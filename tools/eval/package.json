@@ -1,0 +1,47 @@
+{
+  "name": "@fdp/eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evaluation harness: replays MetroPT-3 scenarios through the backend pipeline and scores them against ground truth",
+  "license": "Apache-2.0",
+  "author": "Meddle S.r.l.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meddleconnect/jev-fault-diagnosis-poc"
+  },
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
+  "scripts": {
+    "eval": "node --conditions=@fdp/source src/cli.ts run",
+    "validate": "node --conditions=@fdp/source src/cli.ts validate",
+    "record": "node --conditions=@fdp/source src/cli.ts record",
+    "score-stack": "node --conditions=@fdp/source src/cli.ts score-stack",
+    "sweep": "node --conditions=@fdp/source src/cli.ts sweep",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:live": "node test/live/launch.ts"
+  },
+  "dependencies": {
+    "@fdp/backend": "workspace:*",
+    "@fdp/contracts": "workspace:*",
+    "@fdp/ground-truth": "workspace:*",
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:",
+    "pg": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@fdp/db-migrate": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "mqtt": "catalog:",
+    "testcontainers": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

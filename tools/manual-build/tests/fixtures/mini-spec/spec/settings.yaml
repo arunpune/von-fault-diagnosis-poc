@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: the two regulation settings, cut-in below cut-out.
+schema_version: 1
+settings:
+  - id: cut_in_pressure
+    param_no: P01
+    name: Cut-in pressure
+    unit: bar
+    type: number
+    min: 5.0
+    default: 8.0
+    max: 9.5
+    step: 0.1
+    access: operator
+    signal: line_pressure
+    description: Line pressure at which the controller loads the compressor.
+    used_by: [regulation]
+    constraints:
+      - {relation: lte, other: cut_out_pressure, margin: -0.5, text: must stay below the cut-out pressure by the regulation margin}
+  - id: cut_out_pressure
+    param_no: P02
+    name: Cut-out pressure
+    unit: bar
+    type: number
+    min: 6.0
+    default: 10.0
+    max: 11.0
+    step: 0.1
+    access: operator
+    signal: line_pressure
+    description: Line pressure at which the controller unloads the compressor.
+    used_by: [regulation]
+    constraints:
+      - {relation: gte, other: cut_in_pressure, margin: 0.5, text: must stay above the cut-in pressure by the regulation margin}
+      - {relation: lte, other: machine.ratings.max_working_pressure, text: must not exceed the maximum working pressure}

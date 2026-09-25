@@ -1,0 +1,6 @@
+{
+  "$expect_error": "/error must have required property 'message'",
+  "error": {
+    "code": "not_found"
+  }
+}

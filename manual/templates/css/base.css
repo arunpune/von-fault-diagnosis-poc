@@ -1,0 +1,516 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/*
+ * Shared paged-media stylesheet for both manual variants
+ * (docs/plan/phase1-pdf-build.md §8). It holds everything the two variants
+ * agree on: the A4 page box, the cover page, headings, tables, figures,
+ * admonitions and the table of contents. Page furniture — page numbers,
+ * running headers and the revision stamp — belongs to clean.css and
+ * realistic.css, and so do the two-column body and the spanning tables.
+ *
+ * Section numbers are printed by the templates in <span class="num"> rather
+ * than generated with CSS counters, so the outline of manual/tools/context.py
+ * stays the single source of every number and the text extracted from the PDF
+ * carries it.
+ *
+ * `hyphens: manual` everywhere: WeasyPrint then never loads a Pyphen
+ * dictionary, which keeps line breaking identical across machines
+ * (docs/plan/dependencies.md §10).
+ */
+
+@page {
+  size: A4;
+  /* build.yaml carries no page box, so the margins of phase1-pdf-build.md §8
+     live here; changing them changes both variants at once. The §8 table
+     wrote 18/16/20/16; a 178 x 259 mm text block put the manual's 28 000
+     words outside `pdf.page_budget`, 15/14/16/14 left the clean variant at
+     53 pages against the 30-50 of spec §4, and 14/14/15/14 is still a wide
+     margin for A4 and leaves room for the running furniture of the realistic
+     variant (Revision 3 notes of phase1-pdf-build.md, task PDF-09). */
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+/* The cover has no furniture of any kind; both variants inherit this. */
+@page :first {
+  margin: 24mm 20mm 20mm 20mm;
+  @top-left {
+    content: none;
+  }
+  @top-center {
+    content: none;
+  }
+  @top-right {
+    content: none;
+  }
+  @bottom-left {
+    content: none;
+  }
+  @bottom-center {
+    content: none;
+  }
+  @bottom-right {
+    content: none;
+  }
+}
+
+html {
+  font-family: "IBM Plex Sans", sans-serif;
+  /* 9.5 pt on 11.4 pt is the setting of a printed service manual and the
+     setting this document needs: 28 000 words of prose and generated tables
+     against the 28-56 pages of `pdf.page_budget` and the tighter 30-50 of
+     spec §4. The leading was 1.26 and took the clean variant to 53 pages;
+     1.20 is what the first full build settled on (task PDF-09).
+     realistic.css takes another half point off the size, so the two variants
+     never paginate alike. */
+  font-size: 9.5pt;
+  line-height: 1.2;
+  hyphens: manual;
+  text-rendering: geometricPrecision;
+}
+
+body {
+  margin: 0;
+  color: #111111;
+  background: #ffffff;
+}
+
+/* --- cover ------------------------------------------------------------- */
+
+.cover {
+  break-after: page;
+  padding-top: 28mm;
+}
+
+.cover-issuer {
+  font-size: 9pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 24mm 0;
+}
+
+.cover-title {
+  font-size: 30pt;
+  line-height: 1.12;
+  margin: 0 0 3mm 0;
+}
+
+.cover-subtitle {
+  font-size: 15pt;
+  margin: 0 0 2mm 0;
+}
+
+.cover-type {
+  font-size: 10pt;
+  margin: 0 0 20mm 0;
+  max-width: 120mm;
+}
+
+.cover-facts {
+  display: grid;
+  grid-template-columns: 34mm auto;
+  gap: 1.4mm 6mm;
+  margin: 0 0 20mm 0;
+  font-size: 9.5pt;
+}
+
+.cover-facts dt {
+  font-weight: 700;
+}
+
+.cover-facts dd {
+  margin: 0;
+}
+
+.cover-licence {
+  font-size: 8.5pt;
+  max-width: 120mm;
+}
+
+/* --- table of contents ------------------------------------------------- */
+
+.toc {
+  break-after: page;
+}
+
+.toc-heading {
+  font-size: 18pt;
+  margin: 0 0 6mm 0;
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-sections {
+  margin-left: 10mm;
+}
+
+.toc a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  padding: 0.7mm 0;
+}
+
+.toc a::after {
+  /* Leader dots plus the page the target lands on; `target-counter` is
+     resolved by the paged-media engine, so the HTML holds no page number.
+     The dots are `leader(dotted)`, one run of glyphs, and not a dotted
+     bottom border: WeasyPrint strokes every border dot as four Bézier
+     curves, which alone made the contents page a 14 MB content stream
+     (task PDF-09). */
+  content: leader(dotted) target-counter(attr(href), page);
+  font-variant-numeric: tabular-nums;
+}
+
+.toc-num {
+  display: inline-block;
+  min-width: 14mm;
+  font-variant-numeric: tabular-nums;
+}
+
+.toc-chapter > a {
+  font-weight: 700;
+  margin-top: 2mm;
+}
+
+/* --- chapters and headings --------------------------------------------- */
+
+.chapter {
+  break-before: page;
+  string-set: chapter attr(data-chapter) " " content();
+}
+
+h1 {
+  font-size: 20pt;
+  line-height: 1.2;
+  margin: 0 0 6mm 0;
+  padding-bottom: 2mm;
+  border-bottom: 1pt solid #111111;
+  bookmark-level: 1;
+  bookmark-label: content();
+  break-after: avoid;
+}
+
+h2 {
+  font-size: 13pt;
+  margin: 4.6mm 0 1.8mm 0;
+  bookmark-level: 2;
+  bookmark-label: content();
+  break-after: avoid;
+}
+
+h3 {
+  font-size: 11pt;
+  margin: 3.4mm 0 1.3mm 0;
+  bookmark-level: 3;
+  bookmark-label: content();
+  break-after: avoid;
+}
+
+h1 .num,
+h2 .num,
+h3 .num {
+  font-variant-numeric: tabular-nums;
+  margin-right: 2mm;
+}
+
+p {
+  margin: 0 0 1.8mm 0;
+  orphans: 2;
+  widows: 2;
+}
+
+ul,
+ol {
+  margin: 0 0 1.8mm 0;
+  padding-left: 5mm;
+}
+
+li {
+  margin-bottom: 0.7mm;
+}
+
+/* --- inline marks of the authoring contract ---------------------------- */
+
+a.xref {
+  color: inherit;
+  /* A text decoration rather than a dotted bottom border, for the reason
+     `.toc a::after` gives: a border dot costs four Bézier curves, an
+     underline one dashed stroke (task PDF-09). */
+  text-decoration: underline dotted #555555;
+  text-decoration-thickness: 0.4pt;
+  text-underline-offset: 0.15em;
+}
+
+.tag,
+.mono,
+.alarm-code {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.92em;
+}
+
+.alarm-code {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* --- tables ------------------------------------------------------------ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.5mm 0 3mm 0;
+  /* Relative to the root size, so the realistic variant's smaller body takes
+     its tables down with it; an absolute size left the tables — most of this
+     manual — the same in both variants and out of the page budget. */
+  font-size: 0.87em;
+}
+
+th,
+td {
+  border: 0.5pt solid #666666;
+  padding: 0.7mm 1.3mm;
+  text-align: left;
+  vertical-align: top;
+}
+
+thead {
+  /* Repeat the header on every page a table spills onto. */
+  display: table-header-group;
+}
+
+thead th {
+  background: #eeeeee;
+  font-weight: 700;
+}
+
+tr {
+  break-inside: avoid;
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: 1.2mm;
+}
+
+/*
+ * The two wide generated tables declare their column widths.
+ *
+ * With the automatic algorithm a column is at least as wide as its
+ * min-content width, and the min-content width of a cell holding
+ * `reservoir_pressure_transducer_fault` is the whole 55 mm token. The id
+ * columns of the troubleshooting table and the ten short columns of the
+ * signal list therefore took most of the text block, the prose columns were
+ * left two or three words wide, and a single cause row filled an A4 page —
+ * chapter 8 alone came to 84 of the manual's 140 pages against the 28–56 of
+ * `pdf.page_budget`. The widths below are roughly proportional to how much
+ * text each column carries, so every column of a row runs out of text at
+ * about the same line.
+ *
+ * Nothing here may make a registry id wrap: pdfplumber reads a page line by
+ * line, so an id broken over two lines comes back with other columns' words
+ * between its halves and acceptance check #3, which wants all 39 fault ids
+ * and all 17 condition ids verbatim in the extracted text, cannot find it.
+ * The troubleshooting table gives the ids a band row of their own
+ * (partials/table-troubleshooting.html.j2); the signal list's ids are short
+ * enough for `c-tag`.
+ */
+table.troubleshooting,
+table.signals {
+  font-size: 0.85em;
+}
+
+table.troubleshooting,
+table.signals {
+  table-layout: fixed;
+}
+
+/*
+ * `c-tag` is sized for `separator_discharge_pressure`, the longest tag id at
+ * 28 characters, because a tag id cut over two lines is as lost to the
+ * extracted text as a fault id is; the id is set a little smaller than the
+ * rest of the table so that one column does not cost a quarter of the page.
+ * The same reason keeps `c-range` wide enough for `-1.0–16.0 bar` on one
+ * line.
+ */
+table.signals .mono {
+  font-size: 0.78em;
+}
+
+table.troubleshooting th,
+table.troubleshooting td,
+table.signals th,
+table.signals td {
+  padding: 0.6mm 1mm;
+}
+
+table.troubleshooting ul.checks {
+  margin: 0;
+  padding-left: 3.4mm;
+}
+
+table.troubleshooting ul.checks li {
+  margin-bottom: 0.4mm;
+}
+
+/*
+ * The identification band: the condition id has the first column to itself,
+ * the fault id spans the two middle ones (55 mm of mono at its longest) and
+ * the subsystem closes the row. Grey, and never left at the foot of a page
+ * without the entry it identifies.
+ */
+tr.cause td {
+  background: #f0f0f0;
+}
+
+tr.cause {
+  break-after: avoid;
+}
+
+tr.cause .mono {
+  font-weight: 700;
+}
+
+/*
+ * The signal moves of a full entry: one row across the whole table under the
+ * detail row, never parted from it by a page break.
+ */
+tr.detail:not(.repeat) {
+  break-after: avoid;
+}
+
+tr.signals .signals-label {
+  font-weight: 700;
+}
+
+.troubleshooting col.c-cause {
+  width: 27%;
+}
+
+.troubleshooting col.c-checks {
+  width: 34%;
+}
+
+.troubleshooting col.c-remedy {
+  width: 25%;
+}
+
+.troubleshooting col.c-see-also {
+  width: 14%;
+}
+
+.signals col.c-tag {
+  width: 22%;
+}
+
+.signals col.c-metropt {
+  width: 6%;
+}
+
+.signals col.c-description {
+  width: 25%;
+}
+
+.signals col.c-unit {
+  width: 4%;
+}
+
+.signals col.c-range {
+  width: 11%;
+}
+
+.signals col.c-sample {
+  width: 5%;
+}
+
+.signals col.c-band {
+  width: 6%;
+}
+
+.signals col.c-register {
+  width: 9%;
+}
+
+/* --- figures ------------------------------------------------------------ */
+
+figure {
+  margin: 4mm 0;
+  break-inside: avoid;
+}
+
+figure svg {
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-size: 8.5pt;
+  margin-top: 1.5mm;
+}
+
+.figure-number {
+  font-weight: 700;
+}
+
+/* --- admonitions -------------------------------------------------------- */
+
+.admonition {
+  border-left: 2pt solid #666666;
+  padding: 2mm 3mm;
+  margin: 3mm 0;
+  break-inside: avoid;
+  background: #f6f6f6;
+}
+
+.admonition .label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 8pt;
+  margin: 0 0 1mm 0;
+}
+
+.admonition p:last-child {
+  margin-bottom: 0;
+}
+
+.admonition.warning {
+  border-left-color: #222222;
+}
+
+.admonition.caution {
+  border-left-color: #000000;
+  background: #eeeeee;
+}
+
+/* --- appendix ----------------------------------------------------------- */
+
+.glossary {
+  margin: 3mm 0;
+}
+
+.glossary dt {
+  font-weight: 700;
+  margin-top: 2mm;
+}
+
+.glossary dd {
+  margin: 0 0 1mm 0;
+}
+
+.colophon {
+  margin-top: 6mm;
+  padding-top: 3mm;
+  border-top: 0.5pt solid #666666;
+  font-size: 8.5pt;
+}
+
+.colophon a {
+  color: inherit;
+}

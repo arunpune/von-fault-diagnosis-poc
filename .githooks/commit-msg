@@ -1,0 +1,22 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+#
+# Opt-in commit-msg hook (docs/development.md). Enable it with `make hooks`;
+# bypass it once with `git commit --no-verify`.
+#
+# $1 is the path of the file holding the message git is about to record.
+# Only the subject grammar is checked, as `make commits` and CI check it for
+# the whole branch; neither demands a task id in the body.
+#
+# `--frozen --all-packages` makes the hook work in a clone that has not run
+# `make install` yet; see .githooks/pre-commit.
+
+set -eu
+
+if ! command -v uv >/dev/null 2>&1; then
+	echo "commit-msg: uv is not on PATH; run 'make doctor' (or commit with --no-verify)" >&2
+	exit 1
+fi
+
+uv run --frozen --all-packages fdp-checks commits --message "$1"

@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // The end-to-end suite: the Playwright configuration, the launcher, the mode fixture, the
+  // specs and the fake backend. They run in Node — the fake backend and the launcher under
+  // Node's own type stripping, the specs under Playwright — and reach into the browser only
+  // through `page.evaluate`, hence the DOM library beside Node's types. They import the UI's
+  // contract types from `src/api` (types only, so nothing of the app runs in Node), which is
+  // what makes the compiler catch the fake backend drifting from the contract. `@fdp/contracts`
+  // is mapped to its generated types module exactly as tsconfig.app.json maps it.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.e2e.tsbuildinfo",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@fdp/contracts": ["./node_modules/@fdp/contracts/src/generated/types.ts"]
+    }
+  },
+  "include": [
+    "playwright.config.ts",
+    "e2e",
+    "src/api/types.ts",
+    "src/api/ws-types.ts",
+    "src/lib/testids.ts"
+  ]
+}

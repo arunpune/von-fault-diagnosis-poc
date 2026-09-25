@@ -1,0 +1,39 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "inject_high_ambient_benign",
+  "title": "Injected high ambient temperature, a benign cause",
+  "group": "abstain",
+  "profiles": ["core", "full"],
+  "split": "test",
+  "positive": false,
+  "source": {
+    "kind": "slice",
+    "name": "baseline-feb03"
+  },
+  "replay": {
+    "from": "2020-02-03T00:00:00.000Z",
+    "to": "2020-02-04T00:00:00.000Z"
+  },
+  "injections": [
+    {
+      "injection_id": "high_ambient_temperature",
+      "at": "2020-02-03T02:00:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "abstain",
+    "reason": "a warm machine room is normal operation, not a defect: every cooled quantity moves up together and comes back when the room cools"
+  },
+  "expect": {
+    "tickets": "none",
+    "fault": "benign_or_none",
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 29,
+  "notes": "One of the two \"benign causes with alarming symptoms\" among the abstain cases. The oil temperature rises the way a fouled cooler would raise it, and the right answer is the benign cause or no ticket at all — a ticket naming a defect is what this scenario is here to catch. The definition ramps in over two hours and runs for twelve."
+}

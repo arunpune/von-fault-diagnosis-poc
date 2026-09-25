@@ -1,0 +1,183 @@
+{
+  "schema": "urn:fdp:schema:gt-injections:v1",
+  "injections": [
+    {
+      "injection_id": "oil_cooler_fouling",
+      "fault_id": "oil_cooler_fouled",
+      "label": "Oil cooler fouling",
+      "benign": false,
+      "description": "The oil temperature drifts up over hours while the cycling stays normal and the room stays cool, so the rise cannot be blamed on the weather or on demand.",
+      "default_duration_sim_min": 600,
+      "envelope": { "ramp_in_min": 180, "ramp_out_min": 60 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [{ "tag": "oil_temperature", "op": "offset", "when": "any", "value": 14.0 }]
+    },
+    {
+      "injection_id": "high_ambient_temperature",
+      "fault_id": "high_ambient_temperature",
+      "label": "High ambient temperature",
+      "benign": true,
+      "description": "The room around the unit is much warmer than usual and the oil follows it up, so the oil reading alarms while the difference between oil and cooling air stays what it always was.",
+      "default_duration_sim_min": 720,
+      "envelope": { "ramp_in_min": 120, "ramp_out_min": 120 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        { "tag": "ambient_temperature", "op": "offset", "when": "any", "value": 14.0 },
+        { "tag": "oil_temperature", "op": "offset", "when": "any", "value": 7.0 }
+      ]
+    },
+    {
+      "injection_id": "heavy_air_demand",
+      "fault_id": "high_air_demand",
+      "label": "Heavy air demand",
+      "benign": true,
+      "description": "The plant draws far more air than usual, so the pressures fall faster between loaded runs and the motor works a little harder; nothing on the unit is defective. The recording's cycle timing is kept, so the longer loaded runs heavy demand brings, and the warmer oil that follows them, are not simulated.",
+      "default_duration_sim_min": 240,
+      "envelope": { "ramp_in_min": 20, "ramp_out_min": 20 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        {
+          "tag": "line_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.12,
+          "cap": 1.2,
+          "anchor": "guard_entry"
+        },
+        {
+          "tag": "separator_discharge_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.12,
+          "cap": 1.2,
+          "anchor": "guard_entry"
+        },
+        {
+          "tag": "reservoir_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.12,
+          "cap": 1.2,
+          "anchor": "guard_entry"
+        },
+        { "tag": "motor_current", "op": "scale", "when": "loaded", "factor": 1.04 }
+      ]
+    },
+    {
+      "injection_id": "air_leak_downstream",
+      "fault_id": "downstream_air_leak",
+      "label": "Air leak downstream",
+      "benign": false,
+      "description": "Air escapes in the distribution network, so the pressures decay much faster than usual whenever the unit is not compressing, the earliest sign of a leak. The recording's cycle timing is kept, so the longer loaded runs a leak later forces, and the warmer oil they bring, are not simulated.",
+      "default_duration_sim_min": 240,
+      "envelope": { "ramp_in_min": 10, "ramp_out_min": 10 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        {
+          "tag": "line_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "guard_entry"
+        },
+        {
+          "tag": "separator_discharge_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "guard_entry"
+        },
+        {
+          "tag": "reservoir_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "guard_entry"
+        }
+      ]
+    },
+    {
+      "injection_id": "intake_valve_sticking",
+      "fault_id": "intake_valve_not_opening",
+      "label": "Intake valve sticking",
+      "benign": false,
+      "description": "The intake valve only opens part of the way, so a loaded run delivers less than it should: the discharge pressure sits below the line it feeds and the motor draws less current than a healthy load.",
+      "default_duration_sim_min": 180,
+      "envelope": { "ramp_in_min": 30, "ramp_out_min": 30 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        { "tag": "discharge_pressure", "op": "offset", "when": "loaded", "value": -0.22 },
+        { "tag": "motor_current", "op": "scale", "when": "loaded", "factor": 0.86 }
+      ]
+    },
+    {
+      "injection_id": "dryer_tower_switching_failure",
+      "fault_id": "tower_changeover_valve_fault",
+      "label": "Dryer tower switching failure",
+      "benign": false,
+      "description": "The dryer no longer changes over: the short purge phase after each cut-in disappears, the purge contact never opens and the purge line stays slightly pressurised.",
+      "default_duration_sim_min": 300,
+      "envelope": { "ramp_in_min": 0, "ramp_out_min": 0 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        {
+          "tag": "dryer_tower",
+          "op": "duty_shift",
+          "when": "any",
+          "run_value": false,
+          "extend_s": -60
+        },
+        { "tag": "purge_switch", "op": "stuck", "when": "any", "value": true },
+        { "tag": "dryer_purge_pressure", "op": "offset", "when": "loaded", "value": 0.25 }
+      ]
+    },
+    {
+      "injection_id": "separator_drain_blocked",
+      "fault_id": "condensate_drain_blocked",
+      "label": "Separator drain blocked",
+      "benign": false,
+      "description": "The condensate drain at the separator no longer clears, so the vessel no longer settles to the line pressure once the unit stops compressing and the oil runs a little warmer.",
+      "default_duration_sim_min": 300,
+      "envelope": { "ramp_in_min": 30, "ramp_out_min": 30 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        {
+          "tag": "separator_discharge_pressure",
+          "op": "offset",
+          "when": "not_loaded",
+          "value": -0.8
+        },
+        { "tag": "oil_temperature", "op": "offset", "when": "any", "value": 2.0 }
+      ]
+    },
+    {
+      "injection_id": "motor_overload",
+      "fault_id": "airend_bearing_wear",
+      "label": "Motor overload",
+      "benign": false,
+      "description": "The compression element turns harder than it should, so a loaded run draws a clearly raised and unsteady current and the oil warms with it.",
+      "default_duration_sim_min": 240,
+      "envelope": { "ramp_in_min": 60, "ramp_out_min": 30 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [
+        { "tag": "motor_current", "op": "scale", "when": "loaded", "factor": 1.2 },
+        { "tag": "motor_current", "op": "noise", "when": "loaded", "sigma": 0.12 },
+        { "tag": "oil_temperature", "op": "offset", "when": "any", "value": 6.0 }
+      ]
+    },
+    {
+      "injection_id": "oil_temperature_sensor_fault",
+      "fault_id": "oil_temperature_sensor_fault",
+      "label": "Oil temperature sensor fault",
+      "benign": true,
+      "description": "The oil temperature reading drops to an impossible value while the unit runs normally, so the instrument and not the cooling circuit is at fault.",
+      "default_duration_sim_min": 120,
+      "envelope": { "ramp_in_min": 0, "ramp_out_min": 0 },
+      "params": [{ "name": "magnitude", "default": 1.0, "min": 0.25, "max": 2.0 }],
+      "transforms": [{ "tag": "oil_temperature", "op": "dropout", "when": "any", "value": 0.0 }]
+    }
+  ]
+}

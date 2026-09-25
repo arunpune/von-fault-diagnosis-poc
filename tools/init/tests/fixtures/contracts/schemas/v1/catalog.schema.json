@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:catalog:v1",
+  "title": "Catalog",
+  "description": "The whole fault catalog as one document: the machine, its signal registry, its controller messages, the symptom conditions, the causes, the maintenance plan and the controller parameters. The manual build writes it to tools/eval/fixtures/catalog.json, init ingests it and the evaluation harness scores against it. It is not an MQTT message and carries no envelope, but it repeats its schema id so a reader can reject an unknown major.",
+  "type": "object",
+  "$defs": {
+    "catalog_signal": {
+      "title": "Catalog signal",
+      "description": "One entry of the signal registry, in register order.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+        "panel_label": { "description": "How the panel labels the tag.", "type": "string" },
+        "name": { "description": "The name used in prose.", "type": "string" },
+        "metropt_column": {
+          "description": "The replay source column, or null for a synthesised tag.",
+          "type": ["string", "null"]
+        },
+        "group": {
+          "description": "Which block of the register slot the tag occupies.",
+          "type": "string",
+          "enum": ["analog", "digital", "extra"]
+        },
+        "kind": { "description": "What the tag measures.", "type": "string" },
+        "unit": { "description": "SI unit, or bool for a digital tag.", "type": "string" },
+        "subsystem": { "$ref": "urn:fdp:schema:common:v1#/$defs/subsystem" },
+        "range": {
+          "description": "Lowest and highest value the tag can take.",
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "normal_band": {
+          "description": "What normal looks like per machine state, keyed by state name: a two-number interval for an analog tag, the expected value for a digital one. Left free on purpose, because the manual states a digital band as a level and not as an interval.",
+          "type": "object"
+        },
+        "section": { "description": "Manual section the tag is listed in.", "type": "string" }
+      },
+      "required": ["id", "metropt_column", "group", "unit", "subsystem"],
+      "additionalProperties": false
+    },
+    "catalog_alarm": {
+      "title": "Catalog alarm",
+      "description": "One controller message. bit is the alarm-bit position the simulator sets, or null for a message the simulator never evaluates.",
+      "type": "object",
+      "properties": {
+        "code": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+        "type": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_type" },
+        "bit": { "type": ["integer", "null"], "minimum": 0, "maximum": 31 },
+        "title": { "description": "The message as the panel shows it.", "type": "string" },
+        "signal": {
+          "description": "The tag or derived quantity the trigger watches.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/identifier"
+        },
+        "direction": {
+          "description": "Which side of the threshold raises the message.",
+          "type": "string"
+        },
+        "threshold": {
+          "description": "The value the trigger compares against, or null when the trigger is not a threshold.",
+          "type": ["object", "null"],
+          "properties": {
+            "value": { "type": "number" },
+            "unit": { "type": "string" }
+          },
+          "required": ["value"],
+          "additionalProperties": false
+        },
+        "delay_s": {
+          "description": "How long the condition must hold, or null when it fires at once.",
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "reset": { "description": "How the message clears.", "type": "string" },
+        "text": { "description": "What the manual says about the message.", "type": "string" },
+        "section": { "description": "Manual section the message is listed in.", "type": "string" }
+      },
+      "required": ["code", "type", "bit", "title"],
+      "additionalProperties": false
+    },
+    "catalog_condition": {
+      "title": "Catalog condition",
+      "description": "One symptom of the fault-finding tables, with the causes that explain it.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "urn:fdp:schema:common:v1#/$defs/condition_id" },
+        "title": { "type": "string" },
+        "symptom": {
+          "description": "What the operator sees, in one sentence.",
+          "type": "string"
+        },
+        "symptoms": {
+          "description": "Further wordings of the same symptom, used to build retrieval queries.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "alarms": {
+          "description": "Controller messages the condition raises.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+          "uniqueItems": true
+        },
+        "causes": {
+          "description": "The causes listed under the condition, most likely first.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+              "likelihood": {
+                "type": "string",
+                "enum": ["common", "occasional", "rare", "unknown"]
+              },
+              "note": { "type": "string" }
+            },
+            "required": ["fault_id", "likelihood"],
+            "additionalProperties": false
+          }
+        },
+        "section": { "type": "string" },
+        "pages": {
+          "description": "Where the condition appears in each built variant of the manual.",
+          "type": "object",
+          "properties": {
+            "clean": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+            "realistic": { "type": "array", "items": { "type": "integer", "minimum": 1 } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "title", "alarms", "causes"],
+      "additionalProperties": false
+    },
+    "catalog_maintenance": {
+      "title": "Catalog maintenance task",
+      "description": "One task of the maintenance plan.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "urn:fdp:schema:common:v1#/$defs/identifier" },
+        "title": { "type": "string" },
+        "interval": { "description": "How often the task is due.", "type": "string" },
+        "section": { "type": "string" }
+      },
+      "required": ["id", "title"],
+      "additionalProperties": false
+    },
+    "catalog_parameter": {
+      "title": "Catalog parameter",
+      "description": "One controller setting a technician can change.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "urn:fdp:schema:common:v1#/$defs/setting_id" },
+        "param_no": { "description": "The number on the controller panel.", "type": "string" },
+        "name": { "type": "string" },
+        "unit": { "type": "string" },
+        "min": { "type": "number" },
+        "default": { "type": "number" },
+        "max": { "type": "number" },
+        "section": { "type": "string" }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:catalog:v1" },
+    "generated_from": {
+      "description": "What the document was built from. Stays open: the build adds fields such as the variant it exported.",
+      "type": "object",
+      "properties": {
+        "inputs_tree_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "manual_revision": { "type": "string" },
+        "file": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": true
+    },
+    "machine": {
+      "description": "The fictional machine this catalog describes.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "short_name": { "type": "string" },
+        "controller": { "type": "string" }
+      },
+      "required": ["name", "short_name", "controller"],
+      "additionalProperties": false
+    },
+    "signals": {
+      "description": "The signal registry, in register order.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/catalog_signal" }
+    },
+    "alarms": {
+      "description": "Every controller message, in code order.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/catalog_alarm" }
+    },
+    "conditions": {
+      "description": "The symptoms of the fault-finding tables.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/catalog_condition" }
+    },
+    "causes": {
+      "description": "Every cause, each one a catalog entry.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:catalog-entry:v1" }
+    },
+    "maintenance": {
+      "description": "The maintenance plan.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/catalog_maintenance" }
+    },
+    "parameters": {
+      "description": "The controller parameters.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/catalog_parameter" }
+    }
+  },
+  "required": [
+    "schema",
+    "generated_from",
+    "machine",
+    "signals",
+    "alarms",
+    "conditions",
+    "causes",
+    "maintenance",
+    "parameters"
+  ],
+  "additionalProperties": true
+}

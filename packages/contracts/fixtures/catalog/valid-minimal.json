@@ -1,0 +1,62 @@
+{
+  "schema": "urn:fdp:schema:catalog:v1",
+  "generated_from": {},
+  "machine": {
+    "name": "CAU-7 Compressed-Air Unit",
+    "short_name": "CAU-7",
+    "controller": "CTRL-7"
+  },
+  "signals": [
+    {
+      "id": "oil_temperature",
+      "metropt_column": "Oil_temperature",
+      "group": "analog",
+      "unit": "degC",
+      "subsystem": "oil"
+    }
+  ],
+  "alarms": [
+    {
+      "code": "W104",
+      "type": "warning",
+      "bit": 3,
+      "title": "Oil temperature high"
+    }
+  ],
+  "conditions": [
+    {
+      "id": "oil_temperature_high",
+      "title": "Oil temperature high",
+      "alarms": ["W104"],
+      "causes": [{ "fault_id": "oil_filter_clogged", "likelihood": "occasional" }]
+    }
+  ],
+  "causes": [
+    {
+      "fault_id": "oil_filter_clogged",
+      "name": "Oil filter clogged",
+      "subsystem": "oil",
+      "benign": false,
+      "summary": "The filter element is loaded with debris, so less oil reaches the airend and the heat it should carry away stays in the machine.",
+      "signal_moves": [{ "signal": "oil_temperature", "direction": "rises" }],
+      "signal_moves_text": [],
+      "checks": ["Compare the oil temperature before and after a filter change."],
+      "remedy": "Fit a new filter element and confirm that the oil temperature returns to its normal band under the same duty.",
+      "conditions": [
+        {
+          "condition_id": "oil_temperature_high",
+          "title": "Oil temperature high",
+          "likelihood": "occasional",
+          "alarms": ["W104"]
+        }
+      ],
+      "parts": ["oil_filter_element"],
+      "maintenance": ["oil_filter_change"],
+      "related_alarms": ["W104"],
+      "manual_ref": { "section": "8.3" },
+      "source": "tables"
+    }
+  ],
+  "maintenance": [{ "id": "oil_filter_change", "title": "Oil filter change" }],
+  "parameters": [{ "id": "cut_in_pressure", "name": "Cut-in pressure" }]
+}

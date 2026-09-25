@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-failure-table:v1",
+  "title": "Ground-truth failure table document",
+  "description": "The file packages/ground-truth/data/metropt3-failures.json (docs/dataset.md#the-failure-table): the corrected MetroPT-3 failure windows and everything the evaluation excludes from scoring. Forwarded verbatim inside gt-catalog. Timestamps are the data clock, read as UTC.",
+  "type": "object",
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-failure-table:v1" },
+    "source": {
+      "description": "Where the table comes from and which file it was resolved against.",
+      "type": "object",
+      "properties": {
+        "dataset": { "type": "string", "minLength": 1 },
+        "doi": { "type": "string", "minLength": 1 },
+        "license": { "type": "string", "minLength": 1 },
+        "csv_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "resolved_from": { "type": "string", "minLength": 1 }
+      },
+      "required": ["dataset", "doi", "license", "csv_sha256", "resolved_from"],
+      "additionalProperties": false
+    },
+    "clock": {
+      "description": "The recorded timestamps carry no zone; the project reads them as UTC and says so here.",
+      "type": "string",
+      "const": "utc-assumed"
+    },
+    "failures": {
+      "description": "The scored failures, in chronological order.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/failure" }
+    },
+    "unlabelled_episodes": {
+      "description": "Episodes that look like a labelled failure but carry no label; excluded from precision and reported separately.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/unlabelled_episode" }
+    },
+    "excluded_windows": {
+      "description": "Every window that is neither a positive nor a negative for scoring.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/excluded_window" }
+    },
+    "frozen_blocks": {
+      "description": "Stretches in which the logger repeated one row; the simulator marks them and the evaluation excludes them.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/frozen_block" }
+    },
+    "gaps_over_1h": {
+      "description": "Recording gaps longer than an hour, so the evaluation can plan scenarios without reading the source file.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/gap" }
+    }
+  },
+  "required": [
+    "schema",
+    "source",
+    "clock",
+    "failures",
+    "unlabelled_episodes",
+    "excluded_windows",
+    "frozen_blocks",
+    "gaps_over_1h"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "failure_id": {
+      "title": "Failure id",
+      "description": "Identifier of a row of this table: F1 to F4, plus the addendum F4b.",
+      "type": "string",
+      "pattern": "^F[0-9]{1,2}[a-z]?$"
+    },
+    "nullable_ts": {
+      "title": "Optional instant",
+      "description": "An instant of the data clock, or null when the source records none.",
+      "anyOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }, { "type": "null" }]
+    },
+    "failure": {
+      "title": "Failure",
+      "description": "One failure of the corrected table, with the published values kept beside the corrected ones.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/failure_id" },
+        "uci_nr": {
+          "description": "The number the published table gives this row, or null for a row the published table does not carry.",
+          "type": ["string", "null"]
+        },
+        "start": {
+          "description": "Start of the scoring window, inclusive.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+        },
+        "end": {
+          "description": "End of the scoring window, exclusive.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+        },
+        "uci_start": { "$ref": "#/$defs/nullable_ts" },
+        "uci_end": { "$ref": "#/$defs/nullable_ts" },
+        "data_onset": {
+          "description": "First sample that shows the failure signature.",
+          "$ref": "#/$defs/nullable_ts"
+        },
+        "data_recovery": {
+          "description": "First sample after the failure signature ends.",
+          "$ref": "#/$defs/nullable_ts"
+        },
+        "onset_known": {
+          "description": "False when the logger was frozen across the true onset, so lead time is a lower bound.",
+          "type": "boolean"
+        },
+        "precursor_from": {
+          "description": "First instant at which the signature is measurable ahead of the window, or null.",
+          "$ref": "#/$defs/nullable_ts"
+        },
+        "report_local": {
+          "description": "The operator report as the thesis records it, on the local clock, or null.",
+          "type": ["string", "null"]
+        },
+        "maintenance": { "$ref": "#/$defs/nullable_ts" },
+        "maintenance_verified": {
+          "description": "True when the data shows the intervention at the recorded hour.",
+          "type": "boolean"
+        },
+        "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+        "accepted_fault_ids": {
+          "description": "Every cause the evaluation accepts as correct for this failure, the primary one first.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" }
+        },
+        "signature": {
+          "description": "Which of the two data-derived leak signatures this failure shows.",
+          "type": "string",
+          "enum": ["A", "B"]
+        },
+        "component": { "type": "string", "minLength": 1 },
+        "native_alarm_first": {
+          "description": "First activation of the low-pressure switch inside the window, or null when the controller never signalled.",
+          "$ref": "#/$defs/nullable_ts"
+        },
+        "in_headline": {
+          "description": "False for a row that is reported separately rather than counted in the headline metrics.",
+          "type": "boolean"
+        },
+        "notes": { "type": "string" }
+      },
+      "required": [
+        "id",
+        "uci_nr",
+        "start",
+        "end",
+        "uci_start",
+        "uci_end",
+        "data_onset",
+        "data_recovery",
+        "onset_known",
+        "precursor_from",
+        "report_local",
+        "maintenance",
+        "maintenance_verified",
+        "fault_id",
+        "accepted_fault_ids",
+        "signature",
+        "component",
+        "native_alarm_first",
+        "in_headline",
+        "notes"
+      ],
+      "additionalProperties": false
+    },
+    "unlabelled_episode": {
+      "title": "Unlabelled episode",
+      "description": "A continuous-load episode with raised purge pressure that carries no label.",
+      "type": "object",
+      "properties": {
+        "start": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "end": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "hours": { "type": "number", "minimum": 0 },
+        "tp3_median": { "type": "number" },
+        "dv_pressure_median": { "type": "number" },
+        "oil_max": { "type": "number" },
+        "fault_id_hint": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+        "note": { "type": "string" }
+      },
+      "required": [
+        "start",
+        "end",
+        "hours",
+        "tp3_median",
+        "dv_pressure_median",
+        "oil_max",
+        "fault_id_hint",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "excluded_window": {
+      "title": "Excluded window",
+      "description": "A window that counts neither as a positive nor as a negative; from is inclusive and to is exclusive.",
+      "type": "object",
+      "properties": {
+        "from": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "to": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "repair",
+            "frozen_logger",
+            "unlabelled_positive",
+            "secondary_positive",
+            "depot_depressurisation"
+          ]
+        }
+      },
+      "required": ["from", "to", "reason"],
+      "additionalProperties": false
+    },
+    "frozen_block": {
+      "title": "Frozen block",
+      "description": "A stretch of repeated rows written by a frozen logger.",
+      "type": "object",
+      "properties": {
+        "start": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "end": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "rows": { "type": "integer", "minimum": 0 },
+        "hours": { "type": "number", "minimum": 0 }
+      },
+      "required": ["start", "end", "rows", "hours"],
+      "additionalProperties": false
+    },
+    "gap": {
+      "title": "Recording gap",
+      "description": "A stretch with no rows at all, longer than an hour.",
+      "type": "object",
+      "properties": {
+        "start": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "end": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "seconds": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["start", "end", "seconds"],
+      "additionalProperties": false
+    }
+  }
+}

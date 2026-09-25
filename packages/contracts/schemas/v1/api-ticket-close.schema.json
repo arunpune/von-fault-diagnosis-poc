@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-ticket-close:v1",
+  "title": "Api ticket close",
+  "description": "The body of POST /api/tickets/{ticket_id}/close, the one write a technician performs. The field is `verdict`, never `outcome`: fixtures/api-ticket-close/invalid-outcome.json pins that, so the schema, the frontend's fake backend and the real route cannot drift apart silently. The route answers with the resulting ticket message; the ticket id comes from the path and is not repeated in the body.",
+  "type": "object",
+  "properties": {
+    "verdict": {
+      "description": "Whether the diagnosis on the ticket matched what the technician found.",
+      "type": "string",
+      "enum": ["correct", "wrong"]
+    },
+    "note": {
+      "description": "What the technician found, in their own words.",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "closed_by": {
+      "description": "Who closed the ticket; a role or a shift name, not a personal identifier.",
+      "type": "string",
+      "maxLength": 120
+    }
+  },
+  "required": ["verdict"],
+  "additionalProperties": false
+}

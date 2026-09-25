@@ -1,0 +1,42 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.settings() macro for print (phase1-pdf-build.md §8, decision
+   R-04): the programmable settings of chapter 4. Every row carries
+   id="setting-<id>", the target of MAN's ref('setting:<id>') (§8.3).
+
+   Fact placement (phase1-manual-content.md §8.4): in the realistic variant a
+   setting listed under `prose_only` keeps its row — the row is what
+   ref('setting:<id>') links to — but prints "see text" instead of its three
+   values, so the number really does live in the prose alone.
+
+   The three value cells repeat the unit although the table has a unit column
+   of its own: acceptance check #3 (docs/plan/phase1-acceptance.md §2) searches
+   the extracted text for each minimum, default and maximum together with its
+   unit, and a bare number in a column would not be found. #}
+{%- macro parameter_row(parameter) -%}
+{%- set shown = variant.fact_in_table('setting:' ~ parameter.id) -%}
+<tr id="setting-{{ parameter.id | e }}" data-access="{{ parameter.access | e }}">
+<td><span class="mono">{{ parameter.param_no | e }}</span> {{ parameter.name | e }}</td>
+<td>{{ man.unit_label(parameter.unit) | e }}</td>
+{% if shown %}
+<td>{{ qty(parameter.min, parameter.unit, units_mode=units_mode) }}</td>
+<td>{{ qty(parameter.default, parameter.unit, units_mode=units_mode) }}</td>
+<td>{{ qty(parameter.max, parameter.unit, units_mode=units_mode) }}</td>
+{% else %}
+<td class="see-text" colspan="3">see text</td>
+{% endif %}
+<td>{{ parameter.description_html if parameter.description_html else parameter.description_md | e }}
+{%- for constraint in parameter.constraints %} <span class="constraint">The value {{ constraint.text | e }}.</span>{% endfor %}</td>
+</tr>
+{%- endmacro -%}
+
+{%- macro settings() -%}
+<table class="parameters">
+<caption>Programmable settings</caption>
+<thead><tr><th>Parameter</th><th>Unit</th><th>Min</th><th>Default</th><th>Max</th><th>Description</th></tr></thead>
+<tbody>
+{% for parameter in manual.parameters %}{{ parameter_row(parameter) }}
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}

@@ -1,0 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  // The real base config. The tests copy this fixture into a temporary directory at the same
+  // depth, next to a copy of the repository's tsconfig.base.json, so the path stays correct.
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // The fixture install must stay offline, so it carries no @types/node; the DOM library
+    // is what declares `console` for the eval entry point.
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "tools/**/*.ts"]
+}

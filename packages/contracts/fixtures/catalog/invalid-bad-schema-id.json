@@ -1,0 +1,16 @@
+{
+  "$expect_error": "/schema must be equal to constant",
+  "schema": "urn:fdp:fixture:catalog:v1",
+  "generated_from": { "file": "manual/build.yaml", "manual_revision": "1.0" },
+  "machine": {
+    "name": "CAU-7 Compressed-Air Unit",
+    "short_name": "CAU-7",
+    "controller": "CTRL-7"
+  },
+  "signals": [],
+  "alarms": [],
+  "conditions": [],
+  "causes": [],
+  "maintenance": [],
+  "parameters": []
+}

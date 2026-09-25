@@ -1,0 +1,35 @@
+{
+  "$expect_error": "/subsystem must be equal to one of the allowed values",
+  "fault_id": "downstream_air_leak",
+  "name": "Leak in the distribution network",
+  "subsystem": "downstream",
+  "benign": false,
+  "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses.",
+  "signal_moves": [
+    {
+      "behaviour": "unloaded_pressure_decay",
+      "direction": "faster",
+      "onset": "gradual"
+    }
+  ],
+  "signal_moves_text": [
+    "How fast line pressure falls while the unit is not delivering is gradually faster."
+  ],
+  "checks": [
+    "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls."
+  ],
+  "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test.",
+  "conditions": [
+    {
+      "condition_id": "low_line_pressure",
+      "title": "Line pressure below setpoint",
+      "likelihood": "common",
+      "alarms": ["W101"]
+    }
+  ],
+  "parts": [],
+  "maintenance": ["weekly_checks"],
+  "related_alarms": ["W101"],
+  "manual_ref": { "section": "8.3", "anchor": "fault:downstream_air_leak" },
+  "source": "yaml"
+}

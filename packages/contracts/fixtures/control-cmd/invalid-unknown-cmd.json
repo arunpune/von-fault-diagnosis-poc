@@ -1,0 +1,9 @@
+{
+  "$expect_error": "/cmd must be equal to constant",
+  "schema": "urn:fdp:schema:control-cmd:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:16.000Z",
+  "cmd_id": "9c0d1e2f-3a4b-4c5d-8e7f-8091a2b3c4d5",
+  "cmd": "rewind",
+  "args": {}
+}

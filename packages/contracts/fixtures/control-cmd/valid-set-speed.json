@@ -1,0 +1,8 @@
+{
+  "schema": "urn:fdp:schema:control-cmd:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:04.000Z",
+  "cmd_id": "3c4d5e6f-7a8b-4c9d-8e1f-2a3b4c5d6e7f",
+  "cmd": "set_speed",
+  "args": { "speed": 600 }
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "urn:fdp:eval:metrics-expected:v1",
+  "id": "negative_false_ticket",
+  "scored_tickets": 2,
+  "warmup_tickets": 0,
+  "open_at_end": 2,
+  "match": {
+    "ticket": {
+      "tp": [],
+      "fp": ["t-201"],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": [],
+      "fn": []
+    },
+    "review": {
+      "tp": [],
+      "fp": ["t-201"],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": ["t-202"],
+      "fn": []
+    }
+  },
+  "precision_recall": {
+    "ticket": {
+      "micro": { "tp": 0, "fp": 1, "fn": 0, "windows": 0, "precision": 0, "recall": null },
+      "macro": { "precision": 0, "recall": null },
+      "per_fault": {
+        "air_leak_downstream": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "windows": 0,
+          "precision": 0,
+          "recall": null
+        }
+      }
+    },
+    "review": {
+      "micro": { "tp": 0, "fp": 1, "fn": 0, "windows": 0, "precision": 0, "recall": null },
+      "macro": { "precision": 0, "recall": null },
+      "per_fault": {
+        "air_leak_downstream": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "windows": 0,
+          "precision": 0,
+          "recall": null
+        }
+      }
+    }
+  },
+  "lead_times": [],
+  "rates": {
+    "tickets": 2,
+    "false_tickets": 1,
+    "covered_machine_days": 0.9791666666666666,
+    "negative_machine_days": 0.9791666666666666,
+    "tickets_per_machine_day": 2.0425531914893615,
+    "false_tickets_per_machine_day": 1.0212765957446808
+  },
+  "abstention": null,
+  "cost": {
+    "usd": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "calls": 2,
+    "per_decision": 0,
+    "per_ticket": 0
+  },
+  "detection": { "suspects": 1, "warmup_suspects": 0, "outside_windows": 1, "windows": [] },
+  "pass": { "detection": false, "review_diagnosis": false, "diagnosis": false }
+}

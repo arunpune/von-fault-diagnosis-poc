@@ -1,0 +1,66 @@
+{
+  "$expect_error": "/items/0 must have required property 'decision_id'",
+  "items": [
+    {
+      "schema": "urn:fdp:schema:ticket:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-06-05T09:41:13.700Z",
+      "ticket_id": "2c7f8a15-4b90-4d63-8e27-1a0b9c8d7e60",
+      "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+      "action": "opened",
+      "status": "open",
+      "fault_id": "dryer_purge_leak",
+      "condition_id": "continuous_load",
+      "title": "Dryer purge valve not seating — Compressor stays loaded and does not reach cut-out",
+      "cause": "The purge valve of the desiccant dryer does not close between changeovers, so part of the delivered air escapes at the purge silencer instead of reaching the plant.",
+      "checks": [
+        "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+        "Watch dryer purge pressure through a complete changeover and check whether it falls back to its resting value.",
+        "Isolate the dryer and see whether the unit reaches its cut-out pressure again."
+      ],
+      "remedy": "Overhaul or replace the purge valve and its pilot line, then repeat the changeover test and confirm that the purge pressure returns to its resting value between towers.",
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:dryer_purge_leak",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      "evidence": [
+        {
+          "metric": "loaded_run_duration",
+          "observation": "The unit has been loaded without reaching cut-out for about an hour.",
+          "value": 5322,
+          "unit": "s",
+          "baseline": 186,
+          "duration": "about an hour"
+        },
+        {
+          "metric": "dryer_purge_pressure",
+          "observation": "Dryer purge pressure has stayed far above its resting value between changeovers.",
+          "value": 1.12,
+          "unit": "bar",
+          "baseline": 0.02,
+          "duration": "several hours"
+        }
+      ],
+      "confidence": 0.91,
+      "probabilities": {
+        "dryer_purge_leak": 0.71,
+        "downstream_air_leak": 0.14,
+        "high_air_demand": 0.07,
+        "minimum_pressure_valve_fault": 0.05,
+        "none_of_these": 0.03
+      },
+      "severity": "high",
+      "backend": "jev",
+      "model": "jev-1.13.0",
+      "latest_decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+      "opened_sim_ts": "2020-06-05T09:41:12.000Z",
+      "updated_sim_ts": "2020-06-05T09:41:12.000Z",
+      "resolved_sim_ts": null,
+      "close_reason": null,
+      "update_count": 0,
+      "closure": null
+    }
+  ],
+  "next_cursor": null
+}

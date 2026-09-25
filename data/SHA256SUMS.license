@@ -1,0 +1,4 @@
+SPDX-FileCopyrightText: 2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository, doi:10.24432/C5VW3R)
+SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+SPDX-License-Identifier: CC-BY-4.0
+Comment: the hashes describe the MetroPT-3 download and the slices cut from it. Credit: Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021). MetroPT-3 Dataset. UCI Machine Learning Repository. https://doi.org/10.24432/C5VW3R, licensed CC BY 4.0. The dataset itself is never committed (ground rule 5); the cut slices are excerpts (modified: rows selected) and are gitignored.

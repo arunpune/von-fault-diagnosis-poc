@@ -1,0 +1,50 @@
+{
+  "schema": "urn:fdp:schema:gt-presets:v1",
+  "presets": [
+    {
+      "preset_id": "fixture_noon",
+      "label": "Fixture noon – 1 Feb 2020",
+      "kind": "diagnostic",
+      "sim_ts": "2020-02-01T12:00:00.000Z",
+      "lead_in_min": 30,
+      "failure_id": null,
+      "note": "Simulator fixture only: a jump target inside the first day, with a short lead-in."
+    },
+    {
+      "preset_id": "baseline_feb",
+      "label": "Normal operation – 1 Feb 2020",
+      "kind": "baseline",
+      "sim_ts": "2020-02-01T00:00:00.000Z",
+      "lead_in_min": 0,
+      "failure_id": null,
+      "note": "Dataset start; the lead-in clamps to it."
+    },
+    {
+      "preset_id": "f3_air_leak_jun05",
+      "label": "Air leak – 5 Jun 2020",
+      "kind": "failure",
+      "sim_ts": "2020-06-05T10:00:00.000Z",
+      "lead_in_min": 240,
+      "failure_id": "F3",
+      "note": "Starts 06:00; signature A."
+    },
+    {
+      "preset_id": "f4_air_leak_jul15",
+      "label": "Air leak – 15 Jul 2020",
+      "kind": "failure",
+      "sim_ts": "2020-07-15T14:30:00.000Z",
+      "lead_in_min": 90,
+      "failure_id": "F4",
+      "note": "Acute phase, starts 13:00; signature B."
+    },
+    {
+      "preset_id": "depot_lps_jul31",
+      "label": "Depot depressurisation – 31 Jul 2020",
+      "kind": "diagnostic",
+      "sim_ts": "2020-07-31T01:35:00.000Z",
+      "lead_in_min": 30,
+      "failure_id": null,
+      "note": "Native low-pressure alarm without a leak: the abstention case."
+    }
+  ]
+}

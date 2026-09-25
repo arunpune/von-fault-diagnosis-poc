@@ -1,0 +1,37 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# The cover page (phase1-pdf-build.md §6.4): machine, controller, document
+   number, revision and the licence line. `@page :first` in base.css strips the
+   running furniture from this page. #}
+<section class="cover" id="cover">
+{% if variant.page_furniture == 'running_headers_footers_revision_stamp' %}
+  {# The four named strings of the running furniture (phase1-pdf-build.md §8).
+     realistic.css reads them off these attributes with `string-set`, so the
+     document title, the short machine name and the revision stamp reach every
+     page header and footer without adding a word to the cover's own text. The
+     span is empty and is emitted for this variant only: the clean document
+     carries page numbers and nothing else, and its HTML stays as it was. #}
+  <span class="running-strings" data-doc-title="{{ document.title | e }}" data-short-name="{{ machine.identity.model | e }}" data-rev-id="{{ document.revision | e }}" data-rev-date="{{ document.revision_date | e }}"></span>
+{% endif %}
+  <p class="cover-issuer">{{ document.issuer | e }}</p>
+  <h1 class="cover-title">{{ machine.identity.name | e }}</h1>
+  <p class="cover-subtitle">{{ document.subtitle | e }}</p>
+  <p class="cover-type">{{ machine.identity.type | e }}</p>
+  <dl class="cover-facts">
+    <dt>Machine</dt>
+    <dd>{{ machine.identity.name | e }} ({{ machine.identity.model | e }})</dd>
+    <dt>Controller</dt>
+    <dd>{{ machine.identity.controller | e }}</dd>
+    <dt>Document</dt>
+    <dd>{{ document.number | e }}</dd>
+    <dt>Revision</dt>
+    <dd>{{ document.revision | e }} &middot; {{ document.revision_date | e }}</dd>
+    <dt>Language</dt>
+    <dd>{{ document.language | e }}</dd>
+  </dl>
+  <p class="cover-licence">
+    This manual describes a fictional machine. It is licensed
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+    ({{ document.license | e }}) and may be shared and adapted with attribution.
+  </p>
+</section>

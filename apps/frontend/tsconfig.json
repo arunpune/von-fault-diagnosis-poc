@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // Solution file: `pnpm run typecheck` is `tsc -b`, which checks the browser
+  // sources (tsconfig.app.json), the Node-side configuration and build tests
+  // (tsconfig.node.json) and the end-to-end suite with its fake backend
+  // (tsconfig.e2e.json) as three projects with their own `lib` and `types`.
+  // The shadcn CLI reads the `@/*` alias from this file, and Playwright
+  // resolves the specs' `@/` imports through it, so it is repeated here.
+  "files": [],
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.e2e.json" }
+  ]
+}

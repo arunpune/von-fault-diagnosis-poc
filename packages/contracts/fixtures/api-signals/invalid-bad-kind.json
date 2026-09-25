@@ -1,0 +1,14 @@
+{
+  "$expect_error": "/signals/0/kind must be equal to one of the allowed values",
+  "signals": [
+    {
+      "signal_id": "line_pressure",
+      "label": "Line pressure",
+      "unit": "bar",
+      "kind": "pressure",
+      "metropt_column": "TP2",
+      "source": "recorded",
+      "scale": 100
+    }
+  ]
+}

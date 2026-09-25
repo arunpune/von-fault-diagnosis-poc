@@ -1,0 +1,32 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "f4_precursor_jul14",
+  "title": "Air leak precursor, signature B, 14 July 2020",
+  "group": "recording_positive",
+  "profiles": ["dev", "full"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "f4-jul15"
+  },
+  "replay": {
+    "from": "2020-07-14T06:00:00.000Z",
+    "to": "2020-07-15T14:30:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "failure",
+    "failure_id": "F4"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "within_min": 600,
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 60,
+  "seed": 13,
+  "notes": "The seventeen hours before the acute phase. The failure table puts precursor_from at 14 July 21:28, so the bound window runs from there to the end of the replay and the scenario asks only for a review: whether the faster decay is visible that far ahead depends on the precursor rule's sensitivity, which is why it sits in the dev split, reported and never counted by the core-10 gate."
+}

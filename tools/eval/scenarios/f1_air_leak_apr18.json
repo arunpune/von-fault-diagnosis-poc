@@ -1,0 +1,32 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "f1_air_leak_apr18",
+  "title": "Air leak, signature A, 18 April 2020",
+  "group": "recording_positive",
+  "profiles": ["core", "full"],
+  "split": "test",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "f1-apr18"
+  },
+  "replay": {
+    "from": "2020-04-17T20:00:00.000Z",
+    "to": "2020-04-19T04:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "failure",
+    "failure_id": "F1"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "within_min": 180,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 60,
+  "seed": 7,
+  "notes": "The logger was frozen from 17 April 09:20 until 18 April 00:18, so the replay starts inside that block and the onset the failure table records is a lower bound: the failure table marks F1 onset_known false and the lead time is reported with a '≥' qualifier. The 32-hour window is the frozen lead-in, the labelled day and the two hours of repair venting that follow it."
+}

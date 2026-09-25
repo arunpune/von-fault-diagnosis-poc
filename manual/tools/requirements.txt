@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Stand-alone dependency set for manual/tools/**. These tools deliberately sit
+# outside the uv workspace so that a fresh checkout can run them without
+# `make install`:
+#
+#   uv run --no-project --with-requirements manual/tools/requirements.txt \
+#       python manual/tools/validate.py --strict
+#
+# Versions are exact pins, verified before pinning; Python >= 3.12.
+pyyaml==6.0.3
+jsonschema==4.26.0
+# derive_bands.py only; the recorded `provenance.pandas_version` and the float
+# formatting of the derived bands both depend on it, so the band derivation is
+# only reproducible with the pin (manual/tools/tests/test_bands_live.py).
+pandas==3.0.6
+jinja2==3.1.6
+markdown-it-py==4.2.0
+mdit-py-plugins==0.6.1
+pytest==9.1.1

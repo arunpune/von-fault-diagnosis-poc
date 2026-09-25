@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // Everything this package writes, tests and configuration included, checked
+  // and never emitted: `pnpm run typecheck`, `pnpm run lint` and the editor use
+  // this file. `tsconfig.build.json` is the narrower project that emits dist/
+  // with `src` as its root, so the image starts `node dist/index.js`.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  // `vitest.config.ts` and `vitest.integration.config.ts` import
+  // `../../vitest.base.ts`, which sits outside this package; they are
+  // configuration and stay outside every boundary rule,
+  // so they are checked here but never emitted.
+  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts", "vitest.integration.config.ts"]
+}

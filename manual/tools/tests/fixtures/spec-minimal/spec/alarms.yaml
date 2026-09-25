@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Test fixture: one message family plus one service message.
+schema_version: 1
+alarms:
+  - code: W104
+    type: warning
+    bit: 3
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 1
+    title: Oil temperature high
+    display: OIL TEMP HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      exclude_start_s: {setting: motor_start_mask_time}
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_warning}}
+      for_s: 300
+    reset: {mode: auto_hysteresis, hysteresis: {value: 5, unit: degC}}
+    cause_hint: Cooling is no longer removing the heat the compression element produces.
+    operator_action: Check the cooler and the cooling air path before the unit reaches the shutdown limit.
+    related_conditions: [oil_temperature_high]
+  - code: X201
+    type: shutdown_warning
+    bit: 17
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 2
+    title: Oil temperature very high
+    display: OIL TEMP V HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_shutdown_warning}}
+      for_s: 30
+    reset: {mode: auto}
+    operator_action: Stop the unit at the next opportunity and clear the cause.
+    related_conditions: [oil_temperature_high]
+  - code: S301
+    type: shutdown
+    bit: 21
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 3
+    title: Oil temperature shutdown
+    display: OIL TEMP SHUTDN
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_shutdown}}
+      for_s: 5
+    reset: {mode: manual, note: Reset at the controller once the oil has cooled.}
+    operator_action: Clear the cause and reset the controller before restarting.
+    related_conditions: [oil_temperature_high]
+  - code: M401
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil change due
+    display: OIL CHANGE DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: oil_change}
+    reset: {mode: manual_service}
+    operator_action: Carry out the oil change and reset the service counter.

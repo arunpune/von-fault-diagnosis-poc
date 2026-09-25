@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: four controller messages. Two of them sit on the oil
+# temperature, the warning at 85 degC below the shutdown at 95 degC.
+schema_version: 1
+alarms:
+  - code: W104
+    type: warning
+    bit: 3
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 1
+    title: Oil temperature high
+    display: OIL TEMP HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {value: 85, unit: degC}}
+      for_s: 300
+    reset: {mode: auto_hysteresis, hysteresis: {value: 5, unit: degC}}
+    cause_hint: Cooling is no longer removing the heat the compression element produces.
+    operator_action: Check the cooler and the cooling air path before the unit reaches the shutdown limit.
+    related_conditions: [oil_temperature_high]
+  - code: S301
+    type: shutdown
+    bit: 21
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 2
+    title: Oil temperature shutdown
+    display: OIL TEMP SHUTDN
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {value: 95, unit: degC}}
+      for_s: 5
+    reset: {mode: manual, note: Reset at the controller once the oil has cooled.}
+    operator_action: Clear the cause and reset the controller before restarting.
+    related_conditions: [oil_temperature_high]
+  - code: W120
+    type: warning
+    bit: 7
+    evaluation: sim
+    title: Line pressure low
+    display: LINE PRESS LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      exclude_start_s: 60
+      condition: {signal: line_pressure, op: lt, threshold: {setting: cut_in_pressure, offset: -0.5}}
+      for_s: 600
+    reset: {mode: auto}
+    cause_hint: The unit keeps delivering but the network takes more air than it receives.
+    operator_action: Look for a leak or an unusually high demand before changing the setting.
+    related_conditions: [low_line_pressure]
+  - code: M401
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil change due
+    display: OIL CHANGE DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: oil_change}
+    reset: {mode: manual_service}
+    operator_action: Carry out the oil change and reset the service counter.

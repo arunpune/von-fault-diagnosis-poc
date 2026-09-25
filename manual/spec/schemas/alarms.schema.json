@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:alarms:v1",
+  "title": "manual/spec/alarms.yaml",
+  "description": "CTRL-7 controller messages with machine-evaluable triggers. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "alarms": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/message" }
+    }
+  },
+  "required": ["schema_version", "alarms"],
+  "additionalProperties": false,
+  "$defs": {
+    "leaf": {
+      "type": "object",
+      "properties": {
+        "signal": { "$ref": "common.schema.json#/$defs/identifier" },
+        "op": { "$ref": "common.schema.json#/$defs/comparison_op" },
+        "threshold": { "$ref": "common.schema.json#/$defs/threshold" }
+      },
+      "required": ["signal", "op", "threshold"],
+      "additionalProperties": false
+    },
+    "condition": {
+      "description": "One leaf, or a single level of all/any over leaves.",
+      "oneOf": [
+        { "$ref": "#/$defs/leaf" },
+        {
+          "type": "object",
+          "properties": {
+            "all": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/leaf" } }
+          },
+          "required": ["all"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "any": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/leaf" } }
+          },
+          "required": ["any"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "trigger": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["signal", "external", "counter"] },
+        "state": { "$ref": "common.schema.json#/$defs/state" },
+        "exclude_start_s": { "$ref": "common.schema.json#/$defs/duration_s" },
+        "condition": { "$ref": "#/$defs/condition" },
+        "for_s": { "$ref": "common.schema.json#/$defs/duration_s" },
+        "counter": {
+          "type": "object",
+          "properties": {
+            "derived": { "$ref": "common.schema.json#/$defs/identifier" },
+            "task": { "$ref": "common.schema.json#/$defs/identifier" },
+            "tasks": { "$ref": "common.schema.json#/$defs/identifier_list" }
+          },
+          "required": ["derived"],
+          "additionalProperties": false
+        },
+        "input": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "signal" } }, "required": ["kind"] },
+          "then": { "required": ["state", "condition", "for_s"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "counter" } }, "required": ["kind"] },
+          "then": { "required": ["counter"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "external" } }, "required": ["kind"] },
+          "then": { "required": ["input"] }
+        }
+      ]
+    },
+    "reset": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["auto", "auto_hysteresis", "manual", "manual_service"]
+        },
+        "hysteresis": { "$ref": "common.schema.json#/$defs/quantity" },
+        "note": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["mode"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "auto_hysteresis" } }, "required": ["mode"] },
+          "then": { "required": ["hysteresis"] }
+        }
+      ]
+    },
+    "message": {
+      "type": "object",
+      "properties": {
+        "code": { "$ref": "common.schema.json#/$defs/alarm_code" },
+        "type": {
+          "type": "string",
+          "enum": ["warning", "shutdown_warning", "shutdown", "service"]
+        },
+        "bit": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 31
+        },
+        "evaluation": { "type": "string", "enum": ["sim", "none"] },
+        "family": { "$ref": "common.schema.json#/$defs/identifier" },
+        "rank": { "type": "integer", "minimum": 1 },
+        "title": { "$ref": "common.schema.json#/$defs/text" },
+        "display": { "type": "string", "pattern": "^[A-Z0-9 ]{1,16}$" },
+        "effect": { "type": "string", "enum": ["none", "stop_inhibit_start"] },
+        "trigger": { "$ref": "#/$defs/trigger" },
+        "reset": { "$ref": "#/$defs/reset" },
+        "cause_hint": { "$ref": "common.schema.json#/$defs/text" },
+        "operator_action": { "$ref": "common.schema.json#/$defs/text" },
+        "related_conditions": { "$ref": "common.schema.json#/$defs/identifier_list" }
+      },
+      "required": [
+        "code",
+        "type",
+        "bit",
+        "evaluation",
+        "title",
+        "display",
+        "effect",
+        "trigger",
+        "reset"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "evaluation": { "const": "sim" } }, "required": ["evaluation"] },
+          "then": { "properties": { "bit": { "type": "integer" } } },
+          "else": { "properties": { "bit": { "type": "null" } } }
+        },
+        {
+          "if": { "required": ["family"] },
+          "then": { "required": ["rank"] }
+        }
+      ]
+    }
+  }
+}

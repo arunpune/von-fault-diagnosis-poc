@@ -1,0 +1,9 @@
+{
+  "preset_id": "f3_air_leak_jun05",
+  "label": "Air leak – 5 Jun 2020",
+  "kind": "failure",
+  "sim_ts": "2020-06-05T10:00:00.000Z",
+  "lead_in_min": 240,
+  "failure_id": "F3",
+  "note": "The tour preset of the README; the replay starts at 06:00."
+}

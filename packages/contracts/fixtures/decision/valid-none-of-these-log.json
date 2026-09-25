@@ -1,0 +1,87 @@
+{
+  "schema": "urn:fdp:schema:decision:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-07-18T14:03:51.220Z",
+  "decision_id": "c48b1d60-7a29-4e13-b5c6-8d9e0f1a2b30",
+  "episode_id": "4f7c9a13-6b08-4d52-a9e4-1c2b3a4d5e60",
+  "event_id": "82e4b715-0c93-4a6e-8b17-5d6c7e8f9a01",
+  "sim_ts": "2020-07-18T14:03:51.000Z",
+  "backend": "jev",
+  "model": "jev-1.13.0",
+  "status": "ok",
+  "choice": "none_of_these",
+  "probabilities": {
+    "none_of_these": 0.62,
+    "oil_cooler_fouled": 0.18,
+    "high_ambient_temperature": 0.12,
+    "cooling_fan_failure": 0.08
+  },
+  "confidence": 0.77,
+  "support": {
+    "oil_cooler_fouled": 0.31,
+    "high_ambient_temperature": 0.27,
+    "cooling_fan_failure": 0.09
+  },
+  "candidates": [
+    {
+      "fault_id": "oil_cooler_fouled",
+      "condition_id": "oil_temperature_high",
+      "name": "Oil cooler fouled",
+      "probability": 0.18,
+      "benign": false,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:oil_cooler_fouled",
+        "title": "Oil temperature high"
+      }
+    },
+    {
+      "fault_id": "high_ambient_temperature",
+      "condition_id": "oil_temperature_high",
+      "name": "Ambient temperature above the operating range",
+      "probability": 0.12,
+      "benign": true,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:high_ambient_temperature",
+        "title": "Oil temperature high"
+      }
+    },
+    {
+      "fault_id": "cooling_fan_failure",
+      "condition_id": "oil_temperature_high",
+      "name": "Cooling fan failure",
+      "probability": 0.08,
+      "benign": false,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:cooling_fan_failure",
+        "title": "Oil temperature high"
+      }
+    }
+  ],
+  "severity": {
+    "level": "low",
+    "score": 0,
+    "probabilities": { "0": 0.68, "1": 0.21, "2": 0.08, "3": 0.03 },
+    "confidence": 0.68
+  },
+  "gate": {
+    "outcome": "log",
+    "abstained": true,
+    "reason": "The backend said no catalog cause fits, with a confidence at or above the review threshold.",
+    "ticket_min_confidence": 0.85,
+    "review_min_confidence": 0.6
+  },
+  "usage": { "input_tokens": 1502, "output_tokens": 0 },
+  "cost": {
+    "usd": 0.000063084,
+    "price_input_per_mtok": 0.042,
+    "price_output_per_mtok": 0,
+    "prices_as_of": "2026-09-19"
+  },
+  "latency_ms": 1103,
+  "request_id": "req-7b1e0c4a3d92",
+  "state_digest": "167196c1bf9aecb764cae1111f4228f0e79973995617e10e6c902f87e06ad11a",
+  "error": null
+}

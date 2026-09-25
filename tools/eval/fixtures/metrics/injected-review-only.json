@@ -1,0 +1,87 @@
+{
+  "schema": "urn:fdp:eval:metrics-fixture:v1",
+  "id": "injected_review_only",
+  "note": "An injected fault the backend only ever put in the review queue: detected at review level, missed at ticket level. The two decisions carry the reference usage of 1234 input tokens.",
+  "backend": "jev",
+  "review_min": 0.6,
+  "native_alarm_codes": [],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": 5,
+    "llm_output_per_mtok": 25,
+    "as_of": "2026-09-19"
+  },
+  "binding": {
+    "id": "inject_oil_cooler_fouling",
+    "group": "injected",
+    "split": "test",
+    "warmup_min": 60,
+    "replay": { "from": "2020-02-03T00:00:00.000Z", "to": "2020-02-04T00:00:00.000Z" },
+    "windows": [
+      {
+        "id": "inj-oil-cooler-0200",
+        "from": "2020-02-03T02:00:00.000Z",
+        "to": "2020-02-03T08:00:00.000Z",
+        "lead_from": "2020-02-03T02:00:00.000Z",
+        "accepted": ["oil_cooler_fouling"],
+        "benign": false,
+        "onset": "2020-02-03T02:00:00.000Z",
+        "onset_known": true,
+        "headline": false
+      }
+    ],
+    "excluded": [],
+    "benign_fault_ids": [],
+    "expect": {
+      "tickets": "at_least_one",
+      "fault": "injected",
+      "within_min": 360,
+      "max_false_tickets": 0,
+      "pass_level": "diagnosis"
+    }
+  },
+  "tickets": [
+    {
+      "ticket_id": "t-101",
+      "episode_id": "e-101",
+      "opened_sim_ts": "2020-02-03T05:00:00.000Z",
+      "fault_at_open": "oil_cooler_fouling",
+      "fault_latest": "oil_cooler_fouling",
+      "max_level": "review"
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "d-101",
+      "episode_id": "e-101",
+      "sim_ts": "2020-02-03T05:00:00.000Z",
+      "choice": "oil_cooler_fouling",
+      "confidence": 0.72,
+      "gate": "review",
+      "abstained": false,
+      "usage": { "input_tokens": 1234, "output_tokens": 0 },
+      "backend": "jev",
+      "benign_choice": false
+    },
+    {
+      "decision_id": "d-102",
+      "episode_id": "e-101",
+      "sim_ts": "2020-02-03T05:30:00.000Z",
+      "choice": "oil_cooler_fouling",
+      "confidence": 0.74,
+      "gate": "review",
+      "abstained": false,
+      "usage": { "input_tokens": 1234, "output_tokens": 0 },
+      "backend": "jev",
+      "benign_choice": false
+    }
+  ],
+  "alarms": [{ "code": "W104", "sim_ts": "2020-02-03T06:20:00.000Z" }],
+  "suspects": [
+    {
+      "event_id": "s-101",
+      "sim_ts": "2020-02-03T04:30:00.000Z",
+      "symptom_key": "oil_temperature_high"
+    }
+  ]
+}

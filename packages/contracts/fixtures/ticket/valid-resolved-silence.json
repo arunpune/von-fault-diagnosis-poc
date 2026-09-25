@@ -1,0 +1,51 @@
+{
+  "schema": "urn:fdp:schema:ticket:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-07-18T16:05:00.310Z",
+  "ticket_id": "e13c9b40-7d28-4a65-b091-2c3d4e5f6a70",
+  "episode_id": "4f7c9a13-6b08-4d52-a9e4-1c2b3a4d5e60",
+  "action": "resolved",
+  "status": "resolved",
+  "fault_id": "oil_cooler_fouled",
+  "condition_id": "oil_temperature_high",
+  "title": "Oil cooler fouled — Oil temperature high",
+  "cause": "Dust and oil film on the cooler matrix keep the cooling air from carrying the heat away, so the oil leaves the cooler warmer than it should on every cycle.",
+  "checks": [
+    "Look through the cooler matrix against the light and check how much of it is blocked.",
+    "Compare the oil temperature of a cool night with the same duty on a warm afternoon.",
+    "Confirm that the cooling fan runs whenever the oil is above its switching temperature."
+  ],
+  "remedy": "Clean the cooler matrix from the fan side with low-pressure air, straighten bent fins and repeat the cleaning at the interval of the maintenance plan rather than only when the temperature rises.",
+  "manual_ref": {
+    "section": "8.3",
+    "anchor": "fault:oil_cooler_fouled",
+    "title": "Oil temperature high"
+  },
+  "evidence": [
+    {
+      "metric": "oil_temperature",
+      "observation": "Oil temperature ran above its normal band for two hours and rose steadily through the shift.",
+      "value": 84.6,
+      "unit": "degC",
+      "baseline": 71.4,
+      "duration": "several hours"
+    }
+  ],
+  "confidence": 0.71,
+  "probabilities": {
+    "oil_cooler_fouled": 0.68,
+    "high_ambient_temperature": 0.19,
+    "cooling_fan_failure": 0.08,
+    "none_of_these": 0.05
+  },
+  "severity": "medium",
+  "backend": "jev",
+  "model": "jev-1.13.0",
+  "latest_decision_id": "a52d6c80-3f19-4e47-b2a8-7c9d0e1f2a30",
+  "opened_sim_ts": "2020-07-18T11:52:00.000Z",
+  "updated_sim_ts": "2020-07-18T13:22:00.000Z",
+  "resolved_sim_ts": "2020-07-18T16:05:00.000Z",
+  "close_reason": "silence",
+  "update_count": 2,
+  "closure": null
+}

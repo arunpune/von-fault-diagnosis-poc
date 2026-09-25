@@ -1,0 +1,40 @@
+{
+  "$expect_error": "/failures/0/start must match pattern",
+  "schema": "urn:fdp:schema:gt-failure-table:v1",
+  "source": {
+    "dataset": "MetroPT-3 (UCI 791)",
+    "doi": "10.24432/C5VW3R",
+    "license": "CC-BY-4.0",
+    "csv_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+    "resolved_from": "docs/dataset.md#how-the-windows-were-resolved"
+  },
+  "clock": "utc-assumed",
+  "failures": [
+    {
+      "id": "F2",
+      "uci_nr": "#1 (duplicate, read as #2)",
+      "start": "2020-05-30T00:30:00.000+01:00",
+      "end": "2020-05-30T06:00:00.000Z",
+      "uci_start": "2020-05-29T23:30:00.000Z",
+      "uci_end": "2020-05-30T06:00:00.000Z",
+      "data_onset": "2020-05-29T23:14:56.000Z",
+      "data_recovery": "2020-05-30T05:56:46.000Z",
+      "onset_known": true,
+      "precursor_from": null,
+      "report_local": "2020-05-30 01:10",
+      "maintenance": "2020-05-30T12:00:00.000Z",
+      "maintenance_verified": false,
+      "fault_id": "dryer_purge_leak",
+      "accepted_fault_ids": ["dryer_purge_leak", "downstream_air_leak"],
+      "signature": "A",
+      "component": "pneumatic panel (dryer/drain side)",
+      "native_alarm_first": null,
+      "in_headline": true,
+      "notes": "The published month of the maintenance note is a typo; the data puts it on 30 May."
+    }
+  ],
+  "unlabelled_episodes": [],
+  "excluded_windows": [],
+  "frozen_blocks": [],
+  "gaps_over_1h": []
+}

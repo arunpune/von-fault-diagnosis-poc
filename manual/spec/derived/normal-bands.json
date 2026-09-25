@@ -1,0 +1,492 @@
+{
+  "_credit": "Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021). MetroPT-3 Dataset. UCI Machine Learning Repository. https://doi.org/10.24432/C5VW3R. CC BY 4.0.",
+  "_license": "CC-BY-4.0",
+  "cycle": {
+    "cut_in_pressure_observed": 8.05,
+    "cut_out_pressure_observed": 10.03,
+    "discharge_minus_line_loaded": 0.33,
+    "load_cycles_per_hour": 1.97,
+    "loaded_run_band": {
+      "max": 129,
+      "min": 99
+    },
+    "loaded_run_typical": 109,
+    "off_phase_typical": 1329,
+    "pressure_decay_unloaded_band": {
+      "max": 0.15,
+      "min": 0.05
+    },
+    "pressure_decay_unloaded_typical": 0.07,
+    "pressure_rise_loaded": 1.1,
+    "tower_pulse_after_cut_in": 60,
+    "unloaded_run_on_typical": 407
+  },
+  "provenance": {
+    "generated_by": "manual/tools/derive_bands.py",
+    "pandas_version": "3.0.6",
+    "range": [
+      "2020-02-01T00:00:00",
+      "2020-03-01T00:00:00"
+    ],
+    "range_override": false,
+    "rows_dropped_frozen": 0,
+    "rows_dropped_gap": 35,
+    "rows_dropped_settle": 10548,
+    "rows_total": 1516948,
+    "rows_used": 204267,
+    "script_sha256": "691d143adb1d091f3f1a49bdde6c9748ec02c41d75ae92b8cab8035bc09c6197",
+    "source_bytes": 218300507,
+    "source_file": "MetroPT3(AirCompressor).csv",
+    "source_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24"
+  },
+  "signals": {
+    "ambient_temperature": {
+      "loaded": {
+        "high": 40,
+        "low": 2,
+        "source": "authored",
+        "typical": 20
+      },
+      "off": {
+        "high": 40,
+        "low": 2,
+        "source": "authored",
+        "typical": 20
+      },
+      "unloaded": {
+        "high": 40,
+        "low": 2,
+        "source": "authored",
+        "typical": 20
+      }
+    },
+    "discharge_pressure": {
+      "loaded": {
+        "high": 10.4,
+        "low": 8.8,
+        "max": 10.544,
+        "min": 4.822,
+        "n": 9540,
+        "p1": 7.686,
+        "p5": 8.8298,
+        "p50": 9.692,
+        "p95": 10.382,
+        "p99": 10.476,
+        "typical": 9.7
+      },
+      "off": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": -0.004,
+        "min": -0.02,
+        "n": 149583,
+        "p1": -0.016,
+        "p5": -0.014,
+        "p50": -0.012,
+        "p95": -0.008,
+        "p99": -0.008,
+        "typical": 0.0
+      },
+      "unloaded": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": -0.002,
+        "min": -0.026,
+        "n": 45144,
+        "p1": -0.02,
+        "p5": -0.016,
+        "p50": -0.01,
+        "p95": -0.008,
+        "p99": -0.006,
+        "typical": 0.0
+      }
+    },
+    "dryer_purge_pressure": {
+      "loaded": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": 6.138,
+        "min": -0.026,
+        "n": 9540,
+        "p1": -0.024,
+        "p5": -0.022,
+        "p50": -0.018,
+        "p95": -0.014,
+        "p99": -0.012,
+        "typical": 0.0
+      },
+      "off": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": -0.006,
+        "min": -0.028,
+        "n": 149583,
+        "p1": -0.024,
+        "p5": -0.022,
+        "p50": -0.018,
+        "p95": -0.014,
+        "p99": -0.012,
+        "typical": 0.0
+      },
+      "unloaded": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": -0.006,
+        "min": -0.026,
+        "n": 45144,
+        "p1": -0.024,
+        "p5": -0.022,
+        "p50": -0.018,
+        "p95": -0.014,
+        "p99": -0.012,
+        "typical": 0.0
+      }
+    },
+    "dryer_tower": {
+      "loaded": {
+        "duty": 0.502516,
+        "expected": "alternating",
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "flow_pulse": {
+      "loaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "intake_closed": {
+      "loaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "line_pressure": {
+      "loaded": {
+        "high": 10.1,
+        "low": 8.6,
+        "max": 10.158,
+        "min": 7.416,
+        "n": 9540,
+        "p1": 8.4288,
+        "p5": 8.622,
+        "p50": 9.402,
+        "p95": 10.052,
+        "p99": 10.112,
+        "typical": 9.4
+      },
+      "off": {
+        "high": 9.4,
+        "low": 8.1,
+        "max": 9.658,
+        "min": 8.038,
+        "n": 149583,
+        "p1": 8.072,
+        "p5": 8.124,
+        "p50": 8.706,
+        "p95": 9.398,
+        "p99": 9.508,
+        "typical": 8.7
+      },
+      "unloaded": {
+        "high": 10.0,
+        "low": 9.0,
+        "max": 10.058,
+        "min": 8.072,
+        "n": 45144,
+        "p1": 8.544,
+        "p5": 9.032,
+        "p50": 9.654,
+        "p95": 9.936,
+        "p99": 9.984,
+        "typical": 9.7
+      }
+    },
+    "load_valve": {
+      "loaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.3e-05,
+        "expected": 0,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 45144
+      }
+    },
+    "low_pressure_switch": {
+      "loaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 9540
+      },
+      "off": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 45144
+      }
+    },
+    "motor_current": {
+      "loaded": {
+        "high": 6.3,
+        "low": 5.8,
+        "max": 6.425,
+        "min": 4.5275,
+        "n": 9540,
+        "p1": 5.611,
+        "p5": 5.8175,
+        "p50": 6.0675,
+        "p95": 6.2625,
+        "p99": 6.325,
+        "typical": 6.1
+      },
+      "off": {
+        "high": 0.1,
+        "low": 0.0,
+        "max": 0.045,
+        "min": 0.02,
+        "n": 149583,
+        "p1": 0.0325,
+        "p5": 0.035,
+        "p50": 0.0375,
+        "p95": 0.04,
+        "p99": 0.0425,
+        "typical": 0.0
+      },
+      "unloaded": {
+        "high": 4.0,
+        "low": 3.6,
+        "max": 4.795,
+        "min": 1.055,
+        "n": 45144,
+        "p1": 3.6475,
+        "p5": 3.68,
+        "p50": 3.7675,
+        "p95": 3.9425,
+        "p99": 4.02,
+        "typical": 3.8
+      }
+    },
+    "oil_level_ok": {
+      "loaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "oil_temperature": {
+      "loaded": {
+        "high": 61,
+        "low": 48,
+        "max": 66.325,
+        "min": 34.85,
+        "n": 9540,
+        "p1": 46.625,
+        "p5": 48.95,
+        "p50": 55.3125,
+        "p95": 60.775,
+        "p99": 63.475,
+        "typical": 55
+      },
+      "off": {
+        "high": 61,
+        "low": 50,
+        "max": 65.85,
+        "min": 40.95,
+        "n": 149583,
+        "p1": 47.625,
+        "p5": 50.025,
+        "p50": 56.3,
+        "p95": 60.15,
+        "p99": 62.075,
+        "typical": 56
+      },
+      "unloaded": {
+        "high": 64,
+        "low": 51,
+        "max": 69.15,
+        "min": 36.65,
+        "n": 45144,
+        "p1": 47.45,
+        "p5": 51.8,
+        "p50": 58.5,
+        "p95": 63.675,
+        "p99": 65.775,
+        "typical": 59
+      }
+    },
+    "purge_switch": {
+      "loaded": {
+        "duty": 0.995597,
+        "expected": 1,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "regulator_contact": {
+      "loaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 9540
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 149583
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 45144
+      }
+    },
+    "reservoir_pressure": {
+      "loaded": {
+        "high": 10.1,
+        "low": 8.6,
+        "max": 10.158,
+        "min": 7.412,
+        "n": 9540,
+        "p1": 8.4268,
+        "p5": 8.622,
+        "p50": 9.4,
+        "p95": 10.05,
+        "p99": 10.1132,
+        "typical": 9.4
+      },
+      "off": {
+        "high": 9.4,
+        "low": 8.1,
+        "max": 9.658,
+        "min": 8.048,
+        "n": 149583,
+        "p1": 8.076,
+        "p5": 8.126,
+        "p50": 8.708,
+        "p95": 9.4,
+        "p99": 9.51,
+        "typical": 8.7
+      },
+      "unloaded": {
+        "high": 10.0,
+        "low": 9.0,
+        "max": 10.06,
+        "min": 8.074,
+        "n": 45144,
+        "p1": 8.546,
+        "p5": 9.036,
+        "p50": 9.656,
+        "p95": 9.936,
+        "p99": 9.984,
+        "typical": 9.7
+      }
+    },
+    "separator_discharge_pressure": {
+      "loaded": {
+        "high": 0.0,
+        "low": -0.1,
+        "max": 9.698,
+        "min": -0.022,
+        "n": 9540,
+        "p1": -0.02,
+        "p5": -0.018,
+        "p50": -0.012,
+        "p95": -0.008,
+        "p99": -0.006,
+        "typical": 0.0
+      },
+      "off": {
+        "high": 9.4,
+        "low": 8.1,
+        "max": 9.642,
+        "min": 8.028,
+        "n": 149583,
+        "p1": 8.06,
+        "p5": 8.11,
+        "p50": 8.692,
+        "p95": 9.384,
+        "p99": 9.492,
+        "typical": 8.7
+      },
+      "unloaded": {
+        "high": 10.0,
+        "low": 9.0,
+        "max": 10.052,
+        "min": 8.06,
+        "n": 45144,
+        "p1": 8.5309,
+        "p5": 9.02,
+        "p50": 9.64,
+        "p95": 9.926,
+        "p99": 9.976,
+        "typical": 9.6
+      }
+    }
+  },
+  "start_current_peak": {
+    "n": 1146,
+    "p50": 5.91,
+    "p95": 6.0625
+  }
+}

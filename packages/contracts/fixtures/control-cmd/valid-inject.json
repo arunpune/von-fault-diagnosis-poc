@@ -1,0 +1,11 @@
+{
+  "schema": "urn:fdp:schema:control-cmd:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:10.000Z",
+  "cmd_id": "6f7a8b9c-0d1e-4f2a-9b4c-5d6e7f8091a2",
+  "cmd": "inject",
+  "args": {
+    "injection_id": "downstream_air_leak",
+    "params": { "magnitude": 1.5, "duration_sim_min": 240 }
+  }
+}

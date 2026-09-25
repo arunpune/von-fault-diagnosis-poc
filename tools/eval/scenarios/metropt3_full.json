@@ -1,0 +1,30 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "metropt3_full",
+  "title": "The whole MetroPT-3 recording",
+  "group": "recording_positive",
+  "profiles": ["dev", "full"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "csv"
+  },
+  "replay": {
+    "from": "2020-02-01T00:00:00.000Z",
+    "to": "2020-09-01T00:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "recording"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "within_min": 180,
+    "max_false_tickets": 213,
+    "pass_level": "detection"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 1440,
+  "seed": 47,
+  "notes": "The MetroPT-3 check: all four headline failures against seven months of negative time, from the whole CSV rather than from a slice, so it needs METROPT_CSV and runs only in the full profile. It is recorded as in-sample — the windows it is scored on are the windows the detector was tuned against — so it sits in the dev split and reports rather than gates. The false-ticket budget is one per machine-day over the 213 days of the recording; the figure the report carries is tickets per machine-day, not this bound."
+}

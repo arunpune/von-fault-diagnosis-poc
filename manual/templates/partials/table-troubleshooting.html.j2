@@ -1,0 +1,188 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.troubleshooting() macro for print (phase1-pdf-build.md §8,
+   decision R-04): section 8.2 of chapter 8, one entry per symptom condition
+   and one row per (condition, cause) pair.
+
+   Both variants print the same cells, and the difference is the one spec §4
+   asks for:
+
+   * clean (`tables: fit_page`) gives every condition its own ## heading
+     (id="cond-<id>", the number MAN's outline reserved) and its own table, so
+     a table never breaks across a page;
+   * realistic (`tables: span_pages_repeat_header`) prints one table that runs
+     over page breaks with a single <thead> the stylesheet repeats, and starts
+     each condition with a group row that carries the heading's id so every
+     ref('cond:<id>') and the table of contents still land on a real element.
+
+   A cause is two <tr>s (three for its full entry), because MAN's registry
+   ids are up to 35 characters long and a 35-character id is 55 mm of IBM
+   Plex Mono. Three narrow id columns beside three prose columns cost
+   chapter 8 84 of the manual's 140 pages, and narrowing them broke every id
+   over two lines, which destroys it in the extracted text (acceptance check
+   #3 wants all 39 fault ids verbatim) — pdfplumber reads a page line by
+   line, so the halves come back with other columns' words between them. So
+   the ids get a band row of their own, where they have half the text block
+   each and never wrap:
+
+     <tr class="cause">   the identification band: condition id | fault id
+                          (spanning two columns) | subsystem. This is the row
+                          that carries id="fault-<id>", the data attributes
+                          and, for check #4, the (condition_id, fault_id)
+                          pair in its first two cells.
+     <tr class="detail">  the four prose columns: possible cause, what to
+                          check, remedy, see also.
+     <tr class="signals"> the full entry only: one cell across the table,
+                          "Signals:" and MAN's move_text() sentences, which
+                          say which readings move, in which direction and in
+                          which machine state (spec §3, "each cause states in
+                          plain words which signals move"; chapter 8.1 sends
+                          the reader to them). Run on after the summary in
+                          the 27 % cause column, the sentences cost the clean
+                          variant six pages and pushed it past the 50 of
+                          spec §4; across the whole text block they cost two.
+
+   Decision R-09 is kept — the fault id is a cell of its own on every cause
+   row and the subsystem has one too — and the four prose columns now have
+   173 mm between them instead of 133 mm, so the same text takes a quarter
+   fewer lines. The <thead> names both rows, so a page that starts mid-table
+   still says what each cell is.
+
+   faults.yaml also shares 39 causes over 81 (condition, cause) pairs, so a
+   row that always printed the whole entry printed the summary, the checks
+   and the remedy 2.1 times each. The first condition that lists a cause —
+   the one that already owns id="fault-<id>" and the section number
+   ref('fault:<id>') resolves to — prints the entry in full; every later
+   condition prints the cause name, the likelihood and its own note, and
+   sends the reader to that section for the checks and the remedy, where the
+   signals row is too. Both kinds of entry keep the band row and the
+   (condition, fault) pair, so check #4 still recovers 81 rows. #}
+{%- set columns = 4 -%}
+
+{#- The section number the full entry of `fault_id` is printed under. -#}
+{%- macro entry_ref(fault_id, owner_id) -%}
+<a class="xref" href="#fault-{{ fault_id | e }}">{{ 'section ' if variant.xref_style == 'explicit' }}{{ sections['cond:' ~ owner_id].number | e }}</a>
+{%- endmacro -%}
+
+{#- The id of the first condition that lists `fault_id` (phase1-manual-content.md §8.3). -#}
+{%- macro first_condition_id(fault_id) -%}
+{%- set owner = namespace(id='') -%}
+{%- for condition in manual.conditions -%}
+{%- if not owner.id and (condition.causes | selectattr('fault_id', 'equalto', fault_id) | first is defined) -%}
+{%- set owner.id = condition.id -%}
+{%- endif -%}
+{%- endfor -%}
+{{- owner.id -}}
+{%- endmacro -%}
+
+{%- macro alarm_link(code) -%}
+<a class="xref" href="#alarm-{{ code | e }}"><span class="alarm-code">{{ code | e }}</span></a>
+{%- endmacro -%}
+
+{#- Maintenance tasks and controller messages to follow up from one cause. -#}
+{%- macro see_also(cause) -%}
+{%- set codes = namespace(list=[]) -%}
+{%- for condition in manual.conditions -%}
+{%- if condition.causes | selectattr('fault_id', 'equalto', cause.fault_id) | first is defined -%}
+{%- for code in condition.alarms -%}
+{%- if code not in codes.list -%}{%- set codes.list = codes.list + [code] -%}{%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if not cause.maintenance and not codes.list -%}&mdash;
+{%- else -%}
+{%- for task_id in cause.maintenance -%}
+<a class="xref" href="#task-{{ task_id | e }}">{{ manual.task(task_id).name | e }}</a>{{ ', ' if not loop.last }}
+{%- endfor -%}
+{%- if cause.maintenance and codes.list %}; {% endif -%}
+{%- for code in codes.list %}{{ alarm_link(code) }}{{ ', ' if not loop.last }}{% endfor -%}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro cause_row(condition, entry) -%}
+{%- set cause = manual.cause(entry.fault_id) -%}
+{%- set owner_id = first_condition_id(cause.fault_id) | trim -%}
+{%- set owns = owner_id == condition.id -%}
+<tr class="cause{{ '' if owns else ' repeat' }}"{% if owns %} id="fault-{{ cause.fault_id | e }}"{% endif %} data-condition="{{ condition.id | e }}" data-fault="{{ cause.fault_id | e }}" data-likelihood="{{ entry.likelihood | e }}">
+<td class="condition-id"><span class="mono">{{ condition.id | e }}</span></td>
+<td class="fault-id" colspan="2"><span class="mono">{{ cause.fault_id | e }}</span></td>
+<td class="subsystem">{{ cause.subsystem | replace('_', ' ') | e }}</td>
+</tr>
+<tr class="detail{{ '' if owns else ' repeat' }}" data-condition="{{ condition.id | e }}" data-fault="{{ cause.fault_id | e }}">
+{%- if owns %}
+<td><span class="cause-name">{{ cause.name | e }}</span> ({{ entry.likelihood | e }}{{ ', benign' if cause.benign }})<br>{{ cause.summary_html }}
+{%- if entry.note_html %} {{ entry.note_html }}{% endif %}</td>
+<td><ul class="checks">
+{%- for check in cause.checks_html %}<li>{{ check }}</li>{% endfor -%}
+</ul></td>
+<td>{{ cause.remedy_html }}</td>
+{%- else %}
+<td><span class="cause-name">{{ cause.name | e }}</span> ({{ entry.likelihood | e }}{{ ', benign' if cause.benign }})
+{%- if entry.note_html %}<br>{{ entry.note_html }}{% endif %}</td>
+<td>The checks of {{ entry_ref(cause.fault_id, owner_id) }}.</td>
+<td>The remedy of {{ entry_ref(cause.fault_id, owner_id) }}.</td>
+{%- endif %}
+<td>{{ see_also(cause) }}</td>
+</tr>
+{%- if owns %}
+<tr class="signals" data-condition="{{ condition.id | e }}" data-fault="{{ cause.fault_id | e }}"><td colspan="{{ columns }}"><span class="signals-label">Signals:</span> {{ man.move_text(cause.fault_id) | join(' ') | e }}</td></tr>
+{%- endif %}
+{%- endmacro -%}
+
+{#- Fixed column widths: see the `.troubleshooting col` rules of base.css. -#}
+{%- macro colgroup() -%}
+<colgroup><col class="c-cause"><col class="c-checks"><col class="c-remedy"><col class="c-see-also"></colgroup>
+{%- endmacro -%}
+
+{%- macro header_row() -%}
+<tr class="band-head"><th>Condition</th><th colspan="2">Fault id</th><th>Subsystem</th></tr>
+<tr><th>Possible cause</th><th>What to check</th><th>Remedy</th><th>See also</th></tr>
+{%- endmacro -%}
+
+{%- macro condition_intro(condition) -%}
+<p class="symptom">{{ condition.symptom_html }}</p>
+{% if condition.alarms %}
+<p class="typical-messages">Typical messages:
+{% for code in condition.alarms %}{{ alarm_link(code) }}{{ ', ' if not loop.last else '.' }}{% endfor %}</p>
+{% endif %}
+{%- endmacro -%}
+
+{%- macro per_condition() -%}
+{% for condition in manual.conditions %}
+{%- set section = sections['cond:' ~ condition.id] -%}
+<h2 id="{{ section.html_id | e }}"><span class="num">{{ section.number | e }}</span> {{ section.title | e }} <span class="mono condition-id">{{ condition.id | e }}</span></h2>
+{{ condition_intro(condition) }}
+<table class="troubleshooting" data-condition="{{ condition.id | e }}">
+{{ colgroup() }}
+<thead>{{ header_row() }}</thead>
+<tbody>
+{% for entry in condition.causes %}{{ cause_row(condition, entry) }}
+{% endfor %}
+</tbody>
+</table>
+{% endfor %}
+{%- endmacro -%}
+
+{%- macro spanning() -%}
+<table class="troubleshooting spanning">
+<caption>Symptoms, causes and remedies</caption>
+{{ colgroup() }}
+<thead>{{ header_row() }}</thead>
+<tbody>
+{% for condition in manual.conditions %}
+{%- set section = sections['cond:' ~ condition.id] -%}
+<tr class="group" id="{{ section.html_id | e }}"><td colspan="{{ columns }}"><span class="num">{{ section.number | e }}</span> {{ section.title | e }} <span class="mono condition-id">{{ condition.id | e }}</span><span class="symptom"> &mdash; {{ condition.symptom_html }}</span></td></tr>
+{% for entry in condition.causes %}{{ cause_row(condition, entry) }}
+{% endfor %}
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}
+
+{%- macro troubleshooting() -%}
+{%- if variant.tables == 'span_pages_repeat_header' -%}
+{{ spanning() }}
+{%- else -%}
+{{ per_condition() }}
+{%- endif -%}
+{%- endmacro -%}

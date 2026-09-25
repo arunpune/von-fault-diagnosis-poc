@@ -1,0 +1,346 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Maintenance tasks (chapter 7). Registry: docs/plan/phase1-manual-content.md section 7.3.
+# Intervals are numeric fields; no text field carries a hand-typed number with a unit (rule N1).
+# Every task that names a service_message is counted back by that message (rule R5).
+schema_version: 1
+tasks:
+  - id: daily_checks
+    name: Daily checks
+    interval: {calendar: daily, rule: whichever_first}
+    service_message: null
+    duration_min: 10
+    consumables: []
+    tools: [Torch]
+    safety:
+      - Keep clear of hot surfaces and of the cooling fan while the unit is running; see {{ ref('sec:safety-hot-surfaces') }}.
+      - Do not open any part of the air or oil circuit for these checks; see {{ ref('sec:safety-pressure') }}.
+    steps:
+      - Read the controller display and note every pending or unacknowledged message.
+      - Stop the unit, wait until it has vented and read the oil level through the sight glass.
+      - Check that {{ sig('oil_level_ok') }} reports oil above the minimum on the controller.
+      - Watch the condensate drain over one discharge and confirm that it opens and closes again.
+      - Walk around the unit and listen for escaping air at the purge silencer and at the pipework.
+      - Compare {{ sig('line_pressure') }} and {{ sig('discharge_pressure') }} with the values in {{ ref('sec:normal-bands') }}.
+      - Note the readings in the operating log so that a slow drift becomes visible.
+    post_checks:
+      - No unacknowledged message remains on the controller.
+      - The oil level stands between the marks on the sight glass with the unit stopped.
+      - The condensate drain is dry and quiet between its discharges.
+    related_causes: [condensate_drain_stuck_open, downstream_air_leak, oil_level_low]
+    components: [controller, condensate_drain, separator_vessel, oil_level_switch]
+  - id: weekly_checks
+    name: Weekly checks
+    interval: {calendar: weekly, rule: whichever_first}
+    service_message: null
+    duration_min: 20
+    consumables: []
+    tools: [Torch, Soft brush]
+    safety:
+      - Carry out the checks with the unit stopped, isolated and vented wherever a guard has to be opened; see {{ ref('sec:maintenance-safety') }}.
+      - Keep clear of hot surfaces until the unit has cooled down; see {{ ref('sec:safety-hot-surfaces') }}.
+    steps:
+      - Repeat the daily checks of {{ ref('task:daily_checks') }} before you start.
+      - Brush the dust off the cooler matrix and the ventilation grilles with the unit stopped.
+      - Check the intake filter housing for dust marks and for a loose or damaged seal.
+      - Follow one complete load cycle and confirm that the unit loads, delivers and unloads again.
+      - Confirm that the dryer changes tower during the cycle and that the regeneration discharge is audible.
+      - Compare the loaded run time and the number of load cycles with the figures in {{ ref('sec:normal-bands') }}.
+      - Inspect the flexible hoses and the pipe supports for chafing, oil traces and loose clamps.
+      - Record the run hours and the readings in the operating log.
+    post_checks:
+      - The unit reaches the cut-out pressure and unloads within the expected run time.
+      - The dryer changes tower and regeneration is audible at the silencer.
+      - No oil trace and no loose connection remain on the unit.
+    related_causes: [intake_filter_clogged, oil_cooler_fouled, dryer_purge_leak, tower_changeover_valve_fault]
+    components: [intake_filter, oil_cooler, aftercooler, cooling_fan, dryer_tower_1, dryer_tower_2, purge_silencer]
+  - id: air_filter_service
+    name: Air intake filter service
+    interval: {hours: 2000, months: 12, rule: whichever_first}
+    service_message: M402
+    duration_min: 30
+    consumables:
+      - {part: air_filter_element, quantity: 1, unit: count}
+    tools: [Socket set, Soft brush, Torch]
+    safety:
+      - Stop the unit, isolate it electrically and secure it against restarting; see {{ ref('sec:safety-electrical') }}.
+      - Let the unit vent before opening the intake housing; see {{ ref('sec:safety-pressure') }}.
+    steps:
+      - Stop the unit, isolate it and wait until the display reports no pressure.
+      - Open the intake filter housing and take out the used element.
+      - Wipe the inside of the housing clean, working from the clean side outwards.
+      - Inspect the housing seal and the intake duct for cracks and for loose clamps.
+      - Fit the new element and close the housing so that the seal is evenly compressed.
+      - Restore the supply, start the unit and follow one load cycle.
+      - Reset the service counter for this task at the controller.
+    post_checks:
+      - The motor current under load is back inside the band of {{ ref('sec:normal-bands') }}.
+      - The housing is airtight and no air is drawn in past the seal.
+      - The service message no longer stands on the controller.
+    related_causes: [intake_filter_clogged, airend_element_wear]
+    components: [intake_filter, intake_valve]
+  - id: oil_change
+    name: Oil change
+    interval: {hours: 4000, months: 12, rule: whichever_first}
+    service_message: M401
+    duration_min: 60
+    consumables:
+      - {part: compressor_oil, quantity: 8, unit: L}
+    tools: [Socket set, Drain hose, Collecting vessel, Funnel]
+    safety:
+      - Stop the unit, isolate it electrically, secure it against restarting and vent the separator vessel; see {{ ref('sec:maintenance-safety') }}.
+      - Hot oil causes burns; let the unit cool before draining; see {{ ref('sec:safety-hot-surfaces') }}.
+      - Collect the used oil and hand it over to an authorised disposal service.
+    steps:
+      - Run the unit until it is warm, then stop it, isolate it and vent the separator vessel.
+      - Check that {{ sig('discharge_pressure') }} reads zero on the controller before you open anything.
+      - Connect the drain hose and drain the used oil into the collecting vessel.
+      - Drain the oil cooler and the oil lines as well, so that no old oil stays in the circuit.
+      - Close the drain, refill through the filler port with the specified grade and check the sight glass.
+      - Refit the filler plug with a new sealing ring and wipe the unit dry.
+      - Restore the supply, start the unit and let it run through a full load cycle.
+      - Stop the unit again, let the oil settle and correct the level if needed.
+      - Reset the service counter for this task at the controller.
+    post_checks:
+      - The oil level stands between the marks on the sight glass with the unit stopped and vented.
+      - No leak shows at the drain, at the filler port or at the cooler after the test run.
+      - The oil temperature settles inside the band of {{ ref('sec:normal-bands') }}.
+      - The service message no longer stands on the controller.
+    related_causes: [wrong_oil_grade, oil_level_low, oil_level_high]
+    components: [separator_vessel, oil_cooler, thermostatic_valve, airend]
+  - id: oil_filter_change
+    name: Oil filter change
+    interval: {hours: 4000, rule: whichever_first}
+    service_message: M403
+    duration_min: 30
+    consumables:
+      - {part: oil_filter_element, quantity: 1, unit: count}
+    tools: [Filter wrench, Collecting vessel, Lint-free cloth]
+    safety:
+      - Stop the unit, isolate it electrically and vent the separator vessel before opening the oil circuit; see {{ ref('sec:maintenance-safety') }}.
+      - Let the oil cool before touching the filter head; see {{ ref('sec:safety-hot-surfaces') }}.
+    steps:
+      - Stop the unit, isolate it, vent it and place the collecting vessel under the filter head.
+      - Unscrew the used filter element and let the oil in it drain into the vessel.
+      - Clean the sealing face on the filter head with a lint-free cloth.
+      - Oil the gasket of the new element with clean compressor oil and screw it on by hand.
+      - Tighten the element a further part turn as marked on it, without a wrench.
+      - Restore the supply, start the unit and check the filter head for leaks under pressure.
+      - Correct the oil level after the test run and reset the service counter at the controller.
+    post_checks:
+      - No oil escapes at the filter head under full working pressure.
+      - The oil level stands between the marks after the test run.
+      - The oil temperature settles inside the band of {{ ref('sec:normal-bands') }}.
+    related_causes: [oil_filter_clogged]
+    components: [oil_filter, separator_vessel]
+  - id: separator_element_change
+    name: Separator element change
+    interval: {hours: 8000, months: 24, rule: whichever_first}
+    service_message: M403
+    duration_min: 90
+    consumables:
+      - {part: separator_element, quantity: 1, unit: count}
+    tools: [Socket set, Torque wrench, Lint-free cloth, Lifting aid]
+    safety:
+      - Stop the unit, isolate it electrically, secure it against restarting and vent the separator vessel completely; see {{ ref('sec:maintenance-safety') }}.
+      - The separator vessel is a pressure vessel; never open it while it holds pressure; see {{ ref('sec:safety-pressure') }}.
+    steps:
+      - Stop the unit, isolate it and vent it, then confirm that {{ sig('discharge_pressure') }} reads zero.
+      - Disconnect the scavenge line and the pipework from the separator cover and mark their positions.
+      - Undo the cover bolts evenly and lift the cover off with the lifting aid.
+      - Take out the used element and clean the sealing faces in the vessel and on the cover.
+      - Clear the scavenge line and its orifice, and renew the strainer in it if one is fitted.
+      - Fit the new element with new gaskets and make sure that its earthing strap is in place.
+      - Refit the cover and tighten the bolts crosswise to the torque given on the cover plate.
+      - Reconnect the scavenge line and the pipework, then top up the oil level.
+      - Restore the supply, start the unit and let it reach working pressure while you check for leaks.
+      - Reset the service counter for this task at the controller.
+    post_checks:
+      - The pressure drop across the element under load is back inside the band of {{ ref('sec:normal-bands') }}.
+      - No air and no oil escape at the cover or at the scavenge line under full working pressure.
+      - The motor current under load has fallen back to its normal value.
+      - The service message no longer stands on the controller.
+    related_causes: [separator_element_clogged, separator_element_damaged, scavenge_line_blocked]
+    components: [separator_vessel, minimum_pressure_valve, oil_filter]
+  - id: oil_cooler_cleaning
+    name: Oil cooler and aftercooler cleaning
+    interval: {hours: 2000, months: 6, rule: whichever_first}
+    service_message: null
+    duration_min: 45
+    consumables:
+      - {part: cooler_cleaning_kit, quantity: 1, unit: count}
+    tools: [Socket set, Soft brush, Compressed-air gun, Eye protection]
+    safety:
+      - Stop the unit, isolate it electrically and secure it against restarting before removing any guard; see {{ ref('sec:safety-electrical') }}.
+      - Let the coolers cool down before touching them; see {{ ref('sec:safety-hot-surfaces') }}.
+      - Wear eye protection while blowing out the matrix and keep other people away.
+    steps:
+      - Stop the unit, isolate it and let the coolers cool down.
+      - Remove the guard in front of the cooling fan and check the fan blades for damage and deposits.
+      - Blow the cooler matrix out against the normal air flow direction, working from the clean side.
+      - Brush the remaining deposits off the fins carefully, without bending them.
+      - Clean the ventilation grilles of the enclosure and the air path in front of the unit.
+      - Refit the guard, restore the supply and start the unit.
+      - Follow one full load cycle and watch the oil temperature settle.
+    post_checks:
+      - The oil temperature under load is back inside the band of {{ ref('sec:normal-bands') }}.
+      - The cooling fan runs freely and the guard is properly fastened.
+      - No deposit blocks the ventilation grilles of the enclosure.
+    related_causes: [oil_cooler_fouled, cooling_fan_failure, high_ambient_temperature]
+    components: [oil_cooler, aftercooler, cooling_fan]
+  - id: condensate_drain_service
+    name: Condensate drain service
+    interval: {hours: 2000, rule: whichever_first}
+    service_message: M405
+    duration_min: 30
+    consumables:
+      - {part: drain_valve_kit, quantity: 1, unit: count}
+    tools: [Spanner set, Collecting vessel, Lint-free cloth]
+    safety:
+      - Stop the unit, isolate it electrically and vent the separator before opening the drain; see {{ ref('sec:maintenance-safety') }}.
+      - Condensate contains oil; collect it and hand it over to an authorised disposal service.
+    steps:
+      - Stop the unit, isolate it, vent it and place the collecting vessel under the drain.
+      - Close the isolation valve upstream of the drain and open the manual test valve to relieve it.
+      - Dismantle the drain valve and clean the strainer, the seat and the discharge port.
+      - Renew the seals, the diaphragm and the strainer from the service kit.
+      - Reassemble the drain, open the isolation valve and clear the discharge line to the collector.
+      - Restore the supply, start the unit and watch the drain over several discharges.
+      - Reset the service counter for this task at the controller.
+    post_checks:
+      - The drain opens and closes cleanly and does not leak air between discharges.
+      - The separator discharge pressure under load is back inside the band of {{ ref('sec:normal-bands') }}.
+      - No condensate stands in the separator after a full cycle.
+    related_causes: [condensate_drain_blocked, condensate_drain_stuck_open]
+    components: [condensate_drain, cyclonic_separator]
+  - id: dryer_desiccant_inspection
+    name: Dryer desiccant inspection
+    interval: {hours: 8000, replacement_hours: 16000, rule: whichever_first}
+    service_message: M404
+    duration_min: 60
+    consumables:
+      - {part: desiccant_charge, quantity: 2, unit: count}
+    tools: [Spanner set, Dust mask, Eye protection, Funnel, Collecting vessel]
+    safety:
+      - Stop the unit, isolate it electrically and vent both dryer towers before opening them; see {{ ref('sec:maintenance-safety') }}.
+      - Desiccant dust irritates the eyes and the airways; wear a dust mask and eye protection.
+    steps:
+      - Stop the unit, isolate it and vent both towers through the purge line.
+      - Open the fill port of the first tower and take a sample of the desiccant.
+      - Judge the sample for dust, for broken beads and for oil contamination.
+      - Repeat the inspection on the second tower and compare the two samples.
+      - Replace the charge in both towers when the beads are dusty, oily or broken down.
+      - Refit the fill ports with new seals and clear any dust from the sieve plates.
+      - Restore the supply, start the unit and let the dryer run through several changeovers.
+      - Reset the service counter for this task at the controller.
+    post_checks:
+      - Both towers change over at the expected interval and regeneration is audible each time.
+      - The delivered air shows no visible moisture at the test point downstream of the dryer.
+      - The purge pressure between changeovers stays inside the band of {{ ref('sec:normal-bands') }}.
+    related_causes: [desiccant_exhausted, tower_changeover_valve_fault, condensate_drain_blocked]
+    components: [dryer_tower_1, dryer_tower_2, changeover_valves]
+  - id: dryer_purge_valve_service
+    name: Purge valve and silencer service
+    interval: {hours: 4000, rule: whichever_first}
+    service_message: null
+    duration_min: 60
+    consumables:
+      - {part: purge_valve_kit, quantity: 1, unit: count}
+      - {part: purge_silencer, quantity: 1, unit: count}
+    tools: [Spanner set, Hex key set, Lint-free cloth, Ear protection]
+    safety:
+      - Stop the unit, isolate it electrically and vent the dryer before working on the purge line; see {{ ref('sec:maintenance-safety') }}.
+      - Wear ear protection when you later listen to the regeneration discharge; see {{ ref('sec:safety-general') }}.
+    steps:
+      - Stop the unit, isolate it and vent the dryer towers and the purge line.
+      - Remove the purge silencer and check it for blockage and for mechanical damage.
+      - Dismantle the purge valve, clean the seat and inspect it for scoring.
+      - Renew the seals and the valve seat from the service kit and reassemble the valve.
+      - Fit the new silencer and make sure that its outlet is unobstructed.
+      - Check the changeover valves and the control tubing for leaks and for loose fittings.
+      - Restore the supply, start the unit and follow two complete dryer changeovers.
+    post_checks:
+      - The purge pressure under load is back inside the band of {{ ref('sec:normal-bands') }}.
+      - The regeneration discharge stops cleanly at the end of each purge phase.
+      - No permanent discharge is audible at the silencer while the unit is delivering.
+    related_causes: [dryer_purge_leak, purge_silencer_damaged, tower_changeover_valve_fault]
+    components: [purge_valve, purge_silencer, changeover_valves]
+  - id: safety_valve_test
+    name: Safety valve test
+    interval: {months: 12, rule: whichever_first}
+    service_message: null
+    duration_min: 20
+    consumables: []
+    tools: [Ear protection, Eye protection, Test certificate form]
+    safety:
+      - Only a qualified technician may test the safety valve; see {{ ref('sec:maintenance-safety') }}.
+      - The valve discharges loudly and suddenly; wear ear and eye protection and keep other people away; see {{ ref('sec:safety-pressure') }}.
+      - Never block, adjust or paint the safety valve.
+    steps:
+      - Read the setting stamped on the safety valve and compare it with the technical data of the unit.
+      - Check the valve, its connection and its discharge path for corrosion and for obstruction.
+      - Raise the pressure in a controlled way or lift the valve by its test lever, as its type requires.
+      - Confirm that the valve opens at its setting and reseats cleanly when the pressure falls.
+      - Look for leakage at the seat after the test with the unit at working pressure.
+      - Replace the valve if it leaks, sticks or opens away from its setting.
+      - Record the result and the date on the test certificate kept with the unit.
+    post_checks:
+      - The valve reseats without leakage at working pressure.
+      - The discharge path is clear and points away from the operating position.
+      - The test result is recorded in the documents that stay with the unit.
+    related_causes: [minimum_pressure_valve_fault, separator_element_clogged]
+    components: [safety_valve, separator_vessel, reservoirs]
+  - id: drive_coupling_inspection
+    name: Drive coupling inspection
+    interval: {hours: 8000, rule: whichever_first}
+    service_message: null
+    duration_min: 45
+    consumables:
+      - {part: coupling_element, quantity: 1, unit: count}
+    tools: [Socket set, Feeler gauge, Straight edge, Torque wrench]
+    safety:
+      - Stop the unit, isolate it electrically and secure it against restarting before removing the coupling guard; see {{ ref('sec:safety-electrical') }}.
+      - Never turn the drive by hand while the supply is connected; see {{ ref('sec:maintenance-safety') }}.
+    steps:
+      - Stop the unit, isolate it, secure it against restarting and remove the coupling guard.
+      - Turn the drive by hand and listen for roughness in the motor and airend bearings.
+      - Inspect the flexible coupling element for cracks, for rubber dust and for permanent set.
+      - Replace the coupling element when it shows cracks, dust or excessive play.
+      - Check the alignment of motor and airend with the straight edge and the feeler gauge.
+      - Tighten the motor and airend feet to the torque given in the technical data.
+      - Refit the guard, restore the supply and start the unit while you listen for vibration.
+    post_checks:
+      - The guard is refitted and no tool is left inside the enclosure.
+      - The unit starts without unusual noise and the current peak at start is as expected.
+      - No new vibration is felt on the frame under load.
+    related_causes: [airend_bearing_wear]
+    components: [coupling, motor, airend]
+  - id: annual_inspection
+    name: Annual inspection
+    interval: {months: 12, rule: whichever_first}
+    service_message: M406
+    duration_min: 180
+    consumables: []
+    tools: [Socket set, Multimeter, Torque wrench, Torch, Inspection record form]
+    safety:
+      - Only qualified personnel may carry out this inspection; see {{ ref('sec:maintenance-safety') }}.
+      - Isolate the unit electrically and vent it before opening the cabinet or the air circuit; see {{ ref('sec:safety-electrical') }}.
+    steps:
+      - Review the operating log and the message history since the last inspection.
+      - Carry out the checks of {{ ref('task:weekly_checks') }} and record their results.
+      - Confirm that {{ ref('task:safety_valve_test') }} has been carried out and is documented.
+      - Check the electrical cabinet for loose terminals, heat marks and damaged insulation.
+      - Measure the supply voltage on all three phases and confirm that it is balanced.
+      - Compare the controller settings with the values recorded at commissioning.
+      - Check the pressure vessels, their documents and their corrosion protection.
+      - Check the emergency stop, the motor protection relay and the door interlocks for correct operation.
+      - Compare the readings of every sensor with the bands in {{ ref('sec:normal-bands') }}.
+      - Record the inspection and reset the service counter at the controller.
+    post_checks:
+      - Every safety device has been operated and has responded correctly.
+      - The controller settings match the commissioning record or the deviations are documented.
+      - The inspection record is complete and is kept with the unit.
+      - The service message no longer stands on the controller.
+    related_causes: [supply_voltage_low_or_unbalanced, motor_overload_relay_tripped, emergency_stop_active]
+    components: [controller, safety_valve, reservoirs, pneumatic_panel, motor]

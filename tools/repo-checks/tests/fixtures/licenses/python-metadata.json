@@ -1,0 +1,72 @@
+[
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "MIT-0",
+    "name": "cffi",
+    "version": "2.1.1"
+  },
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "Apache-2.0 OR BSD-3-Clause",
+    "name": "cryptography",
+    "version": "50.0.1"
+  },
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "Apache-2.0",
+    "name": "fdp-init",
+    "version": "0.1.0"
+  },
+  {
+    "classifiers": ["License :: OSI Approved :: BSD License"],
+    "license": "BSD 2-Clause License",
+    "license_expression": "",
+    "name": "grimp",
+    "version": "3.17"
+  },
+  {
+    "classifiers": ["License :: OSI Approved :: MIT License"],
+    "license": "",
+    "license_expression": "",
+    "name": "markdown-it-py",
+    "version": "4.2.0"
+  },
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "Apache-2.0 OR BSD-2-Clause",
+    "name": "packaging",
+    "version": "26.3"
+  },
+  {
+    "classifiers": ["License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"],
+    "license": "",
+    "license_expression": "",
+    "name": "pathspec",
+    "version": "1.1.1"
+  },
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "MIT-CMU",
+    "name": "pillow",
+    "version": "12.3.0"
+  },
+  {
+    "classifiers": [],
+    "license": "BSD-3-Clause, Apache-2.0, dependency licenses",
+    "license_expression": "",
+    "name": "pypdfium2",
+    "version": "5.13.0"
+  },
+  {
+    "classifiers": [],
+    "license": "",
+    "license_expression": "PSF-2.0",
+    "name": "typing_extensions",
+    "version": "4.16.0"
+  }
+]

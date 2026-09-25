@@ -1,0 +1,488 @@
+{
+  "state": {
+    "machine": {
+      "kind": "oil-injected screw compressor with a twin-tower desiccant dryer, load/unload regulation",
+      "mode": "loaded",
+      "mode_for": "about an hour",
+      "ambient": "warm"
+    },
+    "symptom": {
+      "condition": "Compressor stays loaded and does not reach cut-out",
+      "also_present": [
+        "Dryer purge pressure high, air escaping at the purge silencer"
+      ],
+      "for": "about an hour"
+    },
+    "observations": [
+      {
+        "signal": "loaded_run_duration",
+        "label": "how long each loaded run lasts",
+        "level": "far above normal",
+        "trend": "rising",
+        "since": "about an hour",
+        "seen": "The loaded run has lasted far longer than any run of the reference month."
+      },
+      {
+        "signal": "dryer_purge_pressure",
+        "label": "Dryer purge pressure",
+        "level": "far above normal",
+        "trend": "flat",
+        "since": "about an hour",
+        "seen": "Dryer purge pressure has been far above its normal band for about an hour."
+      },
+      {
+        "signal": "cut_out_reached",
+        "label": "whether a loaded run ends at the cut-out pressure",
+        "level": "far below normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "oil_temperature",
+        "label": "Oil temperature",
+        "level": "above normal",
+        "trend": "rising",
+        "since": "about an hour"
+      },
+      {
+        "signal": "line_pressure",
+        "label": "Line pressure",
+        "level": "below normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "motor_current",
+        "label": "Motor current",
+        "level": "below normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "load_cycle_rate",
+        "label": "how often the compressor loads per hour",
+        "level": "below normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "pressure_rise_while_loaded",
+        "label": "how fast line pressure rises during a loaded run",
+        "level": "below normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "unloaded_pressure_decay",
+        "label": "how fast line pressure falls while the unit is not delivering",
+        "level": "normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "discharge_pressure",
+        "label": "Discharge pressure",
+        "level": "normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "purge_switch",
+        "label": "Purge pressure switch",
+        "level": "normal",
+        "trend": "flat",
+        "since": "about an hour"
+      },
+      {
+        "signal": "low_pressure_switch",
+        "label": "Low-pressure switch",
+        "level": "normal",
+        "trend": "flat",
+        "since": "about an hour"
+      }
+    ],
+    "controller_alarms": [
+      "W102 Continuous load time exceeded",
+      "W103 Dryer purge pressure high"
+    ],
+    "candidates": [
+      {
+        "id": "dryer_purge_leak",
+        "cause": "Dryer purge valve not seating",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "Dryer purge pressure (P4) is persistently high while loaded. The clearest sign: the purge line carries pressure all the time instead of only during a changeover pulse.",
+          "Whether a loaded run ends at the cut-out pressure is not reached.",
+          "How long each loaded run lasts is longer while loaded.",
+          "Line pressure (P2) is low while loaded.",
+          "Motor current (I1) is low while loaded. The airend never reaches full delivery pressure, so it draws slightly less than it would at cut-out.",
+          "Oil temperature (T1) rises gradually while loaded.",
+          "Low-pressure switch (D5) stays off. What separates this from a loss in the plant: the line never sinks far enough to close the switch."
+        ],
+        "benign": false
+      },
+      {
+        "id": "purge_silencer_damaged",
+        "cause": "Purge silencer damaged",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "Dryer purge pressure (P4) is high.",
+          "Purge pressure switch (D6) stays on. The discharge is loud enough to hold the switch closed well past the end of the pulse.",
+          "Whether a loaded run ends at the cut-out pressure is unchanged. What separates a damaged silencer from a leaking purge valve: regulation is untouched.",
+          "How often the compressor loads per hour is unchanged."
+        ],
+        "benign": false
+      },
+      {
+        "id": "downstream_air_leak",
+        "cause": "Leak in the distribution network",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+          "How often the compressor loads per hour is gradually higher.",
+          "How long each loaded run lasts is gradually longer while loaded.",
+          "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver.",
+          "Line pressure (P2) falls persistently while loaded.",
+          "Dryer purge pressure (P4) is unchanged. What separates a loss in the plant from a leaking purge valve: the dryer is innocent."
+        ],
+        "benign": false
+      },
+      {
+        "id": "high_air_demand",
+        "cause": "Air demand above the rated delivery",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "How often the compressor loads per hour is higher.",
+          "How long each loaded run lasts is longer while loaded.",
+          "How fast line pressure falls while the unit is not delivering is faster.",
+          "Line pressure (P2) is low while loaded.",
+          "Dryer purge pressure (P4) is unchanged."
+        ],
+        "benign": true
+      },
+      {
+        "id": "intake_filter_clogged",
+        "cause": "Air intake filter clogged",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "Motor current (I1) is low while loaded.",
+          "Discharge pressure (P1) is low while loaded.",
+          "How fast line pressure rises during a loaded run is slower.",
+          "How long each loaded run lasts is longer while loaded.",
+          "Dryer purge pressure (P4) is unchanged. A starved intake is upstream of the dryer, so the purge line is unaffected."
+        ],
+        "benign": false
+      },
+      {
+        "id": "airend_element_wear",
+        "cause": "Compression element worn",
+        "condition": "Compressor stays loaded and does not reach cut-out",
+        "expected_signal_moves": [
+          "Motor current (I1) is low while loaded.",
+          "How fast line pressure rises during a loaded run is slower.",
+          "How long each loaded run lasts is longer while loaded.",
+          "Discharge pressure (P1) is low while loaded.",
+          "Dryer purge pressure (P4) is unchanged."
+        ],
+        "benign": false
+      }
+    ]
+  },
+  "model": "jev-1.13.0",
+  "questions": {
+    "fault": {
+      "type": "choice",
+      "instructions": {
+        "question": "Which candidate in `candidates` has `expected_signal_moves` that match the movements listed in `observations`?",
+        "inspect": [
+          "observations",
+          "controller_alarms",
+          "candidates"
+        ],
+        "focus": "Match the direction of each movement, not its cause. A candidate whose expected movements point the wrong way, or expect a movement that is absent, does not match.",
+        "note": "Choose none_of_these when no candidate's expected movements fit."
+      },
+      "criteria": {
+        "dryer_purge_leak": {
+          "what": "Dryer purge valve not seating: The purge valve of the desiccant dryer does not close fully after a regeneration pulse, so compressed air keeps escaping through the purge silencer. The unit replaces the loss continuously, stays loaded far longer than usual and stops reaching its cut-out pressure. The loss sits inside the machine, so the purge pressure is high while the line pressure sags.",
+          "signals": [
+            "Dryer purge pressure (P4) is persistently high while loaded. The clearest sign: the purge line carries pressure all the time instead of only during a changeover pulse.",
+            "Whether a loaded run ends at the cut-out pressure is not reached.",
+            "How long each loaded run lasts is longer while loaded.",
+            "Line pressure (P2) is low while loaded.",
+            "Motor current (I1) is low while loaded. The airend never reaches full delivery pressure, so it draws slightly less than it would at cut-out.",
+            "Oil temperature (T1) rises gradually while loaded.",
+            "Low-pressure switch (D5) stays off. What separates this from a loss in the plant: the line never sinks far enough to close the switch."
+          ],
+          "not_for": [
+            "Cases where dryer purge pressure stays normal"
+          ]
+        },
+        "purge_silencer_damaged": {
+          "what": "Purge silencer damaged: The silencer on the purge outlet has broken up, so the regeneration pulse leaves with far less back pressure than the dryer expects. The pulse itself is still timed correctly and the unit keeps regulating normally.",
+          "signals": [
+            "Dryer purge pressure (P4) is high.",
+            "Purge pressure switch (D6) stays on. The discharge is loud enough to hold the switch closed well past the end of the pulse.",
+            "Whether a loaded run ends at the cut-out pressure is unchanged. What separates a damaged silencer from a leaking purge valve: regulation is untouched.",
+            "How often the compressor loads per hour is unchanged."
+          ],
+          "not_for": [
+            "Cases where dryer purge pressure stays normal"
+          ]
+        },
+        "downstream_air_leak": {
+          "what": "Leak in the distribution network: Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. Nothing inside the machine is faulty. The loss runs day and night, which is what separates it from a busy shift, and it grows slowly as more joints work loose.",
+          "signals": [
+            "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+            "How often the compressor loads per hour is gradually higher.",
+            "How long each loaded run lasts is gradually longer while loaded.",
+            "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver.",
+            "Line pressure (P2) falls persistently while loaded.",
+            "Dryer purge pressure (P4) is unchanged. What separates a loss in the plant from a leaking purge valve: the dryer is innocent."
+          ],
+          "not_for": [
+            "Cases where how fast line pressure falls while the unit is not delivering stays normal"
+          ]
+        },
+        "high_air_demand": {
+          "what": "Air demand above the rated delivery: The plant is drawing more air than the unit can deliver. Nothing is faulty: a second shift, an extra machine or a blasting nozzle left open will do it. The pattern follows the working day, which is what separates it from a leak.",
+          "signals": [
+            "How often the compressor loads per hour is higher.",
+            "How long each loaded run lasts is longer while loaded.",
+            "How fast line pressure falls while the unit is not delivering is faster.",
+            "Line pressure (P2) is low while loaded.",
+            "Dryer purge pressure (P4) is unchanged."
+          ],
+          "not_for": [
+            "Cases where how often the compressor loads per hour stays normal"
+          ]
+        },
+        "intake_filter_clogged": {
+          "what": "Air intake filter clogged: The intake filter has taken up so much dust that the airend is starved. The unit still regulates, but it fills the line slowly and draws less current than it should under load.",
+          "signals": [
+            "Motor current (I1) is low while loaded.",
+            "Discharge pressure (P1) is low while loaded.",
+            "How fast line pressure rises during a loaded run is slower.",
+            "How long each loaded run lasts is longer while loaded.",
+            "Dryer purge pressure (P4) is unchanged. A starved intake is upstream of the dryer, so the purge line is unaffected."
+          ],
+          "not_for": [
+            "Cases where motor current stays normal"
+          ]
+        },
+        "airend_element_wear": {
+          "what": "Compression element worn: The rotors and their clearances have worn, so part of the air slips back inside the element instead of leaving it. The unit draws less than it should under load and takes longer to fill the line.",
+          "signals": [
+            "Motor current (I1) is low while loaded.",
+            "How fast line pressure rises during a loaded run is slower.",
+            "How long each loaded run lasts is longer while loaded.",
+            "Discharge pressure (P1) is low while loaded.",
+            "Dryer purge pressure (P4) is unchanged."
+          ],
+          "not_for": [
+            "Cases where motor current stays normal"
+          ]
+        },
+        "none_of_these": {
+          "what": "No candidate's expected movements match the observations",
+          "not_for": "Cases where one candidate's expected movements do appear, even partly"
+        }
+      }
+    },
+    "match_dryer_purge_leak": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[0].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[0].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "match_purge_silencer_damaged": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[1].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[1].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "match_downstream_air_leak": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[2].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[2].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "match_high_air_demand": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[3].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[3].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "match_intake_filter_clogged": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[4].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[4].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "match_airend_element_wear": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `observations` show the movement in `candidates[5].expected_signal_moves[0]`?",
+        "inspect": [
+          "observations",
+          "candidates[5].expected_signal_moves"
+        ],
+        "focus": "Judge that one movement: the same signal moving in the same direction. Ignore the other expected movements — code counts those."
+      },
+      "criteria": {
+        "true": {
+          "what": "The observations contain that signal moving in that direction",
+          "examples": [
+            "Expected: line pressure falls faster than normal while unloaded; observed: unloaded pressure decay far above normal"
+          ]
+        },
+        "false": {
+          "what": "That signal is absent from the observations, is normal, or moves the other way",
+          "examples": [
+            "Expected: dryer purge pressure far above normal; observed: dryer purge pressure normal"
+          ]
+        }
+      }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": {
+        "question": "How serious is the situation described by `observations` and `controller_alarms` for the air supply of the plant right now?",
+        "inspect": [
+          "observations",
+          "controller_alarms",
+          "machine.mode"
+        ]
+      },
+      "criteria": [
+        {
+          "summary": "Readings drift outside their normal band but the unit still holds line pressure and cycles normally",
+          "signals": [
+            "one signal above or below normal",
+            "cycle pattern normal",
+            "no controller alarm"
+          ]
+        },
+        {
+          "summary": "The unit still holds line pressure but works harder than normal: load cycles more frequent or longer, pressure decays faster while unloaded, or a temperature keeps rising",
+          "signals": [
+            "load cycle rate above normal",
+            "loaded run duration above normal",
+            "oil temperature rising"
+          ]
+        },
+        {
+          "summary": "The unit no longer reaches its cut-out pressure or runs loaded continuously, or a controller warning is active",
+          "signals": [
+            "loaded run duration far above normal",
+            "cut-out not reached",
+            "a controller warning is active"
+          ]
+        },
+        {
+          "summary": "Air supply is lost or a shutdown condition is active: line pressure below the low-pressure switch, oil temperature far above its limit, or the compressor running continuously while line pressure falls",
+          "signals": [
+            "low-pressure switch active",
+            "oil temperature far above normal",
+            "line pressure falling while loaded"
+          ]
+        }
+      ]
+    }
+  }
+}

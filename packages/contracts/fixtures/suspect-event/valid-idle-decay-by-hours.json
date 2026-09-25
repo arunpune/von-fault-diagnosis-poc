@@ -1,0 +1,78 @@
+{
+  "schema": "urn:fdp:schema:suspect-event:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-03-10T03:12:00.000Z",
+  "event_id": "5f1c9e27-3a4b-4c8d-9e02-6b7a8c9d0e13",
+  "sim_ts": "2020-03-10T03:12:00.000Z",
+  "symptom_key": "low_line_pressure",
+  "rule_ids": ["fast_decay"],
+  "machine_state": {
+    "mode": "unloaded",
+    "since_sim_ts": "2020-03-10T03:09:40.000Z",
+    "dryer_tower": 2
+  },
+  "window": {
+    "from_sim_ts": "2020-03-10T02:41:00.000Z",
+    "to_sim_ts": "2020-03-10T03:12:00.000Z",
+    "samples": 720
+  },
+  "evidence": [
+    {
+      "metric": "unloaded_pressure_decay",
+      "observation": "Line pressure has fallen away faster than usual after cut-out on consecutive cycles.",
+      "value": 0.31,
+      "unit": "bar/min",
+      "baseline": 0.25,
+      "duration": "minutes"
+    }
+  ],
+  "observations": [
+    {
+      "signal": "unloaded_pressure_decay",
+      "level": "far_above",
+      "trend": "flat",
+      "since": "several hours",
+      "value": 0.31,
+      "unit": "bar/min",
+      "by_hours": { "quiet": "far_above", "busy": "far_above" }
+    },
+    {
+      "signal": "load_cycle_rate",
+      "level": "far_above",
+      "trend": "flat",
+      "since": "several hours",
+      "value": 6.2,
+      "unit": "per_hour"
+    },
+    {
+      "signal": "line_pressure",
+      "level": "normal",
+      "trend": "falling",
+      "since": "minutes",
+      "value": 9.42,
+      "unit": "bar"
+    },
+    {
+      "signal": "low_pressure_switch",
+      "level": "normal",
+      "trend": "flat",
+      "since": "days",
+      "value": 0,
+      "unit": "bool"
+    }
+  ],
+  "active_alarms": [],
+  "co_symptoms": ["frequent_cycling"],
+  "ambient": "mild",
+  "rules_fired": [
+    {
+      "rule_id": "fast_decay",
+      "since_sim_ts": "2020-03-10T02:41:00.000Z",
+      "detail": "Line pressure has fallen away faster than usual after cut-out on consecutive cycles.",
+      "value": 0.31,
+      "threshold": 0.25,
+      "unit": "bar/min"
+    }
+  ],
+  "baseline_ref": "metropt3-first-month-2020-02"
+}

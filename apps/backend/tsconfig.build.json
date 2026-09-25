@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // The emitting project: `src` alone, so the entry point lands at
+  // `dist/index.js` (the image's CMD) and the pipeline entry at
+  // `dist/pipeline/index.js`, which is what `package.json#exports` names.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  // `*.test-helper.ts` is scaffolding a unit test beside the code imports; it
+  // is never reached from `src/index.ts`, so it stays out of the image.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test-helper.ts"]
+}

@@ -1,0 +1,150 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# What `REUSE.toml` must resolve to. One representative path per licence class
+# (CONTRIBUTING.md states which licence applies to which path), resolved
+# through the file with last-match-wins by `fdp-checks reuse-order`.
+#
+# A path listed here need not exist yet: the subject is table resolution, not
+# the tree, so the check works before the file itself is created.
+#
+# Add an entry when a change introduces a new licence class or a new data
+# directory whose licence must not drift; keep `why` a sentence a reviewer can
+# check against that table.
+
+version = 1
+
+[[expected]]
+path = "packages/contracts/fixtures/valid-1.json"
+why = "synthetic fixture standing in for machine data, not code"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "db/conformance/expected.json"
+why = "ordinary project JSON: the general table gives it the code licence"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "data/SHA256SUMS"
+why = "MetroPT-3 derivative: keeps the upstream authors' copyright"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)",
+  "2026 Meddle S.r.l.",
+]
+
+[[expected]]
+path = "data/metropt3-first-month-stats.json"
+why = "MetroPT-3 derivative statistics computed over the CSV: keeps the upstream authors' copyright"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)",
+  "2026 Meddle S.r.l.",
+]
+
+[[expected]]
+path = "manual/fonts/IBMPlexSans-Regular.ttf"
+why = "font with its own upstream licence"
+SPDX-License-Identifier = "OFL-1.1"
+SPDX-FileCopyrightText = "2017 IBM Corp. (IBM Plex, Reserved Font Name \"Plex\")"
+
+[[expected]]
+path = "apps/frontend/src/components/ui/button.tsx"
+why = "third-party source copied by the shadcn/ui CLI: upstream MIT stays"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "2023 shadcn"
+
+[[expected]]
+path = "pnpm-lock.yaml"
+why = "tool-owned lock file: trivial generated state"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "data/manual/cau-7-clean.pdf"
+why = "manual PDF: content, and a deliverable the licensing layout puts under CC BY; it prints the MetroPT-3 bands, so the upstream authors' credit stays"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)",
+  "2026 Meddle S.r.l.",
+]
+
+[[expected]]
+path = "data/manual/build-manifest.json"
+why = "the manual's build manifest holds hashes and build facts only: no MetroPT-3 credit"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "tools/eval/fixtures/catalog.json"
+why = "reference fault catalog: manual content that prints the MetroPT-3 bands, so the upstream authors' credit stays"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)",
+  "2026 Meddle S.r.l.",
+]
+
+[[expected]]
+path = "manual/fonts/fonts.json"
+why = "our hash manifest inside an OFL-1.1 directory: must not inherit the font licence"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "services/modbus/testdata/synthetic-tiny.csv"
+why = "synthetic machine data: the general **/*.csv table must not reclaim it"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "services/modbus/go.sum"
+why = "Go lock file: trivial generated state, like pnpm-lock.yaml and uv.lock"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "packages/ground-truth/data/metropt3-failures.json"
+why = "MetroPT-3 derivative inside a package: keeps the upstream authors' copyright"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)",
+  "2026 Meddle S.r.l.",
+]
+
+[[expected]]
+path = "packages/ground-truth/data/injections.json"
+why = "synthetic simulator data: Meddle S.r.l. alone, and the credit table must not reclaim it"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "packages/contracts/embedding.json"
+why = "the embedding pin is configuration both runtimes load: code, not content"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "packages/contracts/fixtures/embeddings/all-minilm-l6-v2.json"
+why = "deliberate exception inside the CC-BY-4.0 fixtures tree: the parity contract two test suites assert against"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "services/modbus/internal/injection/testdata/catalog-invalid-schema.json"
+why = "synthetic simulator fixture in a package testdata directory, not code"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+
+[[expected]]
+path = "apps/backend/src/retrieval/english-stop.ts"
+why = "PostgreSQL's english stop list, taken from the Snowball project: its BSD-3-Clause copyright stays beside our header"
+SPDX-License-Identifier = "BSD-3-Clause"
+SPDX-FileCopyrightText = ["2001 Dr Martin Porter", "2002 Richard Boulton"]
+
+[[expected]]
+path = "apps/frontend/public/fonts/IBMPlexSans-Regular.woff2"
+why = "web font the UI self-hosts, with its own upstream licence"
+SPDX-License-Identifier = "OFL-1.1"
+SPDX-FileCopyrightText = "2017 IBM Corp. (IBM Plex, Reserved Font Name \"Plex\")"

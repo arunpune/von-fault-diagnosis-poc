@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-catalog:v1",
+  "title": "Ground-truth catalog",
+  "description": "What the simulator retains on gt/{unit_id}/catalog: the replay dataset it is serving, the preset menu, the injection menu and the failure table. Only the ground-truth readers of the broker ACL ever see it; diagnosis code must not.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-catalog:v1" },
+    "dataset": {
+      "description": "The replay source the simulator is serving, as the status message reports it.",
+      "type": "object",
+      "properties": {
+        "first_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "last_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "rows": { "type": "integer", "minimum": 0 },
+        "gaps": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["first_ts", "last_ts", "rows", "gaps"],
+      "additionalProperties": false
+    },
+    "presets": {
+      "description": "The presets document, forwarded verbatim.",
+      "$ref": "urn:fdp:schema:gt-presets:v1"
+    },
+    "injections": {
+      "description": "The part of every injection definition the menu needs; the transforms and the envelope stay in the simulator.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/injection_summary" }
+    },
+    "failures": {
+      "description": "The failure-table document, forwarded verbatim.",
+      "$ref": "urn:fdp:schema:gt-failure-table:v1"
+    },
+    "source_sha256": {
+      "description": "Digest over the ground-truth data files in name order, so a consumer can tell two catalogs apart.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": ["schema", "dataset", "presets", "injections", "failures"],
+  "additionalProperties": true,
+  "$defs": {
+    "injection_summary": {
+      "title": "Injection menu entry",
+      "description": "One injection as the user interface lists it.",
+      "type": "object",
+      "properties": {
+        "injection_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/injection_id" },
+        "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+        "label": { "type": "string", "minLength": 1 },
+        "benign": { "type": "boolean" },
+        "description": { "type": "string", "minLength": 1 },
+        "default_duration_sim_min": { "type": "integer", "minimum": 1, "maximum": 14400 },
+        "params": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "urn:fdp:schema:gt-injection-def:v1#/$defs/param" }
+        }
+      },
+      "required": [
+        "injection_id",
+        "fault_id",
+        "label",
+        "benign",
+        "description",
+        "default_duration_sim_min",
+        "params"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

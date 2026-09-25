@@ -1,0 +1,320 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Test fixture: the full sixteen-tag signal registry with placeholder bands.
+schema_version: 1
+signals:
+  - id: discharge_pressure
+    panel_label: P1
+    name: Discharge pressure
+    metropt_column: TP2
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: compressor
+    description: Pressure in the oil separator vessel at the airend discharge.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: 8.3, typical: 9.4, high: 10.4}
+      unloaded: {low: -0.1, typical: 0.0, high: 0.0}
+      "off": {low: -0.1, typical: 0.0, high: 0.0}
+    shown_in_schematic: true
+  - id: line_pressure
+    panel_label: P2
+    name: Line pressure
+    metropt_column: TP3
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: reservoirs
+    description: Line pressure at the pneumatic panel; the regulation signal.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: 8.0, typical: 9.1, high: 10.1}
+      unloaded: {low: 9.0, typical: 9.7, high: 10.1}
+      "off": {low: 8.1, typical: 8.7, high: 9.5}
+    shown_in_schematic: true
+  - id: separator_discharge_pressure
+    panel_label: P3
+    name: Separator discharge pressure
+    metropt_column: H1
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: separator_drain
+    description: Pressure at the cyclonic separator discharge port.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: -0.1, typical: 0.0, high: 0.0}
+      unloaded: {low: 9.0, typical: 9.7, high: 10.1}
+      "off": {low: 8.1, typical: 8.7, high: 9.5}
+    shown_in_schematic: true
+  - id: dryer_purge_pressure
+    panel_label: P4
+    name: Dryer purge pressure
+    metropt_column: DV_pressure
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: dryer
+    description: Pressure in the dryer regeneration line downstream of the purge valve.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: -0.1, typical: 0.0, high: 0.0}
+      unloaded: {low: -0.1, typical: 0.0, high: 0.0}
+      "off": {low: -0.1, typical: 0.0, high: 0.0}
+    shown_in_schematic: true
+  - id: reservoir_pressure
+    panel_label: P5
+    name: Reservoir pressure
+    metropt_column: Reservoirs
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: reservoirs
+    description: Pressure downstream of the reservoirs.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: 8.0, typical: 9.1, high: 10.1}
+      unloaded: {low: 9.0, typical: 9.7, high: 10.1}
+      "off": {low: 8.1, typical: 8.7, high: 9.5}
+    shown_in_schematic: true
+  - id: oil_temperature
+    panel_label: T1
+    name: Oil temperature
+    metropt_column: Oil_temperature
+    group: analog
+    kind: temperature
+    unit: degC
+    subsystem: oil
+    description: Compressor oil temperature at the airend outlet.
+    sample_rate_s: 10
+    range: {min: -20, max: 120}
+    display: {decimals: 1}
+    band: {step: 1, source: derived}
+    modbus: {type: int16, scale: 100}
+    normal_bands:
+      loaded: {low: 48, typical: 55, high: 61}
+      unloaded: {low: 51, typical: 58, high: 64}
+      "off": {low: 50, typical: 56, high: 61}
+    shown_in_schematic: true
+  - id: motor_current
+    panel_label: I1
+    name: Motor current
+    metropt_column: Motor_current
+    group: analog
+    kind: current
+    unit: A
+    subsystem: electrical
+    description: Current of one motor phase.
+    sample_rate_s: 10
+    range: {min: 0, max: 20}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 100}
+    normal_bands:
+      loaded: {low: 5.1, typical: 6.0, high: 6.3}
+      unloaded: {low: 3.6, typical: 3.8, high: 4.0}
+      "off": {low: 0.0, typical: 0.0, high: 0.1}
+    shown_in_schematic: true
+  - id: intake_closed
+    panel_label: D1
+    name: Intake valve closed
+    metropt_column: COMP
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: intake_unloading
+    description: Intake valve closed, so the unit takes in no air.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 0}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: load_valve
+    panel_label: D2
+    name: Load solenoid
+    metropt_column: DV_eletric
+    group: digital
+    kind: command
+    unit: bool
+    subsystem: intake_unloading
+    description: Load solenoid energised, so the unit compresses.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 1}
+      unloaded: {expected: 0}
+      "off": {expected: 0}
+    shown_in_schematic: true
+  - id: dryer_tower
+    panel_label: D3
+    name: Dryer tower in service
+    metropt_column: Towers
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: dryer
+    description: Which desiccant tower is in drying service.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: alternating}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: regulator_contact
+    panel_label: D4
+    name: Pressure regulator contact
+    metropt_column: MPG
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: control
+    description: Pressure regulator contact; the resting state means pressure satisfied.
+    source_note: Defined with the polarity the logged unit shows, not the polarity of the dataset description.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 0}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: low_pressure_switch
+    panel_label: D5
+    name: Low-pressure switch
+    metropt_column: LPS
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: reservoirs
+    description: Hardware switch that closes when line pressure falls below its setting.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 0}
+      unloaded: {expected: 0}
+      "off": {expected: 0}
+    shown_in_schematic: true
+  - id: purge_switch
+    panel_label: D6
+    name: Purge pressure switch
+    metropt_column: Pressure_switch
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: dryer
+    description: Purge pressure switch that detects tower discharge.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 1}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: oil_level_ok
+    panel_label: D7
+    name: Oil level switch
+    metropt_column: Oil_level
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: oil
+    description: Oil level switch; the resting state means the level is above minimum.
+    source_note: Defined as level-OK because the logged unit reads the resting state in normal operation.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 1}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: flow_pulse
+    panel_label: D8
+    name: Flow pulse
+    metropt_column: Caudal_impulses
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: reservoirs
+    description: Pulse from the reservoir inlet flow sensor.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 1}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: ambient_temperature
+    panel_label: T2
+    name: Ambient temperature
+    metropt_column: null
+    group: extra
+    kind: temperature
+    unit: degC
+    subsystem: cooling
+    description: Ambient temperature at the cooling-air inlet.
+    source_note: Synthetic extra; the dataset has no ambient channel, so the band is authored.
+    sample_rate_s: 10
+    range: {min: -20, max: 60}
+    display: {decimals: 1}
+    band: {step: 1, source: authored}
+    modbus: {type: int16, scale: 100}
+    normal_bands:
+      loaded: {low: 15, typical: 20, high: 28}
+      unloaded: {low: 15, typical: 20, high: 28}
+      "off": {low: 15, typical: 20, high: 28}
+    shown_in_schematic: true
+machine_states:
+  order: ["off", unloaded, loaded]
+  running_threshold: {value: 1.0, unit: A}
+  rules:
+    loaded: intake_closed == 0 and load_valve == 1
+    unloaded: not loaded and motor_current >= running_threshold
+    "off": not loaded and motor_current < running_threshold
+  aliases: {running: [unloaded, loaded]}
+  start_event: transition from off to unloaded or loaded
+derived:
+  - {id: reservoir_line_delta, kind: abs_delta, inputs: [reservoir_pressure, line_pressure], unit: bar}
+  - {id: discharge_line_delta, kind: delta, inputs: [discharge_pressure, line_pressure], unit: bar}
+  - {id: continuous_load_time, kind: time_in_state, state: loaded, unit: min}
+  - {id: motor_starts_per_hour, kind: events_per_window, event: start_event, window_s: 3600, unit: per_hour}
+  - {id: seconds_since_tower_change, kind: seconds_since_change, input: dryer_tower, reset_on_state_exit: loaded, unit: s}
+  - {id: run_hours, kind: time_in_states_total, states: [unloaded, loaded], unit: h}
+behaviours:
+  - {id: load_cycle_rate, description: how often the compressor loads per hour}
+  - {id: loaded_run_duration, description: how long each loaded run lasts}
+  - {id: unloaded_pressure_decay, description: how fast line pressure falls while the unit is not delivering}
+  - {id: cut_out_reached, description: whether a loaded run ends at the cut-out pressure}
+  - {id: pressure_rise_while_loaded, description: how fast line pressure rises during a loaded run}
+  - {id: start_current_peak, description: the current peak at motor start}

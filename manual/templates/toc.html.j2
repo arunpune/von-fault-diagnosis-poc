@@ -1,0 +1,23 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# Table of contents: the ten chapters and every level-2 section under them,
+   authored or generated. The page numbers are not written here: base.css fills
+   them with `target-counter(attr(href), page)` at paged-media time, so the
+   HTML stays the same whatever the layout does. #}
+<section class="toc" id="toc">
+  <h1 class="toc-heading">Contents</h1>
+  <ol class="toc-chapters">
+{% for ch in chapters %}
+    <li class="toc-chapter">
+      <a href="#ch-{{ ch.number }}"><span class="toc-num">{{ ch.number }}</span><span class="toc-title">{{ ch.title | e }}</span></a>
+{% if ch.sections %}
+      <ol class="toc-sections">
+{% for section in ch.sections %}
+        <li class="toc-section"><a href="#{{ section.html_id | e }}"><span class="toc-num">{{ section.number | e }}</span><span class="toc-title">{{ section.title | e }}</span></a></li>
+{% endfor %}
+      </ol>
+{% endif %}
+    </li>
+{% endfor %}
+  </ol>
+</section>

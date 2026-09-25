@@ -1,0 +1,78 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+
+pnpm-lock.yaml
+**/dist
+**/coverage
+**/generated
+data/
+manual/fonts
+reports/
+**/*.min.*
+apps/frontend/src/components/ui/
+.venv
+
+# Tool caches. `lint-imports` writes .import_linter_cache/ at the repo root and
+# Prettier does not honour the nested .gitignore Grimp puts inside it, so
+# `make lint-py` would otherwise make the later `prettier --check .` fail.
+.import_linter_cache/
+
+# Build output. `fdp-manual-build build --html-only` and `make manual-html`
+# write the assembled variants here. It is ignored by the nested
+# tools/manual-build/.gitignore, which Prettier does not read either.
+tools/manual-build/.build/
+
+# Hand-formatted Markdown: Prettier would realign the tables.
+CHANGELOG.md
+README.md
+# The evaluation records are committed as written: the held-out seal test reads
+# the seal's hash lines, the harness parses the choice record's NAME=value lines,
+# and the final-run record is a fixed account of one run.
+tools/eval/records/**
+
+# Manual source of truth. manual/build.yaml and the spec YAML keep their flow
+# style verbatim, and manual/spec/derived/*.json is written by
+# manual/tools/derive_bands.py with
+# json.dumps(indent=2, sort_keys=True) — Prettier reflows both, which would make
+# the band derivation irreproducible. The test fixtures mirror those files.
+manual/build.yaml
+manual/spec/**/*.yaml
+manual/spec/derived/**
+manual/tools/tests/fixtures/**
+tools/manual-build/tests/fixtures/**
+
+# The init fixtures, for the same reason. `contracts/**` holds byte copies
+# of `packages/contracts/**` that `test_contracts_drift.py` compares with
+# `read_bytes()`, and one of them, `contracts/embedding.json`, copies a file
+# Prettier is already told to leave alone below. `mini-manual/mini-manual.html`
+# is the single source of the two committed PDFs, whose pagination
+# `expected.json` pins and `build.sh --check` re-verifies, so reflowing its
+# markup would move the page breaks the extractor tests assert.
+tools/init/tests/fixtures/**
+
+# Build output of `fdp-manual-build build`, written with
+# json.dumps(indent=2, sort_keys=True) so its bytes are a function of the
+# manual sources. Prettier collapses the short arrays, which would leave the
+# tree dirty after every `make manual`.
+tools/eval/fixtures/catalog.json
+
+# The embedding pin and its reference fixture, written by
+# packages/contracts/scripts/embed_fixture.py with json.dumps(indent=2). Prettier
+# collapses `onnx.inputs` onto one line and refills the 384-component vectors, so
+# every `pnpm --filter @fdp/contracts embed-fixture` run would leave the tree dirty
+# and the pin would stop being a function of the model files.
+packages/contracts/embedding.json
+packages/contracts/fixtures/embeddings/**
+
+# The backend's calibration fixture of the manual's catalog, written by
+# tools/eval/scripts/export-man-fixture.ts with JSON.stringify(sorted, null, 2).
+# tools/eval/test/man-fixture-drift.test.ts compares it with a fresh export, and
+# Prettier would collapse the short arrays and leave the tree dirty after every
+# export.
+apps/backend/test/fixtures/catalog/man/catalog.json
+
+# The golden Jev request and its reported tokens. The test compares the file
+# byte for byte with JSON.stringify(body, null, 2) of the request the SDK
+# sent, and `vitest -u` rewrites it that way; Prettier collapses the short
+# arrays, which would break the comparison and leave the tree dirty.
+apps/backend/test/fixtures/jev/*.json

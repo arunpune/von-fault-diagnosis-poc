@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!--
+  The mini manual of docs/plan/init.md §15.1: six fictional pages of a
+  CAU-7 compressed-air unit, written for this repository. No brand, no model
+  code and no sentence of any real manual appears in it; the identifiers and
+  the signal-move sentences come from the registry of
+  docs/plan/phase1-manual-content.md §7.2 and §7.1.
+
+  One source, two variants. `class="clean"` on <html> selects the named page
+  `clean` and the single-column layout; `build.sh` rewrites that one attribute
+  to `realistic` for the second build, which selects the running furniture, the
+  two-column prose of 8.1, the single spanning troubleshooting table and the
+  floating footnote (docs/plan/phase1-pdf-build.md §8).
+
+  Both variants print the same causes, alarms and signals, so the catalog of
+  expected.json is the same for either PDF. The blocks that belong to one
+  variant only are marked `only-clean` / `only-realistic` and hidden by the
+  stylesheet: the clean variant gives every condition an 8.2.k heading, a
+  symptom paragraph and a table of its own, and the realistic variant opens the
+  same condition with a group row inside one spanning table.
+-->
+<html lang="en" class="clean">
+<head>
+<meta charset="utf-8">
+<title>CAU-7 compressed-air unit &middot; Instruction manual &middot; Rev. A</title>
+<meta name="description" content="Mini manual fixture for the init service extraction tests.">
+<meta name="dcterms.rights" content="CC-BY-4.0">
+<link rel="stylesheet" href="mini-manual.css">
+</head>
+<body>
+
+<!-- The running strings of the realistic variant come off this empty element,
+     so the document title is printed by the page margin box and never sits in
+     the body text. -->
+<span class="running-strings" data-doc-title="CAU-7 compressed-air unit &mdash; Instruction manual"></span>
+
+<section class="chapter" id="ch-1">
+<h1><span class="num">1</span> Safety</h1>
+<div class="body">
+<p>Read this manual before the unit is started for the first time. The unit delivers compressed air at a pressure that can injure; isolate it from the air system and lock the supply off before any part of it is opened.</p>
+<p>Only a trained technician may change a controller setting or open the oil circuit. The oil and the airend stay hot for a long time after a stop.</p>
+</div>
+</section>
+
+<section class="chapter" id="ch-3">
+<h1><span class="num">3</span> Controller messages</h1>
+<div class="body">
+<p>The controller shows one message at a time. A warning leaves the unit running, a shutdown warning announces a limit that is close, and a shutdown stops the unit and inhibits a restart until it is reset by hand.</p>
+<table class="alarms">
+<thead>
+<tr><th>Code</th><th>Type</th><th>Message</th><th>Trigger</th><th>Threshold</th><th>Delay</th><th>Reset</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="mono">W101</span></td><td>Warning</td><td>Line pressure low</td><td>Low-pressure switch closed in any state</td><td><span class="si">7.0 bar</span><span class="imp"> (102 psi)</span></td><td>10 s</td><td>Automatic</td></tr>
+<tr><td><span class="mono">W102</span></td><td>Warning</td><td>Continuous load time exceeded</td><td>Loaded without reaching cut-out</td><td>10 min</td><td>2 min</td><td>Automatic</td></tr>
+<tr><td><span class="mono">W104</span></td><td>Warning</td><td>Oil temperature high</td><td>Oil temperature above the warning setting while running</td><td><span class="si">75 °C</span><span class="imp"> (167 °F)</span></td><td>5 min</td><td>Automatic</td></tr>
+<tr><td><span class="mono">W108</span></td><td>Warning</td><td>Motor starts per hour exceeded</td><td>More starts in one hour than the setting allows</td><td>6 per hour</td><td>0 s</td><td>Automatic</td></tr>
+<tr><td><span class="mono">X201</span></td><td>Shutdown warning</td><td>Oil temperature very high</td><td>Oil temperature above the shutdown warning setting while running</td><td><span class="si">85 °C</span><span class="imp"> (185 °F)</span></td><td>30 s</td><td>Automatic</td></tr>
+<tr><td><span class="mono">S301</span></td><td>Shutdown</td><td>Oil temperature shutdown</td><td>Oil temperature above the shutdown setting while running</td><td><span class="si">95 °C</span><span class="imp"> (203 °F)</span></td><td>5 s</td><td>Manual</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="chapter" id="ch-4">
+<h1><span class="num">4</span> Programmable settings</h1>
+<div class="body">
+<p>The controller refuses a value outside the range below, and it refuses a value that would put two settings in the wrong order.</p>
+<table class="parameters">
+<thead>
+<tr><th>Parameter</th><th>Unit</th><th>Min</th><th>Default</th><th>Max</th></tr>
+</thead>
+<tbody>
+<tr><td>Cut-in pressure</td><td>bar</td><td>5.0</td><td>8.0</td><td>9.5</td></tr>
+<tr><td>Cut-out pressure</td><td>bar</td><td>6.0</td><td>10.0</td><td>11.0</td></tr>
+<tr><td>Oil temperature warning</td><td>°C</td><td>60</td><td>75</td><td>90</td></tr>
+<tr><td>Maximum starts per hour</td><td>per hour</td><td>1</td><td>6</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="chapter" id="ch-8">
+<h1><span class="num">8</span> Problem solving</h1>
+<div class="body">
+
+<h2 id="sec-8-1"><span class="num">8.1</span> Before you start</h2>
+<div class="prose">
+<p>Work from what the unit shows, not from what it is said to do. Read the controller message list first, then the signals of the pneumatic panel, and only then open a component. A message names a limit that was crossed; it does not name the cause, and the same message follows from several of the causes listed in 8.2.</p>
+<p>Let the unit run through one full load and unload cycle before a reading is taken. Oil temperature settles slowly, so a reading taken within ten minutes of a start says little about the cooling circuit.<span class="fn">Do not exceed 95 °C (203 °F): above that limit the controller stops the unit and inhibits the restart.</span></p>
+<ul>
+<li>Note the controller message, the state of the unit and the hour reading before anything is changed.</li>
+<li>Take every pressure from the pneumatic panel, never from a temporary gauge in the distribution line.</li>
+<li>Change one thing at a time and repeat the reading after one full cycle.</li>
+</ul>
+</div>
+
+<h2 id="sec-8-2"><span class="num">8.2</span> Fault tables</h2>
+<p>Each table below lists the causes of one condition, the signals that move, what to check and what to do. A cause that explains more than one condition keeps the same fault id under each of them.</p>
+
+<div class="fault-tables">
+
+<div class="only-clean">
+
+<h3 id="cond-low-line-pressure"><span class="num">8.2.1</span> Line pressure below setpoint <span class="mono">low_line_pressure</span></h3>
+<p class="symptom">The unit runs but the line pressure stays below the cut-in setting, and the low-pressure switch closes.</p>
+<table class="troubleshooting">
+<colgroup><col class="c-fault"><col class="c-cause"><col class="c-subsystem"><col class="c-signals"><col class="c-checks"><col class="c-remedy"></colgroup>
+<thead>
+<tr><th>Fault id</th><th>Possible cause</th><th>Subsystem</th><th>Signals</th><th>Checks</th><th>Remedy</th></tr>
+</thead>
+<tbody>
+<tr class="cause"><td><span class="mono">downstream_air_leak</span></td><td>Downstream air leak. Air escapes from the distribution line after the unit, and the unit makes the loss up. Raises W101.</td><td>distribution</td><td>Line pressure (P2) falls faster than usual while unloaded. Load cycle rate is higher.</td><td><ol class="checks"><li>Close the isolation valve at the reservoir outlet.</li><li>Watch line pressure (P2) for ten minutes with the unit stopped.</li><li>Walk the distribution line and listen at every joint.</li></ol></td><td>Repair the leaking joint or fitting and put the line back in service.</td></tr>
+<tr class="cause"><td><span class="mono">intake_filter_clogged</span></td><td>Intake filter clogged. The filter element is loaded with dust and restricts the air the element draws. Raises W101.</td><td>intake unloading</td><td>Line pressure (P2) is low while loaded. Motor current (I1) is low while loaded.</td><td><ol class="checks"><li>Read the filter restriction indicator.</li><li>Inspect the element against a lamp.</li><li>Compare motor current (I1) with the value of a clean element.</li></ol></td><td>Fit a new intake filter element and reset the service counter.</td></tr>
+<tr class="cause"><td><span class="mono">dryer_purge_leak</span></td><td>Dryer purge leak. The purge valve does not seat, so regeneration air escapes without stopping. Raises W101 and W102.</td><td>dryer</td><td>Purge pressure (P4) is high while loaded. Line pressure (P2) falls while loaded.</td><td><ol class="checks"><li>Listen at the purge silencer with the unit loaded.</li><li>Read purge pressure (P4) over one full tower period.</li><li>Check the purge valve seat and its pilot line.</li></ol></td><td>Overhaul or replace the purge valve and repeat the check.</td></tr>
+</tbody>
+</table>
+
+<h3 id="cond-frequent-cycling"><span class="num">8.2.2</span> Compressor starts and loads too often <span class="mono">frequent_cycling</span></h3>
+<p class="symptom">The unit loads and unloads more often than the setting allows, and the starts per hour message appears.</p>
+<table class="troubleshooting">
+<colgroup><col class="c-fault"><col class="c-cause"><col class="c-subsystem"><col class="c-signals"><col class="c-checks"><col class="c-remedy"></colgroup>
+<thead>
+<tr><th>Fault id</th><th>Possible cause</th><th>Subsystem</th><th>Signals</th><th>Checks</th><th>Remedy</th></tr>
+</thead>
+<tbody>
+<tr class="cause"><td><span class="mono">downstream_air_leak</span></td><td>Downstream air leak. The same leak makes the unit load again soon after it unloads. Raises W108.</td><td>distribution</td><td>Load cycle rate is higher. Line pressure (P2) falls faster than usual while unloaded.</td><td><ol class="checks"><li>Record the number of starts in one hour.</li><li>Close the outlet isolation valve and watch line pressure (P2).</li><li>Walk the distribution line and listen at every joint.</li></ol></td><td>Repair the leaking joint or fitting and put the line back in service.</td></tr>
+<tr class="cause"><td><span class="mono">reservoir_isolation_valve_closed</span></td><td>Reservoir isolation valve closed. Part of the reservoir volume is shut off, so the unit cycles on a small volume. Raises W108.</td><td>reservoirs</td><td>Load cycle rate is higher. Line pressure (P2) rises faster than usual while loaded.</td><td><ol class="checks"><li>Check the position of every reservoir isolation valve.</li><li>Compare the reservoir pressure with line pressure (P2).</li><li>Time one loaded run.</li></ol></td><td>Open the isolation valve and lock it in the open position.</td></tr>
+</tbody>
+</table>
+
+<h3 id="cond-oil-temperature-high"><span class="num">8.2.3</span> Oil temperature high <span class="mono">oil_temperature_high</span></h3>
+<p class="symptom">The oil temperature reading stays above the warning setting, and the unit may reach the shutdown limit.</p>
+<table class="troubleshooting">
+<colgroup><col class="c-fault"><col class="c-cause"><col class="c-subsystem"><col class="c-signals"><col class="c-checks"><col class="c-remedy"></colgroup>
+<thead>
+<tr><th>Fault id</th><th>Possible cause</th><th>Subsystem</th><th>Signals</th><th>Checks</th><th>Remedy</th></tr>
+</thead>
+<tbody>
+<tr class="cause"><td><span class="mono">oil_cooler_fouled</span></td><td>Oil cooler fouled. The cooler matrix is blocked with dust, so it rejects less heat than it should. Raises W104 and X201.</td><td>cooling</td><td>Oil temperature (T1) rises gradually in every state.</td><td><ol class="checks"><li>Inspect the cooler matrix against a lamp.</li><li>Check the cooling air path for obstructions.</li><li>Read oil temperature (T1) after one hour at full load.</li></ol></td><td>Clean the cooler matrix with the cleaning kit and repeat the reading.</td></tr>
+<tr class="cause"><td><span class="mono">high_ambient_temperature</span></td><td>No fault: high ambient temperature. The cooling air is warmer than the reference condition, so the oil settles higher. Raises W104.</td><td>cooling</td><td>Oil temperature (T1) is high in every state.</td><td><ol class="checks"><li>Read the temperature of the cooling air at the inlet.</li><li>Compare it with the reference conditions.</li><li>Check that warm exhaust air is not drawn back in.</li></ol></td><td>Improve the ventilation of the machine room or shade the air inlet.</td></tr>
+<tr class="cause"><td><span class="mono">oil_filter_clogged</span></td><td>Oil filter clogged. The filter element restricts the oil flow to the airend, so less heat leaves with the oil. Raises W104 and S301.</td><td>oil</td><td>Oil temperature (T1) rises gradually while loaded.</td><td><ol class="checks"><li>Read the filter restriction indicator.</li><li>Check the hours since the last oil filter change.</li><li>Read oil temperature (T1) at full load.</li></ol></td><td>Fit a new oil filter element and reset the service counter.</td></tr>
+</tbody>
+</table>
+
+</div><!-- /only-clean -->
+
+<div class="only-realistic">
+<table class="troubleshooting spanning">
+<colgroup><col class="c-fault"><col class="c-cause"><col class="c-subsystem"><col class="c-signals"><col class="c-checks"><col class="c-remedy"></colgroup>
+<thead>
+<tr><th>Fault id</th><th>Possible cause</th><th>Subsystem</th><th>Signals</th><th>Checks</th><th>Remedy</th></tr>
+</thead>
+<tbody>
+<tr class="group"><td colspan="6"><span class="num">8.2.1</span> Line pressure below setpoint <span class="mono">low_line_pressure</span></td></tr>
+<tr class="cause"><td><span class="mono">downstream_air_leak</span></td><td>Downstream air leak. Air escapes from the distribution line after the unit, and the unit makes the loss up. Raises W101.</td><td>distribution</td><td>Line pressure (P2) falls faster than usual while unloaded. Load cycle rate is higher.</td><td><ol class="checks"><li>Close the isolation valve at the reservoir outlet.</li><li>Watch line pressure (P2) for ten minutes with the unit stopped.</li><li>Walk the distribution line and listen at every joint.</li></ol></td><td>Repair the leaking joint or fitting and put the line back in service.</td></tr>
+<tr class="cause"><td><span class="mono">intake_filter_clogged</span></td><td>Intake filter clogged. The filter element is loaded with dust and restricts the air the element draws. Raises W101.</td><td>intake unloading</td><td>Line pressure (P2) is low while loaded. Motor current (I1) is low while loaded.</td><td><ol class="checks"><li>Read the filter restriction indicator.</li><li>Inspect the element against a lamp.</li><li>Compare motor current (I1) with the value of a clean element.</li></ol></td><td>Fit a new intake filter element and reset the service counter.</td></tr>
+<tr class="cause"><td><span class="mono">dryer_purge_leak</span></td><td>Dryer purge leak. The purge valve does not seat, so regeneration air escapes without stopping. Raises W101 and W102.</td><td>dryer</td><td>Purge pressure (P4) is high while loaded. Line pressure (P2) falls while loaded.</td><td><ol class="checks"><li>Listen at the purge silencer with the unit loaded.</li><li>Read purge pressure (P4) over one full tower period.</li><li>Check the purge valve seat and its pilot line.</li></ol></td><td>Overhaul or replace the purge valve and repeat the check.</td></tr>
+<tr class="group"><td colspan="6"><span class="num">8.2.2</span> Compressor starts and loads too often <span class="mono">frequent_cycling</span></td></tr>
+<tr class="cause"><td><span class="mono">downstream_air_leak</span></td><td>Downstream air leak. The same leak makes the unit load again soon after it unloads. Raises W108.</td><td>distribution</td><td>Load cycle rate is higher. Line pressure (P2) falls faster than usual while unloaded.</td><td><ol class="checks"><li>Record the number of starts in one hour.</li><li>Close the outlet isolation valve and watch line pressure (P2).</li><li>Walk the distribution line and listen at every joint.</li></ol></td><td>Repair the leaking joint or fitting and put the line back in service.</td></tr>
+<tr class="cause"><td><span class="mono">reservoir_isolation_valve_closed</span></td><td>Reservoir isolation valve closed. Part of the reservoir volume is shut off, so the unit cycles on a small volume. Raises W108.</td><td>reservoirs</td><td>Load cycle rate is higher. Line pressure (P2) rises faster than usual while loaded.</td><td><ol class="checks"><li>Check the position of every reservoir isolation valve.</li><li>Compare the reservoir pressure with line pressure (P2).</li><li>Time one loaded run.</li></ol></td><td>Open the isolation valve and lock it in the open position.</td></tr>
+<tr class="group"><td colspan="6"><span class="num">8.2.3</span> Oil temperature high <span class="mono">oil_temperature_high</span></td></tr>
+<tr class="cause"><td><span class="mono">oil_cooler_fouled</span></td><td>Oil cooler fouled. The cooler matrix is blocked with dust, so it rejects less heat than it should. Raises W104 and X201.</td><td>cooling</td><td>Oil temperature (T1) rises gradually in every state.</td><td><ol class="checks"><li>Inspect the cooler matrix against a lamp.</li><li>Check the cooling air path for obstructions.</li><li>Read oil temperature (T1) after one hour at full load.</li></ol></td><td>Clean the cooler matrix with the cleaning kit and repeat the reading.</td></tr>
+<tr class="cause"><td><span class="mono">high_ambient_temperature</span></td><td>No fault: high ambient temperature. The cooling air is warmer than the reference condition, so the oil settles higher. Raises W104.</td><td>cooling</td><td>Oil temperature (T1) is high in every state.</td><td><ol class="checks"><li>Read the temperature of the cooling air at the inlet.</li><li>Compare it with the reference conditions.</li><li>Check that warm exhaust air is not drawn back in.</li></ol></td><td>Improve the ventilation of the machine room or shade the air inlet.</td></tr>
+<tr class="cause"><td><span class="mono">oil_filter_clogged</span></td><td>Oil filter clogged. The filter element restricts the oil flow to the airend, so less heat leaves with the oil. Raises W104 and S301.</td><td>oil</td><td>Oil temperature (T1) rises gradually while loaded.</td><td><ol class="checks"><li>Read the filter restriction indicator.</li><li>Check the hours since the last oil filter change.</li><li>Read oil temperature (T1) at full load.</li></ol></td><td>Fit a new oil filter element and reset the service counter.</td></tr>
+</tbody>
+</table>
+</div><!-- /only-realistic -->
+
+</div><!-- /fault-tables -->
+
+</div>
+</section>
+
+<section class="chapter" id="ch-9">
+<h1><span class="num">9</span> Technical data</h1>
+<div class="body">
+<p>The tags below are the signals the controller publishes. The source column names the column of the public dataset the replay reads.</p>
+<table class="signals">
+<thead>
+<tr><th>Tag</th><th>Label</th><th>Description</th><th>Unit</th><th>Kind</th><th>Source column</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="mono">discharge_pressure</span></td><td>P1</td><td>Pressure in the oil separator vessel at the airend discharge</td><td>bar</td><td>analog</td><td><span class="mono">TP2</span></td></tr>
+<tr><td><span class="mono">line_pressure</span></td><td>P2</td><td>Line pressure at the pneumatic panel, the regulation signal</td><td>bar</td><td>analog</td><td><span class="mono">TP3</span></td></tr>
+<tr><td><span class="mono">purge_pressure</span></td><td>P4</td><td>Pressure in the dryer purge line after the purge valve</td><td>bar</td><td>analog</td><td><span class="mono">DV_pressure</span></td></tr>
+<tr><td><span class="mono">oil_temperature</span></td><td>T1</td><td>Compressor oil temperature at the airend outlet</td><td>°C</td><td>analog</td><td><span class="mono">Oil_temperature</span></td></tr>
+<tr><td><span class="mono">motor_current</span></td><td>I1</td><td>Current of one motor phase</td><td>A</td><td>analog</td><td><span class="mono">Motor_current</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</body>
+</html>

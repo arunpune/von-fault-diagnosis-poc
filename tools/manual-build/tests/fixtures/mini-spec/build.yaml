@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: a complete but tiny manual tree in the manual's grammar,
+# validated against the real schemas under manual/spec/schemas. Everything in it
+# is fictional.
+schema_version: 1
+document: {title: CAU-7 Compressed-Air Unit, subtitle: Instruction manual, number: CAU7-IOM-EN, revision: "1.0",
+           revision_date: 2026-01-15, language: en, license: CC-BY-4.0, issuer: Meddle S.r.l.,
+           revisions: [{revision: "1.0", date: 2026-01-15, change: First issue}]}
+source_date_epoch: 1768435200          # == revision_date at 00:00:00Z
+outputs: {dir: .build/mini-spec, basename: mini}
+fonts: {body: IBM Plex Sans, mono: IBM Plex Mono, dir: manual/fonts}
+chapters:
+  - {number: 1, slug: safety, title: Safety precautions}
+  - {number: 2, slug: description, title: General description}
+  - {number: 3, slug: controller, title: Controller CTRL-7}
+  - {number: 4, slug: settings, title: Programmable settings}
+  - {number: 5, slug: installation, title: Installation and reference conditions}
+  - {number: 6, slug: operation, title: Operation}
+  - {number: 7, slug: maintenance, title: Maintenance}
+  - {number: 8, slug: troubleshooting, title: Problem solving}
+  - {number: 9, slug: technical-data, title: Technical data and signal list}
+  - {number: 10, slug: appendix, title: Appendix}
+default_variant: realistic
+variants:
+  clean:
+    layout: single_column
+    two_column_chapters: []
+    tables: fit_page
+    fact_placement: tables_only
+    xref_style: explicit
+    units: si
+    page_furniture: page_numbers
+    footnotes: false
+  realistic:
+    layout: mixed
+    two_column_chapters: [2, 6, 7]
+    tables: span_pages_repeat_header
+    fact_placement: mixed
+    prose_only: [setting:cut_in_pressure]
+    table_only: [machine.ratings.oil_fill_volume]
+    xref_style: short_with_footnotes
+    units: si_plus_imperial
+    page_furniture: running_headers_footers_revision_stamp
+    footnotes: true
+  scanned:
+    extends: realistic
+    enabled: false
+    raster_dpi: 200
+    skew_deg: 0.4
+    noise: 0.02
+lint:
+  allowed_number_phrases: []
+pdf:
+  pdf_identifier: fdp-mini-manual
+  page_budget: {min: 4, max: 24}
+  outputs: {manifest: .build/mini-spec/build-manifest.json, catalog: .build/mini-spec/catalog.json}

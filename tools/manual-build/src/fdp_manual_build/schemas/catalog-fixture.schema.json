@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:catalog-fixture:v1",
+  "title": "Reference fault catalog written by fdp-manual-build export-catalog",
+  "description": "The contracts `catalog` document (packages/contracts), mirrored package-locally; the contracts package validates the committed file against @fdp/contracts too. Identifiers are the manual's registry ids, never F-NNN or C-NN.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_from",
+    "machine",
+    "signals",
+    "alarms",
+    "conditions",
+    "causes",
+    "maintenance",
+    "parameters"
+  ],
+  "properties": {
+    "schema": { "const": "urn:fdp:schema:catalog:v1" },
+    "generated_from": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sha256", "variant"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "variant": { "type": "string", "minLength": 1 },
+        "inputs_tree_sha256": { "$ref": "#/$defs/sha256" },
+        "manual_revision": { "type": "string", "minLength": 1 }
+      }
+    },
+    "machine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "short_name", "controller"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "short_name": { "type": "string", "minLength": 1 },
+        "controller": { "type": "string", "minLength": 1 }
+      }
+    },
+    "signals": { "type": "array", "items": { "$ref": "#/$defs/signal" } },
+    "alarms": { "type": "array", "items": { "$ref": "#/$defs/alarm" } },
+    "conditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } },
+    "causes": { "type": "array", "items": { "$ref": "#/$defs/catalog_entry" } },
+    "maintenance": { "type": "array", "items": { "$ref": "#/$defs/maintenance_task" } },
+    "parameters": { "type": "array", "items": { "$ref": "#/$defs/parameter" } }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,60}$" },
+    "alarm_code": { "type": "string", "pattern": "^[WXSM][0-9]{3}$" },
+    "section": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+){0,2}$" },
+    "subsystem": {
+      "enum": [
+        "compressor",
+        "intake_unloading",
+        "oil",
+        "cooling",
+        "separator_drain",
+        "dryer",
+        "reservoirs",
+        "distribution",
+        "electrical",
+        "control"
+      ]
+    },
+    "likelihood": { "enum": ["common", "occasional", "rare", "unknown"] },
+    "text": { "type": "string", "minLength": 1 },
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "panel_label",
+        "name",
+        "metropt_column",
+        "group",
+        "kind",
+        "unit",
+        "subsystem",
+        "normal_band"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "panel_label": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "metropt_column": { "type": ["string", "null"] },
+        "group": { "enum": ["analog", "digital", "extra"] },
+        "kind": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
+        "subsystem": { "$ref": "#/$defs/subsystem" },
+        "range": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "normal_band": {
+          "description": "Machine state → the analog band as [low, high], or the expected level of a digital tag.",
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              { "type": ["integer", "string"] }
+            ]
+          }
+        },
+        "section": { "$ref": "#/$defs/section" }
+      }
+    },
+    "alarm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "type", "bit", "title", "reset", "threshold", "delay_s"],
+      "properties": {
+        "code": { "$ref": "#/$defs/alarm_code" },
+        "type": { "enum": ["warning", "shutdown_warning", "shutdown", "service"] },
+        "bit": { "type": ["integer", "null"], "minimum": 0, "maximum": 31 },
+        "title": { "type": "string", "minLength": 1 },
+        "signal": { "$ref": "#/$defs/identifier" },
+        "direction": { "enum": ["above", "below", "equal", "not_equal"] },
+        "threshold": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit"],
+              "properties": {
+                "value": { "type": "number" },
+                "unit": { "type": "string", "minLength": 1 }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "delay_s": { "type": ["integer", "null"], "minimum": 0 },
+        "reset": { "enum": ["auto", "auto_hysteresis", "manual", "manual_service"] },
+        "text": { "$ref": "#/$defs/text" },
+        "section": { "$ref": "#/$defs/section" }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "symptom", "alarms", "causes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1 },
+        "symptom": { "$ref": "#/$defs/text" },
+        "alarms": { "type": "array", "items": { "$ref": "#/$defs/alarm_code" } },
+        "causes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fault_id", "likelihood"],
+            "properties": {
+              "fault_id": { "$ref": "#/$defs/identifier" },
+              "likelihood": { "$ref": "#/$defs/likelihood" },
+              "note": { "$ref": "#/$defs/text" }
+            }
+          }
+        },
+        "section": { "$ref": "#/$defs/section" }
+      }
+    },
+    "signal_move": {
+      "description": "The manual's vocabulary: exactly one of signal or behaviour.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction"],
+      "oneOf": [{ "required": ["signal"] }, { "required": ["behaviour"] }],
+      "properties": {
+        "signal": { "$ref": "#/$defs/identifier" },
+        "behaviour": { "$ref": "#/$defs/identifier" },
+        "direction": { "type": "string", "minLength": 1 },
+        "phase": { "enum": ["loaded", "unloaded", "off", "any", "start"] },
+        "onset": { "enum": ["sudden", "gradual", "intermittent", "sustained"] },
+        "note": { "$ref": "#/$defs/text" },
+        "text": { "$ref": "#/$defs/text" }
+      }
+    },
+    "manual_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section"],
+      "properties": {
+        "section": { "$ref": "#/$defs/section" },
+        "anchor": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "page": { "type": "integer", "minimum": 1 },
+        "page_start": { "type": "integer", "minimum": 1 },
+        "page_end": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "catalog_entry": {
+      "description": "One cause.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fault_id",
+        "name",
+        "subsystem",
+        "benign",
+        "summary",
+        "signal_moves",
+        "signal_moves_text",
+        "checks",
+        "remedy",
+        "conditions",
+        "parts",
+        "maintenance",
+        "related_alarms",
+        "manual_ref",
+        "source"
+      ],
+      "properties": {
+        "fault_id": { "$ref": "#/$defs/identifier" },
+        "name": { "type": "string", "minLength": 1 },
+        "subsystem": { "$ref": "#/$defs/subsystem" },
+        "benign": { "type": "boolean" },
+        "summary": { "$ref": "#/$defs/text" },
+        "signal_moves": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/signal_move" }
+        },
+        "signal_moves_text": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "checks": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "remedy": { "$ref": "#/$defs/text" },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["condition_id", "title", "likelihood", "alarms"],
+            "properties": {
+              "condition_id": { "$ref": "#/$defs/identifier" },
+              "title": { "type": "string", "minLength": 1 },
+              "likelihood": { "$ref": "#/$defs/likelihood" },
+              "note": { "$ref": "#/$defs/text" },
+              "alarms": { "type": "array", "items": { "$ref": "#/$defs/alarm_code" } }
+            }
+          }
+        },
+        "parts": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "maintenance": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "related_alarms": { "type": "array", "items": { "$ref": "#/$defs/alarm_code" } },
+        "manual_ref": { "$ref": "#/$defs/manual_ref" },
+        "pages": {
+          "description": "Variant name → the 1-based pages the fault id is printed on.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "source": { "enum": ["tables", "llm", "yaml"] }
+      }
+    },
+    "maintenance_task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "interval"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1 },
+        "interval": { "type": "string", "minLength": 1 },
+        "section": { "$ref": "#/$defs/section" }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "param_no", "name", "unit", "min", "default", "max"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "param_no": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
+        "min": { "type": "number" },
+        "default": { "type": "number" },
+        "max": { "type": "number" },
+        "section": { "$ref": "#/$defs/section" }
+      }
+    }
+  }
+}

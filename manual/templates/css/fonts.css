@@ -1,0 +1,77 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: Apache-2.0 */
+/*
+ * The six faces the manual embeds (ADR 0021, phase1-pdf-build.md section 10.1).
+ * The font files themselves are IBM's and stay under OFL-1.1; this stylesheet
+ * only declares them.
+ *
+ * WeasyPrint resolves the `url()` values against this file, so `../../fonts/`
+ * is `manual/fonts/` -- the `fonts.dir` of manual/build.yaml. A missing file
+ * is a build error, never a silent fallback to a system font: render.py
+ * verifies the six files against manual/fonts/fonts.json before rendering.
+ *
+ * `font-display: block` keeps a paged renderer from laying text out with a
+ * fallback metric, and `hyphens: manual` means only explicit soft hyphens in
+ * the source ever break a word, so line breaking depends on the text and the
+ * shaper alone (spec section 5, reproducible output).
+ */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../../fonts/IBMPlexSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../../fonts/IBMPlexSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../../fonts/IBMPlexSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../../fonts/IBMPlexSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../../fonts/IBMPlexMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../../fonts/IBMPlexMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+html {
+  font-family: "IBM Plex Sans", sans-serif;
+  hyphens: manual;
+}
+
+code,
+.tag,
+.alarm-code,
+.mono {
+  font-family: "IBM Plex Mono", monospace;
+}

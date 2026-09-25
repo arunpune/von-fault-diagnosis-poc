@@ -1,0 +1,10 @@
+{
+  "$expect_error": "must have required property 'status'",
+  "schema": "urn:fdp:schema:control-ack:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:00.019Z",
+  "cmd_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "cmd": "play",
+  "ok": true,
+  "error": null
+}

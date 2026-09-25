@@ -1,0 +1,37 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "f3_air_leak_jun05",
+  "title": "Air leak, signature A, 5 June 2020",
+  "group": "recording_positive",
+  "profiles": ["smoke", "core", "full"],
+  "split": "test",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "f3-jun05"
+  },
+  "replay": {
+    "from": "2020-06-05T04:00:00.000Z",
+    "to": "2020-06-06T04:00:00.000Z",
+    "overrides": {
+      "smoke": {
+        "to": "2020-06-05T14:00:00.000Z"
+      }
+    }
+  },
+  "ground_truth": {
+    "kind": "failure",
+    "failure_id": "F3"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "within_min": 120,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 60,
+  "seed": 11,
+  "notes": "The reference case of the tour and of the smoke profile: onset 09:48:30 (the failure table's data onset), six hours of normal operation ahead of it, and the first native LPS activation only on 6 June at 19:42:19, which is where the lead time comes from. The smoke override keeps the first four hours after the onset and ends before the repair period."
+}

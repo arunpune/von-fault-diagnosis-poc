@@ -1,0 +1,96 @@
+{
+  "sim": {
+    "schema": "urn:fdp:schema:status-sim:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-09-19T10:00:00.500Z",
+    "sim_ts": "2020-06-05T09:48:20.000Z",
+    "state": "playing",
+    "speed": 600,
+    "head_seq": 128394,
+    "dataset": {
+      "first_ts": "2020-02-01T00:00:00.000Z",
+      "last_ts": "2020-09-01T03:59:50.000Z",
+      "rows": 1516948,
+      "sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+      "source": "MetroPT3(AirCompressor).csv"
+    },
+    "loop": false,
+    "uptime_s": 3720
+  },
+  "gateway": {
+    "schema": "urn:fdp:schema:status-gateway:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-09-19T10:00:05.000Z",
+    "last_seq": 1225,
+    "dropped_total": 0,
+    "polls_total": 4820,
+    "poll_errors_total": 2,
+    "poll_interval_ms": 200,
+    "samples_per_s": 59.8,
+    "modbus": {
+      "host": "modbus-sim",
+      "port": 5020,
+      "connected": true,
+      "map_major": 1,
+      "map_minor": 0
+    },
+    "last_error": null
+  },
+  "backend": {
+    "schema": "urn:fdp:schema:status-backend:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-09-19T10:00:05.000Z",
+    "backend": {
+      "name": "jev",
+      "model": "jev-1.13.0"
+    },
+    "decision": {
+      "total": 42,
+      "ok": 41,
+      "failed": 1,
+      "consecutive_errors": 0,
+      "last_ok_wall_ts": "2026-09-19T09:59:58.412Z",
+      "last_error_wall_ts": "2026-09-19T09:41:03.907Z"
+    },
+    "heartbeat": {
+      "telemetry_silent": false,
+      "decision_api_silent": false
+    },
+    "episodes_open": 2,
+    "tickets_open": 1,
+    "version": "1.0.0"
+  },
+  "alerts_active": [
+    {
+      "schema": "urn:fdp:schema:alert-system:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-06-05T09:41:12.000Z",
+      "alert_id": "0f8f3b0a-1d3a-4f5e-9c2b-6a7d8e9f0a1b",
+      "kind": "telemetry_silent",
+      "state": "raised",
+      "since_wall_ts": "2026-06-05T09:39:42.000Z",
+      "details": {
+        "timeout_s": 90,
+        "last_ok_wall_ts": "2026-06-05T09:39:42.000Z",
+        "message": "No telemetry sample arrived for 90 s."
+      }
+    }
+  ],
+  "injections_active": [
+    {
+      "instance_id": "inj-7f3a-1",
+      "injection_id": "oil_cooler_fouling",
+      "fault_id": "oil_cooler_fouled",
+      "started_sim_ts": "2020-06-05T08:00:00.000Z",
+      "ends_sim_ts": "2020-06-05T18:00:00.000Z",
+      "params": {
+        "magnitude": 1,
+        "duration_sim_min": 600
+      }
+    }
+  ],
+  "gate": {
+    "ticket_min_confidence": 0.85,
+    "review_min_confidence": 0.6
+  }
+}

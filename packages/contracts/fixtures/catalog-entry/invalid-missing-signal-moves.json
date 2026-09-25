@@ -1,0 +1,28 @@
+{
+  "$expect_error": "/signal_moves must NOT have fewer than 1 items",
+  "fault_id": "purge_silencer_damaged",
+  "name": "Purge silencer damaged",
+  "subsystem": "dryer",
+  "benign": false,
+  "summary": "The silencer on the purge line has lost its packing, so the purge escapes faster than the dryer was set up for and the unit replaces more air than it should.",
+  "signal_moves": [],
+  "signal_moves_text": [],
+  "checks": [
+    "Look at the silencer body for loose packing around the outlet.",
+    "Compare the purge noise of both towers over a full changeover."
+  ],
+  "remedy": "Replace the silencer and repeat the changeover test.",
+  "conditions": [
+    {
+      "condition_id": "purge_pressure_high",
+      "title": "Dryer purge pressure high, air escaping at the purge silencer",
+      "likelihood": "occasional",
+      "alarms": ["W103"]
+    }
+  ],
+  "parts": ["purge_silencer"],
+  "maintenance": ["dryer_purge_valve_service"],
+  "related_alarms": ["W103"],
+  "manual_ref": { "section": "8.3", "anchor": "fault:purge_silencer_damaged" },
+  "source": "yaml"
+}

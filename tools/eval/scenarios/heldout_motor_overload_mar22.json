@@ -1,0 +1,39 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "heldout_motor_overload_mar22",
+  "title": "Held-out: injected motor overload, 22 March 2020",
+  "group": "injected",
+  "profiles": ["heldout"],
+  "split": "heldout",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "heldout-mar22"
+  },
+  "replay": {
+    "from": "2020-03-22T00:00:00.000Z",
+    "to": "2020-03-23T00:00:00.000Z"
+  },
+  "injections": [
+    {
+      "injection_id": "motor_overload",
+      "at": "2020-03-22T04:29:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "injection"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "injected",
+    "within_min": 120,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 55,
+  "notes": "H6 held-out positive (docs/plan/heldout-seal.md). The day and the 04:29 instant of the data clock were drawn by the rule committed before the draw, from the days no scenario, slice, tuning case or document had used, 48 h or more from every labelled failure and unlabelled episode, with no known anomaly or gap. The injection runs for its default 240 minutes at magnitude 1, and the expectation is the one this definition's committed scenarios carry (within 120 min, at diagnosis level). Split heldout, profile heldout only: every other profile, --scenario and the tuning list refuse it, and only the set's one final run replays it, after the Jev thresholds are fixed under the pre-registration. H6 was decided after the E3 and E4 results had been seen, so every earlier figure stays in-sample."
+}

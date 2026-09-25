@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:ws-client-message:v1",
+  "title": "Ws client message",
+  "description": "The only two frames a browser may send on GET /ws. `subscribe` narrows the frame types the socket receives; `ping` keeps the socket alive and is answered by nothing. Commands never travel over the socket: they are REST posts validated with api-sim-command. The default subscription is every ws-server-message type except telemetry.samples, which a client has to ask for by name.",
+  "type": "object",
+  "$defs": {
+    "channel": {
+      "title": "Channel",
+      "description": "A frame type of ws-server-message; the two enums are asserted equal in test/ws-api.test.ts.",
+      "type": "string",
+      "enum": [
+        "hello",
+        "snapshot",
+        "heartbeat",
+        "telemetry.samples",
+        "telemetry.series",
+        "status.sim",
+        "status.gateway",
+        "status.backend",
+        "event.suspect",
+        "decision",
+        "ticket",
+        "alert.system",
+        "alarm.native",
+        "overlay.catalog",
+        "overlay.injection",
+        "overlay.injection_active",
+        "overlay.marker",
+        "cost.update"
+      ]
+    },
+    "channel_list": {
+      "title": "Channel list",
+      "description": "The frame types the socket wants from now on. An empty list mutes every channel.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/channel" },
+      "uniqueItems": true
+    }
+  },
+  "oneOf": [
+    {
+      "description": "Replace the subscription of this socket with the named channels.",
+      "properties": {
+        "type": { "const": "subscribe" },
+        "channels": { "$ref": "#/$defs/channel_list" }
+      },
+      "required": ["type", "channels"]
+    },
+    {
+      "description": "Keep the socket alive. The frame carries nothing else.",
+      "properties": {
+        "type": { "const": "ping" },
+        "channels": false
+      },
+      "required": ["type"]
+    }
+  ],
+  "properties": {
+    "type": {
+      "description": "Which of the two client frames this is.",
+      "type": "string",
+      "enum": ["subscribe", "ping"]
+    },
+    "channels": { "$ref": "#/$defs/channel_list" }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

@@ -1,0 +1,64 @@
+{
+  "name": "@fdp/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "JSON Schema source of truth for every MQTT, WebSocket and REST message of the unit",
+  "license": "Apache-2.0",
+  "author": "Meddle S.r.l.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meddleconnect/jev-fault-diagnosis-poc"
+  },
+  "exports": {
+    ".": {
+      "@fdp/source": "./src/index.ts",
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./testing": {
+      "@fdp/source": "./src/testing.ts",
+      "types": "./dist/src/testing.d.ts",
+      "default": "./dist/src/testing.js"
+    },
+    "./mock": {
+      "@fdp/source": "./mock/index.ts",
+      "types": "./dist/mock/index.d.ts",
+      "default": "./dist/mock/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "schemas",
+    "fixtures",
+    "generated",
+    "topics.json"
+  ],
+  "scripts": {
+    "generate": "node --conditions=@fdp/source scripts/generate.ts && node --conditions=@fdp/source scripts/generate-regmap.ts",
+    "generate:regmap": "node --conditions=@fdp/source scripts/generate-regmap.ts",
+    "embed-fixture": "uv run scripts/embed_fixture.py",
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "mock": "node --conditions=@fdp/source mock/cli.ts",
+    "mock-anthropic": "node --conditions=@fdp/source mock/anthropic-cli.ts",
+    "test:integration": "node -e \"console.log('@fdp/contracts: no integration tests yet')\"",
+    "check-drift": "bash scripts/check-drift.sh"
+  },
+  "dependencies": {
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "catalog:",
+    "@types/node": "catalog:",
+    "@typesafe-ai/sdk": "catalog:",
+    "json-schema-to-typescript": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:",
+    "zod": "catalog:"
+  }
+}

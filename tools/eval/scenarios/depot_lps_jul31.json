@@ -1,0 +1,30 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "depot_lps_jul31",
+  "title": "Depot depressurisation, 31 July 2020",
+  "group": "abstain",
+  "profiles": ["smoke", "core", "full"],
+  "split": "test",
+  "positive": false,
+  "source": {
+    "kind": "slice",
+    "name": "depot-jul31"
+  },
+  "replay": {
+    "from": "2020-07-31T00:00:00.000Z",
+    "to": "2020-07-31T08:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "abstain",
+    "reason": "depot_depressurisation: the unit is parked and the system is vented on purpose, so the low-pressure switch is right and there is nothing to diagnose"
+  },
+  "expect": {
+    "tickets": "none",
+    "fault": "benign_or_none",
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 35,
+  "notes": "The canonical hard negative: the longest LPS episode of the recording, 01:35:33 to 06:04:16, with no leak behind it. The failure table marks it excluded, so nothing raised inside it is scored; what the scenario watches is the hour before and the two hours after, where a detector that reads the vent as a fault would open a ticket."
+}

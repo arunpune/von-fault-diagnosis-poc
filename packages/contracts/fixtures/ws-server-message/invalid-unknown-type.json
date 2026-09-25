@@ -1,0 +1,10 @@
+{
+  "$expect_error": "must match exactly one schema in oneOf",
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "type": "telemetry.raw",
+  "payload": {
+    "samples": []
+  }
+}

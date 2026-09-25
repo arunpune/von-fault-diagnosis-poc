@@ -1,0 +1,32 @@
+{
+  "status": "ok",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "version": "1.0.0",
+  "backend": {
+    "name": "jev",
+    "model": "jev-1.13.0"
+  },
+  "mqtt": {
+    "diag": "ok",
+    "ops": "ok"
+  },
+  "db": {
+    "app": "ok",
+    "gt": "ok"
+  },
+  "heartbeats": {
+    "telemetry": "ok",
+    "decision_api": "ok"
+  },
+  "sim": {
+    "state": "playing",
+    "speed": 600,
+    "sim_ts": "2020-06-05T09:41:12.000Z"
+  },
+  "counters": {
+    "samples_ingested": 128394,
+    "decisions": 42,
+    "tickets_open": 1
+  },
+  "uptime_s": 3720
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:maintenance:v1",
+  "title": "manual/spec/maintenance.yaml",
+  "description": "Maintenance tasks with intervals, consumables, steps and post-service checks. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/task" }
+    }
+  },
+  "required": ["schema_version", "tasks"],
+  "additionalProperties": false,
+  "$defs": {
+    "interval": {
+      "type": "object",
+      "properties": {
+        "hours": { "type": "integer", "exclusiveMinimum": 0 },
+        "months": { "type": "integer", "exclusiveMinimum": 0 },
+        "calendar": { "type": "string", "enum": ["daily", "weekly"] },
+        "replacement_hours": { "type": "integer", "exclusiveMinimum": 0 },
+        "rule": { "type": "string", "const": "whichever_first" }
+      },
+      "required": ["rule"],
+      "additionalProperties": false,
+      "anyOf": [{ "required": ["hours"] }, { "required": ["months"] }, { "required": ["calendar"] }]
+    },
+    "consumable": {
+      "type": "object",
+      "properties": {
+        "part": { "$ref": "common.schema.json#/$defs/identifier" },
+        "quantity": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" }
+      },
+      "required": ["part", "quantity", "unit"],
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "name": { "$ref": "common.schema.json#/$defs/text" },
+        "interval": { "$ref": "#/$defs/interval" },
+        "service_message": {
+          "oneOf": [{ "$ref": "common.schema.json#/$defs/alarm_code" }, { "type": "null" }]
+        },
+        "duration_min": { "type": "integer", "exclusiveMinimum": 0 },
+        "consumables": { "type": "array", "items": { "$ref": "#/$defs/consumable" } },
+        "tools": { "$ref": "common.schema.json#/$defs/text_list" },
+        "safety": { "$ref": "common.schema.json#/$defs/text_list" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "post_checks": { "$ref": "common.schema.json#/$defs/text_list" },
+        "related_causes": { "$ref": "common.schema.json#/$defs/identifier_list" },
+        "components": { "$ref": "common.schema.json#/$defs/identifier_list" }
+      },
+      "required": [
+        "id",
+        "name",
+        "interval",
+        "service_message",
+        "duration_min",
+        "consumables",
+        "tools",
+        "safety",
+        "steps",
+        "post_checks",
+        "related_causes",
+        "components"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

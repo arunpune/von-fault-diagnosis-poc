@@ -1,0 +1,10 @@
+{
+  "schema": "urn:fdp:schema:ticket-closure:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-07-19T07:12:08.000Z",
+  "ticket_id": "e13c9b40-7d28-4a65-b091-2c3d4e5f6a70",
+  "verdict": "wrong",
+  "note": "The cooler matrix was clean. The fan contactor was dropping out under load, so the oil ran warm for the same reason without the cooler being at fault. Replaced the contactor and reran the duty test.",
+  "closed_by": "maintenance-lead",
+  "sim_ts": "2020-07-19T07:12:00.000Z"
+}

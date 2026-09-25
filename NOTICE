@@ -1,0 +1,63 @@
+fault-diagnosis-poc
+Copyright 2026 Meddle S.r.l.
+
+This product includes software developed by Meddle S.r.l. and is
+licensed under the Apache License, Version 2.0 (see LICENSE). Content
+that is not code carries its own licence; the machine-readable mapping
+is in REUSE.toml and in the SPDX headers of the individual files. Full
+licence texts live in LICENSES/.
+
+The project licences in use are:
+
+  Apache-2.0    code and configuration
+  CC-BY-4.0     the fictional manual, the fault catalog, synthetic data
+                and the documentation (docs/ and the Markdown guides
+                and READMEs across the tree)
+  CC0-1.0       trivial editor configuration and lock files
+  OFL-1.1       the bundled fonts
+  MIT           third-party component sources kept under their own terms
+  BSD-3-Clause  the Snowball english stop word list, kept under its own
+                terms
+
+--------------------------------------------------------------------
+Third-party attributions
+--------------------------------------------------------------------
+
+MetroPT-3 Dataset
+  Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021).
+  MetroPT-3 Dataset. UCI Machine Learning Repository.
+  https://doi.org/10.24432/C5VW3R
+  Licensed under CC BY 4.0. The dataset is downloaded at run time into
+  a git-ignored directory and used unchanged; no MetroPT-3 rows are
+  committed to this repository. Only derived statistics are committed
+  (the normal bands the manual PDFs and the fault catalog print, the
+  first-month statistics and the failure table), together with the
+  slice definitions and the checksums the download is verified
+  against. The derived statistics keep the authors' credit (see
+  REUSE.toml).
+
+IBM Plex Sans and IBM Plex Mono
+  Copyright 2017 IBM Corp. (Reserved Font Name "Plex")
+  Licensed under the SIL Open Font License, Version 1.1
+  (LICENSES/OFL-1.1.txt).
+
+shadcn/ui component sources
+  Copyright 2023 shadcn
+  Licensed under the MIT License (LICENSES/MIT.txt). The components are
+  copied into this repository by the shadcn CLI and keep their upstream
+  notice; modifications by this project are Apache-2.0.
+
+Snowball english stop word list
+  Copyright 2001 Dr Martin Porter
+  Copyright 2002 Richard Boulton
+  Licensed under the BSD 3-Clause License (LICENSES/BSD-3-Clause.txt).
+  PostgreSQL ships the list as its english stop word file, and
+  apps/backend/src/retrieval/english-stop.ts copies it so that the
+  backend drops the same words as to_tsvector('english', ...); the
+  wrapper around the list is Apache-2.0.
+
+Eclipse Paho (Go client) and Eclipse Mosquitto
+  Copyright the Eclipse Paho and Eclipse Mosquitto contributors.
+  Dual-licensed under the Eclipse Public License 2.0 and the Eclipse
+  Distribution License 1.0 (BSD-3-Clause). This project elects the
+  Eclipse Distribution License 1.0 (BSD-3-Clause).

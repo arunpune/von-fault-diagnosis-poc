@@ -1,0 +1,10 @@
+{
+  "cmd": "inject",
+  "args": {
+    "injection_id": "oil_cooler_fouling",
+    "params": {
+      "magnitude": 1,
+      "duration_sim_min": 600
+    }
+  }
+}

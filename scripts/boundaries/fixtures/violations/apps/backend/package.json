@@ -1,0 +1,16 @@
+{
+  "name": "@fdp/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./pipeline": {
+      "@fdp/source": "./src/pipeline/index.ts",
+      "types": "./dist/pipeline/index.d.ts",
+      "default": "./dist/pipeline/index.js"
+    }
+  },
+  "dependencies": {
+    "@fdp/ground-truth": "workspace:*"
+  }
+}

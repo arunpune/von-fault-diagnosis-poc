@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" width="110mm" height="52mm" role="img"
+     font-family="IBM Plex Sans, sans-serif" font-size="16" text-anchor="middle">
+  <!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+       SPDX-License-Identifier: CC-BY-4.0 -->
+  <title>CTRL-7 control panel (mini fixture)</title>
+  <desc>Front of the CTRL-7 controller: the two-line display showing a warning message, the
+  indicator lamps and the operating keys.</desc>
+  <rect x="0" y="0" width="640" height="300" fill="#ffffff" stroke="none"/>
+
+  <g fill="none" stroke="#333333" stroke-width="2">
+    <rect x="20" y="20" width="600" height="260" rx="12"/>
+    <rect x="60" y="60" width="330" height="80" rx="4"/>
+    <circle cx="470" cy="80" r="14"/>
+    <circle cx="530" cy="80" r="14"/>
+    <circle cx="590" cy="80" r="14"/>
+    <rect x="60" y="190" width="110" height="50" rx="6"/>
+    <rect x="200" y="190" width="110" height="50" rx="6"/>
+    <rect x="340" y="190" width="110" height="50" rx="6"/>
+    <rect x="480" y="190" width="110" height="50" rx="6"/>
+  </g>
+
+  <g fill="#333333">
+    <text x="225" y="95" font-family="IBM Plex Mono, monospace">W104</text>
+    <text x="225" y="125" font-family="IBM Plex Mono, monospace">OIL TEMP HIGH</text>
+    <text x="470" y="120" font-size="12">power</text>
+    <text x="530" y="120" font-size="12">warning</text>
+    <text x="590" y="120" font-size="12">service</text>
+    <text x="115" y="222">START</text>
+    <text x="255" y="222">STOP</text>
+    <text x="395" y="222">RESET</text>
+    <text x="535" y="222">MENU</text>
+    <text x="320" y="270" font-size="12">CTRL-7</text>
+  </g>
+</svg>

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-health:v1",
+  "title": "Api health",
+  "description": "The body of GET /api/health. The route answers 503 with the same body when a database or a broker connection is down, so a container healthcheck can read the status code and an operator can read the reason. It never carries a credential or a connection string.",
+  "type": "object",
+  "$defs": {
+    "link_state": {
+      "title": "Link state",
+      "description": "Whether one connection of the backend is usable right now.",
+      "type": "string",
+      "enum": ["ok", "down"]
+    },
+    "heartbeat_state": {
+      "title": "Heartbeat state",
+      "description": "State of one watchdog: answering, silent past its timeout, or not yet known.",
+      "type": "string",
+      "enum": ["ok", "silent", "unknown"]
+    }
+  },
+  "properties": {
+    "status": {
+      "description": "ok when every connection is up, degraded otherwise.",
+      "type": "string",
+      "enum": ["ok", "degraded"]
+    },
+    "wall_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "version": {
+      "description": "Version of the backend image or package that answered.",
+      "type": "string"
+    },
+    "backend": {
+      "description": "Which decision backend is selected and which model it calls.",
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+        "model": {
+          "description": "Model identifier of the selected decision backend.",
+          "type": "string"
+        }
+      },
+      "required": ["name", "model"],
+      "additionalProperties": false
+    },
+    "mqtt": {
+      "description": "The two broker connections: the diagnosis client and the ops client.",
+      "type": "object",
+      "properties": {
+        "diag": { "$ref": "#/$defs/link_state" },
+        "ops": { "$ref": "#/$defs/link_state" }
+      },
+      "required": ["diag", "ops"],
+      "additionalProperties": false
+    },
+    "db": {
+      "description": "The two database roles: the application schema and the read-only ground-truth schema.",
+      "type": "object",
+      "properties": {
+        "app": { "$ref": "#/$defs/link_state" },
+        "gt": { "$ref": "#/$defs/link_state" }
+      },
+      "required": ["app", "gt"],
+      "additionalProperties": false
+    },
+    "heartbeats": {
+      "description": "The two watchdogs of the backend, in the state they are in right now.",
+      "type": "object",
+      "properties": {
+        "telemetry": { "$ref": "#/$defs/heartbeat_state" },
+        "decision_api": { "$ref": "#/$defs/heartbeat_state" }
+      },
+      "required": ["telemetry", "decision_api"],
+      "additionalProperties": false
+    },
+    "sim": {
+      "description": "Where the replay stands, null before the first retained simulator status arrives.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "title": "Health sim",
+          "description": "The three replay values the health route repeats from the retained simulator status.",
+          "type": "object",
+          "properties": {
+            "state": { "$ref": "urn:fdp:schema:common:v1#/$defs/sim_state" },
+            "speed": {
+              "description": "Simulated seconds per wall-clock second.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600
+            },
+            "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+          },
+          "required": ["state", "speed", "sim_ts"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "counters": {
+      "description": "Free-form process counters for debugging; consumers read the keys they know and ignore the rest.",
+      "type": "object"
+    },
+    "uptime_s": {
+      "description": "Seconds since the backend process started.",
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "status",
+    "wall_ts",
+    "version",
+    "backend",
+    "mqtt",
+    "db",
+    "heartbeats",
+    "sim",
+    "counters",
+    "uptime_s"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "heldout_air_leak_downstream_jun26",
+  "title": "Held-out: injected downstream air leak, 26 June 2020",
+  "group": "injected",
+  "profiles": ["heldout"],
+  "split": "heldout",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "heldout-jun26"
+  },
+  "replay": {
+    "from": "2020-06-26T00:00:00.000Z",
+    "to": "2020-06-27T00:00:00.000Z"
+  },
+  "injections": [
+    {
+      "injection_id": "air_leak_downstream",
+      "at": "2020-06-26T12:03:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "injection"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "injected",
+    "within_min": 180,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 51,
+  "notes": "H6 held-out positive (docs/plan/heldout-seal.md). The day and the 12:03 instant of the data clock were drawn by the rule committed before the draw, from the days no scenario, slice, tuning case or document had used, 48 h or more from every labelled failure and unlabelled episode, with no known anomaly or gap. The injection runs for its default 240 minutes at magnitude 1, and the expectation is the one this definition's committed scenarios carry (within 180 min, at diagnosis level). Split heldout, profile heldout only: every other profile, --scenario and the tuning list refuse it, and only the set's one final run replays it, after the Jev thresholds are fixed under the pre-registration. H6 was decided after the E3 and E4 results had been seen, so every earlier figure stays in-sample."
+}

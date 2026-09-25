@@ -1,0 +1,34 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "baseline_feb03_normal",
+  "title": "Normal operation, 3 February 2020",
+  "group": "negative",
+  "profiles": ["smoke", "core", "full"],
+  "split": "test",
+  "positive": false,
+  "source": {
+    "kind": "slice",
+    "name": "baseline-feb03"
+  },
+  "replay": {
+    "from": "2020-02-03T00:00:00.000Z",
+    "to": "2020-02-04T00:00:00.000Z",
+    "overrides": {
+      "smoke": {
+        "to": "2020-02-03T08:00:00.000Z"
+      }
+    }
+  },
+  "ground_truth": {
+    "kind": "negative"
+  },
+  "expect": {
+    "tickets": "none",
+    "fault": "benign_or_none",
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "warmup_min": 60,
+  "seed": 33,
+  "notes": "A full machine-day with nothing wrong: the reference for tickets per machine-day and the simplest way a change to the detector shows up as noise. The first month carries no labelled failure, and this day has no gap, no frozen block and no depot depressurisation."
+}

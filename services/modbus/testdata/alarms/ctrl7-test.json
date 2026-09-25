@@ -1,0 +1,179 @@
+{
+  "note": "Synthetic CTRL-7 alarm table for the alarm-evaluator tests of services/modbus/internal/ctrl7. The codes are test codes (T0nn) and the thresholds are chosen to make each trigger kind easy to drive, so the table stays independent of the generated packages/contracts/generated/register-map.json. Field names are the snake_case form of regmap.Alarm and regmap.Trigger. Licence: CC-BY-4.0, SPDX-FileCopyrightText 2026 Meddle S.r.l. (annotated in REUSE.toml under services/modbus/testdata/**).",
+  "alarms": [
+    {
+      "code": "T001",
+      "bit": 0,
+      "type": "warning",
+      "trigger": {
+        "kind": "threshold",
+        "signal": "oil_temperature",
+        "op": "gt",
+        "threshold": 75,
+        "hysteresis": 5,
+        "delay_s": 300,
+        "when": "running",
+        "reset_mode": "auto_hysteresis"
+      }
+    },
+    {
+      "code": "T002",
+      "bit": 1,
+      "type": "warning",
+      "trigger": {
+        "kind": "digital",
+        "signal": "low_pressure_switch",
+        "value": true,
+        "threshold": 1,
+        "delay_s": 0,
+        "when": "any",
+        "reset_mode": "auto"
+      }
+    },
+    {
+      "code": "T003",
+      "bit": 2,
+      "type": "warning",
+      "trigger": {
+        "kind": "state_duration",
+        "op": "gt",
+        "state": "loaded",
+        "duration_s": 600,
+        "when": "loaded",
+        "derived": "continuous_load_time",
+        "reset_mode": "auto"
+      }
+    },
+    {
+      "code": "T004",
+      "bit": 3,
+      "type": "warning",
+      "trigger": {
+        "kind": "differential",
+        "signal": "reservoir_pressure",
+        "signal_b": "line_pressure",
+        "op": "gt",
+        "threshold": 0.5,
+        "hysteresis": 0.1,
+        "delay_s": 60,
+        "when": "any",
+        "abs": true,
+        "derived": "reservoir_line_delta",
+        "reset_mode": "auto_hysteresis"
+      }
+    },
+    {
+      "code": "T005",
+      "bit": 4,
+      "type": "warning",
+      "trigger": {
+        "kind": "derived",
+        "op": "gt",
+        "threshold": 2,
+        "delay_s": 0,
+        "when": "any",
+        "derived": "motor_starts_per_hour",
+        "reset_mode": "auto",
+        "note": "events_per_window quantity motor_starts_per_hour"
+      }
+    },
+    {
+      "code": "T006",
+      "bit": 5,
+      "type": "warning",
+      "trigger": {
+        "kind": "derived",
+        "op": "gt",
+        "threshold": 180,
+        "delay_s": 0,
+        "when": "loaded",
+        "derived": "seconds_since_tower_change",
+        "reset_mode": "auto",
+        "note": "seconds_since_change quantity seconds_since_tower_change"
+      }
+    },
+    {
+      "code": "T007",
+      "bit": 6,
+      "type": "warning",
+      "trigger": {
+        "kind": "threshold",
+        "signal": "motor_current",
+        "op": "gt",
+        "threshold": 7.5,
+        "delay_s": 0,
+        "when": "loaded",
+        "start_mask_s": 15,
+        "reset_mode": "auto"
+      }
+    },
+    {
+      "code": "T008",
+      "bit": 7,
+      "type": "shutdown",
+      "trigger": {
+        "kind": "composite",
+        "delay_s": 20,
+        "when": "any",
+        "reset_mode": "manual",
+        "note": "all of 2 conditions",
+        "all": [
+          {
+            "kind": "digital",
+            "signal": "load_valve",
+            "value": true,
+            "threshold": 1
+          },
+          {
+            "kind": "threshold",
+            "signal": "motor_current",
+            "op": "lt",
+            "threshold": 1
+          }
+        ]
+      }
+    },
+    {
+      "code": "T009",
+      "bit": 8,
+      "type": "shutdown",
+      "trigger": {
+        "kind": "composite",
+        "delay_s": 10,
+        "when": "any",
+        "reset_mode": "manual_service",
+        "note": "any of 2 conditions",
+        "any": [
+          {
+            "kind": "threshold",
+            "signal": "line_pressure",
+            "op": "lt",
+            "threshold": -0.5
+          },
+          {
+            "kind": "threshold",
+            "signal": "line_pressure",
+            "op": "gt",
+            "threshold": 15.5
+          }
+        ]
+      }
+    },
+    {
+      "code": "T010",
+      "bit": 9,
+      "type": "warning",
+      "trigger": {
+        "kind": "pressure_ratio",
+        "signal": "line_pressure",
+        "signal_b": "discharge_pressure",
+        "op": "gt",
+        "threshold": 1.5,
+        "delay_s": 0,
+        "when": "any",
+        "reset_mode": "auto",
+        "note": "a kind this evaluator does not know; it must never fire"
+      }
+    }
+  ]
+}

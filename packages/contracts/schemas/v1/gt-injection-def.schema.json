@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-injection-def:v1",
+  "title": "Fault injection definition",
+  "description": "One injection type of the simulator, exactly in the simulator's model: per-tag transforms with a state guard, a trapezoid envelope and tunable instance parameters. tag values are the manual's signal registry ids and fault_id values are the manual's cause registry ids. Never a message on its own: definitions travel inside a gt-injections document.",
+  "type": "object",
+  "properties": {
+    "injection_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/injection_id" },
+    "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+    "label": {
+      "description": "Menu text of the injection, shown verbatim.",
+      "type": "string",
+      "minLength": 1
+    },
+    "benign": {
+      "description": "True when the cause is a normal operating condition rather than a defect.",
+      "type": "boolean"
+    },
+    "description": {
+      "description": "What the injection does to the signals, in words.",
+      "type": "string",
+      "minLength": 1
+    },
+    "default_duration_sim_min": {
+      "description": "Simulated minutes an instance runs when the command names no duration.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 14400
+    },
+    "envelope": {
+      "description": "Trapezoid in simulated time: the magnitude rises over ramp_in_min, holds at one and falls over ramp_out_min.",
+      "type": "object",
+      "properties": {
+        "ramp_in_min": { "type": "integer", "minimum": 0 },
+        "ramp_out_min": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["ramp_in_min", "ramp_out_min"],
+      "additionalProperties": false
+    },
+    "params": {
+      "description": "The tunable instance parameters and their bounds; magnitude and duration_sim_min are the two the control plane accepts.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/param" }
+    },
+    "transforms": {
+      "description": "The per-tag overlays, applied in list order to every emitted row while an instance is active.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/transform" }
+    }
+  },
+  "required": [
+    "injection_id",
+    "fault_id",
+    "label",
+    "benign",
+    "description",
+    "default_duration_sim_min",
+    "envelope",
+    "params",
+    "transforms"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "param": {
+      "title": "Instance parameter",
+      "description": "One tunable parameter of an injection instance with its default and its bounds.",
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "urn:fdp:schema:common:v1#/$defs/identifier" },
+        "default": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" }
+      },
+      "required": ["name", "default", "min", "max"],
+      "additionalProperties": false
+    },
+    "when": {
+      "title": "State guard",
+      "description": "The machine state a transform applies in; any applies always.",
+      "type": "string",
+      "enum": ["any", "loaded", "not_loaded", "unloaded", "off"]
+    },
+    "stuck_value": {
+      "title": "Frozen value",
+      "description": "The value a stuck or dropped-out tag reports: a number for an analog tag, a boolean for a digital one.",
+      "type": ["number", "boolean"]
+    },
+    "transform": {
+      "title": "Transform",
+      "description": "One overlay on one tag: the seven primitives of docs/simulation.md#transform-primitives. Every transform carries tag, op and when; the remaining fields are the primitive's own parameters, so every branch is closed.",
+      "type": "object",
+      "oneOf": [
+        {
+          "title": "offset",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "offset" },
+            "value": {
+              "description": "Added to the analog value, scaled by the envelope magnitude.",
+              "type": "number"
+            }
+          },
+          "required": ["tag", "op", "when", "value"],
+          "additionalProperties": false
+        },
+        {
+          "title": "scale",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "scale" },
+            "factor": {
+              "description": "Multiplies the analog value; the envelope magnitude interpolates between one and this factor.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["tag", "op", "when", "factor"],
+          "additionalProperties": false
+        },
+        {
+          "title": "ramp",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "ramp" },
+            "rate_per_min": {
+              "description": "Change per simulated minute since the anchor.",
+              "type": "number"
+            },
+            "cap": {
+              "description": "Largest absolute deviation the ramp may reach.",
+              "type": "number",
+              "minimum": 0
+            },
+            "anchor": {
+              "description": "Where the ramp counts its minutes from: injection_start counts from the instance start; state_entry restarts at every change of the machine state; guard_entry restarts each time the transform's when guard starts to hold and keeps running through changes of machine state that stay inside the guard (unloaded to off under not_loaded, for example).",
+              "type": "string",
+              "enum": ["injection_start", "state_entry", "guard_entry"]
+            }
+          },
+          "required": ["tag", "op", "when", "rate_per_min", "cap", "anchor"],
+          "additionalProperties": false
+        },
+        {
+          "title": "noise",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "noise" },
+            "sigma": {
+              "description": "Standard deviation of the added zero-mean noise, scaled by the envelope magnitude.",
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": ["tag", "op", "when", "sigma"],
+          "additionalProperties": false
+        },
+        {
+          "title": "stuck",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "stuck" },
+            "value": { "$ref": "#/$defs/stuck_value" }
+          },
+          "required": ["tag", "op", "when", "value"],
+          "additionalProperties": false
+        },
+        {
+          "title": "duty_shift",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "duty_shift" },
+            "run_value": {
+              "description": "Which level of the digital tag is stretched or suppressed.",
+              "type": "boolean"
+            },
+            "extend_s": {
+              "description": "Seconds each run of run_value is extended; a negative value suppresses that many seconds at the start of the run.",
+              "type": "integer"
+            }
+          },
+          "required": ["tag", "op", "when", "run_value", "extend_s"],
+          "additionalProperties": false
+        },
+        {
+          "title": "dropout",
+          "properties": {
+            "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+            "when": { "$ref": "#/$defs/when" },
+            "op": { "const": "dropout" },
+            "value": { "$ref": "#/$defs/stuck_value" }
+          },
+          "required": ["tag", "op", "when"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

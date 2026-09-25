@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:ticket-closure:v1",
+  "title": "Ticket closure",
+  "description": "A technician's verdict on a ticket, as POST /api/tickets/{id}/close records it. The verdict also travels inside the closed ticket message, so a consumer that follows tickets needs nothing else; this schema is what the API body and the app.ticket_closures row are validated against.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:ticket-closure:v1" },
+    "ticket_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "verdict": {
+      "description": "Whether the diagnosis on the ticket matched what the technician found.",
+      "type": "string",
+      "enum": ["correct", "wrong"]
+    },
+    "note": {
+      "description": "What the technician found, in their own words.",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "closed_by": { "description": "Who closed the ticket.", "type": "string" },
+    "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+  },
+  "required": ["schema", "ticket_id", "verdict", "sim_ts"],
+  "additionalProperties": true
+}

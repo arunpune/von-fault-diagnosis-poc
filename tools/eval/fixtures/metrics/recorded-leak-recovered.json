@@ -1,0 +1,158 @@
+{
+  "schema": "urn:fdp:eval:metrics-fixture:v1",
+  "id": "recorded_leak_recovered",
+  "note": "A recorded leak found late and named wrongly first: the window is detected, the diagnosis is not. Also carries a ticket in an excluded window, a benign ticket, a warmup ticket and a review-only false positive.",
+  "backend": "rules",
+  "review_min": 0.6,
+  "native_alarm_codes": ["W102", "W103"],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": 5,
+    "llm_output_per_mtok": 25,
+    "as_of": "2026-09-19"
+  },
+  "binding": {
+    "id": "f3_air_leak_jun05",
+    "group": "recording_positive",
+    "split": "test",
+    "warmup_min": 60,
+    "replay": { "from": "2020-06-05T04:00:00.000Z", "to": "2020-06-06T04:00:00.000Z" },
+    "windows": [
+      {
+        "id": "F3",
+        "from": "2020-06-05T09:49:00.000Z",
+        "to": "2020-06-06T04:00:00.000Z",
+        "lead_from": "2020-06-05T09:49:00.000Z",
+        "accepted": ["air_leak_downstream", "air_leak_dryer_purge"],
+        "benign": false,
+        "onset": "2020-06-05T09:49:00.000Z",
+        "onset_known": true,
+        "headline": true
+      }
+    ],
+    "excluded": [
+      {
+        "id": "gap-recovery-0600",
+        "from": "2020-06-05T06:00:00.000Z",
+        "to": "2020-06-05T07:00:00.000Z",
+        "reason": "gap_recovery"
+      }
+    ],
+    "benign_fault_ids": ["high_ambient_temperature"],
+    "expect": {
+      "tickets": "at_least_one",
+      "fault": "accepted",
+      "within_min": 120,
+      "max_false_tickets": 2,
+      "pass_level": "diagnosis"
+    }
+  },
+  "tickets": [
+    {
+      "ticket_id": "t-006",
+      "episode_id": "e-006",
+      "opened_sim_ts": "2020-06-05T04:30:00.000Z",
+      "fault_at_open": "motor_overload",
+      "fault_latest": "motor_overload",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "t-004",
+      "episode_id": "e-004",
+      "opened_sim_ts": "2020-06-05T06:30:00.000Z",
+      "fault_at_open": "motor_overload",
+      "fault_latest": "motor_overload",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "t-005",
+      "episode_id": "e-005",
+      "opened_sim_ts": "2020-06-05T08:00:00.000Z",
+      "fault_at_open": "high_ambient_temperature",
+      "fault_latest": "high_ambient_temperature",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "t-007",
+      "episode_id": "e-007",
+      "opened_sim_ts": "2020-06-05T08:30:00.000Z",
+      "fault_at_open": "separator_drain_blocked",
+      "fault_latest": "separator_drain_blocked",
+      "max_level": "review"
+    },
+    {
+      "ticket_id": "t-001",
+      "episode_id": "e-001",
+      "opened_sim_ts": "2020-06-05T10:10:00.000Z",
+      "fault_at_open": "oil_cooler_fouling",
+      "fault_latest": "oil_cooler_fouling",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "t-002",
+      "episode_id": "e-002",
+      "opened_sim_ts": "2020-06-05T10:40:00.000Z",
+      "fault_at_open": "air_leak_downstream",
+      "fault_latest": "air_leak_downstream",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "t-003",
+      "episode_id": "e-003",
+      "opened_sim_ts": "2020-06-05T11:10:00.000Z",
+      "fault_at_open": "air_leak_dryer_purge",
+      "fault_latest": "air_leak_dryer_purge",
+      "max_level": "ticket"
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "d-001",
+      "episode_id": "e-001",
+      "sim_ts": "2020-06-05T10:10:00.000Z",
+      "choice": "oil_cooler_fouling",
+      "confidence": 0.87,
+      "gate": "ticket",
+      "abstained": false,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "backend": "rules",
+      "benign_choice": false
+    },
+    {
+      "decision_id": "d-002",
+      "episode_id": "e-002",
+      "sim_ts": "2020-06-05T10:40:00.000Z",
+      "choice": "air_leak_downstream",
+      "confidence": 0.91,
+      "gate": "ticket",
+      "abstained": false,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "backend": "rules",
+      "benign_choice": false
+    }
+  ],
+  "alarms": [
+    { "code": "W101", "sim_ts": "2020-06-05T09:00:00.000Z" },
+    { "code": "W102", "sim_ts": "2020-06-05T10:55:00.000Z" },
+    { "code": "W103", "sim_ts": "2020-06-05T11:30:00.000Z" }
+  ],
+  "suspects": [
+    {
+      "event_id": "s-001",
+      "sim_ts": "2020-06-05T04:20:00.000Z",
+      "symptom_key": "frequent_cycling"
+    },
+    {
+      "event_id": "s-002",
+      "sim_ts": "2020-06-05T06:30:00.000Z",
+      "symptom_key": "frequent_cycling"
+    },
+    {
+      "event_id": "s-003",
+      "sim_ts": "2020-06-05T08:00:00.000Z",
+      "symptom_key": "oil_temperature_high"
+    },
+    { "event_id": "s-004", "sim_ts": "2020-06-05T09:50:00.000Z", "symptom_key": "continuous_load" },
+    { "event_id": "s-005", "sim_ts": "2020-06-05T10:20:00.000Z", "symptom_key": "continuous_load" }
+  ]
+}

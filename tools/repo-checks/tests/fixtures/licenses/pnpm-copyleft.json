@@ -1,0 +1,26 @@
+{
+  "GPL-3.0-only": [
+    {
+      "description": "Synthetic entry: a copyleft dependency.",
+      "license": "GPL-3.0-only",
+      "name": "example-copyleft-widget",
+      "versions": ["1.0.0"]
+    }
+  ],
+  "LGPL-3.0-or-later": [
+    {
+      "description": "Synthetic entry: a weak-copyleft dependency the policy flags.",
+      "license": "LGPL-3.0-or-later",
+      "name": "example-flagged-widget",
+      "versions": ["2.3.1"]
+    }
+  ],
+  "MIT": [
+    {
+      "description": "Synthetic entry: a permissive dependency.",
+      "license": "MIT",
+      "name": "example-permissive-widget",
+      "versions": ["0.4.0"]
+    }
+  ]
+}

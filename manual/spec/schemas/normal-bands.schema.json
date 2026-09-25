@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:normal-bands:v1",
+  "title": "manual/spec/derived/normal-bands.json",
+  "description": "Output of manual/tools/derive_bands.py: per-state bands, start-current peak and reference cycle figures derived from the first MetroPT-3 month. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source_file": { "$ref": "common.schema.json#/$defs/text" },
+        "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "source_bytes": { "type": "integer", "exclusiveMinimum": 0 },
+        "rows_total": { "type": "integer", "exclusiveMinimum": 0 },
+        "range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+          }
+        },
+        "rows_used": { "type": "integer", "exclusiveMinimum": 0 },
+        "rows_dropped_gap": { "type": "integer", "minimum": 0 },
+        "rows_dropped_frozen": { "type": "integer", "minimum": 0 },
+        "rows_dropped_settle": { "type": "integer", "minimum": 0 },
+        "generated_by": { "$ref": "common.schema.json#/$defs/text" },
+        "script_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "pandas_version": { "$ref": "common.schema.json#/$defs/text" },
+        "range_override": { "type": "boolean" }
+      },
+      "required": [
+        "source_file",
+        "source_sha256",
+        "source_bytes",
+        "rows_total",
+        "range",
+        "rows_used",
+        "rows_dropped_gap",
+        "rows_dropped_frozen",
+        "rows_dropped_settle",
+        "generated_by",
+        "script_sha256",
+        "pandas_version",
+        "range_override"
+      ],
+      "additionalProperties": false
+    },
+    "signals": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "common.schema.json#/$defs/identifier" },
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1,
+        "propertyNames": { "$ref": "common.schema.json#/$defs/band_state" },
+        "additionalProperties": { "$ref": "#/$defs/state_stats" }
+      }
+    },
+    "start_current_peak": {
+      "type": "object",
+      "properties": {
+        "p50": { "type": "number" },
+        "p95": { "type": "number" },
+        "n": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["p50", "p95", "n"],
+      "additionalProperties": false
+    },
+    "cycle": {
+      "type": "object",
+      "description": "Reference operating figures; numbers only, the units live in machine.yaml reference_operation.",
+      "properties": {
+        "cut_in_pressure_observed": { "type": "number" },
+        "cut_out_pressure_observed": { "type": "number" },
+        "loaded_run_typical": { "type": "number" },
+        "loaded_run_band": { "$ref": "#/$defs/number_band" },
+        "unloaded_run_on_typical": { "type": "number" },
+        "off_phase_typical": { "type": "number" },
+        "load_cycles_per_hour": { "type": "number" },
+        "pressure_rise_loaded": { "type": "number" },
+        "pressure_decay_unloaded_typical": { "type": "number" },
+        "pressure_decay_unloaded_band": { "$ref": "#/$defs/number_band" },
+        "discharge_minus_line_loaded": { "type": "number" },
+        "tower_pulse_after_cut_in": { "type": "number" }
+      },
+      "required": [
+        "cut_in_pressure_observed",
+        "cut_out_pressure_observed",
+        "loaded_run_typical",
+        "loaded_run_band",
+        "unloaded_run_on_typical",
+        "off_phase_typical",
+        "load_cycles_per_hour",
+        "pressure_rise_loaded",
+        "pressure_decay_unloaded_typical",
+        "pressure_decay_unloaded_band",
+        "discharge_minus_line_loaded",
+        "tower_pulse_after_cut_in"
+      ],
+      "additionalProperties": false
+    },
+    "_credit": { "$ref": "common.schema.json#/$defs/text" },
+    "_license": { "$ref": "common.schema.json#/$defs/text" }
+  },
+  "required": ["provenance", "signals", "start_current_peak", "cycle", "_credit", "_license"],
+  "additionalProperties": false,
+  "$defs": {
+    "number_band": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" }
+      },
+      "required": ["min", "max"],
+      "additionalProperties": false
+    },
+    "analog_stats": {
+      "type": "object",
+      "properties": {
+        "low": { "type": "number" },
+        "typical": { "type": "number" },
+        "high": { "type": "number" },
+        "p1": { "type": "number" },
+        "p5": { "type": "number" },
+        "p50": { "type": "number" },
+        "p95": { "type": "number" },
+        "p99": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "n": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["low", "typical", "high", "p1", "p5", "p50", "p95", "p99", "min", "max", "n"],
+      "additionalProperties": false
+    },
+    "digital_stats": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "anyOf": [
+            { "type": "integer", "enum": [0, 1] },
+            { "type": "string", "const": "alternating" }
+          ]
+        },
+        "duty": { "type": "number", "minimum": 0, "maximum": 1 },
+        "n": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["expected", "duty", "n"],
+      "additionalProperties": false
+    },
+    "authored_stats": {
+      "description": "The synthetic extra (ambient_temperature) has no MetroPT-3 column, so its band is authored from machine.yaml rather than derived. Check B1 skips it: it compares only the signals whose band.source is `derived`.",
+      "type": "object",
+      "properties": {
+        "low": { "type": "number" },
+        "typical": { "type": "number" },
+        "high": { "type": "number" },
+        "source": { "type": "string", "const": "authored" }
+      },
+      "required": ["low", "typical", "high", "source"],
+      "additionalProperties": false
+    },
+    "state_stats": {
+      "oneOf": [
+        { "$ref": "#/$defs/analog_stats" },
+        { "$ref": "#/$defs/digital_stats" },
+        { "$ref": "#/$defs/authored_stats" }
+      ]
+    }
+  }
+}

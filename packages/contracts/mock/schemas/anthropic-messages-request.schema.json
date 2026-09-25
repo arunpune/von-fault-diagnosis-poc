@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:mock:anthropic-messages-request:v1",
+  "title": "POST /v1/messages request body",
+  "description": "What the mock Anthropic server accepts. It pins the one wire shape this repository uses for structured output: `output_config.format = { type: \"json_schema\", schema: <JSON Schema> }`. The Node client reaches it through messages.parse() with an output-format helper and the Python client through messages.create() with a raw JSON Schema, so the mock never has to know which SDK called it. The body stays open at the top level because the Messages API keeps adding parameters; `output_config` and `format` are closed, because the point of this schema is to notice when that shape moves.",
+  "type": "object",
+  "required": ["model", "max_tokens", "messages"],
+  "properties": {
+    "model": { "type": "string", "minLength": 1 },
+    "max_tokens": { "type": "integer", "minimum": 1 },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/message" }
+    },
+    "system": { "type": ["string", "array"] },
+    "temperature": { "type": "number", "minimum": 0, "maximum": 1 },
+    "top_p": { "type": "number", "minimum": 0, "maximum": 1 },
+    "stop_sequences": { "type": "array", "items": { "type": "string" } },
+    "stream": { "type": "boolean" },
+    "metadata": { "type": "object" },
+    "output_config": { "$ref": "#/$defs/output_config" }
+  },
+  "$defs": {
+    "message": {
+      "type": "object",
+      "required": ["role", "content"],
+      "properties": {
+        "role": { "enum": ["user", "assistant"] },
+        "content": { "type": ["string", "array"] }
+      },
+      "additionalProperties": false
+    },
+    "output_config": {
+      "type": "object",
+      "properties": {
+        "effort": { "enum": ["low", "medium", "high", "xhigh", "max", null] },
+        "format": { "$ref": "#/$defs/json_schema_format" }
+      },
+      "additionalProperties": false
+    },
+    "json_schema_format": {
+      "description": "The only output format this repository sends. `schema` is a JSON Schema object; its contents are the caller's business, so they are not constrained further here.",
+      "type": ["object", "null"],
+      "required": ["type", "schema"],
+      "properties": {
+        "type": { "const": "json_schema" },
+        "schema": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

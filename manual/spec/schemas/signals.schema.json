@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:signals:v1",
+  "title": "manual/spec/signals.yaml",
+  "description": "Signal tags in register order, machine states, derived signals and named behaviours. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "signals": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/signal" }
+    },
+    "machine_states": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "common.schema.json#/$defs/band_state" }
+        },
+        "running_threshold": { "$ref": "common.schema.json#/$defs/quantity" },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "loaded": { "$ref": "common.schema.json#/$defs/text" },
+            "unloaded": { "$ref": "common.schema.json#/$defs/text" },
+            "off": { "$ref": "common.schema.json#/$defs/text" }
+          },
+          "required": ["loaded", "unloaded", "off"],
+          "additionalProperties": false
+        },
+        "aliases": {
+          "type": "object",
+          "properties": {
+            "running": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/band_state" }
+            }
+          },
+          "required": ["running"],
+          "additionalProperties": false
+        },
+        "start_event": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["order", "running_threshold", "rules", "aliases", "start_event"],
+      "additionalProperties": false
+    },
+    "derived": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/derived_signal" }
+    },
+    "behaviours": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/identifier" },
+          "description": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["id", "description"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schema_version", "signals", "machine_states", "derived", "behaviours"],
+  "additionalProperties": false,
+  "$defs": {
+    "analog_band": {
+      "type": "object",
+      "properties": {
+        "low": { "type": "number" },
+        "typical": { "type": "number" },
+        "high": { "type": "number" }
+      },
+      "required": ["low", "typical", "high"],
+      "additionalProperties": false
+    },
+    "digital_band": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "anyOf": [
+            { "type": "integer", "enum": [0, 1] },
+            { "type": "string", "const": "alternating" }
+          ]
+        }
+      },
+      "required": ["expected"],
+      "additionalProperties": false
+    },
+    "signal": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "panel_label": { "$ref": "common.schema.json#/$defs/panel_label" },
+        "name": { "$ref": "common.schema.json#/$defs/text" },
+        "metropt_column": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "group": { "$ref": "common.schema.json#/$defs/signal_group" },
+        "kind": { "$ref": "common.schema.json#/$defs/signal_kind" },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" },
+        "subsystem": { "$ref": "common.schema.json#/$defs/subsystem" },
+        "description": { "$ref": "common.schema.json#/$defs/text" },
+        "source_note": { "$ref": "common.schema.json#/$defs/text" },
+        "sample_rate_s": { "type": "integer", "exclusiveMinimum": 0 },
+        "range": { "$ref": "common.schema.json#/$defs/range" },
+        "display": {
+          "type": "object",
+          "properties": { "decimals": { "type": "integer", "minimum": 0 } },
+          "required": ["decimals"],
+          "additionalProperties": false
+        },
+        "band": { "$ref": "common.schema.json#/$defs/band" },
+        "modbus": { "$ref": "common.schema.json#/$defs/modbus" },
+        "normal_bands": {
+          "type": "object",
+          "properties": {
+            "loaded": { "$ref": "#/$defs/state_band" },
+            "unloaded": { "$ref": "#/$defs/state_band" },
+            "off": { "$ref": "#/$defs/state_band" }
+          },
+          "required": ["loaded", "unloaded", "off"],
+          "additionalProperties": false
+        },
+        "shown_in_schematic": { "type": "boolean" }
+      },
+      "required": [
+        "id",
+        "panel_label",
+        "name",
+        "metropt_column",
+        "group",
+        "kind",
+        "unit",
+        "subsystem",
+        "description",
+        "sample_rate_s",
+        "band",
+        "modbus",
+        "normal_bands",
+        "shown_in_schematic"
+      ],
+      "additionalProperties": false
+    },
+    "state_band": {
+      "oneOf": [{ "$ref": "#/$defs/analog_band" }, { "$ref": "#/$defs/digital_band" }]
+    },
+    "derived_signal": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "abs_delta",
+            "delta",
+            "time_in_state",
+            "events_per_window",
+            "seconds_since_change",
+            "time_in_states_total"
+          ]
+        },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" },
+        "inputs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "common.schema.json#/$defs/identifier" }
+        },
+        "input": { "$ref": "common.schema.json#/$defs/identifier" },
+        "state": { "$ref": "common.schema.json#/$defs/band_state" },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "common.schema.json#/$defs/band_state" }
+        },
+        "event": { "$ref": "common.schema.json#/$defs/text" },
+        "window_s": { "type": "integer", "exclusiveMinimum": 0 },
+        "reset_on_state_exit": { "$ref": "common.schema.json#/$defs/band_state" }
+      },
+      "required": ["id", "kind", "unit"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "enum": ["abs_delta", "delta"] } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["inputs"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "time_in_state" } }, "required": ["kind"] },
+          "then": { "required": ["state"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "events_per_window" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["event", "window_s"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "seconds_since_change" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["input"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "time_in_states_total" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["states"] }
+        }
+      ]
+    }
+  }
+}

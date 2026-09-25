@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+# Rendered from packages/contracts/topics.json by scripts/ops/render-mosquitto-acl.ts. Do not edit; run `make mosquitto-acl`.
+topic read plant/cau-7/telemetry/#
+topic read plant/cau-7/status/#
+topic read plant/cau-7/events/#
+topic read plant/cau-7/decisions
+topic read plant/cau-7/alerts/#
+topic read $SYS/#
+
+user eval
+topic read plant/#
+topic read gt/#
+topic read $SYS/#
+
+user gateway
+topic write plant/cau-7/telemetry/#
+topic write plant/cau-7/status/gateway
+
+user sim
+topic read plant/cau-7/control/cmd
+topic write plant/cau-7/control/ack
+topic write plant/cau-7/status/sim
+topic write gt/#
+
+user backend-diag
+topic read plant/cau-7/telemetry/#
+topic read plant/cau-7/status/#
+topic write plant/cau-7/events/#
+topic write plant/cau-7/decisions
+topic write plant/cau-7/alerts/#
+topic write plant/cau-7/status/backend
+
+user backend-ops
+topic read plant/cau-7/control/ack
+topic read gt/#
+topic write plant/cau-7/control/cmd

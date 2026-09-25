@@ -1,0 +1,289 @@
+[
+  {
+    "fault_id": "dryer_purge_leak",
+    "name": "Dryer purge valve not seating",
+    "subsystem": "dryer",
+    "benign": false,
+    "summary": "The purge valve no longer closes fully, so dried air escapes continuously through the regeneration line and the silencer. The unit delivers against that loss and never reaches its cut-out point, while the line stays above the low-pressure switch setting, so the controller gives no warning of a pressure problem at all.",
+    "signal_moves": [
+      {
+        "signal": "dryer_purge_pressure",
+        "direction": "high",
+        "phase": "loaded",
+        "onset": "sustained",
+        "note": "The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+        "text": "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached."
+      },
+      {
+        "signal": "oil_temperature",
+        "direction": "rises",
+        "phase": "loaded",
+        "onset": "gradual",
+        "note": "The unit is loaded for hours on end, so the oil keeps taking up heat.",
+        "text": "Oil temperature (T1) gradually rises while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat."
+      },
+      {
+        "signal": "low_pressure_switch",
+        "direction": "stays_off",
+        "phase": "any",
+        "note": "The line never falls far enough to close the switch, so the native warning is absent.",
+        "text": "Low-pressure switch (D5) stays off in any state. The line never falls far enough to close the switch, so the native warning is absent."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+      "Whether a loaded run ends at the cut-out pressure is not reached.",
+      "Oil temperature (T1) gradually rises while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat.",
+      "Low-pressure switch (D5) stays off in any state. The line never falls far enough to close the switch, so the native warning is absent."
+    ],
+    "checks": [
+      "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+      "Watch the dryer purge pressure through a complete changeover and check whether it falls back to its resting value.",
+      "Isolate the dryer and see whether the unit reaches its cut-out pressure again."
+    ],
+    "remedy": "Fit a new purge valve kit and check the silencer for erosion while the valve is out. Refit, run a full regeneration cycle and confirm that the purge pressure returns to its resting value between changeovers and that the unit reaches its cut-out point again.",
+    "conditions": [
+      {
+        "condition_id": "continuous_load",
+        "title": "Compressor stays loaded and does not reach cut-out",
+        "likelihood": "common",
+        "note": "Signature of a loss inside the unit; the purge pressure stays raised while the unit delivers and the low-pressure switch never closes.",
+        "alarms": ["W102"]
+      }
+    ],
+    "parts": [],
+    "maintenance": ["weekly_checks"],
+    "related_alarms": ["W102"],
+    "manual_ref": {
+      "section": "8.3",
+      "anchor": "fault:dryer_purge_leak",
+      "title": "Compressor stays loaded and does not reach cut-out"
+    },
+    "source": "yaml"
+  },
+  {
+    "fault_id": "downstream_air_leak",
+    "name": "Leak in the distribution network",
+    "subsystem": "distribution",
+    "benign": false,
+    "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. Nothing inside the machine is faulty. The loss runs day and night, which is what separates it from a busy shift, and it grows slowly as more joints work loose.",
+    "signal_moves": [
+      {
+        "behaviour": "unloaded_pressure_decay",
+        "direction": "faster",
+        "onset": "gradual",
+        "note": "The earliest sign, visible in the idle phase of every cycle.",
+        "text": "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "higher",
+        "onset": "gradual",
+        "text": "How often the compressor loads per hour is gradually higher."
+      },
+      {
+        "signal": "line_pressure",
+        "direction": "falls",
+        "phase": "loaded",
+        "onset": "sustained",
+        "note": "Late in the fault the line sinks while the unit is still delivering.",
+        "text": "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering."
+      }
+    ],
+    "signal_moves_text": [
+      "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+      "How often the compressor loads per hour is gradually higher.",
+      "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering."
+    ],
+    "checks": [
+      "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+      "If it holds, open the valve again and repeat the hold test with the plant isolated section by section.",
+      "Walk the distribution network and listen at joints, couplings and hose ends, starting with the branches changed most recently."
+    ],
+    "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated. Record the decay you measure so the next comparison starts from a known figure.",
+    "conditions": [
+      {
+        "condition_id": "continuous_load",
+        "title": "Compressor stays loaded and does not reach cut-out",
+        "likelihood": "common",
+        "note": "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load.",
+        "alarms": ["W102"]
+      }
+    ],
+    "parts": [],
+    "maintenance": ["weekly_checks"],
+    "related_alarms": ["W102"],
+    "manual_ref": {
+      "section": "8.3",
+      "anchor": "fault:downstream_air_leak",
+      "title": "Line pressure below setpoint"
+    },
+    "source": "yaml"
+  },
+  {
+    "fault_id": "high_air_demand",
+    "name": "Air demand above the rated delivery",
+    "subsystem": "distribution",
+    "benign": true,
+    "summary": "The consumers ask for more air than the unit is rated to deliver, usually after a new machine went into service or a shift pattern changed. The unit works exactly as designed and needs no repair; it simply cannot keep up with what is now being asked of it.",
+    "signal_moves": [
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "phase": "loaded",
+        "onset": "sustained",
+        "text": "How long each loaded run lasts is persistently longer while loaded."
+      },
+      {
+        "signal": "line_pressure",
+        "direction": "low",
+        "phase": "loaded",
+        "onset": "sustained",
+        "text": "Line pressure (P2) is persistently low while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "How long each loaded run lasts is persistently longer while loaded.",
+      "Line pressure (P2) is persistently low while loaded."
+    ],
+    "checks": [
+      "Ask the operators whether a consumer was added, enlarged or moved to a longer duty.",
+      "Watch the line pressure across a full shift and across a quiet night, and compare the two.",
+      "Confirm that the pressure holds when the plant is idle; a demand problem disappears then, a leak does not."
+    ],
+    "remedy": "No repair is needed on the unit. Reduce the demand, move the heaviest consumers out of the peak, or plan additional compressed-air capacity. Until then, monitor the oil temperature and the loaded time per hour.",
+    "conditions": [
+      {
+        "condition_id": "continuous_load",
+        "title": "Compressor stays loaded and does not reach cut-out",
+        "likelihood": "common",
+        "alarms": ["W102"]
+      }
+    ],
+    "parts": [],
+    "maintenance": ["weekly_checks"],
+    "related_alarms": ["W102"],
+    "manual_ref": {
+      "section": "8.3",
+      "anchor": "fault:high_air_demand",
+      "title": "Compressor stays loaded and does not reach cut-out"
+    },
+    "source": "yaml"
+  },
+  {
+    "fault_id": "oil_cooler_fouled",
+    "name": "Oil cooler fouled",
+    "subsystem": "cooling",
+    "benign": false,
+    "summary": "Dust and oil mist have settled on the cooler block, so the cooling air can no longer carry the heat away. The oil runs hotter in every state, while the duty of the unit and the room around it stay exactly as they were. The change comes on slowly, over weeks rather than hours.",
+    "signal_moves": [
+      {
+        "signal": "oil_temperature",
+        "direction": "rises",
+        "phase": "any",
+        "onset": "gradual",
+        "note": "The rise shows in the idle and stopped phases too, not only under load.",
+        "text": "Oil temperature (T1) gradually rises in any state. The rise shows in the idle and stopped phases too, not only under load."
+      },
+      {
+        "signal": "ambient_temperature",
+        "direction": "unchanged",
+        "phase": "any",
+        "note": "The room is as warm as it always was, which rules out a hot site.",
+        "text": "Ambient temperature (T2) is unchanged in any state. The room is as warm as it always was, which rules out a hot site."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "note": "The unit is not working any harder than before.",
+        "text": "How often the compressor loads per hour is unchanged. The unit is not working any harder than before."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) gradually rises in any state. The rise shows in the idle and stopped phases too, not only under load.",
+      "Ambient temperature (T2) is unchanged in any state. The room is as warm as it always was, which rules out a hot site.",
+      "How often the compressor loads per hour is unchanged. The unit is not working any harder than before."
+    ],
+    "checks": [
+      "Look at the cooler block and the fan guard against the light for a dust or oil film between the fins.",
+      "Compare the oil temperature with the ambient temperature over a full cycle; a difference larger than usual points at the cooler.",
+      "Confirm that the fan turns freely and at its usual speed, to separate this from a fan failure."
+    ],
+    "remedy": "Clean the cooler block, the aftercooler and the fan guard with the unit stopped and isolated, working from the clean side outwards so the dirt is not driven further in. Confirm over the next loaded runs that the oil temperature comes back to its reference figure.",
+    "conditions": [
+      {
+        "condition_id": "oil_temperature_high",
+        "title": "Oil temperature high",
+        "likelihood": "common",
+        "note": "The rise is slow and shows in every state, including the idle and stopped phases.",
+        "alarms": ["W104"]
+      }
+    ],
+    "parts": ["cooler_cleaning_kit"],
+    "maintenance": ["oil_cooler_cleaning"],
+    "related_alarms": ["W104"],
+    "manual_ref": {
+      "section": "8.5",
+      "anchor": "fault:oil_cooler_fouled",
+      "title": "Oil temperature high"
+    },
+    "source": "yaml"
+  },
+  {
+    "fault_id": "high_ambient_temperature",
+    "name": "Ambient temperature above the operating range",
+    "subsystem": "cooling",
+    "benign": true,
+    "summary": "The cooling air reaching the unit is warmer than the reference conditions allow, so the cooler cannot pull the oil down to its usual temperature. The unit and its cooling circuit are sound; the room around them has changed.",
+    "signal_moves": [
+      {
+        "signal": "ambient_temperature",
+        "direction": "high",
+        "phase": "any",
+        "onset": "sustained",
+        "text": "Ambient temperature (T2) is persistently high in any state."
+      },
+      {
+        "signal": "oil_temperature",
+        "direction": "rises",
+        "phase": "any",
+        "onset": "gradual",
+        "note": "The difference between oil and cooling air stays as it always was; both simply sit higher.",
+        "text": "Oil temperature (T1) gradually rises in any state. The difference between oil and cooling air stays as it always was; both simply sit higher."
+      }
+    ],
+    "signal_moves_text": [
+      "Ambient temperature (T2) is persistently high in any state.",
+      "Oil temperature (T1) gradually rises in any state. The difference between oil and cooling air stays as it always was; both simply sit higher."
+    ],
+    "checks": [
+      "Check that the cooling-air inlet and outlet are clear and that warm outlet air is not being drawn back in.",
+      "Compare the oil temperature with the ambient temperature; when the difference between them is normal, the cooler is doing its job.",
+      "Check whether other equipment in the room has started to give off heat."
+    ],
+    "remedy": "No repair is needed on the unit. Improve the ventilation of the room, duct the warm outlet air away from the intake, or move the heat source. Until the room is put right, monitor the oil temperature and the difference between it and the ambient reading.",
+    "conditions": [
+      {
+        "condition_id": "oil_temperature_high",
+        "title": "Oil temperature high",
+        "likelihood": "common",
+        "note": "The room itself is warm; the difference between oil and cooling air is the same as always.",
+        "alarms": ["W104"]
+      }
+    ],
+    "parts": [],
+    "maintenance": ["oil_cooler_cleaning"],
+    "related_alarms": ["W104"],
+    "manual_ref": {
+      "section": "8.5",
+      "anchor": "fault:high_ambient_temperature",
+      "title": "Oil temperature high"
+    },
+    "source": "yaml"
+  }
+]

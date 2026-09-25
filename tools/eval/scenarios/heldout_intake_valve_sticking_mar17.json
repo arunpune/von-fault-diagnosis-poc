@@ -1,0 +1,39 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "heldout_intake_valve_sticking_mar17",
+  "title": "Held-out: injected intake valve sticking, 17 March 2020",
+  "group": "injected",
+  "profiles": ["heldout"],
+  "split": "heldout",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "heldout-mar17"
+  },
+  "replay": {
+    "from": "2020-03-17T00:00:00.000Z",
+    "to": "2020-03-18T00:00:00.000Z"
+  },
+  "injections": [
+    {
+      "injection_id": "intake_valve_sticking",
+      "at": "2020-03-17T14:50:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "injection"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "injected",
+    "within_min": 120,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 53,
+  "notes": "H6 held-out positive (docs/plan/heldout-seal.md). The day and the 14:50 instant of the data clock were drawn by the rule committed before the draw, from the days no scenario, slice, tuning case or document had used, 48 h or more from every labelled failure and unlabelled episode, with no known anomaly or gap. The injection runs for its default 180 minutes at magnitude 1, and the expectation is the one this definition's committed scenarios carry (within 120 min, at diagnosis level). Split heldout, profile heldout only: every other profile, --scenario and the tuning list refuse it, and only the set's one final run replays it, after the Jev thresholds are fixed under the pre-registration. H6 was decided after the E3 and E4 results had been seen, so every earlier figure stays in-sample."
+}

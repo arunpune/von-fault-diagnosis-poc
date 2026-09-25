@@ -1,0 +1,35 @@
+{
+  "schema": "urn:fdp:schema:gt-injections:v1",
+  "injections": [
+    {
+      "injection_id": "test_injection",
+      "fault_id": "oil_cooler_fouled",
+      "label": "Test injection",
+      "benign": false,
+      "description": "A hand-written fixture for the catalog loader tests.",
+      "default_duration_sim_min": 600,
+      "envelope": {
+        "ramp_in_min": 180,
+        "ramp_out_min": 60
+      },
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ],
+      "transforms": [
+        {
+          "tag": "line_pressure",
+          "op": "ramp",
+          "when": "not_loaded",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "power_on"
+        }
+      ]
+    }
+  ]
+}

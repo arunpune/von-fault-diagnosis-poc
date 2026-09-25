@@ -1,0 +1,242 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional signal registry: the fixed registry the register-map generator falls back to
+# while manual/spec/signals.yaml is absent from a worktree. It holds only the fields the
+# generator reads, with the manual's tag ids verbatim, so nothing is renamed when the real file
+# lands.
+schema_version: 1
+signals:
+  - id: discharge_pressure
+    panel_label: P1
+    name: Discharge pressure
+    metropt_column: TP2
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: compressor
+    range:
+      min: -1
+      max: 16
+    modbus:
+      type: int16
+      scale: 1000
+  - id: line_pressure
+    panel_label: P2
+    name: Line pressure
+    metropt_column: TP3
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: reservoirs
+    range:
+      min: -1
+      max: 16
+    modbus:
+      type: int16
+      scale: 1000
+  - id: separator_discharge_pressure
+    panel_label: P3
+    name: Separator discharge pressure
+    metropt_column: H1
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: separator_drain
+    range:
+      min: -1
+      max: 16
+    modbus:
+      type: int16
+      scale: 1000
+  - id: dryer_purge_pressure
+    panel_label: P4
+    name: Dryer purge pressure
+    metropt_column: DV_pressure
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: dryer
+    range:
+      min: -1
+      max: 16
+    modbus:
+      type: int16
+      scale: 1000
+  - id: reservoir_pressure
+    panel_label: P5
+    name: Reservoir pressure
+    metropt_column: Reservoirs
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: reservoirs
+    range:
+      min: -1
+      max: 16
+    modbus:
+      type: int16
+      scale: 1000
+  - id: oil_temperature
+    panel_label: T1
+    name: Oil temperature
+    metropt_column: Oil_temperature
+    group: analog
+    kind: temperature
+    unit: degC
+    subsystem: oil
+    range:
+      min: -20
+      max: 120
+    modbus:
+      type: int16
+      scale: 100
+  - id: motor_current
+    panel_label: I1
+    name: Motor current
+    metropt_column: Motor_current
+    group: analog
+    kind: current
+    unit: A
+    subsystem: electrical
+    range:
+      min: 0
+      max: 20
+    modbus:
+      type: int16
+      scale: 100
+  - id: intake_closed
+    panel_label: D1
+    name: Intake valve closed
+    metropt_column: COMP
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: intake_unloading
+    modbus:
+      type: uint16
+      scale: 1
+  - id: load_valve
+    panel_label: D2
+    name: Load solenoid
+    metropt_column: DV_eletric
+    group: digital
+    kind: command
+    unit: bool
+    subsystem: intake_unloading
+    modbus:
+      type: uint16
+      scale: 1
+  - id: dryer_tower
+    panel_label: D3
+    name: Dryer tower in service
+    metropt_column: Towers
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: dryer
+    modbus:
+      type: uint16
+      scale: 1
+  - id: regulator_contact
+    panel_label: D4
+    name: Pressure regulator contact
+    metropt_column: MPG
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: control
+    modbus:
+      type: uint16
+      scale: 1
+  - id: low_pressure_switch
+    panel_label: D5
+    name: Low-pressure switch
+    metropt_column: LPS
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: reservoirs
+    modbus:
+      type: uint16
+      scale: 1
+  - id: purge_switch
+    panel_label: D6
+    name: Purge pressure switch
+    metropt_column: Pressure_switch
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: dryer
+    modbus:
+      type: uint16
+      scale: 1
+  - id: oil_level_ok
+    panel_label: D7
+    name: Oil level switch
+    metropt_column: Oil_level
+    group: digital
+    kind: switch
+    unit: bool
+    subsystem: oil
+    modbus:
+      type: uint16
+      scale: 1
+  - id: flow_pulse
+    panel_label: D8
+    name: Flow pulse
+    metropt_column: Caudal_impulses
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: reservoirs
+    modbus:
+      type: uint16
+      scale: 1
+  - id: ambient_temperature
+    panel_label: T2
+    name: Ambient temperature
+    metropt_column: null
+    group: extra
+    kind: temperature
+    unit: degC
+    subsystem: cooling
+    range:
+      min: -20
+      max: 60
+    modbus:
+      type: int16
+      scale: 100
+derived:
+  - id: reservoir_line_delta
+    kind: abs_delta
+    inputs:
+      - reservoir_pressure
+      - line_pressure
+    unit: bar
+  - id: discharge_line_delta
+    kind: delta
+    inputs:
+      - discharge_pressure
+      - line_pressure
+    unit: bar
+  - id: continuous_load_time
+    kind: time_in_state
+    state: loaded
+    unit: min
+  - id: motor_starts_per_hour
+    kind: events_per_window
+    event: start_event
+    window_s: 3600
+    unit: per_hour
+  - id: seconds_since_tower_change
+    kind: seconds_since_change
+    input: dryer_tower
+    reset_on_state_exit: loaded
+    unit: s
+  - id: run_hours
+    kind: time_in_states_total
+    states:
+      - unloaded
+      - loaded
+    unit: h

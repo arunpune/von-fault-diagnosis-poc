@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Test fixture: one interval task with a service message and one calendar task.
+schema_version: 1
+tasks:
+  - id: oil_change
+    name: Oil change
+    interval: {hours: 4000, months: 12, rule: whichever_first}
+    service_message: M401
+    duration_min: 60
+    consumables:
+      - {part: compressor_oil, quantity: 8, unit: L}
+      - {part: oil_filter_element, quantity: 1, unit: count}
+    tools: [Socket set, Drain hose, Collecting vessel]
+    safety:
+      - Stop the unit, isolate it electrically and vent the pressure before opening the oil circuit.
+      - Let the oil cool down before draining it.
+    steps:
+      - Drain the used oil into the collecting vessel.
+      - Fit a new oil filter element and a new sealing ring.
+      - Refill with the specified oil grade up to the mark on the sight glass.
+      - Run the unit through a full load cycle and check for leaks.
+    post_checks:
+      - The oil level stands between the marks after the unit has stopped.
+      - The service message has been reset at the controller.
+    related_causes: [oil_filter_clogged]
+    components: []
+  - id: daily_checks
+    name: Daily checks
+    interval: {calendar: daily, rule: whichever_first}
+    service_message: null
+    duration_min: 10
+    consumables: []
+    tools: []
+    safety:
+      - Keep clear of hot surfaces while the unit is running.
+    steps:
+      - Read the controller display and note any pending message.
+      - Check the oil level through the sight glass while the unit is stopped.
+      - Confirm that the condensate drain discharges and closes again.
+    post_checks:
+      - No unacknowledged message remains on the controller.
+    related_causes: [condensate_drain_stuck_open]
+    components: [controller]

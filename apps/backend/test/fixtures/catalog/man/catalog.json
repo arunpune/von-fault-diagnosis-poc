@@ -1,0 +1,3796 @@
+[
+  {
+    "benign": false,
+    "checks": [
+      "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+      "If it holds, open the valve again and repeat the hold test with the plant isolated section by section.",
+      "Walk the distribution network and listen at joints, couplings and hose ends, starting with the branches changed most recently.",
+      "Compare the pressure decay of a quiet night with the reference cycle of section 6.3."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "common",
+        "note": "The pressure falls at the same rate at night and at the weekend, when no consumer is drawing air.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W108"
+        ],
+        "condition_id": "frequent_cycling",
+        "likelihood": "common",
+        "note": "The clearest early sign; the idle pressure decay is faster than the reference figure long before the pressure itself drops.",
+        "title": "Compressor starts and loads too often"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "common",
+        "note": "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load.",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      }
+    ],
+    "fault_id": "downstream_air_leak",
+    "maintenance": [
+      "weekly_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:downstream_air_leak",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Leak in the distribution network",
+    "pages": {
+      "clean": [
+        26,
+        29
+      ],
+      "realistic": [
+        27,
+        30
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W108",
+      "W102"
+    ],
+    "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated. Record the decay you measure so the next comparison starts from a known figure. Leaks return, so add a walk-round listening check to the routine in task 7.3.2 rather than treating this as a one-off repair.",
+    "signal_moves": [
+      {
+        "behaviour": "unloaded_pressure_decay",
+        "direction": "faster",
+        "note": "The earliest sign, visible in the idle phase of every cycle.",
+        "onset": "gradual",
+        "text": "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "higher",
+        "onset": "gradual",
+        "text": "How often the compressor loads per hour is gradually higher."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "gradual",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is gradually longer while loaded."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "note": "Late in the fault, once the loss matches what the unit can deliver.",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver."
+      },
+      {
+        "direction": "falls",
+        "note": "Late in the fault the line sinks while the unit is still delivering.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering."
+      },
+      {
+        "direction": "on",
+        "note": "The switch closes only at that late stage, so it gives no early warning.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "low_pressure_switch",
+        "text": "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+      }
+    ],
+    "signal_moves_text": [
+      "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+      "How often the compressor loads per hour is gradually higher.",
+      "How long each loaded run lasts is gradually longer while loaded.",
+      "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver.",
+      "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering.",
+      "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+    ],
+    "source": "yaml",
+    "subsystem": "distribution",
+    "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. Nothing inside the machine is faulty. The loss runs day and night, which is what separates it from a busy shift, and it grows slowly as more joints work loose."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+      "Watch dryer purge pressure (P4) through a complete changeover and check whether it falls back to its resting value.",
+      "Isolate the dryer and see whether the unit reaches its cut-out pressure again.",
+      "Inspect the purge valve seat, spring and pilot line as described in task 7.3.10."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "common",
+        "note": "Look at the purge line before the distribution network; the loss is inside the unit.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "common",
+        "note": "Signature of a loss inside the unit; the purge pressure stays raised while the unit delivers and the low-pressure switch never closes.",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W103"
+        ],
+        "condition_id": "purge_pressure_high",
+        "likelihood": "common",
+        "note": "The purge pressure is high continuously, not only around a changeover.",
+        "title": "Dryer purge pressure high, air escaping at the purge silencer"
+      }
+    ],
+    "fault_id": "dryer_purge_leak",
+    "maintenance": [
+      "dryer_purge_valve_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:dryer_purge_leak",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Dryer purge valve not seating",
+    "pages": {
+      "clean": [
+        26,
+        29,
+        30
+      ],
+      "realistic": [
+        27,
+        30,
+        31
+      ]
+    },
+    "parts": [
+      "purge_valve_kit",
+      "purge_silencer"
+    ],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W102",
+      "W103"
+    ],
+    "remedy": "Fit a new purge valve kit and check the silencer for erosion while the valve is out. Refit, run a full regeneration cycle and confirm that the purge pressure returns to its resting value between changeovers and that the unit reaches its cut-out point again. A valve that has leaked for a long time usually means the silencer packing is damaged too; replace both together.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "note": "The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "sustained",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is persistently longer while loaded."
+      },
+      {
+        "direction": "rises",
+        "note": "The unit is loaded for hours on end, so the oil keeps taking up heat.",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat."
+      },
+      {
+        "direction": "low",
+        "note": "The element works against a plateau below the normal delivery pressure.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently low while loaded. The element works against a plateau below the normal delivery pressure."
+      },
+      {
+        "direction": "stays_off",
+        "note": "The line never falls far enough to close the switch, so the native warning is absent.",
+        "phase": "any",
+        "signal": "low_pressure_switch",
+        "text": "Low-pressure switch (D5) stays off in every state. The line never falls far enough to close the switch, so the native warning is absent."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+      "Whether a loaded run ends at the cut-out pressure is not reached.",
+      "How long each loaded run lasts is persistently longer while loaded.",
+      "Oil temperature (T1) rises gradually while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat.",
+      "Motor current (I1) is persistently low while loaded. The element works against a plateau below the normal delivery pressure.",
+      "Low-pressure switch (D5) stays off in every state. The line never falls far enough to close the switch, so the native warning is absent."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "The purge valve no longer closes fully, so dried air escapes continuously through the regeneration line and the silencer. The unit delivers against that loss and never reaches its cut-out point, while the line stays above the low-pressure switch setting, so the controller gives no warning of a pressure problem at all."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Look at the silencer body for cracks, missing packing or loose material around the outlet.",
+      "Compare the noise of a regeneration pulse with the noise the unit made when it was commissioned.",
+      "Watch how long the purge pressure takes to fall back after a changeover."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "rare",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W103"
+        ],
+        "condition_id": "purge_pressure_high",
+        "likelihood": "occasional",
+        "note": "The discharge is much louder than usual and the purge pressure decays slowly after each pulse.",
+        "title": "Dryer purge pressure high, air escaping at the purge silencer"
+      }
+    ],
+    "fault_id": "purge_silencer_damaged",
+    "maintenance": [
+      "dryer_purge_valve_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:purge_silencer_damaged",
+      "section": "8.5",
+      "title": "Compressor stays loaded and does not reach cut-out"
+    },
+    "name": "Purge silencer damaged",
+    "pages": {
+      "clean": [
+        30
+      ],
+      "realistic": [
+        31
+      ]
+    },
+    "parts": [
+      "purge_silencer"
+    ],
+    "related_alarms": [
+      "W102",
+      "W103"
+    ],
+    "remedy": "Fit a new silencer and clear any packing material that has been carried into the purge line. Run a full regeneration cycle and confirm that the purge pressure falls back promptly and that the discharge noise is back to its usual level. Check the purge valve at the same time, because packing debris often damages the seat.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "note": "Raised for a long while after each changeover rather than continuously.",
+        "onset": "intermittent",
+        "phase": "any",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is intermittently high in every state. Raised for a long while after each changeover rather than continuously."
+      },
+      {
+        "direction": "stays_on",
+        "note": "The discharge is still being detected long after the pulse should have ended.",
+        "phase": "loaded",
+        "signal": "purge_switch",
+        "text": "Purge pressure switch (D6) stays on while loaded. The discharge is still being detected long after the pulse should have ended."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "gradual",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is gradually longer while loaded."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "note": "Only in the worst case, when the escaping regeneration air matches the delivery.",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached. Only in the worst case, when the escaping regeneration air matches the delivery."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer purge pressure (P4) is intermittently high in every state. Raised for a long while after each changeover rather than continuously.",
+      "Purge pressure switch (D6) stays on while loaded. The discharge is still being detected long after the pulse should have ended.",
+      "How long each loaded run lasts is gradually longer while loaded.",
+      "Whether a loaded run ends at the cut-out pressure is not reached. Only in the worst case, when the escaping regeneration air matches the delivery."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "The silencer packing has broken up or blown out, so the regeneration air leaves almost unrestricted and far more loudly than usual. The purge line drains slowly after every changeover instead of clearing at once, and the unit loses more air to regeneration than it was sized for."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Watch the tower indication on the display over several changeover periods and note whether it alternates.",
+      "Feel both tower bodies; the tower in service is warmer than the one being regenerated, and a stuck valve leaves them alike.",
+      "Operate the changeover valves by hand where the design allows it and listen for the regeneration discharge.",
+      "Inspect the valve pilot lines and actuators for leaks or damage."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W103"
+        ],
+        "condition_id": "purge_pressure_high",
+        "likelihood": "occasional",
+        "title": "Dryer purge pressure high, air escaping at the purge silencer"
+      },
+      {
+        "alarms": [],
+        "condition_id": "water_in_air",
+        "likelihood": "occasional",
+        "title": "Condensate or moisture in the delivered air"
+      },
+      {
+        "alarms": [
+          "W111",
+          "W115"
+        ],
+        "condition_id": "dryer_changeover_fault",
+        "likelihood": "common",
+        "note": "The purge line still shows pressure, but the duty never moves to the other tower.",
+        "title": "Dryer towers do not change over"
+      }
+    ],
+    "fault_id": "tower_changeover_valve_fault",
+    "maintenance": [
+      "dryer_desiccant_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:tower_changeover_valve_fault",
+      "section": "8.6",
+      "title": "Dryer purge pressure high, air escaping at the purge silencer"
+    },
+    "name": "Tower changeover valve fault",
+    "pages": {
+      "clean": [
+        31,
+        37,
+        41
+      ],
+      "realistic": [
+        31,
+        36,
+        39
+      ]
+    },
+    "parts": [
+      "purge_valve_kit"
+    ],
+    "related_alarms": [
+      "W103",
+      "W111",
+      "W115"
+    ],
+    "remedy": "Free or replace the faulty changeover valve and its pilot line, then run several changeover periods and confirm that both towers take the duty in turn. Have the desiccant of the tower that was left in service inspected under task 7.3.9, because a charge that has run without regeneration is usually saturated and may need replacing.",
+    "signal_moves": [
+      {
+        "direction": "stays_on",
+        "note": "The tower indication stops alternating and holds one position.",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "dryer_tower",
+        "text": "Dryer tower in service (D3) stays on persistently in every state. The tower indication stops alternating and holds one position."
+      },
+      {
+        "direction": "high",
+        "onset": "intermittent",
+        "phase": "loaded",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is intermittently high while loaded."
+      },
+      {
+        "direction": "no_pulse",
+        "note": "No clean discharge is detected, because the regeneration path never opens fully.",
+        "phase": "loaded",
+        "signal": "purge_switch",
+        "text": "Purge pressure switch (D6) gives no pulse while loaded. No clean discharge is detected, because the regeneration path never opens fully."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "note": "The compressor side of the unit is untouched by this fault.",
+        "text": "How often the compressor loads per hour is unchanged. The compressor side of the unit is untouched by this fault."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer tower in service (D3) stays on persistently in every state. The tower indication stops alternating and holds one position.",
+      "Dryer purge pressure (P4) is intermittently high while loaded.",
+      "Purge pressure switch (D6) gives no pulse while loaded. No clean discharge is detected, because the regeneration path never opens fully.",
+      "How often the compressor loads per hour is unchanged. The compressor side of the unit is untouched by this fault."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "A changeover valve no longer moves the drying duty from one tower to the other. One tower carries the whole load and is never regenerated, while the purge line behaves abnormally because the regeneration path is only partly open. The air leaving the dryer turns wet within hours."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Check that the dryer control has power and that its changeover period is still set as commissioned.",
+      "Watch the purge line through more than one changeover period and confirm that no discharge happens at all.",
+      "Operate a changeover valve by hand; if the towers then swap cleanly, the valves are sound and the command is missing.",
+      "Inspect the wiring between the control and the changeover valves for damage at the terminals."
+    ],
+    "conditions": [
+      {
+        "alarms": [],
+        "condition_id": "water_in_air",
+        "likelihood": "rare",
+        "title": "Condensate or moisture in the delivered air"
+      },
+      {
+        "alarms": [
+          "W111",
+          "W115"
+        ],
+        "condition_id": "dryer_changeover_fault",
+        "likelihood": "occasional",
+        "note": "No purge flow at all, because the changeover command is never issued.",
+        "title": "Dryer towers do not change over"
+      }
+    ],
+    "fault_id": "dryer_controller_fault",
+    "maintenance": [
+      "dryer_desiccant_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:dryer_controller_fault",
+      "section": "8.13",
+      "title": "Condensate or moisture in the delivered air"
+    },
+    "name": "Dryer control fault",
+    "pages": {
+      "clean": [
+        37,
+        41
+      ],
+      "realistic": [
+        37,
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W111",
+      "W115"
+    ],
+    "remedy": "Repair the wiring or replace the dryer control, then confirm over several periods that the towers alternate and that a regeneration discharge follows every changeover. Have the desiccant inspected afterwards, because a charge that has been left without regeneration holds far more water than the following cycles can drive out.",
+    "signal_moves": [
+      {
+        "direction": "stays_on",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "dryer_tower",
+        "text": "Dryer tower in service (D3) stays on persistently in every state."
+      },
+      {
+        "direction": "near_zero",
+        "note": "No regeneration flow at all, which separates this from a stuck valve.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is persistently near zero while loaded. No regeneration flow at all, which separates this from a stuck valve."
+      },
+      {
+        "direction": "no_pulse",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "purge_switch",
+        "text": "Purge pressure switch (D6) gives no pulse persistently while loaded."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer tower in service (D3) stays on persistently in every state.",
+      "Dryer purge pressure (P4) is persistently near zero while loaded. No regeneration flow at all, which separates this from a stuck valve.",
+      "Purge pressure switch (D6) gives no pulse persistently while loaded.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "The dryer control no longer issues the changeover command, so the towers keep their duty far past the intended period. Regeneration never starts, the purge line stays quiet and moisture passes through to the consumers, although the valves themselves are sound."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Read the running hours of the desiccant charge against the interval in task 7.3.9.",
+      "Confirm that the towers change over and that a regeneration discharge follows each changeover.",
+      "Check the colour and the dust content of the charge through the inspection port.",
+      "Check that the condensate drain upstream of the dryer is working, because a flooded dryer exhausts a sound charge quickly."
+    ],
+    "conditions": [
+      {
+        "alarms": [],
+        "condition_id": "water_in_air",
+        "likelihood": "common",
+        "note": "The towers change over correctly and nothing else moves; only the delivered air is wet.",
+        "title": "Condensate or moisture in the delivered air"
+      }
+    ],
+    "fault_id": "desiccant_exhausted",
+    "maintenance": [
+      "dryer_desiccant_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:desiccant_exhausted",
+      "section": "8.13",
+      "title": "Condensate or moisture in the delivered air"
+    },
+    "name": "Desiccant charge exhausted",
+    "pages": {
+      "clean": [
+        37
+      ],
+      "realistic": [
+        36
+      ]
+    },
+    "parts": [
+      "desiccant_charge"
+    ],
+    "related_alarms": [],
+    "remedy": "Replace the desiccant charge in both towers and clean the tower screens while they are open. Put the cause of the overload right at the same time: a blocked separator drain, a warm intake or a missed regeneration will exhaust the new charge just as fast. Record the change so the next inspection interval starts from the correct date.",
+    "signal_moves": [
+      {
+        "direction": "toggles",
+        "note": "The changeover sequence itself is still exactly as it should be.",
+        "phase": "any",
+        "signal": "dryer_tower",
+        "text": "Dryer tower in service (D3) toggles in every state. The changeover sequence itself is still exactly as it should be."
+      },
+      {
+        "direction": "unchanged",
+        "note": "Regeneration still runs; it is the charge that can no longer hold the water.",
+        "phase": "any",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is unchanged in every state. Regeneration still runs; it is the charge that can no longer hold the water."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      },
+      {
+        "direction": "high",
+        "note": "A warm intake carries more moisture into the towers and shortens the life of the charge.",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is persistently high in every state. A warm intake carries more moisture into the towers and shortens the life of the charge."
+      }
+    ],
+    "signal_moves_text": [
+      "Dryer tower in service (D3) toggles in every state. The changeover sequence itself is still exactly as it should be.",
+      "Dryer purge pressure (P4) is unchanged in every state. Regeneration still runs; it is the charge that can no longer hold the water.",
+      "How often the compressor loads per hour is unchanged.",
+      "Ambient temperature (T2) is persistently high in every state. A warm intake carries more moisture into the towers and shortens the life of the charge."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "The desiccant has taken up more water than regeneration removes, or it has simply aged past its service life. The towers still change over correctly and every pressure on the display looks normal, yet the dew point of the delivered air climbs and water reaches the consumers."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Watch dryer purge pressure (P4) and the purge switch together through one changeover; a pulse on the pressure with no switch signal isolates the switch.",
+      "Listen at the silencer to confirm that the discharge really happens.",
+      "Inspect the switch wiring and its connection at the controller terminals."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W111",
+          "W115"
+        ],
+        "condition_id": "dryer_changeover_fault",
+        "likelihood": "occasional",
+        "note": "The dryer works correctly; only the confirmation of the discharge is missing.",
+        "title": "Dryer towers do not change over"
+      }
+    ],
+    "fault_id": "purge_switch_fault",
+    "maintenance": [],
+    "manual_ref": {
+      "anchor": "fault:purge_switch_fault",
+      "section": "8.18",
+      "title": "Dryer towers do not change over"
+    },
+    "name": "Purge pressure switch fault",
+    "pages": {
+      "clean": [
+        41
+      ],
+      "realistic": [
+        40
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W111",
+      "W115"
+    ],
+    "remedy": "Repair the wiring or replace the pressure switch, then confirm over a complete changeover that the switch reports at the same moment as the purge pressure pulse. Until the repair is made the dryer is still drying, so the air quality is not at risk; only the supervision of it is.",
+    "signal_moves": [
+      {
+        "direction": "no_pulse",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "purge_switch",
+        "text": "Purge pressure switch (D6) gives no pulse persistently while loaded."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The purge line still pulses at every changeover, which is what rules the dryer itself out.",
+        "phase": "any",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is unchanged in every state. The purge line still pulses at every changeover, which is what rules the dryer itself out."
+      },
+      {
+        "direction": "toggles",
+        "phase": "any",
+        "signal": "dryer_tower",
+        "text": "Dryer tower in service (D3) toggles in every state."
+      }
+    ],
+    "signal_moves_text": [
+      "Purge pressure switch (D6) gives no pulse persistently while loaded.",
+      "Dryer purge pressure (P4) is unchanged in every state. The purge line still pulses at every changeover, which is what rules the dryer itself out.",
+      "Dryer tower in service (D3) toggles in every state."
+    ],
+    "source": "yaml",
+    "subsystem": "dryer",
+    "summary": "The switch that confirms the tower discharge no longer reports, although the towers change over and the purge line works as it should. The controller cannot see the regeneration pulse and reports a changeover problem that the dryer does not have."
+  },
+  {
+    "benign": true,
+    "checks": [
+      "Ask the operators whether a consumer was added, enlarged or moved to a longer duty.",
+      "Watch the line pressure across a full shift and across a quiet night, and compare the two.",
+      "Confirm that the pressure holds when the plant is idle; a demand problem disappears then, a leak does not.",
+      "Compare the loaded time per hour with the reference duty of section 6.3."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "common",
+        "note": "The shortfall follows the production pattern and disappears when the plant stops.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W108"
+        ],
+        "condition_id": "frequent_cycling",
+        "likelihood": "common",
+        "title": "Compressor starts and loads too often"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "common",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "occasional",
+        "note": "The unit is simply loaded far more of the time; the cooling circuit itself is sound.",
+        "title": "Oil temperature high"
+      }
+    ],
+    "fault_id": "high_air_demand",
+    "maintenance": [
+      "weekly_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:high_air_demand",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Air demand above the rated delivery",
+    "pages": {
+      "clean": [
+        26,
+        29,
+        30,
+        32
+      ],
+      "realistic": [
+        27,
+        30,
+        32
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W108",
+      "W102",
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "No repair is needed on the unit. Reduce the demand, move the heaviest consumers out of the peak, or plan additional compressed-air capacity. Until then, monitor the oil temperature and the loaded time per hour: the long loaded runs are what push the temperature up, and a unit that is loaded almost continuously has no margin left for a real fault. Record the new demand so later comparisons start from it.",
+    "signal_moves": [
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "sustained",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is persistently longer while loaded."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "higher",
+        "onset": "sustained",
+        "text": "How often the compressor loads per hour is persistently higher."
+      },
+      {
+        "direction": "low",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) is persistently low while loaded."
+      },
+      {
+        "behaviour": "unloaded_pressure_decay",
+        "direction": "faster",
+        "note": "The decay follows the production pattern and stops when the plant stops, unlike a leak.",
+        "text": "How fast line pressure falls while the unit is not delivering is faster. The decay follows the production pattern and stops when the plant stops, unlike a leak."
+      },
+      {
+        "direction": "rises",
+        "note": "A consequence of the long loaded runs, not of a cooling problem.",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded. A consequence of the long loaded runs, not of a cooling problem."
+      }
+    ],
+    "signal_moves_text": [
+      "How long each loaded run lasts is persistently longer while loaded.",
+      "How often the compressor loads per hour is persistently higher.",
+      "Line pressure (P2) is persistently low while loaded.",
+      "How fast line pressure falls while the unit is not delivering is faster. The decay follows the production pattern and stops when the plant stops, unlike a leak.",
+      "Oil temperature (T1) rises gradually while loaded. A consequence of the long loaded runs, not of a cooling problem."
+    ],
+    "source": "yaml",
+    "subsystem": "distribution",
+    "summary": "The consumers ask for more air than the unit is rated to deliver, usually after a new machine went into service or a shift pattern changed. The unit works exactly as designed and needs no repair; it simply cannot keep up with what is now being asked of it."
+  },
+  {
+    "benign": true,
+    "checks": [
+      "Read the ambient temperature at the cooling-air inlet and compare it with the operating limits of section 5.2.",
+      "Check that the cooling-air inlet and outlet are clear and that warm outlet air is not being drawn back in.",
+      "Compare the oil temperature with the ambient temperature; when the difference between them is normal, the cooler is doing its job.",
+      "Check whether other equipment in the room has started to give off heat."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "common",
+        "note": "The room itself is warm; the difference between oil and cooling air is the same as always.",
+        "title": "Oil temperature high"
+      },
+      {
+        "alarms": [],
+        "condition_id": "water_in_air",
+        "likelihood": "occasional",
+        "note": "Warm, humid intake air carries more water into the towers than the regeneration cycle removes.",
+        "title": "Condensate or moisture in the delivered air"
+      }
+    ],
+    "fault_id": "high_ambient_temperature",
+    "maintenance": [
+      "oil_cooler_cleaning"
+    ],
+    "manual_ref": {
+      "anchor": "fault:high_ambient_temperature",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Ambient temperature above the operating range",
+    "pages": {
+      "clean": [
+        31,
+        37
+      ],
+      "realistic": [
+        32,
+        36
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "No repair is needed on the unit. Improve the ventilation of the room, duct the warm outlet air away from the intake, or move the heat source. Until the room is put right, monitor the oil temperature and the difference between it and the ambient reading: as long as that difference stays normal, the cooling circuit is sound. Watch the delivered air for moisture as well, because a warm intake loads the dryer more heavily.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is persistently high in every state."
+      },
+      {
+        "direction": "rises",
+        "note": "The difference between oil and cooling air stays as it always was; both simply sit higher.",
+        "onset": "gradual",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually in every state. The difference between oil and cooling air stays as it always was; both simply sit higher."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      },
+      {
+        "direction": "unchanged",
+        "note": "Nothing is dragging; this separates a warm room from mechanical wear.",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded. Nothing is dragging; this separates a warm room from mechanical wear."
+      }
+    ],
+    "signal_moves_text": [
+      "Ambient temperature (T2) is persistently high in every state.",
+      "Oil temperature (T1) rises gradually in every state. The difference between oil and cooling air stays as it always was; both simply sit higher.",
+      "How often the compressor loads per hour is unchanged.",
+      "Motor current (I1) is unchanged while loaded. Nothing is dragging; this separates a warm room from mechanical wear."
+    ],
+    "source": "yaml",
+    "subsystem": "cooling",
+    "summary": "The cooling air reaching the unit is warmer than the reference conditions allow, so the cooler cannot pull the oil down to its usual temperature. The unit and its cooling circuit are sound; the room around them has changed. Warm air also carries more moisture into the dryer."
+  },
+  {
+    "benign": true,
+    "checks": [
+      "Read the ambient temperature at the cooling-air inlet and compare it with the operating limits of section 5.2.",
+      "Watch how long the oil takes to reach its working temperature after a cold start.",
+      "Look at the oil through the sight glass for the milky appearance that water in the oil gives.",
+      "Check whether a door, a broken window or a failed room heater is letting cold air in."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W105",
+          "W110",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_low",
+        "likelihood": "common",
+        "title": "Oil temperature stays low, condensate in the oil"
+      },
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "occasional",
+        "note": "Cold, thick oil makes the first turns so heavy that the protection drops out.",
+        "title": "Compressor does not start"
+      }
+    ],
+    "fault_id": "low_ambient_temperature",
+    "maintenance": [
+      "daily_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:low_ambient_temperature",
+      "section": "8.8",
+      "title": "Oil temperature stays low, condensate in the oil"
+    },
+    "name": "Ambient temperature below the operating range",
+    "pages": {
+      "clean": [
+        33,
+        39
+      ],
+      "realistic": [
+        33,
+        38
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W105",
+      "W110",
+      "S306",
+      "S304",
+      "S307",
+      "S308"
+    ],
+    "remedy": "No repair is needed on the unit. Keep the room above the lower operating limit, close the source of the cold draught, or fit room heating. Until then, monitor the oil temperature during the warm-up after each start and drain condensate from the vessel more often, because water separates out of oil that never gets warm. Report repeated hard starts, since they shorten the life of the motor.",
+    "signal_moves": [
+      {
+        "direction": "low",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is persistently low in every state."
+      },
+      {
+        "direction": "low",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) is persistently low in every state."
+      },
+      {
+        "behaviour": "start_current_peak",
+        "direction": "higher",
+        "note": "Thick oil makes the motor work much harder for the first turns of a start.",
+        "phase": "start",
+        "text": "The current peak at motor start is higher at start. Thick oil makes the motor work much harder for the first turns of a start."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Ambient temperature (T2) is persistently low in every state.",
+      "Oil temperature (T1) is persistently low in every state.",
+      "The current peak at motor start is higher at start. Thick oil makes the motor work much harder for the first turns of a start.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "cooling",
+    "summary": "The unit stands in a cold room, so the oil is thick at rest and warms very slowly. Water condenses in a charge that never reaches its working temperature, and a cold start is hard enough to trip the motor protection. The machine itself is undamaged."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Inspect the intake element against the light and look for an even layer of dust over the whole surface.",
+      "Read the running hours since the last intake filter service and compare them with task 7.3.3.",
+      "Check the condition of the room; a dusty site shortens the life of the element considerably."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "occasional",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "occasional",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W107"
+        ],
+        "condition_id": "motor_current_low",
+        "likelihood": "common",
+        "note": "The element is visibly dirty and the change came on over the whole service interval.",
+        "title": "Motor current low under load, delivery low"
+      }
+    ],
+    "fault_id": "intake_filter_clogged",
+    "maintenance": [
+      "air_filter_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:intake_filter_clogged",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Air intake filter clogged",
+    "pages": {
+      "clean": [
+        27,
+        30,
+        35
+      ],
+      "realistic": [
+        28,
+        30,
+        35
+      ]
+    },
+    "parts": [
+      "air_filter_element"
+    ],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W102",
+      "W107"
+    ],
+    "remedy": "Fit a new intake filter element, clean the housing and the intake grille, and record the service so the next interval starts from the right hour count. Confirm afterwards that the loaded current and the pressure rise per loaded run are back in their normal bands. On a dusty site, shorten the interval rather than waiting for the symptom to come back.",
+    "signal_moves": [
+      {
+        "direction": "low",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is gradually low while loaded."
+      },
+      {
+        "behaviour": "pressure_rise_while_loaded",
+        "direction": "slower",
+        "onset": "gradual",
+        "text": "How fast line pressure rises during a loaded run is gradually slower."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "gradual",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is gradually longer while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) is gradually low while loaded.",
+      "How fast line pressure rises during a loaded run is gradually slower.",
+      "How long each loaded run lasts is gradually longer while loaded."
+    ],
+    "source": "yaml",
+    "subsystem": "intake_unloading",
+    "summary": "A blocked intake element throttles the suction side, so the compression element never receives a full charge of air. The motor turns more easily than it should, the unit delivers less per loaded run, and the restriction grows slowly over the whole service interval."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the valve feedback with the load command while the unit is delivering; a disagreement isolates the valve.",
+      "Inspect the intake element first, to rule out the far more common blockage.",
+      "Check the pilot line and the actuator of the intake valve for leaks and for a sticking stem.",
+      "Look for gum or dust deposits on the valve seat and guide."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "occasional",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "occasional",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W107"
+        ],
+        "condition_id": "motor_current_low",
+        "likelihood": "occasional",
+        "note": "The change was abrupt and the valve feedback contradicts the load command.",
+        "title": "Motor current low under load, delivery low"
+      }
+    ],
+    "fault_id": "intake_valve_not_opening",
+    "maintenance": [
+      "air_filter_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:intake_valve_not_opening",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Intake valve not opening fully",
+    "pages": {
+      "clean": [
+        28,
+        30,
+        35
+      ],
+      "realistic": [
+        29,
+        31,
+        35
+      ]
+    },
+    "parts": [
+      "air_filter_element"
+    ],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W102",
+      "W107"
+    ],
+    "remedy": "Clean or overhaul the intake valve, free the stem and renew the pilot line if it leaks. Refit and confirm over a full cycle that the valve feedback follows the load command and that the loaded current and the pressure rise per loaded run are back in their normal bands. Fit a new intake filter element at the same time, because dust carried past a worn element is the usual reason the valve sticks.",
+    "signal_moves": [
+      {
+        "direction": "low",
+        "note": "The change appears from one cycle to the next rather than over weeks.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently low while loaded. The change appears from one cycle to the next rather than over weeks."
+      },
+      {
+        "behaviour": "pressure_rise_while_loaded",
+        "direction": "slower",
+        "onset": "sustained",
+        "text": "How fast line pressure rises during a loaded run is persistently slower."
+      },
+      {
+        "direction": "stays_on",
+        "note": "The valve feedback still reports closed while the controller is asking for load.",
+        "phase": "loaded",
+        "signal": "intake_closed",
+        "text": "Intake valve closed (D1) stays on while loaded. The valve feedback still reports closed while the controller is asking for load."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) is persistently low while loaded. The change appears from one cycle to the next rather than over weeks.",
+      "How fast line pressure rises during a loaded run is persistently slower.",
+      "Intake valve closed (D1) stays on while loaded. The valve feedback still reports closed while the controller is asking for load.",
+      "Whether a loaded run ends at the cut-out pressure is not reached."
+    ],
+    "source": "yaml",
+    "subsystem": "intake_unloading",
+    "summary": "The intake and unloading valve stays partly closed when the unit loads, so the element never gets its full charge of air. The motor turns easily and the unit delivers far less than its rating. Unlike a clogged filter, the change is abrupt and the intake element is clean."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Stop the unit at once if the safety valve is lifting, then investigate.",
+      "Watch the valve feedback at the moment the controller unloads; a feedback that does not change isolates the valve.",
+      "Check the pilot line, the actuator and the return spring of the intake valve.",
+      "Inspect the valve seat for deposits or damage that would hold it off its seat."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "occasional",
+        "note": "The current stays at load level during the idle phase as well, which no mechanical drag explains.",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "X202",
+          "S302",
+          "W117"
+        ],
+        "condition_id": "discharge_pressure_high",
+        "likelihood": "occasional",
+        "note": "The vessel pressure keeps climbing after the controller has asked the unit to unload.",
+        "title": "Discharge pressure high, safety valve blows"
+      },
+      {
+        "alarms": [
+          "X204"
+        ],
+        "condition_id": "no_unload",
+        "likelihood": "common",
+        "note": "The solenoid drops out correctly but the valve itself stays open, so air keeps coming in.",
+        "title": "Compressor does not unload at cut-out"
+      }
+    ],
+    "fault_id": "intake_valve_not_closing",
+    "maintenance": [
+      "safety_valve_test"
+    ],
+    "manual_ref": {
+      "anchor": "fault:intake_valve_not_closing",
+      "section": "8.9",
+      "title": "Motor current high"
+    },
+    "name": "Intake valve not closing",
+    "pages": {
+      "clean": [
+        34,
+        36,
+        40
+      ],
+      "realistic": [
+        34,
+        35,
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W106",
+      "X203",
+      "S303",
+      "X202",
+      "S302",
+      "W117",
+      "X204"
+    ],
+    "remedy": "Overhaul or replace the intake valve, renew the return spring and the pilot line, and clear any deposits from the seat. Refit and confirm over several cycles that the unit unloads at its cut-out setting and that the vessel vents afterwards. Have the safety valve tested under task 7.3.11 if it lifted, because a valve that has blown does not always reseat cleanly.",
+    "signal_moves": [
+      {
+        "direction": "stays_off",
+        "note": "The feedback shows the valve open when the unit should be idling.",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "intake_closed",
+        "text": "Intake valve closed (D1) stays off persistently while unloaded. The feedback shows the valve open when the unit should be idling."
+      },
+      {
+        "direction": "high",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is persistently high while unloaded."
+      },
+      {
+        "direction": "high",
+        "note": "The motor keeps doing compression work during a phase in which it should be running light.",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently high while unloaded. The motor keeps doing compression work during a phase in which it should be running light."
+      },
+      {
+        "direction": "rises",
+        "note": "The line climbs past the cut-out setting instead of settling.",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) rises persistently while unloaded. The line climbs past the cut-out setting instead of settling."
+      }
+    ],
+    "signal_moves_text": [
+      "Intake valve closed (D1) stays off persistently while unloaded. The feedback shows the valve open when the unit should be idling.",
+      "Discharge pressure (P1) is persistently high while unloaded.",
+      "Motor current (I1) is persistently high while unloaded. The motor keeps doing compression work during a phase in which it should be running light.",
+      "Line pressure (P2) rises persistently while unloaded. The line climbs past the cut-out setting instead of settling."
+    ],
+    "source": "yaml",
+    "subsystem": "intake_unloading",
+    "summary": "The intake valve does not shut when the controller unloads, so the unit keeps drawing and compressing air past its cut-out point. Pressure and current stay at their loaded values through what should be the idle phase, and the safety valve can lift."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the load command of the controller with the solenoid state while the unit cycles.",
+      "Listen at the solenoid as the controller switches; a coil that does not pick up is usually audible.",
+      "Measure the coil and check its wiring at the terminal strip.",
+      "Check the pilot air supply to the solenoid for blockage or moisture."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "rare",
+        "note": "Only when the solenoid fails in the idle position, so the unit never loads.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "X204"
+        ],
+        "condition_id": "no_unload",
+        "likelihood": "common",
+        "title": "Compressor does not unload at cut-out"
+      }
+    ],
+    "fault_id": "unloader_solenoid_fault",
+    "maintenance": [
+      "condensate_drain_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:unloader_solenoid_fault",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Unloader solenoid fault",
+    "pages": {
+      "clean": [
+        28,
+        40
+      ],
+      "realistic": [
+        29,
+        38
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "X204"
+    ],
+    "remedy": "Replace the solenoid or repair its wiring, and clear the pilot air line of moisture and debris. Refit and confirm over several complete cycles that the unit loads at the cut-in setting and unloads at the cut-out setting. Where wet pilot air caused the fault, check the condensate drain as well, because it will otherwise ruin the new coil in the same way.",
+    "signal_moves": [
+      {
+        "direction": "stays_on",
+        "note": "With the solenoid stuck in the load position; stuck the other way it stays off instead.",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "load_valve",
+        "text": "Load solenoid (D2) stays on persistently in every state. With the solenoid stuck in the load position; stuck the other way it stays off instead."
+      },
+      {
+        "direction": "stays_off",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "intake_closed",
+        "text": "Intake valve closed (D1) stays off persistently while unloaded."
+      },
+      {
+        "direction": "rises",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) rises persistently while unloaded."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "note": "With the solenoid stuck in the idle position the unit never builds pressure to the cut-out point.",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached. With the solenoid stuck in the idle position the unit never builds pressure to the cut-out point."
+      }
+    ],
+    "signal_moves_text": [
+      "Load solenoid (D2) stays on persistently in every state. With the solenoid stuck in the load position; stuck the other way it stays off instead.",
+      "Intake valve closed (D1) stays off persistently while unloaded.",
+      "Line pressure (P2) rises persistently while unloaded.",
+      "Whether a loaded run ends at the cut-out pressure is not reached. With the solenoid stuck in the idle position the unit never builds pressure to the cut-out point."
+    ],
+    "source": "yaml",
+    "subsystem": "intake_unloading",
+    "summary": "The solenoid that switches the unit between load and idle no longer follows the controller. Stuck in the load position the unit compresses past its cut-out point; stuck in the idle position it runs on without ever building pressure. The coil, its wiring and the pilot air are all possible reasons."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Watch the regulator contact while the line pressure passes the cut-out setting; a contact that does not change isolates the fault.",
+      "Compare the pressure on the display with a test gauge at the panel to rule out a transducer fault.",
+      "Inspect the contact, its pilot connection and its wiring at the pneumatic panel."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "rare",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "X204"
+        ],
+        "condition_id": "no_unload",
+        "likelihood": "occasional",
+        "title": "Compressor does not unload at cut-out"
+      }
+    ],
+    "fault_id": "regulator_contact_fault",
+    "maintenance": [],
+    "manual_ref": {
+      "anchor": "fault:regulator_contact_fault",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Pressure regulator contact fault",
+    "pages": {
+      "clean": [
+        28,
+        40
+      ],
+      "realistic": [
+        29,
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "X204"
+    ],
+    "remedy": "Clean or replace the regulator contact and renew its pilot connection and wiring as needed. Confirm over several cycles that the contact changes state at the cut-in and cut-out settings and that the unit follows it. Until the repair is made, keep the unit under supervision: with regulation out of action the only protection left against overpressure is the safety valve.",
+    "signal_moves": [
+      {
+        "direction": "stays_off",
+        "note": "A contact stuck in the load-requested position keeps the unit loaded; stuck the other way it keeps the unit idle.",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "regulator_contact",
+        "text": "Pressure regulator contact (D4) stays off persistently in every state. A contact stuck in the load-requested position keeps the unit loaded; stuck the other way it keeps the unit idle."
+      },
+      {
+        "direction": "rises",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) rises persistently while loaded."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "note": "The run overshoots the cut-out point instead of ending at it.",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached. The run overshoots the cut-out point instead of ending at it."
+      },
+      {
+        "direction": "stays_on",
+        "phase": "any",
+        "signal": "load_valve",
+        "text": "Load solenoid (D2) stays on in every state."
+      }
+    ],
+    "signal_moves_text": [
+      "Pressure regulator contact (D4) stays off persistently in every state. A contact stuck in the load-requested position keeps the unit loaded; stuck the other way it keeps the unit idle.",
+      "Line pressure (P2) rises persistently while loaded.",
+      "Whether a loaded run ends at the cut-out pressure is not reached. The run overshoots the cut-out point instead of ending at it.",
+      "Load solenoid (D2) stays on in every state."
+    ],
+    "source": "yaml",
+    "subsystem": "control",
+    "summary": "The regulator contact that tells the controller whether the line pressure is satisfied no longer changes state. The controller keeps the unit in whatever mode the stuck contact reports, however the real pressure behaves, so regulation stops working while every sensor still reads correctly."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Watch discharge pressure (P1) at the moment the unit unloads and again when it stops; it should fall away in both cases.",
+      "Listen at the blow-down outlet for the vent that should follow every unload.",
+      "Inspect the valve, its pilot line and its silencer for blockage or a sticking stem.",
+      "Check the condensate drain, because carried-over water is what usually blocks the vent path."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "occasional",
+        "note": "The peak appears at the start, against a vessel that was never vented.",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "occasional",
+        "note": "The unit is being asked to start against a vessel that still holds pressure.",
+        "title": "Compressor does not start"
+      },
+      {
+        "alarms": [
+          "X204"
+        ],
+        "condition_id": "no_unload",
+        "likelihood": "occasional",
+        "note": "Here the unit does stop taking in air, but the vessel is never relieved.",
+        "title": "Compressor does not unload at cut-out"
+      }
+    ],
+    "fault_id": "blowdown_valve_fault",
+    "maintenance": [
+      "condensate_drain_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:blowdown_valve_fault",
+      "section": "8.9",
+      "title": "Motor current high"
+    },
+    "name": "Blow-down valve fault",
+    "pages": {
+      "clean": [
+        35,
+        39,
+        40
+      ],
+      "realistic": [
+        34,
+        38,
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W106",
+      "X203",
+      "S303",
+      "S304",
+      "S307",
+      "S308",
+      "X204"
+    ],
+    "remedy": "Free or replace the blow-down valve and clear its pilot line and outlet. Confirm that the vessel vents within the usual time after every unload and after a stop, and that the start current is back in its normal band. Where the motor protection has dropped out repeatedly, have the motor and its protection checked before the unit goes back into normal service.",
+    "signal_moves": [
+      {
+        "direction": "not_venting",
+        "note": "The vessel should fall towards zero as soon as the unit stops delivering.",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) does not vent persistently while unloaded. The vessel should fall towards zero as soon as the unit stops delivering."
+      },
+      {
+        "behaviour": "start_current_peak",
+        "direction": "higher",
+        "phase": "start",
+        "text": "The current peak at motor start is higher at start."
+      },
+      {
+        "direction": "high",
+        "note": "The peak is high enough to drop the motor protection out before the unit reaches speed.",
+        "onset": "sudden",
+        "phase": "start",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is suddenly high at start. The peak is high enough to drop the motor protection out before the unit reaches speed."
+      },
+      {
+        "direction": "rises",
+        "note": "The vessel stays hot because it is never relieved.",
+        "onset": "gradual",
+        "phase": "unloaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while unloaded. The vessel stays hot because it is never relieved."
+      }
+    ],
+    "signal_moves_text": [
+      "Discharge pressure (P1) does not vent persistently while unloaded. The vessel should fall towards zero as soon as the unit stops delivering.",
+      "The current peak at motor start is higher at start.",
+      "Motor current (I1) is suddenly high at start. The peak is high enough to drop the motor protection out before the unit reaches speed.",
+      "Oil temperature (T1) rises gradually while unloaded. The vessel stays hot because it is never relieved."
+    ],
+    "source": "yaml",
+    "subsystem": "intake_unloading",
+    "summary": "The blow-down valve does not vent the separator vessel when the unit idles or stops. The element stays under pressure, so the next start is made against a full vessel and the motor draws far more current than it should. A vessel that is never relieved also keeps its heat."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the vessel pressure with the line pressure while the unit delivers; a much larger difference than usual points at this valve.",
+      "Rule out a clogged separator element first, since it produces a similar difference but builds up slowly.",
+      "Check the valve seat, spring and guide for deposits and for a sticking stem.",
+      "Look for oil starvation at the element, which a valve that leaks back will cause."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "occasional",
+        "note": "The vessel pressure stays high while the line stays low; that split points at the valve.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "occasional",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "X202",
+          "S302",
+          "W117"
+        ],
+        "condition_id": "discharge_pressure_high",
+        "likelihood": "occasional",
+        "note": "The line pressure stays low while the vessel pressure climbs, which a clogged element does not do.",
+        "title": "Discharge pressure high, safety valve blows"
+      }
+    ],
+    "fault_id": "minimum_pressure_valve_fault",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:minimum_pressure_valve_fault",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Minimum-pressure valve fault",
+    "pages": {
+      "clean": [
+        27,
+        35,
+        36
+      ],
+      "realistic": [
+        28,
+        35
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W106",
+      "X203",
+      "S303",
+      "X202",
+      "S302",
+      "W117"
+    ],
+    "remedy": "Overhaul or replace the minimum-pressure valve, renew its spring and clear the seat. Refit and confirm over a full cycle that the vessel and line pressures track each other with the normal difference between them and that the loaded current is back in its band. Have the oil circuit checked if the valve was leaking back, because the element may have run with too little oil.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "note": "With the valve stuck shut; when it leaks back the vessel pressure stays low instead.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is persistently high while loaded. With the valve stuck shut; when it leaks back the vessel pressure stays low instead."
+      },
+      {
+        "direction": "low",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) is persistently low while loaded."
+      },
+      {
+        "direction": "high",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently high while loaded."
+      },
+      {
+        "behaviour": "pressure_rise_while_loaded",
+        "direction": "slower",
+        "note": "The line sees little of the air the element is actually delivering.",
+        "text": "How fast line pressure rises during a loaded run is slower. The line sees little of the air the element is actually delivering."
+      }
+    ],
+    "signal_moves_text": [
+      "Discharge pressure (P1) is persistently high while loaded. With the valve stuck shut; when it leaks back the vessel pressure stays low instead.",
+      "Line pressure (P2) is persistently low while loaded.",
+      "Motor current (I1) is persistently high while loaded.",
+      "How fast line pressure rises during a loaded run is slower. The line sees little of the air the element is actually delivering."
+    ],
+    "source": "yaml",
+    "subsystem": "compressor",
+    "summary": "The minimum-pressure valve no longer opens at its setting or no longer holds. Stuck shut, it lets the vessel pressure climb while the line stays low; leaking back, it lets the vessel drain into the line so that the oil circuit never gets the pressure it needs to circulate."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the vessel pressure with the line pressure while the unit delivers and watch how the difference has grown over recent weeks.",
+      "Read the running hours since the last separator element change against task 7.3.6.",
+      "Check whether the oil grade and the oil change interval have been kept, since the wrong oil blocks an element quickly.",
+      "Inspect the downstream filters for oil carry-over."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "common",
+        "note": "The vessel pressure rises with the current while the line pressure keeps its setting.",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "X202",
+          "S302",
+          "W117"
+        ],
+        "condition_id": "discharge_pressure_high",
+        "likelihood": "common",
+        "title": "Discharge pressure high, safety valve blows"
+      },
+      {
+        "alarms": [
+          "W116"
+        ],
+        "condition_id": "oil_in_air",
+        "likelihood": "common",
+        "note": "Carry-over here comes with a growing difference between the vessel and the line pressure.",
+        "title": "Oil carry-over, high oil consumption"
+      }
+    ],
+    "fault_id": "separator_element_clogged",
+    "maintenance": [
+      "separator_element_change"
+    ],
+    "manual_ref": {
+      "anchor": "fault:separator_element_clogged",
+      "section": "8.9",
+      "title": "Motor current high"
+    },
+    "name": "Separator element clogged",
+    "pages": {
+      "clean": [
+        34,
+        36,
+        38
+      ],
+      "realistic": [
+        34,
+        35,
+        37
+      ]
+    },
+    "parts": [
+      "separator_element",
+      "compressor_oil",
+      "oil_filter_element"
+    ],
+    "related_alarms": [
+      "W106",
+      "X203",
+      "S303",
+      "X202",
+      "S302",
+      "W117",
+      "W116"
+    ],
+    "remedy": "Fit a new separator element and renew its seals and the scavenge line strainer while the vessel is open. Change the oil and the oil filter at the same time if the element blocked early, because that is almost always a sign of the wrong grade or an overdue oil change. Confirm afterwards that the difference between the vessel and line pressures is back to its reference figure.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is gradually high while loaded."
+      },
+      {
+        "direction": "high",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is gradually high while loaded."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The line still follows its setting; it is the difference across the element that grows.",
+        "phase": "loaded",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) is unchanged while loaded. The line still follows its setting; it is the difference across the element that grows."
+      },
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "Discharge pressure (P1) is gradually high while loaded.",
+      "Motor current (I1) is gradually high while loaded.",
+      "Line pressure (P2) is unchanged while loaded. The line still follows its setting; it is the difference across the element that grows.",
+      "Oil temperature (T1) rises gradually while loaded."
+    ],
+    "source": "yaml",
+    "subsystem": "compressor",
+    "summary": "The separator element is loaded with dirt and oil residue, so the air has to force its way through it. The vessel works at a higher pressure than the line, the motor takes more current for the same delivery, and the element starts to let oil through with the air."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the vessel pressure with the line pressure; heavy carry-over with a normal difference between them points at a damaged element rather than a clogged one.",
+      "Check how much oil has been added since the last oil change and compare it with the fill volume.",
+      "Inspect the downstream filters and the pipework for oil.",
+      "Open the vessel and examine the element and its seal for splits and for tracking marks."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W116"
+        ],
+        "condition_id": "oil_in_air",
+        "likelihood": "occasional",
+        "note": "Heavy carry-over with no rise in the vessel pressure at all.",
+        "title": "Oil carry-over, high oil consumption"
+      }
+    ],
+    "fault_id": "separator_element_damaged",
+    "maintenance": [
+      "separator_element_change"
+    ],
+    "manual_ref": {
+      "anchor": "fault:separator_element_damaged",
+      "section": "8.14",
+      "title": "Oil carry-over, high oil consumption"
+    },
+    "name": "Separator element damaged",
+    "pages": {
+      "clean": [
+        38
+      ],
+      "realistic": [
+        37
+      ]
+    },
+    "parts": [
+      "separator_element",
+      "compressor_oil"
+    ],
+    "related_alarms": [
+      "W116"
+    ],
+    "remedy": "Fit a new separator element with new seals and top the oil back up to the mark with the specified grade. Confirm that the carry-over stops and that the oil level then holds between services. Check how the element was damaged before closing the vessel: a collapsed element usually means it was already blocked, and refitting into the same conditions will destroy the new one as well.",
+    "signal_moves": [
+      {
+        "direction": "unchanged",
+        "note": "A torn element does not restrict the flow, so the vessel pressure looks entirely normal.",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is unchanged while loaded. A torn element does not restrict the flow, so the vessel pressure looks entirely normal."
+      },
+      {
+        "direction": "off",
+        "note": "The level switch eventually reports that the charge has fallen below the minimum.",
+        "onset": "gradual",
+        "phase": "any",
+        "signal": "oil_level_ok",
+        "text": "Oil level switch (D7) is gradually off in every state. The level switch eventually reports that the charge has fallen below the minimum."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "Discharge pressure (P1) is unchanged while loaded. A torn element does not restrict the flow, so the vessel pressure looks entirely normal.",
+      "Oil level switch (D7) is gradually off in every state. The level switch eventually reports that the charge has fallen below the minimum.",
+      "Motor current (I1) is unchanged while loaded."
+    ],
+    "source": "yaml",
+    "subsystem": "compressor",
+    "summary": "The element is split, or its seal has failed, so part of the air bypasses the separating media entirely. Oil leaves with the air without the difference across the element growing at all, and the level in the vessel falls much faster than the service schedule expects."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Rule out an overfilled vessel and a damaged element first; both are more common and easier to see.",
+      "Check the scavenge line, its strainer and its orifice for sludge and carbon deposits.",
+      "Feel the scavenge line while the unit is loaded; a line that is returning oil is warm along its length.",
+      "Check the oil change record, since sludge comes from oil left in service too long."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W116"
+        ],
+        "condition_id": "oil_in_air",
+        "likelihood": "occasional",
+        "title": "Oil carry-over, high oil consumption"
+      }
+    ],
+    "fault_id": "scavenge_line_blocked",
+    "maintenance": [
+      "oil_change"
+    ],
+    "manual_ref": {
+      "anchor": "fault:scavenge_line_blocked",
+      "section": "8.14",
+      "title": "Oil carry-over, high oil consumption"
+    },
+    "name": "Scavenge line blocked",
+    "pages": {
+      "clean": [
+        38
+      ],
+      "realistic": [
+        37
+      ]
+    },
+    "parts": [
+      "compressor_oil",
+      "oil_filter_element"
+    ],
+    "related_alarms": [
+      "W116"
+    ],
+    "remedy": "Clear or replace the scavenge line, its strainer and its orifice, then change the oil and the oil filter so the new line does not block again on the same sludge. Confirm afterwards that the carry-over stops and that the oil level holds. Shorten the oil change interval if the deposits were heavy.",
+    "signal_moves": [
+      {
+        "direction": "off",
+        "onset": "gradual",
+        "phase": "any",
+        "signal": "oil_level_ok",
+        "text": "Oil level switch (D7) is gradually off in every state."
+      },
+      {
+        "direction": "unchanged",
+        "note": "Nothing restricts the air path, so the vessel pressure is exactly where it should be.",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is unchanged while loaded. Nothing restricts the air path, so the vessel pressure is exactly where it should be."
+      },
+      {
+        "direction": "rises",
+        "note": "Less oil circulates through the element, so it carries away less heat.",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded. Less oil circulates through the element, so it carries away less heat."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil level switch (D7) is gradually off in every state.",
+      "Discharge pressure (P1) is unchanged while loaded. Nothing restricts the air path, so the vessel pressure is exactly where it should be.",
+      "Oil temperature (T1) rises gradually while loaded. Less oil circulates through the element, so it carries away less heat."
+    ],
+    "source": "yaml",
+    "subsystem": "oil",
+    "summary": "The line that returns collected oil from the bottom of the separator element to the compression element is blocked. Oil gathers in the element until it is carried out with the air, although the element itself is undamaged and the pressures on the display look normal."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Stop the unit, let the vessel vent and stand, then read the level at the sight glass.",
+      "Compare the quantity recorded at the last oil change with the fill volume in section 9.1.",
+      "Ask whether anyone has topped the unit up since the last service."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W116"
+        ],
+        "condition_id": "oil_in_air",
+        "likelihood": "common",
+        "note": "Always the first thing to check after an oil change or a top-up.",
+        "title": "Oil carry-over, high oil consumption"
+      }
+    ],
+    "fault_id": "oil_level_high",
+    "maintenance": [
+      "oil_change",
+      "daily_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:oil_level_high",
+      "section": "8.14",
+      "title": "Oil carry-over, high oil consumption"
+    },
+    "name": "Oil level above the mark",
+    "pages": {
+      "clean": [
+        38
+      ],
+      "realistic": [
+        37
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W116"
+    ],
+    "remedy": "Drain the excess oil down to the mark with the unit stopped and the vessel vented, then run the unit and check the level again once it has settled. Confirm that the carry-over stops. Record the quantity that was drained, and note in the service record how much oil the unit actually takes, so the next top-up does not repeat the mistake.",
+    "signal_moves": [
+      {
+        "direction": "stays_on",
+        "note": "The switch only reports the minimum, so an overfill never shows on it.",
+        "phase": "any",
+        "signal": "oil_level_ok",
+        "text": "Oil level switch (D7) stays on in every state. The switch only reports the minimum, so an overfill never shows on it."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is unchanged while loaded."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) is unchanged in every state."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil level switch (D7) stays on in every state. The switch only reports the minimum, so an overfill never shows on it.",
+      "Discharge pressure (P1) is unchanged while loaded.",
+      "Oil temperature (T1) is unchanged in every state."
+    ],
+    "source": "yaml",
+    "subsystem": "oil",
+    "summary": "The vessel has been filled above the mark, so oil reaches the separator element faster than it can be separated out. Oil leaves with the air even though every part of the unit is sound. This is the first thing to rule out after any oil change or top-up."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Stop the unit, let the vessel vent and stand, then read the level at the sight glass.",
+      "Look under and around the machine for oil at the cooler, the hoses and the shaft seal.",
+      "Check the downstream filters for oil, which would point at carry-over rather than a leak.",
+      "Compare how much oil has been added recently with the interval in task 7.3.4."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "common",
+        "title": "Oil temperature high"
+      }
+    ],
+    "fault_id": "oil_level_low",
+    "maintenance": [
+      "oil_change",
+      "daily_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:oil_level_low",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Oil level below the minimum",
+    "pages": {
+      "clean": [
+        32
+      ],
+      "realistic": [
+        32
+      ]
+    },
+    "parts": [
+      "compressor_oil"
+    ],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "Top the charge back up to the mark with the specified grade, then find out where it went: an external leak, carry-over through the separator, or a blocked scavenge line. Topping up alone treats the symptom only. Confirm once the level holds that the oil temperature comes back into its normal band.",
+    "signal_moves": [
+      {
+        "direction": "off",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "oil_level_ok",
+        "text": "Oil level switch (D7) is persistently off in every state."
+      },
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil level switch (D7) is persistently off in every state.",
+      "Oil temperature (T1) rises gradually while loaded.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "oil",
+    "summary": "Too little oil circulates, so the charge that is left has to take up the heat of the whole compression process. The temperature climbs while the unit otherwise behaves normally. A level that keeps falling always has a second cause behind it, which has to be found as well."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Read the service record for the grade and the quantity used at the last oil change.",
+      "Look at the oil at the sight glass for a colour or a foaming behaviour that does not match the specified grade.",
+      "Check whether the separator element blocked earlier than its interval, which the wrong grade will cause.",
+      "Compare the oil temperature and the loaded current with the figures recorded before the last oil change."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "rare",
+        "title": "Oil temperature high"
+      },
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "rare",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "W116"
+        ],
+        "condition_id": "oil_in_air",
+        "likelihood": "rare",
+        "title": "Oil carry-over, high oil consumption"
+      }
+    ],
+    "fault_id": "wrong_oil_grade",
+    "maintenance": [
+      "oil_change"
+    ],
+    "manual_ref": {
+      "anchor": "fault:wrong_oil_grade",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Wrong oil grade in service",
+    "pages": {
+      "clean": [
+        33,
+        35,
+        38
+      ],
+      "realistic": [
+        33,
+        35,
+        38
+      ]
+    },
+    "parts": [
+      "compressor_oil",
+      "oil_filter_element",
+      "separator_element"
+    ],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306",
+      "W106",
+      "X203",
+      "S303"
+    ],
+    "remedy": "Drain the charge completely, flush the circuit, and refill with the specified grade and quantity given in section 9.1. Change the oil filter and the separator element at the same time, because the wrong grade damages both. Record the grade used so the mistake is not repeated, and confirm afterwards that the oil temperature and the loaded current return to their normal bands.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded."
+      },
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) rises gradually while loaded."
+      },
+      {
+        "direction": "off",
+        "note": "Poor separation carries oil out with the air, so the level falls between services.",
+        "onset": "gradual",
+        "phase": "any",
+        "signal": "oil_level_ok",
+        "text": "Oil level switch (D7) is gradually off in every state. Poor separation carries oil out with the air, so the level falls between services."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) rises gradually while loaded.",
+      "Motor current (I1) rises gradually while loaded.",
+      "Oil level switch (D7) is gradually off in every state. Poor separation carries oil out with the air, so the level falls between services.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "oil",
+    "summary": "The unit has been filled with an oil that is not the specified grade, or with two grades mixed together. It carries heat away less well, drags in the element and separates poorly, so temperature, current and carry-over all move at once without any single part being at fault."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Read the running hours since the last oil filter change against task 7.3.5.",
+      "Feel the filter housing while the unit is loaded and compare the temperature across it.",
+      "Check the oil change record, since oil left in service too long blocks a filter early."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "occasional",
+        "title": "Oil temperature high"
+      }
+    ],
+    "fault_id": "oil_filter_clogged",
+    "maintenance": [
+      "oil_filter_change"
+    ],
+    "manual_ref": {
+      "anchor": "fault:oil_filter_clogged",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Oil filter clogged",
+    "pages": {
+      "clean": [
+        32
+      ],
+      "realistic": [
+        32
+      ]
+    },
+    "parts": [
+      "oil_filter_element",
+      "compressor_oil"
+    ],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "Fit a new oil filter element and top the charge up to the mark. Change the oil as well if it is anywhere near its interval, because a filter that blocked early is a sign of the oil, not of the filter. Confirm that the oil temperature comes back into its normal band over the next few loaded runs and record the service.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) rises gradually while loaded.",
+      "Motor current (I1) is unchanged while loaded.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "oil",
+    "summary": "The filter element restricts the oil flow, so less oil reaches the compression element and the injected charge carries away less heat. The restriction builds up slowly across the service interval, and nothing else on the unit changes with it."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Look at the cooler block and the fan guard against the light for a dust or oil film between the fins.",
+      "Compare the oil temperature with the ambient temperature over a full cycle; a difference larger than usual points at the cooler.",
+      "Confirm that the fan turns freely and at its usual speed, to separate this from a fan failure.",
+      "Read the running hours since the last cooler cleaning against task 7.3.7."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "common",
+        "note": "The rise is slow and shows in every state, including the idle and stopped phases.",
+        "title": "Oil temperature high"
+      }
+    ],
+    "fault_id": "oil_cooler_fouled",
+    "maintenance": [
+      "oil_cooler_cleaning"
+    ],
+    "manual_ref": {
+      "anchor": "fault:oil_cooler_fouled",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Oil cooler fouled",
+    "pages": {
+      "clean": [
+        31
+      ],
+      "realistic": [
+        31
+      ]
+    },
+    "parts": [
+      "cooler_cleaning_kit"
+    ],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "Clean the cooler block, the aftercooler and the fan guard with the unit stopped and isolated, working from the clean side outwards so the dirt is not driven further in. Confirm over the next loaded runs that the oil temperature comes back to its reference figure. Where the site is dusty, shorten the cleaning interval instead of waiting for the warning to return.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "note": "The rise shows in the idle and stopped phases too, not only under load.",
+        "onset": "gradual",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually in every state. The rise shows in the idle and stopped phases too, not only under load."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The room is as warm as it always was, which rules out a hot site.",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is unchanged in every state. The room is as warm as it always was, which rules out a hot site."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "note": "The unit is not working any harder than before.",
+        "text": "How often the compressor loads per hour is unchanged. The unit is not working any harder than before."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) rises gradually in every state. The rise shows in the idle and stopped phases too, not only under load.",
+      "Ambient temperature (T2) is unchanged in every state. The room is as warm as it always was, which rules out a hot site.",
+      "How often the compressor loads per hour is unchanged. The unit is not working any harder than before.",
+      "Motor current (I1) is unchanged while loaded."
+    ],
+    "source": "yaml",
+    "subsystem": "cooling",
+    "summary": "Dust and oil mist have settled on the cooler block, so the cooling air can no longer carry the heat away. The oil runs hotter in every state, while the duty of the unit and the room around it stay exactly as they were. The change comes on slowly, over weeks rather than hours."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Look and listen at the fan while the unit is loaded, and feel for air leaving the cooler outlet.",
+      "Isolate the unit and turn the fan by hand to check for a seized bearing or a fouled impeller.",
+      "Check the fan supply, its protection and its wiring at the terminal strip.",
+      "Look for anything blocking the cooling-air inlet or outlet."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "occasional",
+        "note": "The rise sets in abruptly at the next loaded run rather than over days.",
+        "title": "Oil temperature high"
+      }
+    ],
+    "fault_id": "cooling_fan_failure",
+    "maintenance": [
+      "oil_cooler_cleaning"
+    ],
+    "manual_ref": {
+      "anchor": "fault:cooling_fan_failure",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Cooling fan failure",
+    "pages": {
+      "clean": [
+        32
+      ],
+      "realistic": [
+        32
+      ]
+    },
+    "parts": [
+      "cooler_cleaning_kit"
+    ],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306"
+    ],
+    "remedy": "Free or replace the fan and its motor, clear whatever blocked the airway and restore the supply. Confirm over the next loaded runs that the oil temperature settles at its reference figure. Clean the cooler block while the fan is out, because a unit that has run hot has usually baked oil mist onto the fins as well.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "note": "The onset is abrupt, which is what separates this from a slowly fouling cooler.",
+        "onset": "sudden",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises suddenly while loaded. The onset is abrupt, which is what separates this from a slowly fouling cooler."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is unchanged in every state."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The compression side is unaffected; only the cooling air is missing.",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded. The compression side is unaffected; only the cooling air is missing."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) rises suddenly while loaded. The onset is abrupt, which is what separates this from a slowly fouling cooler.",
+      "Ambient temperature (T2) is unchanged in every state.",
+      "How often the compressor loads per hour is unchanged.",
+      "Motor current (I1) is unchanged while loaded. The compression side is unaffected; only the cooling air is missing."
+    ],
+    "source": "yaml",
+    "subsystem": "cooling",
+    "summary": "The cooling fan has stopped or turns far too slowly, so almost no air passes through the cooler block. The oil temperature climbs sharply as soon as the unit loads, much faster than a fouled block could explain, and it keeps climbing until the controller stops the unit."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Feel the pipework on both sides of the valve while the unit warms up; a working valve sends the oil to the cooler only once it is warm.",
+      "Watch the warm-up curve after a cold start and note whether the oil settles at its working temperature.",
+      "Rule out a fouled cooler and a failed fan first, since both are more common.",
+      "Inspect the valve element for deposits and for a stem that no longer moves."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "occasional",
+        "title": "Oil temperature high"
+      },
+      {
+        "alarms": [
+          "W105",
+          "W110",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_low",
+        "likelihood": "occasional",
+        "note": "Here the oil stays cold whatever the room does, because the whole flow goes through the cooler.",
+        "title": "Oil temperature stays low, condensate in the oil"
+      }
+    ],
+    "fault_id": "thermostatic_valve_stuck",
+    "maintenance": [
+      "oil_cooler_cleaning"
+    ],
+    "manual_ref": {
+      "anchor": "fault:thermostatic_valve_stuck",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Thermostatic valve stuck",
+    "pages": {
+      "clean": [
+        32,
+        33
+      ],
+      "realistic": [
+        33
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306",
+      "W105",
+      "W110"
+    ],
+    "remedy": "Replace the thermostatic element and clean its housing. Confirm after a cold start that the oil warms up at its usual rate and then settles at its working temperature. Drain any condensate from the vessel if the valve was stuck towards the cooler, because oil that has run cold for a long time holds water.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "note": "With the valve stuck towards the bypass, so the oil hardly passes through the cooler.",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded. With the valve stuck towards the bypass, so the oil hardly passes through the cooler."
+      },
+      {
+        "direction": "low",
+        "note": "With the valve stuck towards the cooler, so the oil stays below its working temperature even after a long run.",
+        "onset": "sustained",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) is persistently low in every state. With the valve stuck towards the cooler, so the oil stays below its working temperature even after a long run."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is unchanged in every state."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) rises gradually while loaded. With the valve stuck towards the bypass, so the oil hardly passes through the cooler.",
+      "Oil temperature (T1) is persistently low in every state. With the valve stuck towards the cooler, so the oil stays below its working temperature even after a long run.",
+      "Ambient temperature (T2) is unchanged in every state.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "cooling",
+    "summary": "The valve that decides how much oil passes through the cooler has stuck. Held towards the bypass, the oil never cools; held towards the cooler, it never warms up and water separates out in it. In both cases the oil temperature stops responding to the duty and to the room."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the reading with a hand-held thermometer at the airend oil outlet.",
+      "Feel the cooler outlet and the vessel; a machine that is really hot cannot be mistaken by hand.",
+      "Inspect the sensor wiring and its terminals for damage, moisture and loose screws.",
+      "Watch the reading through a full cycle and look for steps that no heating or cooling could explain."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W104",
+          "X201",
+          "S301",
+          "W109",
+          "W116",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_high",
+        "likelihood": "rare",
+        "note": "Nothing else on the unit is hot; a hand-held thermometer contradicts the display.",
+        "title": "Oil temperature high"
+      },
+      {
+        "alarms": [
+          "W105",
+          "W110",
+          "S306"
+        ],
+        "condition_id": "oil_temperature_low",
+        "likelihood": "rare",
+        "title": "Oil temperature stays low, condensate in the oil"
+      }
+    ],
+    "fault_id": "oil_temperature_sensor_fault",
+    "maintenance": [],
+    "manual_ref": {
+      "anchor": "fault:oil_temperature_sensor_fault",
+      "section": "8.7",
+      "title": "Oil temperature high"
+    },
+    "name": "Oil temperature sensor fault",
+    "pages": {
+      "clean": [
+        33,
+        34
+      ],
+      "realistic": [
+        33,
+        34
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W104",
+      "X201",
+      "S301",
+      "W109",
+      "W116",
+      "S306",
+      "W105",
+      "W110"
+    ],
+    "remedy": "Repair the wiring or replace the sensor, then confirm the reading against a reference instrument at the working temperature. Reset the message and watch the next few cycles. Until the sensor is trusted again, do not raise the temperature settings to silence the warning: that would leave the unit without its real protection.",
+    "signal_moves": [
+      {
+        "direction": "fluctuates",
+        "note": "Steps and jumps that no thermal process could produce.",
+        "onset": "intermittent",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) fluctuates intermittently in every state. Steps and jumps that no thermal process could produce."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "any",
+        "signal": "ambient_temperature",
+        "text": "Ambient temperature (T2) is unchanged in every state."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      },
+      {
+        "direction": "unchanged",
+        "note": "Nothing else that would accompany a genuinely hot machine is present.",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is unchanged while loaded. Nothing else that would accompany a genuinely hot machine is present."
+      }
+    ],
+    "signal_moves_text": [
+      "Oil temperature (T1) fluctuates intermittently in every state. Steps and jumps that no thermal process could produce.",
+      "Ambient temperature (T2) is unchanged in every state.",
+      "How often the compressor loads per hour is unchanged.",
+      "Motor current (I1) is unchanged while loaded. Nothing else that would accompany a genuinely hot machine is present."
+    ],
+    "source": "yaml",
+    "subsystem": "control",
+    "summary": "The temperature sensor or its wiring reports a value that the oil itself does not have. The reading jumps or drifts while every other sign of a hot or a cold machine is missing, and the controller acts on a temperature that is not there."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Listen at the compression element for a changed running noise, and compare it with how the unit sounded when it was commissioned.",
+      "Compare the loaded current with the reference figure of section 9.1.",
+      "Rule out a clogged separator element and the wrong oil grade first, since both raise the current as well.",
+      "Check the oil for metal particles at the filter change."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "rare",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "rare",
+        "title": "Compressor does not start"
+      }
+    ],
+    "fault_id": "airend_bearing_wear",
+    "maintenance": [
+      "drive_coupling_inspection",
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:airend_bearing_wear",
+      "section": "8.9",
+      "title": "Motor current high"
+    },
+    "name": "Airend bearing wear",
+    "pages": {
+      "clean": [
+        35,
+        39
+      ],
+      "realistic": [
+        35,
+        38
+      ]
+    },
+    "parts": [
+      "compressor_oil",
+      "oil_filter_element",
+      "coupling_element"
+    ],
+    "related_alarms": [
+      "W106",
+      "X203",
+      "S303",
+      "S304",
+      "S307",
+      "S308"
+    ],
+    "remedy": "Stop the unit and have the compression element inspected and overhauled by a service engineer; a bearing that is allowed to run to failure destroys the rotors as well. Check the drive coupling at the same time under task 7.3.12. Change the oil and both filters after the overhaul, because metal particles will have reached the whole circuit.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) rises gradually while loaded."
+      },
+      {
+        "direction": "rises",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) rises gradually while loaded."
+      },
+      {
+        "behaviour": "start_current_peak",
+        "direction": "higher",
+        "onset": "gradual",
+        "phase": "start",
+        "text": "The current peak at motor start is gradually higher at start."
+      },
+      {
+        "behaviour": "pressure_rise_while_loaded",
+        "direction": "slower",
+        "note": "Worn clearances let compressed air slip back through the element.",
+        "text": "How fast line pressure rises during a loaded run is slower. Worn clearances let compressed air slip back through the element."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) rises gradually while loaded.",
+      "Oil temperature (T1) rises gradually while loaded.",
+      "The current peak at motor start is gradually higher at start.",
+      "How fast line pressure rises during a loaded run is slower. Worn clearances let compressed air slip back through the element."
+    ],
+    "source": "yaml",
+    "subsystem": "compressor",
+    "summary": "Worn bearings in the compression element add friction to every turn. The motor has to work harder, the oil takes up the extra heat, and the running noise changes. In the end the element can become too stiff for the motor to start at all."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the vessel pressure with the line pressure while the unit delivers; a difference that has shrunk over months points at wear.",
+      "Rule out a clogged intake filter and a sticking intake valve first, since both also lower the loaded current.",
+      "Compare the time a loaded run takes with the reference cycle of section 6.3.",
+      "Check the running hours of the unit against the inspection interval."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "occasional",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W102"
+        ],
+        "condition_id": "continuous_load",
+        "likelihood": "occasional",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      {
+        "alarms": [
+          "W107"
+        ],
+        "condition_id": "motor_current_low",
+        "likelihood": "rare",
+        "title": "Motor current low under load, delivery low"
+      }
+    ],
+    "fault_id": "airend_element_wear",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:airend_element_wear",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Compression element worn",
+    "pages": {
+      "clean": [
+        27,
+        30,
+        36
+      ],
+      "realistic": [
+        28,
+        30,
+        35
+      ]
+    },
+    "parts": [
+      "compressor_oil",
+      "oil_filter_element",
+      "separator_element"
+    ],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W102",
+      "W107"
+    ],
+    "remedy": "Have the compression element inspected and overhauled or exchanged by a service engineer. Wear of this kind is gradual and does not repair itself, so plan the work rather than waiting for a breakdown. Change the oil and both filters after the overhaul and record the new reference figures for the loaded current and the pressure rise per loaded run.",
+    "signal_moves": [
+      {
+        "direction": "low",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is gradually low while loaded."
+      },
+      {
+        "behaviour": "pressure_rise_while_loaded",
+        "direction": "slower",
+        "onset": "gradual",
+        "text": "How fast line pressure rises during a loaded run is gradually slower."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "longer",
+        "onset": "gradual",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is gradually longer while loaded."
+      },
+      {
+        "direction": "low",
+        "note": "The difference between the vessel and the line is smaller than the reference figure.",
+        "onset": "gradual",
+        "phase": "loaded",
+        "signal": "discharge_pressure",
+        "text": "Discharge pressure (P1) is gradually low while loaded. The difference between the vessel and the line is smaller than the reference figure."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) is gradually low while loaded.",
+      "How fast line pressure rises during a loaded run is gradually slower.",
+      "How long each loaded run lasts is gradually longer while loaded.",
+      "Discharge pressure (P1) is gradually low while loaded. The difference between the vessel and the line is smaller than the reference figure."
+    ],
+    "source": "yaml",
+    "subsystem": "compressor",
+    "summary": "The clearances inside the compression element have opened up, so part of the air slips back instead of being delivered. The unit turns easily and quietly but no longer fills the line, and the difference between the vessel and the line falls below its reference figure."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Measure the supply voltage at the terminals while the unit is loaded, not only at rest.",
+      "Compare the three phases against each other under load and look for an imbalance.",
+      "Feel the motor housing and the terminal box; a supply problem heats the motor while the oil stays normal.",
+      "Inspect the supply cable, the fuses and the terminal connections for damage and heat marks."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W106",
+          "X203",
+          "S303"
+        ],
+        "condition_id": "motor_current_high",
+        "likelihood": "occasional",
+        "title": "Motor current high"
+      },
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "occasional",
+        "title": "Compressor does not start"
+      }
+    ],
+    "fault_id": "supply_voltage_low_or_unbalanced",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:supply_voltage_low_or_unbalanced",
+      "section": "8.9",
+      "title": "Motor current high"
+    },
+    "name": "Supply voltage low or unbalanced",
+    "pages": {
+      "clean": [
+        34,
+        39
+      ],
+      "realistic": [
+        34,
+        38
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W106",
+      "X203",
+      "S303",
+      "S304",
+      "S307",
+      "S308"
+    ],
+    "remedy": "Have the supply, the protection and the connections checked and put right by an electrician; nothing on the compressor side needs work. Confirm after the repair that the loaded current and the start peak are back in their normal bands. A motor that has run for a long time on an unbalanced supply should be checked before the unit returns to full duty.",
+    "signal_moves": [
+      {
+        "direction": "rises",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "motor_current",
+        "text": "Motor current (I1) rises persistently while loaded."
+      },
+      {
+        "behaviour": "start_current_peak",
+        "direction": "higher",
+        "phase": "start",
+        "text": "The current peak at motor start is higher at start."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The oil stays in its normal band, unlike every mechanical reason for a high current.",
+        "phase": "any",
+        "signal": "oil_temperature",
+        "text": "Oil temperature (T1) is unchanged in every state. The oil stays in its normal band, unlike every mechanical reason for a high current."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) rises persistently while loaded.",
+      "The current peak at motor start is higher at start.",
+      "Oil temperature (T1) is unchanged in every state. The oil stays in its normal band, unlike every mechanical reason for a high current.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "electrical",
+    "summary": "The supply is weak, or the phases are out of balance, so the motor draws more current for the same work and heats up. A bad start can make the protection drop out before the unit reaches speed. The extra heat is in the motor, not in the oil, which is what gives it away."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Look at the protection relay in the cabinet and confirm that it has tripped.",
+      "Read the recorded current of the last loaded runs before the trip and look for a rise.",
+      "Check the supply voltage and the balance of the phases before resetting anything.",
+      "Turn the compression element by hand, with the unit isolated, to rule out a seizure."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "common",
+        "title": "Compressor does not start"
+      }
+    ],
+    "fault_id": "motor_overload_relay_tripped",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:motor_overload_relay_tripped",
+      "section": "8.15",
+      "title": "Compressor does not start"
+    },
+    "name": "Motor protection relay tripped",
+    "pages": {
+      "clean": [
+        39
+      ],
+      "realistic": [
+        38
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "S304",
+      "S307",
+      "S308"
+    ],
+    "remedy": "Find and remove the reason for the trip first, then reset the relay and start the unit under supervision. A high current from a clogged separator element, a blow-down valve that never vents, a weak supply or worn bearings all trip the same relay, and each has its own repair. Repeated trips with no cause found mean the motor and the relay setting themselves must be checked.",
+    "signal_moves": [
+      {
+        "direction": "near_zero",
+        "onset": "sustained",
+        "phase": "off",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently near zero while the unit is off."
+      },
+      {
+        "direction": "off",
+        "onset": "sustained",
+        "phase": "off",
+        "signal": "load_valve",
+        "text": "Load solenoid (D2) is persistently off while the unit is off."
+      },
+      {
+        "behaviour": "start_current_peak",
+        "direction": "not_reached",
+        "note": "No start current appears at all, because the circuit never closes.",
+        "phase": "start",
+        "text": "The current peak at motor start is not reached at start. No start current appears at all, because the circuit never closes."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) is persistently near zero while the unit is off.",
+      "Load solenoid (D2) is persistently off while the unit is off.",
+      "The current peak at motor start is not reached at start. No start current appears at all, because the circuit never closes."
+    ],
+    "source": "yaml",
+    "subsystem": "electrical",
+    "summary": "The motor protection has dropped out and holds the start circuit open. The controller cannot start the unit until the relay is reset, and resetting it without finding the reason for the trip simply repeats the event, usually within a few cycles."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Look at every emergency-stop button on the unit and on any remote station and check that each is released.",
+      "Read the message on the display, which names this state directly.",
+      "Check the wiring of the emergency-stop circuit if every button is released and the message stays."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "S304",
+          "S307",
+          "S308"
+        ],
+        "condition_id": "no_start",
+        "likelihood": "common",
+        "note": "Always check this first; it costs nothing and explains most sudden no-start calls.",
+        "title": "Compressor does not start"
+      }
+    ],
+    "fault_id": "emergency_stop_active",
+    "maintenance": [],
+    "manual_ref": {
+      "anchor": "fault:emergency_stop_active",
+      "section": "8.15",
+      "title": "Compressor does not start"
+    },
+    "name": "Emergency stop active",
+    "pages": {
+      "clean": [
+        39
+      ],
+      "realistic": [
+        38
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "S304",
+      "S307",
+      "S308"
+    ],
+    "remedy": "Establish why the unit was stopped before releasing anything. Once it is safe, turn the button to release it, reset the message and start the unit under supervision. Where no button is pressed, the fault is in the emergency-stop circuit itself and must be repaired by a qualified person; that circuit is a safety function and must never be bridged.",
+    "signal_moves": [
+      {
+        "direction": "near_zero",
+        "onset": "sustained",
+        "phase": "off",
+        "signal": "motor_current",
+        "text": "Motor current (I1) is persistently near zero while the unit is off."
+      },
+      {
+        "direction": "off",
+        "onset": "sustained",
+        "phase": "off",
+        "signal": "load_valve",
+        "text": "Load solenoid (D2) is persistently off while the unit is off."
+      },
+      {
+        "direction": "stays_on",
+        "onset": "sustained",
+        "phase": "off",
+        "signal": "intake_closed",
+        "text": "Intake valve closed (D1) stays on persistently while the unit is off."
+      }
+    ],
+    "signal_moves_text": [
+      "Motor current (I1) is persistently near zero while the unit is off.",
+      "Load solenoid (D2) is persistently off while the unit is off.",
+      "Intake valve closed (D1) stays on persistently while the unit is off."
+    ],
+    "source": "yaml",
+    "subsystem": "control",
+    "summary": "The emergency-stop button is still pressed, or it was never released after an earlier stop. The controller keeps the start inhibited and shows the corresponding message until the button is freed and the message is reset. It is the cheapest possible check and the most commonly missed one."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the display with a test gauge at the pneumatic panel, at rest and under load.",
+      "Compare the line reading with the reservoir reading, which shares the same air circuit.",
+      "Compare the reading with the state of the low-pressure switch, which is independent of the transducer.",
+      "Inspect the transducer, its impulse line and its wiring for moisture, blockage and loose terminals."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "rare",
+        "note": "The pressure is only low on the display; a test gauge at the panel disagrees with it.",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "X204"
+        ],
+        "condition_id": "no_unload",
+        "likelihood": "rare",
+        "note": "The controller never sees the cut-out point, because the reading lags the real pressure.",
+        "title": "Compressor does not unload at cut-out"
+      },
+      {
+        "alarms": [
+          "W113"
+        ],
+        "condition_id": "reservoir_deviation",
+        "likelihood": "occasional",
+        "note": "Here the regulation itself also misbehaves, because the controller regulates on the faulty reading.",
+        "title": "Reservoir pressure differs from line pressure"
+      }
+    ],
+    "fault_id": "line_pressure_transducer_fault",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:line_pressure_transducer_fault",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Line pressure transducer fault",
+    "pages": {
+      "clean": [
+        28,
+        40
+      ],
+      "realistic": [
+        29,
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "X204",
+      "W113"
+    ],
+    "remedy": "Clear the impulse line, repair the wiring or replace the transducer, then confirm the reading against a test gauge across the working range. Keep the unit under supervision until the reading is trusted again: with a faulty regulation signal the unit can compress past its cut-out point, and only the safety valve then stands between it and an overpressure.",
+    "signal_moves": [
+      {
+        "direction": "fluctuates",
+        "onset": "intermittent",
+        "phase": "any",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) fluctuates intermittently in every state."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The reservoir transducer keeps reporting the true pressure, so the two readings drift apart.",
+        "phase": "any",
+        "signal": "reservoir_pressure",
+        "text": "Reservoir pressure (P5) is unchanged in every state. The reservoir transducer keeps reporting the true pressure, so the two readings drift apart."
+      },
+      {
+        "behaviour": "cut_out_reached",
+        "direction": "not_reached",
+        "text": "Whether a loaded run ends at the cut-out pressure is not reached."
+      },
+      {
+        "direction": "stays_off",
+        "note": "The mechanical switch follows the real pressure and contradicts the display.",
+        "phase": "any",
+        "signal": "low_pressure_switch",
+        "text": "Low-pressure switch (D5) stays off in every state. The mechanical switch follows the real pressure and contradicts the display."
+      }
+    ],
+    "signal_moves_text": [
+      "Line pressure (P2) fluctuates intermittently in every state.",
+      "Reservoir pressure (P5) is unchanged in every state. The reservoir transducer keeps reporting the true pressure, so the two readings drift apart.",
+      "Whether a loaded run ends at the cut-out pressure is not reached.",
+      "Low-pressure switch (D5) stays off in every state. The mechanical switch follows the real pressure and contradicts the display."
+    ],
+    "source": "yaml",
+    "subsystem": "control",
+    "summary": "The line pressure transducer or its wiring reports a value that the pipework does not have. The controller regulates on the wrong figure, so it can hold the unit loaded past the real cut-out point or unload it while the line is still empty, while every other reading stays correct."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Compare the display with a test gauge at the reservoir.",
+      "Check the position of the reservoir isolation valves, which produce a real deviation rather than a false one.",
+      "Inspect the transducer, its impulse line and its wiring for moisture, blockage and loose terminals."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W113"
+        ],
+        "condition_id": "reservoir_deviation",
+        "likelihood": "occasional",
+        "note": "A test gauge at the reservoir agrees with the line, not with the display.",
+        "title": "Reservoir pressure differs from line pressure"
+      }
+    ],
+    "fault_id": "reservoir_pressure_transducer_fault",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:reservoir_pressure_transducer_fault",
+      "section": "8.17",
+      "title": "Reservoir pressure differs from line pressure"
+    },
+    "name": "Reservoir pressure transducer fault",
+    "pages": {
+      "clean": [
+        40
+      ],
+      "realistic": [
+        39
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W113"
+    ],
+    "remedy": "Clear the impulse line, repair the wiring or replace the transducer, then confirm the reading against a test gauge and against the line reading with the isolation valves open. The unit can stay in service in the meantime, because regulation does not depend on this reading, but the deviation message will keep appearing until the repair is made.",
+    "signal_moves": [
+      {
+        "direction": "fluctuates",
+        "onset": "intermittent",
+        "phase": "any",
+        "signal": "reservoir_pressure",
+        "text": "Reservoir pressure (P5) fluctuates intermittently in every state."
+      },
+      {
+        "direction": "unchanged",
+        "note": "Regulation is untouched, because it does not use this reading.",
+        "phase": "any",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) is unchanged in every state. Regulation is untouched, because it does not use this reading."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      },
+      {
+        "direction": "toggles",
+        "note": "Air is still reaching the reservoirs, so the flow sensor keeps pulsing normally.",
+        "phase": "loaded",
+        "signal": "flow_pulse",
+        "text": "Flow pulse (D8) toggles while loaded. Air is still reaching the reservoirs, so the flow sensor keeps pulsing normally."
+      }
+    ],
+    "signal_moves_text": [
+      "Reservoir pressure (P5) fluctuates intermittently in every state.",
+      "Line pressure (P2) is unchanged in every state. Regulation is untouched, because it does not use this reading.",
+      "How often the compressor loads per hour is unchanged.",
+      "Flow pulse (D8) toggles while loaded. Air is still reaching the reservoirs, so the flow sensor keeps pulsing normally."
+    ],
+    "source": "yaml",
+    "subsystem": "control",
+    "summary": "The reservoir transducer reports a pressure the vessels do not have, while the line reading stays correct. A deviation appears on the display although nothing in the air circuit has changed, and the regulation of the unit is not affected at all."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Check the position of the isolation valve at each reservoir; this is the quickest check and the usual answer.",
+      "Compare the reservoir reading with the line reading over a complete cycle.",
+      "Ask whether any work has been done on the reservoirs or their safety valves recently."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W108"
+        ],
+        "condition_id": "frequent_cycling",
+        "likelihood": "rare",
+        "note": "Here the loaded runs get shorter rather than longer, because the unit fills a much smaller volume.",
+        "title": "Compressor starts and loads too often"
+      },
+      {
+        "alarms": [
+          "W113"
+        ],
+        "condition_id": "reservoir_deviation",
+        "likelihood": "common",
+        "note": "The reservoir reading stands still while the line reading cycles.",
+        "title": "Reservoir pressure differs from line pressure"
+      },
+      {
+        "alarms": [
+          "W114"
+        ],
+        "condition_id": "no_flow_signal",
+        "likelihood": "occasional",
+        "note": "Here no air passes at all, and the reservoir pressure confirms it.",
+        "title": "Flow signal missing"
+      }
+    ],
+    "fault_id": "reservoir_isolation_valve_closed",
+    "maintenance": [
+      "weekly_checks"
+    ],
+    "manual_ref": {
+      "anchor": "fault:reservoir_isolation_valve_closed",
+      "section": "8.4",
+      "title": "Compressor starts and loads too often"
+    },
+    "name": "Reservoir isolation valve closed",
+    "pages": {
+      "clean": [
+        29,
+        40,
+        41
+      ],
+      "realistic": [
+        30,
+        39,
+        40
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W108",
+      "W113",
+      "W114"
+    ],
+    "remedy": "Open the isolation valve slowly, with the unit stopped, and let the reservoir fill before starting again. Confirm that the reservoir and line readings track each other and that the flow sensor pulses while the unit delivers. Add a valve position check to the hand-over after any work on the reservoirs, because this is a procedural fault, not a technical one.",
+    "signal_moves": [
+      {
+        "direction": "unchanged",
+        "note": "The pressure behind the closed valve stands still while the line pressure cycles.",
+        "phase": "any",
+        "signal": "reservoir_pressure",
+        "text": "Reservoir pressure (P5) is unchanged in every state. The pressure behind the closed valve stands still while the line pressure cycles."
+      },
+      {
+        "behaviour": "loaded_run_duration",
+        "direction": "shorter",
+        "note": "Shorter runs, unlike a leak or heavy demand, which both make runs longer.",
+        "phase": "loaded",
+        "text": "How long each loaded run lasts is shorter while loaded. Shorter runs, unlike a leak or heavy demand, which both make runs longer."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "higher",
+        "text": "How often the compressor loads per hour is higher."
+      },
+      {
+        "direction": "no_pulse",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "flow_pulse",
+        "text": "Flow pulse (D8) gives no pulse persistently while loaded."
+      }
+    ],
+    "signal_moves_text": [
+      "Reservoir pressure (P5) is unchanged in every state. The pressure behind the closed valve stands still while the line pressure cycles.",
+      "How long each loaded run lasts is shorter while loaded. Shorter runs, unlike a leak or heavy demand, which both make runs longer.",
+      "How often the compressor loads per hour is higher.",
+      "Flow pulse (D8) gives no pulse persistently while loaded."
+    ],
+    "source": "yaml",
+    "subsystem": "reservoirs",
+    "summary": "An isolation valve at a reservoir has been left closed, usually after maintenance, so the unit works against a much smaller volume. It fills and empties that volume quickly, the reservoir reading no longer follows the line, and no air passes the flow sensor."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Listen at the drain outlet between drain pulses; a steady hiss of air is the clearest sign.",
+      "Watch separator discharge pressure (P3) while the unit idles; it should match the line pressure.",
+      "Inspect the drain valve seat and the strainer for debris holding the valve off its seat.",
+      "Read the running hours since the last drain service against task 7.3.8."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W101",
+          "S305"
+        ],
+        "condition_id": "low_line_pressure",
+        "likelihood": "occasional",
+        "title": "Line pressure below setpoint"
+      },
+      {
+        "alarms": [
+          "W108"
+        ],
+        "condition_id": "frequent_cycling",
+        "likelihood": "occasional",
+        "title": "Compressor starts and loads too often"
+      },
+      {
+        "alarms": [
+          "W112"
+        ],
+        "condition_id": "separator_pressure_abnormal",
+        "likelihood": "common",
+        "note": "The reading collapses towards zero while the unit idles, and air is heard at the drain outlet.",
+        "title": "Separator discharge pressure abnormal"
+      }
+    ],
+    "fault_id": "condensate_drain_stuck_open",
+    "maintenance": [
+      "condensate_drain_service"
+    ],
+    "manual_ref": {
+      "anchor": "fault:condensate_drain_stuck_open",
+      "section": "8.3",
+      "title": "Line pressure below setpoint"
+    },
+    "name": "Condensate drain stuck open",
+    "pages": {
+      "clean": [
+        27,
+        29,
+        36
+      ],
+      "realistic": [
+        28,
+        30,
+        36
+      ]
+    },
+    "parts": [
+      "drain_valve_kit"
+    ],
+    "related_alarms": [
+      "W101",
+      "S305",
+      "W108",
+      "W112"
+    ],
+    "remedy": "Clean or rebuild the drain valve, clear its strainer and confirm that it closes tightly between pulses. Check the separator discharge pressure over a complete cycle afterwards. Where debris caused the fault, shorten the drain service interval, since the same debris will hold the rebuilt valve open just as easily.",
+    "signal_moves": [
+      {
+        "direction": "near_zero",
+        "note": "It should follow the line pressure while the unit is not delivering.",
+        "onset": "sustained",
+        "phase": "unloaded",
+        "signal": "separator_discharge_pressure",
+        "text": "Separator discharge pressure (P3) is persistently near zero while unloaded. It should follow the line pressure while the unit is not delivering."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "higher",
+        "onset": "sustained",
+        "text": "How often the compressor loads per hour is persistently higher."
+      },
+      {
+        "behaviour": "unloaded_pressure_decay",
+        "direction": "faster",
+        "text": "How fast line pressure falls while the unit is not delivering is faster."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The purge line is normal, which separates this from a leaking purge valve.",
+        "phase": "any",
+        "signal": "dryer_purge_pressure",
+        "text": "Dryer purge pressure (P4) is unchanged in every state. The purge line is normal, which separates this from a leaking purge valve."
+      }
+    ],
+    "signal_moves_text": [
+      "Separator discharge pressure (P3) is persistently near zero while unloaded. It should follow the line pressure while the unit is not delivering.",
+      "How often the compressor loads per hour is persistently higher.",
+      "How fast line pressure falls while the unit is not delivering is faster.",
+      "Dryer purge pressure (P4) is unchanged in every state. The purge line is normal, which separates this from a leaking purge valve."
+    ],
+    "source": "yaml",
+    "subsystem": "separator_drain",
+    "summary": "The automatic drain no longer closes between pulses, so compressed air escapes with the condensate. The unit replaces the loss and loads more often, and the pressure at the separator discharge collapses instead of following the line while the unit idles."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Watch the drain through several drain intervals and confirm whether any condensate leaves it at all.",
+      "Open the manual drain and see how much water has collected.",
+      "Inspect the drain valve, its strainer and its outlet line for sludge, scale and ice.",
+      "Check the delivered air at the consumers for water, which is the consequence to expect."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W112"
+        ],
+        "condition_id": "separator_pressure_abnormal",
+        "likelihood": "occasional",
+        "note": "The reading stays high under load and no condensate leaves the drain at all.",
+        "title": "Separator discharge pressure abnormal"
+      },
+      {
+        "alarms": [],
+        "condition_id": "water_in_air",
+        "likelihood": "common",
+        "note": "The dryer receives far more water than it was sized for, because the separator no longer drains.",
+        "title": "Condensate or moisture in the delivered air"
+      }
+    ],
+    "fault_id": "condensate_drain_blocked",
+    "maintenance": [
+      "condensate_drain_service",
+      "dryer_desiccant_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:condensate_drain_blocked",
+      "section": "8.12",
+      "title": "Separator discharge pressure abnormal"
+    },
+    "name": "Condensate drain blocked",
+    "pages": {
+      "clean": [
+        36,
+        37
+      ],
+      "realistic": [
+        36
+      ]
+    },
+    "parts": [
+      "drain_valve_kit"
+    ],
+    "related_alarms": [
+      "W112"
+    ],
+    "remedy": "Clear or rebuild the drain valve and its outlet line, then confirm over several intervals that condensate leaves the unit normally. Have the dryer desiccant inspected under task 7.3.9, because a charge that has been flooded rarely recovers and will keep passing wet air until it is replaced.",
+    "signal_moves": [
+      {
+        "direction": "high",
+        "note": "It should fall away while the unit delivers, and standing condensate keeps it up.",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "separator_discharge_pressure",
+        "text": "Separator discharge pressure (P3) is persistently high while loaded. It should fall away while the unit delivers, and standing condensate keeps it up."
+      },
+      {
+        "direction": "toggles",
+        "note": "The dryer keeps changing over correctly; it simply cannot cope with the water reaching it.",
+        "phase": "any",
+        "signal": "dryer_tower",
+        "text": "Dryer tower in service (D3) toggles in every state. The dryer keeps changing over correctly; it simply cannot cope with the water reaching it."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Separator discharge pressure (P3) is persistently high while loaded. It should fall away while the unit delivers, and standing condensate keeps it up.",
+      "Dryer tower in service (D3) toggles in every state. The dryer keeps changing over correctly; it simply cannot cope with the water reaching it.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "separator_drain",
+    "summary": "The drain no longer opens, so condensate stands in the separator and is carried forward into the dryer. The towers take far more water than they were sized for, the desiccant is overwhelmed, and moisture reaches the consumers while every pressure still looks plausible."
+  },
+  {
+    "benign": false,
+    "checks": [
+      "Confirm that the reservoir pressure follows the line pressure, which proves that air is passing the sensor.",
+      "Check the position of the reservoir isolation valves, since a closed valve gives the same missing signal for a real reason.",
+      "Inspect the sensor, its wiring and its terminals at the controller.",
+      "Check the sensor body for debris or water that would stop it from responding."
+    ],
+    "conditions": [
+      {
+        "alarms": [
+          "W114"
+        ],
+        "condition_id": "no_flow_signal",
+        "likelihood": "common",
+        "note": "The reservoirs keep filling, which proves that air is passing the sensor.",
+        "title": "Flow signal missing"
+      }
+    ],
+    "fault_id": "flow_sensor_fault",
+    "maintenance": [
+      "annual_inspection"
+    ],
+    "manual_ref": {
+      "anchor": "fault:flow_sensor_fault",
+      "section": "8.19",
+      "title": "Flow signal missing"
+    },
+    "name": "Flow sensor fault",
+    "pages": {
+      "clean": [
+        41
+      ],
+      "realistic": [
+        40
+      ]
+    },
+    "parts": [],
+    "related_alarms": [
+      "W114"
+    ],
+    "remedy": "Clean or replace the flow sensor and repair its wiring, then confirm while the unit delivers that the pulses return. The unit can stay in service in the meantime, because nothing in the air circuit is at fault, but the supervision of the flow is lost until the repair is made and the message will keep appearing.",
+    "signal_moves": [
+      {
+        "direction": "no_pulse",
+        "onset": "sustained",
+        "phase": "loaded",
+        "signal": "flow_pulse",
+        "text": "Flow pulse (D8) gives no pulse persistently while loaded."
+      },
+      {
+        "direction": "unchanged",
+        "note": "The reservoirs still fill, which proves that air is reaching them.",
+        "phase": "any",
+        "signal": "reservoir_pressure",
+        "text": "Reservoir pressure (P5) is unchanged in every state. The reservoirs still fill, which proves that air is reaching them."
+      },
+      {
+        "direction": "unchanged",
+        "phase": "any",
+        "signal": "line_pressure",
+        "text": "Line pressure (P2) is unchanged in every state."
+      },
+      {
+        "behaviour": "load_cycle_rate",
+        "direction": "unchanged",
+        "text": "How often the compressor loads per hour is unchanged."
+      }
+    ],
+    "signal_moves_text": [
+      "Flow pulse (D8) gives no pulse persistently while loaded.",
+      "Reservoir pressure (P5) is unchanged in every state. The reservoirs still fill, which proves that air is reaching them.",
+      "Line pressure (P2) is unchanged in every state.",
+      "How often the compressor loads per hour is unchanged."
+    ],
+    "source": "yaml",
+    "subsystem": "reservoirs",
+    "summary": "The flow sensor at the reservoir inlet, or its wiring, no longer delivers pulses although air is passing. The controller reports a missing flow signal while every pressure on the unit behaves entirely normally, so the message is easy to dismiss as a nuisance."
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "summer_normal_jul05",
+  "title": "Normal operation in high summer, 5 July 2020",
+  "group": "negative",
+  "profiles": ["dev", "full"],
+  "split": "dev",
+  "positive": false,
+  "source": {
+    "kind": "slice",
+    "name": "summer-jul05"
+  },
+  "replay": {
+    "from": "2020-07-05T00:00:00.000Z",
+    "to": "2020-07-06T00:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "negative"
+  },
+  "expect": {
+    "tickets": "none",
+    "fault": "benign_or_none",
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "warmup_min": 60,
+  "seed": 37,
+  "notes": "The seasonal false-positive check the first-month bands call for: the oil temperature sits high all day because the ambient does, and a band learned in February would call that a fault. Benign review items are reported rather than counted; a ticket naming a defect is a false positive."
+}

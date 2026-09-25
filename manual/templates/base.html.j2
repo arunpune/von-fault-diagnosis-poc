@@ -1,0 +1,31 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# The whole document of one variant (phase1-pdf-build.md §6.4).
+   `base_url` is the manual/ directory, so the three stylesheet links, the fonts
+   and the figures resolve relatively and `--html-only` output opens in a
+   browser. `dcterms.created` is build.yaml's fixed source_date_epoch, never a
+   clock, which is what keeps two builds byte-identical. #}
+<!DOCTYPE html>
+<html lang="{{ document.language | e }}">
+<head>
+<meta charset="utf-8">
+<title>{{ document.title | e }} &middot; {{ document.subtitle | e }} &middot; Rev. {{ document.revision | e }}</title>
+<meta name="author" content="{{ document.issuer | e }}">
+<meta name="description" content="{{ document.subtitle | e }} for the {{ machine.identity.name | e }} with the {{ machine.identity.controller | e }} controller, document {{ document.number | e }} revision {{ document.revision | e }}.">
+<meta name="dcterms.created" content="{{ source_date_iso | e }}">
+<meta name="dcterms.rights" content="{{ document.license | e }}">
+<link rel="stylesheet" href="templates/css/fonts.css">
+<link rel="stylesheet" href="templates/css/base.css">
+<link rel="stylesheet" href="templates/css/{{ variant.name | e }}.css">
+</head>
+<body data-variant="{{ variant.name | e }}">
+{% include "partials/cover.html.j2" %}
+{% include "toc.html.j2" %}
+{% for ch in chapters %}
+<section class="chapter" id="ch-{{ ch.number }}" data-chapter="{{ ch.number }}" data-columns="{{ ch.columns }}">
+<h1 class="chapter-title" id="ch-{{ ch.number }}-title"><span class="num">{{ ch.number }}</span> {{ ch.title | e }}</h1>
+{% include "chapters/" ~ ch.template %}
+</section>
+{% endfor %}
+</body>
+</html>

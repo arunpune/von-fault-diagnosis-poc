@@ -1,0 +1,39 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "inject_dryer_tower_switching_failure",
+  "title": "Injected dryer changeover failure on a normal day",
+  "group": "injected",
+  "profiles": ["dev", "full"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "baseline-feb03"
+  },
+  "replay": {
+    "from": "2020-02-03T00:00:00.000Z",
+    "to": "2020-02-04T00:00:00.000Z"
+  },
+  "injections": [
+    {
+      "injection_id": "dryer_tower_switching_failure",
+      "at": "2020-02-03T02:00:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "injection"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "injected",
+    "within_min": 180,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 27,
+  "notes": "The towers stop alternating, so the signature is a digital pattern that stops rather than an analog value that moves. The definition has no ramp and runs for five hours. Outside the core-10, so it belongs to the dev split."
+}

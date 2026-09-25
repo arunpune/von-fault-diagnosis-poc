@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Document metadata, chapter list and variant knobs for the CAU-7 manual.
+# Validated against manual/spec/schemas/build.schema.json; the PDF build may
+# add its own keys in a `pdf` block.
+schema_version: 1
+document: {title: CAU-7 Compressed-Air Unit, subtitle: Instruction manual, number: CAU7-IOM-EN, revision: "1.0",
+           revision_date: 2026-01-15, language: en, license: CC-BY-4.0, issuer: Meddle S.r.l.,
+           revisions: [{revision: "1.0", date: 2026-01-15, change: First issue}]}
+source_date_epoch: 1768435200          # == revision_date at 00:00:00Z
+outputs: {dir: data/manual, basename: cau-7}         # -> data/manual/cau-7-realistic.pdf, cau-7-clean.pdf
+fonts: {body: IBM Plex Sans, mono: IBM Plex Mono, dir: manual/fonts}
+chapters:                               # order and titles; file = content/NN-<slug>.md
+  - {number: 1, slug: safety, title: Safety precautions}
+  - {number: 2, slug: description, title: General description}
+  - {number: 3, slug: controller, title: Controller CTRL-7}
+  - {number: 4, slug: settings, title: Programmable settings}
+  - {number: 5, slug: installation, title: Installation and reference conditions}
+  - {number: 6, slug: operation, title: Operation}
+  - {number: 7, slug: maintenance, title: Maintenance}
+  - {number: 8, slug: troubleshooting, title: Problem solving}
+  - {number: 9, slug: technical-data, title: Technical data and signal list}
+  - {number: 10, slug: appendix, title: Appendix}
+default_variant: realistic
+variants:
+  clean:
+    layout: single_column
+    two_column_chapters: []
+    tables: fit_page
+    fact_placement: tables_only
+    xref_style: explicit
+    units: si
+    page_furniture: page_numbers
+    footnotes: false
+  realistic:
+    layout: mixed
+    two_column_chapters: [2, 6, 7]
+    tables: span_pages_repeat_header
+    fact_placement: mixed
+    prose_only: [setting:unload_run_on_time, setting:restart_delay, setting:dryer_changeover_timeout,
+                 machine.ratings.minimum_pressure_valve_opening, machine.ratings.dryer_purge_fraction]
+    table_only: [setting:motor_current_low_warning, setting:separator_element_dp_warning, machine.ratings.sound_pressure_level]
+    xref_style: short_with_footnotes
+    units: si_plus_imperial
+    page_furniture: running_headers_footers_revision_stamp
+    footnotes: true
+  scanned:                              # optional, off by default; the PDF build decides whether to build it
+    extends: realistic
+    enabled: false
+    raster_dpi: 200
+    skew_deg: 0.4
+    noise: 0.02
+lint:
+  allowed_number_phrases: []            # exact strings the number lint may ignore (keep empty unless unavoidable)

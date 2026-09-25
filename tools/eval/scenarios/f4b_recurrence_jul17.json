@@ -1,0 +1,31 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "f4b_recurrence_jul17",
+  "title": "Secondary air-leak recurrence, 17 July 2020",
+  "group": "diagnostic",
+  "profiles": ["dev"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "f4b-jul17"
+  },
+  "replay": {
+    "from": "2020-07-16T18:00:00.000Z",
+    "to": "2020-07-17T08:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "failure",
+    "failure_id": "F4b"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 60,
+  "seed": 45,
+  "notes": "The thesis-only recurrence the day after the July repair: the failure table carries it with in_headline false, so the bound window is a secondary positive, reported apart from the headline metrics and never counted as a false one. The first LPS activation inside it is at 00:56."
+}

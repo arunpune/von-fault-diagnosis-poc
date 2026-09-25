@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:machine:v1",
+  "title": "manual/spec/machine.yaml",
+  "description": "Identity, ratings, limits, reference conditions, sensors, components, parts and reference operation of the CAU-7. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "model": { "$ref": "common.schema.json#/$defs/text" },
+        "name": { "$ref": "common.schema.json#/$defs/text" },
+        "controller": { "$ref": "common.schema.json#/$defs/text" },
+        "type": { "$ref": "common.schema.json#/$defs/text" },
+        "serial_format": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["model", "name", "controller", "type", "serial_format"],
+      "additionalProperties": false
+    },
+    "document": {
+      "type": "object",
+      "description": "Must equal the document block of build.yaml (rule P6).",
+      "properties": {
+        "number": { "$ref": "common.schema.json#/$defs/text" },
+        "revision": { "$ref": "common.schema.json#/$defs/text" },
+        "revision_date": { "$ref": "common.schema.json#/$defs/iso_date" }
+      },
+      "required": ["number", "revision", "revision_date"],
+      "additionalProperties": false
+    },
+    "ratings": {
+      "type": "object",
+      "properties": {
+        "motor_power": { "$ref": "common.schema.json#/$defs/quantity" },
+        "motor_rated_current": { "$ref": "common.schema.json#/$defs/quantity" },
+        "motor_speed": { "$ref": "common.schema.json#/$defs/quantity" },
+        "supply_voltage": { "$ref": "common.schema.json#/$defs/quantity" },
+        "supply_frequency": { "$ref": "common.schema.json#/$defs/quantity" },
+        "supply_fuse": { "$ref": "common.schema.json#/$defs/quantity" },
+        "free_air_delivery": { "$ref": "common.schema.json#/$defs/quantity" },
+        "max_working_pressure": { "$ref": "common.schema.json#/$defs/quantity" },
+        "safety_valve_setting": { "$ref": "common.schema.json#/$defs/quantity" },
+        "minimum_pressure_valve_opening": { "$ref": "common.schema.json#/$defs/quantity" },
+        "oil_fill_volume": { "$ref": "common.schema.json#/$defs/quantity" },
+        "reservoir_volume_each": { "$ref": "common.schema.json#/$defs/quantity" },
+        "reservoir_count": { "$ref": "common.schema.json#/$defs/quantity" },
+        "reservoir_design_pressure": { "$ref": "common.schema.json#/$defs/quantity" },
+        "dryer_dew_point": { "$ref": "common.schema.json#/$defs/quantity" },
+        "dryer_purge_fraction": { "$ref": "common.schema.json#/$defs/quantity" },
+        "desiccant_charge_each": { "$ref": "common.schema.json#/$defs/quantity" },
+        "sound_pressure_level": { "$ref": "common.schema.json#/$defs/quantity" },
+        "length": { "$ref": "common.schema.json#/$defs/quantity" },
+        "width": { "$ref": "common.schema.json#/$defs/quantity" },
+        "height": { "$ref": "common.schema.json#/$defs/quantity" },
+        "mass": { "$ref": "common.schema.json#/$defs/quantity" }
+      },
+      "required": ["max_working_pressure", "safety_valve_setting", "reservoir_design_pressure"],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "ambient_operating": { "$ref": "common.schema.json#/$defs/span" },
+        "ambient_storage": { "$ref": "common.schema.json#/$defs/span" },
+        "max_altitude": { "$ref": "common.schema.json#/$defs/quantity" },
+        "max_relative_humidity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "supply_voltage_tolerance": { "$ref": "common.schema.json#/$defs/quantity" }
+      },
+      "required": ["ambient_operating"],
+      "additionalProperties": false
+    },
+    "reference_conditions": {
+      "type": "object",
+      "properties": {
+        "ambient_temperature": { "$ref": "common.schema.json#/$defs/quantity" },
+        "inlet_pressure_absolute": { "$ref": "common.schema.json#/$defs/quantity" },
+        "relative_humidity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "cooling_air_temperature": { "$ref": "common.schema.json#/$defs/quantity" }
+      },
+      "required": ["ambient_temperature"],
+      "additionalProperties": false
+    },
+    "hardware_switches": {
+      "type": "object",
+      "properties": {
+        "low_pressure_switch": {
+          "type": "object",
+          "properties": {
+            "closes_below": { "$ref": "common.schema.json#/$defs/quantity" },
+            "opens_above": { "$ref": "common.schema.json#/$defs/quantity" },
+            "signal": { "$ref": "common.schema.json#/$defs/identifier" }
+          },
+          "required": ["closes_below", "opens_above", "signal"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["low_pressure_switch"],
+      "additionalProperties": false
+    },
+    "sensors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "signal": { "$ref": "common.schema.json#/$defs/identifier" },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "pressure_transducer",
+              "resistance_thermometer",
+              "current_transformer",
+              "switch",
+              "pulse_sensor"
+            ]
+          },
+          "range": { "$ref": "common.schema.json#/$defs/span" },
+          "accuracy": { "$ref": "common.schema.json#/$defs/quantity" }
+        },
+        "required": ["signal", "kind", "range"],
+        "additionalProperties": false
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/identifier" },
+          "name": { "$ref": "common.schema.json#/$defs/text" },
+          "subsystem": { "$ref": "common.schema.json#/$defs/subsystem" },
+          "description": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["id", "name", "subsystem"],
+        "additionalProperties": false
+      }
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/identifier" },
+          "code": { "$ref": "common.schema.json#/$defs/part_code" },
+          "name": { "$ref": "common.schema.json#/$defs/text" },
+          "description": { "$ref": "common.schema.json#/$defs/text" },
+          "unit": { "$ref": "common.schema.json#/$defs/unit" }
+        },
+        "required": ["id", "code", "name"],
+        "additionalProperties": false
+      }
+    },
+    "reference_operation": {
+      "type": "object",
+      "description": "Copied from spec/derived/normal-bands.json `cycle`; rule B1 asserts equality.",
+      "properties": {
+        "cut_in_pressure_observed": { "$ref": "common.schema.json#/$defs/quantity" },
+        "cut_out_pressure_observed": { "$ref": "common.schema.json#/$defs/quantity" },
+        "loaded_run_typical": { "$ref": "common.schema.json#/$defs/quantity" },
+        "loaded_run_band": { "$ref": "common.schema.json#/$defs/span" },
+        "unloaded_run_on_typical": { "$ref": "common.schema.json#/$defs/quantity" },
+        "off_phase_typical": { "$ref": "common.schema.json#/$defs/quantity" },
+        "load_cycles_per_hour": { "$ref": "common.schema.json#/$defs/quantity" },
+        "pressure_rise_loaded": { "$ref": "common.schema.json#/$defs/quantity" },
+        "pressure_decay_unloaded_typical": { "$ref": "common.schema.json#/$defs/quantity" },
+        "pressure_decay_unloaded_band": { "$ref": "common.schema.json#/$defs/span" },
+        "discharge_minus_line_loaded": { "$ref": "common.schema.json#/$defs/quantity" },
+        "tower_pulse_after_cut_in": { "$ref": "common.schema.json#/$defs/quantity" }
+      },
+      "required": [
+        "cut_in_pressure_observed",
+        "cut_out_pressure_observed",
+        "loaded_run_typical",
+        "loaded_run_band",
+        "unloaded_run_on_typical",
+        "off_phase_typical",
+        "load_cycles_per_hour",
+        "pressure_rise_loaded",
+        "pressure_decay_unloaded_typical",
+        "pressure_decay_unloaded_band",
+        "discharge_minus_line_loaded",
+        "tower_pulse_after_cut_in"
+      ],
+      "additionalProperties": false
+    },
+    "subsystems": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/subsystem" }
+    }
+  },
+  "required": [
+    "schema_version",
+    "identity",
+    "document",
+    "ratings",
+    "limits",
+    "sensors",
+    "components",
+    "parts",
+    "reference_operation",
+    "subsystems"
+  ],
+  "additionalProperties": false
+}

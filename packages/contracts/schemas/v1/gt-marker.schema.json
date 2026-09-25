@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-marker:v1",
+  "title": "Replay marker",
+  "description": "A discontinuity the simulator created itself, published on gt/{unit_id}/marker: a jump to a preset or to an instant, a reset to the start of the data, or the wrap at the end of the data.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-marker:v1" },
+    "kind": {
+      "description": "Which move in the data this marker records.",
+      "type": "string",
+      "enum": ["jump", "reset", "loop"]
+    },
+    "preset_id": {
+      "description": "The preset the jump came from; absent when the jump named an instant instead.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/preset_id"
+    },
+    "sim_ts_from": {
+      "description": "The instant the replay left.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "sim_ts_to": {
+      "description": "The instant the replay continues from.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    }
+  },
+  "required": ["schema", "kind", "sim_ts_from", "sim_ts_to"],
+  "additionalProperties": true
+}

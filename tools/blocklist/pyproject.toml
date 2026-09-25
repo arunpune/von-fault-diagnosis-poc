@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+[project]
+name = "fdp-blocklist"
+version = "0.1.0"
+description = "Scans repository text and PDF text for real brand names"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+dependencies = ["pdfplumber==0.11.10"]
+
+[project.scripts]
+fdp-blocklist = "fdp_blocklist.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"

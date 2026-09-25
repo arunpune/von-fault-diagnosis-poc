@@ -1,0 +1,107 @@
+{
+  "$expect_error": "/candidates must NOT have more than 6 items",
+  "schema": "urn:fdp:schema:decision:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:13.640Z",
+  "decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+  "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+  "event_id": "3d4a1f02-5c6b-4e71-9a83-0b1c2d3e4f50",
+  "sim_ts": "2020-06-05T09:41:12.000Z",
+  "backend": "jev",
+  "model": "jev-1.13.0",
+  "status": "ok",
+  "choice": "dryer_purge_leak",
+  "probabilities": {
+    "dryer_purge_leak": 0.4,
+    "downstream_air_leak": 0.16,
+    "high_air_demand": 0.12,
+    "minimum_pressure_valve_fault": 0.1,
+    "purge_silencer_damaged": 0.09,
+    "separator_element_clogged": 0.07,
+    "condensate_drain_stuck_open": 0.04,
+    "none_of_these": 0.02
+  },
+  "confidence": 0.62,
+  "support": { "dryer_purge_leak": 0.71 },
+  "candidates": [
+    {
+      "fault_id": "dryer_purge_leak",
+      "condition_id": "continuous_load",
+      "name": "Dryer purge valve not seating",
+      "probability": 0.4,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "downstream_air_leak",
+      "condition_id": "continuous_load",
+      "name": "Leak in the distribution network",
+      "probability": 0.16,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "high_air_demand",
+      "condition_id": "continuous_load",
+      "name": "Air demand above the rated delivery",
+      "probability": 0.12,
+      "benign": true,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "minimum_pressure_valve_fault",
+      "condition_id": "continuous_load",
+      "name": "Minimum-pressure valve fault",
+      "probability": 0.1,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "purge_silencer_damaged",
+      "condition_id": "purge_pressure_high",
+      "name": "Purge silencer damaged",
+      "probability": 0.09,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "separator_element_clogged",
+      "condition_id": "separator_pressure_abnormal",
+      "name": "Separator element clogged",
+      "probability": 0.07,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    },
+    {
+      "fault_id": "condensate_drain_stuck_open",
+      "condition_id": "low_line_pressure",
+      "name": "Condensate drain stuck open",
+      "probability": 0.04,
+      "benign": false,
+      "manual_ref": { "section": "8.3" }
+    }
+  ],
+  "severity": {
+    "level": "medium",
+    "score": 1,
+    "probabilities": { "0": 0.12, "1": 0.55, "2": 0.28, "3": 0.05 },
+    "confidence": 0.55
+  },
+  "gate": {
+    "outcome": "review",
+    "abstained": false,
+    "reason": "A named cause between the review and the ticket threshold opens a ticket for review.",
+    "ticket_min_confidence": 0.85,
+    "review_min_confidence": 0.6
+  },
+  "usage": { "input_tokens": 2051, "output_tokens": 0 },
+  "cost": {
+    "usd": 0.000086142,
+    "price_input_per_mtok": 0.042,
+    "price_output_per_mtok": 0,
+    "prices_as_of": "2026-09-19"
+  },
+  "latency_ms": 1388,
+  "state_digest": "1788d5ff4e5908d47c22632af729a0366cdb413932503dbda1effd48ebacfcb3",
+  "error": null
+}

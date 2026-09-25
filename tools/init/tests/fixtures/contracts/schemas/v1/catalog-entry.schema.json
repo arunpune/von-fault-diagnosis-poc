@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:catalog-entry:v1",
+  "title": "Catalog entry",
+  "description": "One cause of the fault catalog, as the manual declares it and as the export writes it into the causes array of a catalog document. It is not an MQTT message and carries no envelope: retrieval hands it to the decision backend, init writes it to app.catalog_causes and the evaluation harness reads it as the reference answer.",
+  "type": "object",
+  "$defs": {
+    "entry_condition": {
+      "title": "Entry condition",
+      "description": "A symptom this cause explains, with how often it is the explanation.",
+      "type": "object",
+      "properties": {
+        "condition_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/condition_id" },
+        "title": { "description": "The condition title from the manual.", "type": "string" },
+        "likelihood": {
+          "description": "How often this cause explains that condition.",
+          "type": "string",
+          "enum": ["common", "occasional", "rare", "unknown"]
+        },
+        "note": {
+          "description": "What distinguishes this cause from the others under the same condition.",
+          "type": "string"
+        },
+        "alarms": {
+          "description": "Controller alarm codes the condition raises; may be empty.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["condition_id", "title", "likelihood", "alarms"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+    "name": { "description": "The cause name shown on tickets.", "type": "string" },
+    "subsystem": { "$ref": "urn:fdp:schema:common:v1#/$defs/subsystem" },
+    "benign": {
+      "description": "True when the cause is normal operation rather than a defect.",
+      "type": "boolean"
+    },
+    "summary": { "description": "What happens and why, in a paragraph.", "type": "string" },
+    "signal_moves": {
+      "description": "The movements the manual expects from this cause, in the signal-move vocabulary.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_move" },
+      "minItems": 1
+    },
+    "signal_moves_text": {
+      "description": "The same movements as rendered sentences. Empty for entries derived from the PDF rather than from the manual source.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "checks": {
+      "description": "What to check, in the order the manual gives.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "remedy": { "description": "What to do about it.", "type": "string" },
+    "conditions": {
+      "description": "The symptoms this cause explains.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry_condition" },
+      "minItems": 1
+    },
+    "parts": {
+      "description": "Spare part ids the remedy needs.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/identifier" },
+      "uniqueItems": true
+    },
+    "maintenance": {
+      "description": "Maintenance task ids that prevent or detect the cause.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/identifier" },
+      "uniqueItems": true
+    },
+    "related_alarms": {
+      "description": "Every alarm code any of the conditions raises.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+      "uniqueItems": true
+    },
+    "manual_ref": { "$ref": "urn:fdp:schema:common:v1#/$defs/manual_ref" },
+    "pages": {
+      "description": "Where the entry appears in each built variant of the manual.",
+      "type": "object",
+      "properties": {
+        "clean": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "realistic": { "type": "array", "items": { "type": "integer", "minimum": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "description": "Where the entry came from: the manual's fault tables, the extraction model, or the manual source YAML.",
+      "type": "string",
+      "enum": ["tables", "llm", "yaml"]
+    }
+  },
+  "required": [
+    "fault_id",
+    "name",
+    "subsystem",
+    "benign",
+    "summary",
+    "signal_moves",
+    "signal_moves_text",
+    "checks",
+    "remedy",
+    "conditions",
+    "parts",
+    "maintenance",
+    "related_alarms",
+    "manual_ref",
+    "source"
+  ],
+  "additionalProperties": false
+}

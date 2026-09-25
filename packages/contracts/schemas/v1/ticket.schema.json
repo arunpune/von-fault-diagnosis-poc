@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:ticket:v1",
+  "title": "Ticket",
+  "description": "The live view of one episode, published on plant/{unit_id}/alerts/ticket whenever it changes. action says what this message announces and status where the ticket stands: a review ticket promoted above the ticket threshold is an updated message whose status changes to open, and a technician verdict arrives as a closed message carrying closure.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:ticket:v1" },
+    "ticket_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "episode_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "action": {
+      "description": "What this message announces.",
+      "type": "string",
+      "enum": ["opened", "updated", "resolved", "closed"]
+    },
+    "status": {
+      "description": "Where the ticket stands. review is the review queue; resolved is the machine closing an episode; closed needs a technician verdict.",
+      "type": "string",
+      "enum": ["review", "open", "resolved", "closed"]
+    },
+    "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+    "condition_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/condition_id" },
+    "title": {
+      "description": "Cause name and condition title, joined for the ticket header.",
+      "type": "string",
+      "minLength": 1
+    },
+    "cause": { "description": "The catalog summary of the cause.", "type": "string" },
+    "checks": {
+      "description": "The catalog checks, in order.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "remedy": { "description": "The catalog remedy.", "type": "string" },
+    "manual_ref": { "$ref": "urn:fdp:schema:common:v1#/$defs/manual_ref" },
+    "evidence": {
+      "description": "The evidence sentences of the suspect events that produced this ticket.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:suspect-event:v1#/$defs/evidence_item" }
+    },
+    "confidence": { "$ref": "urn:fdp:schema:common:v1#/$defs/confidence" },
+    "probabilities": { "$ref": "urn:fdp:schema:common:v1#/$defs/probabilities" },
+    "severity": { "$ref": "urn:fdp:schema:common:v1#/$defs/severity_level" },
+    "backend": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+    "model": {
+      "description": "Model identifier of the decision behind the current text.",
+      "type": "string",
+      "minLength": 1
+    },
+    "rationale": {
+      "description": "The LLM backend's short justification, when one exists.",
+      "type": "string"
+    },
+    "latest_decision_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "opened_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "updated_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "resolved_sim_ts": {
+      "description": "When the episode ended, or null while it is still running.",
+      "oneOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }, { "type": "null" }]
+    },
+    "close_reason": {
+      "description": "Why the ticket left the open state: silence or a discontinuity ended the episode, or a technician closed it.",
+      "type": ["string", "null"],
+      "enum": ["silence", "discontinuity", "technician", null]
+    },
+    "update_count": {
+      "description": "How many decisions have updated this ticket since it was opened.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "closure": {
+      "description": "The technician verdict, or null until one arrives.",
+      "type": ["object", "null"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["correct", "wrong"] },
+        "note": { "type": "string", "maxLength": 2000 },
+        "closed_by": { "type": "string" },
+        "wall_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+      },
+      "required": ["verdict", "wall_ts"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema",
+    "ticket_id",
+    "episode_id",
+    "action",
+    "status",
+    "fault_id",
+    "condition_id",
+    "title",
+    "cause",
+    "checks",
+    "remedy",
+    "manual_ref",
+    "evidence",
+    "confidence",
+    "probabilities",
+    "severity",
+    "backend",
+    "model",
+    "latest_decision_id",
+    "opened_sim_ts",
+    "updated_sim_ts",
+    "resolved_sim_ts",
+    "close_reason",
+    "update_count",
+    "closure"
+  ],
+  "additionalProperties": true
+}

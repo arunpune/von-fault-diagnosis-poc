@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-preset-def:v1",
+  "title": "Ground-truth preset definition",
+  "description": "One entry of the simulator's jump menu. The simulator jumps to sim_ts minus lead_in_min and announces the jump with a gt-marker; the user interface shows label verbatim. Never a message on its own: presets travel inside a gt-presets document.",
+  "type": "object",
+  "properties": {
+    "preset_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/preset_id" },
+    "label": {
+      "description": "Menu text, shown verbatim; an en dash and an abbreviated month, as in the README.",
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "description": "What the preset demonstrates: a labelled failure, its precursor, an unscored diagnostic case or normal operation.",
+      "type": "string",
+      "enum": ["failure", "precursor", "diagnostic", "baseline"]
+    },
+    "sim_ts": {
+      "description": "Target instant in the data clock; the interesting moment the preset is named after.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "lead_in_min": {
+      "description": "Simulated minutes of context before sim_ts; the jump lands at sim_ts minus this value.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "failure_id": {
+      "description": "The failure of the ground-truth table this preset shows, or null when the preset is not scored.",
+      "type": ["string", "null"],
+      "pattern": "^F[0-9]{1,2}[a-z]?$"
+    },
+    "note": {
+      "description": "Why the preset exists, for the operator of the demonstration.",
+      "type": "string"
+    }
+  },
+  "required": ["preset_id", "label", "kind", "sim_ts", "lead_in_min", "failure_id", "note"],
+  "additionalProperties": false
+}

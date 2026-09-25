@@ -1,0 +1,10 @@
+{
+  "name": "@fdp/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fdp/backend": "workspace:*",
+    "@fdp/ground-truth": "workspace:*"
+  }
+}

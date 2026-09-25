@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# CI, smoke test and stack-mode browser tests, applied as
+# `-f compose.yaml -f compose.ci.yaml`. Compose merges `environment` maps by
+# key and `volumes` by target path, so a bind mount on /models replaces the
+# named volume of compose.yaml.
+#
+# Four things change against the base stack: the decision service is the mock
+# from packages/contracts (deterministic answers, no network, no key), the
+# dataset is the cut fixture slice instead of the 218 MB download, the model
+# cache is a host directory CI can cache between runs, and postgres is
+# published on an ephemeral loopback port so the evaluation tool can score a
+# stack that `scripts/smoke.sh --keep` left running.
+#
+# The manual stays the default realistic PDF, so CI ingests what the demo
+# ingests.
+#
+# The decision backend here is jev against the mock, never rules: the
+# best-overlap policy answers with confidence 0.9, which clears the 0.85 ticket
+# gate, so this stack always opens tickets in status `open`. `make smoke`
+# (scripts/smoke.sh --mode ci) and the frontend's stack tour assert exactly
+# that. The rules backend runs in `make smoke-quickstart`, on compose.yaml
+# alone, which is a known failure today: its decision on the 5 June leak stays
+# below the review threshold, so no ticket or review item opens (README.md,
+# "Status and limitations").
+services:
+  typesafe-mock:
+    build: { context: ., dockerfile: packages/contracts/mock/Dockerfile }
+    environment:
+      # Deterministic on the request: the answer follows the candidate that
+      # overlaps the evidence best, so a CI decision is reproducible.
+      MOCK_ANSWER_POLICY: best-overlap
+    healthcheck:
+      # 127.0.0.1, not localhost: the mock binds IPv4 only (the image's CMD
+      # passes --host 0.0.0.0), and the image's own HEALTHCHECK asks the same
+      # address.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8089/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+    # The anchor of compose.yaml does not reach an override file, so the log
+    # rotation every other service has is spelled out.
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  postgres:
+    # Loopback only, ephemeral host port: `make eval-stack` reads the mapping
+    # back with `docker compose port postgres 5432`.
+    ports: ["127.0.0.1::5432"]
+
+  init:
+    environment:
+      METROPT_CSV: /data/fixtures/metropt3/ci-slice.csv
+    volumes:
+      # Host directory CI caches between runs; replaces the named volume.
+      - ./.cache/models:/models
+
+  modbus-sim:
+    environment:
+      METROPT_CSV: /data/fixtures/metropt3/ci-slice.csv
+      SIM_AUTOPLAY: "true"
+
+  backend:
+    environment:
+      DECISION_BACKEND: jev
+      # Not a secret: the mock accepts any non-empty bearer token.
+      TYPESAFE_API_KEY: fdp-ci-mock-key
+      TYPESAFE_BASE_URL: http://typesafe-mock:8089
+    volumes:
+      - ./.cache/models:/models:ro
+    depends_on:
+      typesafe-mock: { condition: service_healthy }

@@ -1,0 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  // Same shape as the clean fixture. `tsc` is never run over this workspace: two of its
+  // imports are unresolvable on purpose, which is what `not-to-unresolvable` reports.
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "tools/**/*.ts"]
+}

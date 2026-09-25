@@ -1,0 +1,51 @@
+{
+  "$expect_error": "/conditions/0/causes/0 must NOT have additional properties",
+  "schema": "urn:fdp:schema:catalog:v1",
+  "generated_from": { "file": "manual/build.yaml", "manual_revision": "1.0" },
+  "machine": {
+    "name": "CAU-7 Compressed-Air Unit",
+    "short_name": "CAU-7",
+    "controller": "CTRL-7"
+  },
+  "signals": [],
+  "alarms": [],
+  "conditions": [
+    {
+      "id": "purge_pressure_high",
+      "title": "Dryer purge pressure high, air escaping at the purge silencer",
+      "alarms": ["W103"],
+      "causes": [
+        {
+          "fault_id": "dryer_purge_leak",
+          "likelihood": "common",
+          "name": "Dryer purge valve not seating",
+          "subsystem": "dryer",
+          "benign": false,
+          "summary": "The purge valve does not close between changeovers.",
+          "signal_moves": [
+            { "signal": "dryer_purge_pressure", "direction": "high", "phase": "loaded" }
+          ],
+          "signal_moves_text": ["Dryer purge pressure is high while loaded."],
+          "checks": ["Listen at the purge silencer while the unit is loaded."],
+          "remedy": "Overhaul or replace the purge valve and its pilot line.",
+          "conditions": [
+            {
+              "condition_id": "purge_pressure_high",
+              "title": "Dryer purge pressure high, air escaping at the purge silencer",
+              "likelihood": "common",
+              "alarms": ["W103"]
+            }
+          ],
+          "parts": ["purge_valve_kit"],
+          "maintenance": ["dryer_purge_valve_service"],
+          "related_alarms": ["W103"],
+          "manual_ref": { "section": "8.3", "anchor": "fault:dryer_purge_leak" },
+          "source": "yaml"
+        }
+      ]
+    }
+  ],
+  "causes": [],
+  "maintenance": [],
+  "parameters": []
+}

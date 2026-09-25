@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:status-gateway:v1",
+  "title": "Status gateway",
+  "description": "Health and counters of the Modbus gateway, published retained on plant/{unit_id}/status/gateway every few seconds. The counters are monotonic since the gateway started; a consumer compares two messages to get a rate.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:status-gateway:v1" },
+    "last_seq": {
+      "description": "Sequence number of the newest sample the gateway published; 0 before the first one.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "dropped_total": {
+      "description": "Samples the gateway never read because the ring buffer overwrote them while it was behind.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "polls_total": {
+      "description": "Poll cycles completed since the gateway started.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "poll_errors_total": {
+      "description": "Poll cycles that ended in a Modbus read error.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "poll_interval_ms": {
+      "description": "Milliseconds the gateway waits between two poll cycles when it has caught up.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "samples_per_s": {
+      "description": "Samples published per wall-clock second, averaged over the last reporting window.",
+      "type": "number",
+      "minimum": 0
+    },
+    "modbus": {
+      "description": "The Modbus endpoint the gateway reads from. The gateway only ever reads; it holds no write function code at all.",
+      "type": "object",
+      "properties": {
+        "host": {
+          "description": "Host name or address of the simulator.",
+          "type": "string"
+        },
+        "port": {
+          "description": "TCP port of the simulator.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "connected": {
+          "description": "True while the Modbus client holds an open connection.",
+          "type": "boolean"
+        },
+        "map_major": {
+          "description": "Major version of the register map the simulator reports in its header block.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "map_minor": {
+          "description": "Minor version of the register map the simulator reports in its header block.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["host", "port", "connected"],
+      "additionalProperties": false
+    },
+    "last_error": {
+      "description": "Null while the last poll cycle succeeded, otherwise one English sentence describing it.",
+      "oneOf": [{ "type": "null" }, { "type": "string" }]
+    }
+  },
+  "required": [
+    "schema",
+    "last_seq",
+    "dropped_total",
+    "polls_total",
+    "poll_errors_total",
+    "poll_interval_ms",
+    "samples_per_s",
+    "modbus",
+    "last_error"
+  ],
+  "additionalProperties": true
+}

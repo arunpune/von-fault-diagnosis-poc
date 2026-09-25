@@ -1,0 +1,66 @@
+{
+  "injection_id": "motor_overload",
+  "fault_id": "airend_bearing_wear",
+  "label": "Motor overload",
+  "benign": false,
+  "description": "Coverage fixture for the contract tests: it exercises every transform primitive at once and is not the simulator's own definition.",
+  "default_duration_sim_min": 240,
+  "envelope": {
+    "ramp_in_min": 60,
+    "ramp_out_min": 30
+  },
+  "params": [
+    {
+      "name": "magnitude",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 2.0
+    }
+  ],
+  "transforms": [
+    {
+      "tag": "motor_current",
+      "op": "scale",
+      "factor": 1.2,
+      "when": "loaded"
+    },
+    {
+      "tag": "motor_current",
+      "op": "noise",
+      "sigma": 0.12,
+      "when": "loaded"
+    },
+    {
+      "tag": "oil_temperature",
+      "op": "offset",
+      "value": 6.0,
+      "when": "any"
+    },
+    {
+      "tag": "line_pressure",
+      "op": "ramp",
+      "rate_per_min": -0.12,
+      "cap": 1.2,
+      "anchor": "injection_start",
+      "when": "not_loaded"
+    },
+    {
+      "tag": "purge_switch",
+      "op": "stuck",
+      "value": true,
+      "when": "any"
+    },
+    {
+      "tag": "dryer_tower",
+      "op": "duty_shift",
+      "run_value": false,
+      "extend_s": -60,
+      "when": "any"
+    },
+    {
+      "tag": "flow_pulse",
+      "op": "dropout",
+      "when": "off"
+    }
+  ]
+}

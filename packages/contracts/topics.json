@@ -1,0 +1,139 @@
+{
+  "roots": { "plant": "plant", "gt": "gt" },
+  "default_unit_id": "cau-7",
+  "topics": {
+    "telemetry_samples": {
+      "template": "plant/{unit_id}/telemetry/samples",
+      "schema": "telemetry-samples",
+      "qos": 1,
+      "retain": false,
+      "publisher": "gateway"
+    },
+    "control_cmd": {
+      "template": "plant/{unit_id}/control/cmd",
+      "schema": "control-cmd",
+      "qos": 1,
+      "retain": false,
+      "publisher": "backend-ops"
+    },
+    "control_ack": {
+      "template": "plant/{unit_id}/control/ack",
+      "schema": "control-ack",
+      "qos": 1,
+      "retain": false,
+      "publisher": "sim"
+    },
+    "status_sim": {
+      "template": "plant/{unit_id}/status/sim",
+      "schema": "status-sim",
+      "qos": 1,
+      "retain": true,
+      "publisher": "sim"
+    },
+    "status_gateway": {
+      "template": "plant/{unit_id}/status/gateway",
+      "schema": "status-gateway",
+      "qos": 1,
+      "retain": true,
+      "publisher": "gateway"
+    },
+    "status_backend": {
+      "template": "plant/{unit_id}/status/backend",
+      "schema": "status-backend",
+      "qos": 1,
+      "retain": true,
+      "publisher": "backend-diag"
+    },
+    "events_suspect": {
+      "template": "plant/{unit_id}/events/suspect",
+      "schema": "suspect-event",
+      "qos": 1,
+      "retain": false,
+      "publisher": "backend-diag"
+    },
+    "decisions": {
+      "template": "plant/{unit_id}/decisions",
+      "schema": "decision",
+      "qos": 1,
+      "retain": false,
+      "publisher": "backend-diag"
+    },
+    "alerts_ticket": {
+      "template": "plant/{unit_id}/alerts/ticket",
+      "schema": "ticket",
+      "qos": 1,
+      "retain": false,
+      "publisher": "backend-diag"
+    },
+    "alerts_system": {
+      "template": "plant/{unit_id}/alerts/system",
+      "schema": "alert-system",
+      "qos": 1,
+      "retain": false,
+      "publisher": "backend-diag"
+    },
+    "gt_catalog": {
+      "template": "gt/{unit_id}/catalog",
+      "schema": "gt-catalog",
+      "qos": 1,
+      "retain": true,
+      "publisher": "sim"
+    },
+    "gt_injection": {
+      "template": "gt/{unit_id}/injection",
+      "schema": "gt-injection",
+      "qos": 1,
+      "retain": false,
+      "publisher": "sim"
+    },
+    "gt_injection_active": {
+      "template": "gt/{unit_id}/injection/active",
+      "schema": "gt-injection-active",
+      "qos": 1,
+      "retain": true,
+      "publisher": "sim"
+    },
+    "gt_marker": {
+      "template": "gt/{unit_id}/marker",
+      "schema": "gt-marker",
+      "qos": 1,
+      "retain": false,
+      "publisher": "sim"
+    }
+  },
+  "acl": {
+    "anonymous": {
+      "read": [
+        "plant/{unit_id}/telemetry/#",
+        "plant/{unit_id}/status/#",
+        "plant/{unit_id}/events/#",
+        "plant/{unit_id}/decisions",
+        "plant/{unit_id}/alerts/#",
+        "$SYS/#"
+      ],
+      "write": []
+    },
+    "eval": { "read": ["plant/#", "gt/#", "$SYS/#"], "write": [] },
+    "gateway": {
+      "read": [],
+      "write": ["plant/{unit_id}/telemetry/#", "plant/{unit_id}/status/gateway"]
+    },
+    "sim": {
+      "read": ["plant/{unit_id}/control/cmd"],
+      "write": ["plant/{unit_id}/control/ack", "plant/{unit_id}/status/sim", "gt/#"]
+    },
+    "backend-diag": {
+      "read": ["plant/{unit_id}/telemetry/#", "plant/{unit_id}/status/#"],
+      "write": [
+        "plant/{unit_id}/events/#",
+        "plant/{unit_id}/decisions",
+        "plant/{unit_id}/alerts/#",
+        "plant/{unit_id}/status/backend"
+      ]
+    },
+    "backend-ops": {
+      "read": ["plant/{unit_id}/control/ack", "gt/#"],
+      "write": ["plant/{unit_id}/control/cmd"]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "urn:fdp:schema:gt-failure-table:v1",
+  "source": {
+    "dataset": "MetroPT-3 (UCI 791)",
+    "doi": "10.24432/C5VW3R",
+    "license": "CC-BY-4.0",
+    "resolved_from": "docs/dataset.md#how-the-windows-were-resolved"
+  },
+  "clock": "utc-assumed",
+  "failures": [
+    {
+      "id": "F1",
+      "start": "2020-04-18T00:00:00.000Z",
+      "end": "2020-04-19T02:00:00.000Z",
+      "label": "Air leak – 18 Apr 2020",
+      "type": "air_leak",
+      "signature": "A"
+    },
+    {
+      "id": "F2",
+      "start": "2020-05-29T23:30:00.000Z",
+      "end": "2020-05-30T06:00:00.000Z",
+      "label": "Air leak – 30 May 2020",
+      "type": "air_leak",
+      "signature": "A"
+    },
+    {
+      "id": "F3",
+      "start": "2020-06-05T10:00:00.000Z",
+      "end": "2020-06-07T14:30:00.000Z",
+      "label": "Air leak – 5 Jun 2020",
+      "type": "air_leak",
+      "signature": "A"
+    },
+    {
+      "id": "F4",
+      "start": "2020-07-15T14:30:00.000Z",
+      "end": "2020-07-15T19:00:00.000Z",
+      "label": "Air leak – 15 Jul 2020",
+      "type": "air_leak",
+      "signature": "B"
+    }
+  ]
+}

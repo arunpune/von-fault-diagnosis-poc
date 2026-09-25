@@ -1,0 +1,394 @@
+{
+  "schema": "fdp-mini-manual-expected-v1",
+  "about": [
+    "What tools/init must read out of the two committed mini-manual PDFs",
+    "(docs/plan/init.md §8 and §15.1). Hand-authored from mini-manual.html and",
+    "verified against pdfplumber 0.11.10 with the settings of §8.4.",
+    "",
+    "`variants` holds what depends on the layout: the page count, the heading",
+    "tree, the page furniture that §8.2 drops, the tables §8.4 finds and how",
+    "many chunks of each kind §10 cuts. `catalog` is outside `variants`: both",
+    "variants print the same causes, alarms and signals, and §9.1 is expected to",
+    "return the same catalog from either PDF, which is the property INI-06",
+    "tests.",
+    "",
+    "Field notes:",
+    "  headings.title  the text after the section number, exactly as printed;",
+    "                  the 8.2.k headings of the clean variant carry the",
+    "                  condition id after the title, and the realistic variant",
+    "                  prints no 8.2.k heading at all — the same three",
+    "                  conditions open a group row inside the spanning table.",
+    "  furniture       the raw margin lines §8.2 drops, in page order.",
+    "  tables.rows     data rows, excluding the repeated header row and, for a",
+    "                  troubleshooting table, excluding the group rows; the",
+    "                  fragment of a row a page break cut counts once, with its",
+    "                  tail folded into its head (§8.4 row continuation).",
+    "  tables.merged_from  how many per-page fragments §8.4 merges into the",
+    "                  table; 1 when the table sits on one page.",
+    "  subsystem       the CON enum value; the PDF prints it with spaces for",
+    "                  underscores, the way the real manual does (R-09).",
+    "  signal_moves    MAN's vocabulary verbatim (R-10): the direction word the",
+    "                  sentence uses, and `note` carrying the recognised onset",
+    "                  and phase, onset first, `any` for \"in every state\".",
+    "                  `load_cycle_rate` is a behaviour, not a signal tag."
+  ],
+  "counts": {
+    "conditions": 3,
+    "causes": 7,
+    "cause_rows": 8,
+    "alarms": 6,
+    "signals": 5
+  },
+  "variants": {
+    "clean": {
+      "page_count": 6,
+      "furniture": ["1", "2", "3", "4", "5", "6"],
+      "headings": [
+        { "ref": "1", "title": "Safety", "level": 1, "page": 1 },
+        { "ref": "3", "title": "Controller messages", "level": 1, "page": 1 },
+        { "ref": "4", "title": "Programmable settings", "level": 1, "page": 2 },
+        { "ref": "8", "title": "Problem solving", "level": 1, "page": 3 },
+        { "ref": "8.1", "title": "Before you start", "level": 2, "page": 3 },
+        { "ref": "8.2", "title": "Fault tables", "level": 2, "page": 3 },
+        {
+          "ref": "8.2.1",
+          "title": "Line pressure below setpoint low_line_pressure",
+          "level": 3,
+          "page": 4
+        },
+        {
+          "ref": "8.2.2",
+          "title": "Compressor starts and loads too often frequent_cycling",
+          "level": 3,
+          "page": 4
+        },
+        {
+          "ref": "8.2.3",
+          "title": "Oil temperature high oil_temperature_high",
+          "level": 3,
+          "page": 5
+        },
+        { "ref": "9", "title": "Technical data", "level": 1, "page": 6 }
+      ],
+      "tables": [
+        {
+          "kind": "alarms",
+          "section_ref": "3",
+          "header": ["Code", "Type", "Message", "Trigger", "Threshold", "Delay", "Reset"],
+          "rows": 6,
+          "page_from": 1,
+          "page_to": 1,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "parameters",
+          "section_ref": "4",
+          "header": ["Parameter", "Unit", "Min", "Default", "Max"],
+          "rows": 4,
+          "page_from": 2,
+          "page_to": 2,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "troubleshooting",
+          "section_ref": "8.2.1",
+          "header": ["Fault id", "Possible cause", "Subsystem", "Signals", "Checks", "Remedy"],
+          "rows": 3,
+          "page_from": 4,
+          "page_to": 4,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "troubleshooting",
+          "section_ref": "8.2.2",
+          "header": ["Fault id", "Possible cause", "Subsystem", "Signals", "Checks", "Remedy"],
+          "rows": 2,
+          "page_from": 5,
+          "page_to": 5,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "troubleshooting",
+          "section_ref": "8.2.3",
+          "header": ["Fault id", "Possible cause", "Subsystem", "Signals", "Checks", "Remedy"],
+          "rows": 3,
+          "page_from": 5,
+          "page_to": 5,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "signals",
+          "section_ref": "9",
+          "header": ["Tag", "Label", "Description", "Unit", "Kind", "Source column"],
+          "rows": 5,
+          "page_from": 6,
+          "page_to": 6,
+          "merged_from": 1,
+          "group_rows": []
+        }
+      ],
+      "row_continuations": [],
+      "chunks": { "text": 9, "list": 1, "table": 23 }
+    },
+    "realistic": {
+      "page_count": 6,
+      "furniture": [
+        "Rev. A · 2026-09-19 page 1 of 6",
+        "Rev. A · 2026-09-19 page 2 of 6",
+        "CAU-7 compressed-air unit — Instruction manual 8 Problem solving",
+        "Rev. A · 2026-09-19 page 3 of 6",
+        "CAU-7 compressed-air unit — Instruction manual 8 Problem solving",
+        "Rev. A · 2026-09-19 page 4 of 6",
+        "CAU-7 compressed-air unit — Instruction manual 8 Problem solving",
+        "Rev. A · 2026-09-19 page 5 of 6",
+        "Rev. A · 2026-09-19 page 6 of 6"
+      ],
+      "headings": [
+        { "ref": "1", "title": "Safety", "level": 1, "page": 1 },
+        { "ref": "3", "title": "Controller messages", "level": 1, "page": 1 },
+        { "ref": "4", "title": "Programmable settings", "level": 1, "page": 2 },
+        { "ref": "8", "title": "Problem solving", "level": 1, "page": 3 },
+        { "ref": "8.1", "title": "Before you start", "level": 2, "page": 3 },
+        { "ref": "8.2", "title": "Fault tables", "level": 2, "page": 3 },
+        { "ref": "9", "title": "Technical data", "level": 1, "page": 6 }
+      ],
+      "tables": [
+        {
+          "kind": "alarms",
+          "section_ref": "3",
+          "header": ["Code", "Type", "Message", "Trigger", "Threshold", "Delay", "Reset"],
+          "rows": 6,
+          "page_from": 1,
+          "page_to": 1,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "parameters",
+          "section_ref": "4",
+          "header": ["Parameter", "Unit", "Min", "Default", "Max"],
+          "rows": 4,
+          "page_from": 2,
+          "page_to": 2,
+          "merged_from": 1,
+          "group_rows": []
+        },
+        {
+          "kind": "troubleshooting",
+          "section_ref": "8.2",
+          "header": ["Fault id", "Possible cause", "Subsystem", "Signals", "Checks", "Remedy"],
+          "rows": 8,
+          "page_from": 4,
+          "page_to": 5,
+          "merged_from": 2,
+          "continued_without_header": false,
+          "group_rows": [
+            {
+              "ref": "8.2.1",
+              "title": "Line pressure below setpoint",
+              "condition_id": "low_line_pressure",
+              "page": 4
+            },
+            {
+              "ref": "8.2.2",
+              "title": "Compressor starts and loads too often",
+              "condition_id": "frequent_cycling",
+              "page": 4
+            },
+            {
+              "ref": "8.2.3",
+              "title": "Oil temperature high",
+              "condition_id": "oil_temperature_high",
+              "page": 4
+            }
+          ]
+        },
+        {
+          "kind": "signals",
+          "section_ref": "9",
+          "header": ["Tag", "Label", "Description", "Unit", "Kind", "Source column"],
+          "rows": 5,
+          "page_from": 6,
+          "page_to": 6,
+          "merged_from": 1,
+          "group_rows": []
+        }
+      ],
+      "row_continuations": [{ "fault_id": "oil_cooler_fouled", "head_page": 4, "tail_page": 5 }],
+      "chunks": { "text": 6, "list": 1, "table": 23 }
+    }
+  },
+  "catalog": {
+    "conditions": [
+      {
+        "condition_id": "low_line_pressure",
+        "title": "Line pressure below setpoint",
+        "causes": [
+          {
+            "fault_id": "downstream_air_leak",
+            "title": "Downstream air leak",
+            "subsystem": "distribution",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W101"],
+            "signal_moves": [
+              { "signal_id": "line_pressure", "direction": "falls", "note": "unloaded" },
+              { "signal_id": "load_cycle_rate", "direction": "higher", "note": null }
+            ]
+          },
+          {
+            "fault_id": "intake_filter_clogged",
+            "title": "Intake filter clogged",
+            "subsystem": "intake_unloading",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W101"],
+            "signal_moves": [
+              { "signal_id": "line_pressure", "direction": "low", "note": "loaded" },
+              { "signal_id": "motor_current", "direction": "low", "note": "loaded" }
+            ]
+          },
+          {
+            "fault_id": "dryer_purge_leak",
+            "title": "Dryer purge leak",
+            "subsystem": "dryer",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W101", "W102"],
+            "signal_moves": [
+              { "signal_id": "purge_pressure", "direction": "high", "note": "loaded" },
+              { "signal_id": "line_pressure", "direction": "falls", "note": "loaded" }
+            ]
+          }
+        ]
+      },
+      {
+        "condition_id": "frequent_cycling",
+        "title": "Compressor starts and loads too often",
+        "causes": [
+          {
+            "fault_id": "downstream_air_leak",
+            "title": "Downstream air leak",
+            "subsystem": "distribution",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W108"],
+            "signal_moves": [
+              { "signal_id": "load_cycle_rate", "direction": "higher", "note": null },
+              { "signal_id": "line_pressure", "direction": "falls", "note": "unloaded" }
+            ]
+          },
+          {
+            "fault_id": "reservoir_isolation_valve_closed",
+            "title": "Reservoir isolation valve closed",
+            "subsystem": "reservoirs",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W108"],
+            "signal_moves": [
+              { "signal_id": "load_cycle_rate", "direction": "higher", "note": null },
+              { "signal_id": "line_pressure", "direction": "rises", "note": "loaded" }
+            ]
+          }
+        ]
+      },
+      {
+        "condition_id": "oil_temperature_high",
+        "title": "Oil temperature high",
+        "causes": [
+          {
+            "fault_id": "oil_cooler_fouled",
+            "title": "Oil cooler fouled",
+            "subsystem": "cooling",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W104", "X201"],
+            "signal_moves": [
+              { "signal_id": "oil_temperature", "direction": "rises", "note": "gradual, any" }
+            ]
+          },
+          {
+            "fault_id": "high_ambient_temperature",
+            "title": "No fault: high ambient temperature",
+            "subsystem": "cooling",
+            "benign": true,
+            "checks_count": 3,
+            "alarm_codes": ["W104"],
+            "signal_moves": [
+              { "signal_id": "oil_temperature", "direction": "high", "note": "any" }
+            ]
+          },
+          {
+            "fault_id": "oil_filter_clogged",
+            "title": "Oil filter clogged",
+            "subsystem": "oil",
+            "benign": false,
+            "checks_count": 3,
+            "alarm_codes": ["W104", "S301"],
+            "signal_moves": [
+              { "signal_id": "oil_temperature", "direction": "rises", "note": "gradual, loaded" }
+            ]
+          }
+        ]
+      }
+    ],
+    "alarms": [
+      { "code": "W101", "kind": "warning", "threshold": 7.0, "threshold_unit": "bar", "delay_s": 10 },
+      { "code": "W102", "kind": "warning", "threshold": 10, "threshold_unit": "min", "delay_s": 120 },
+      { "code": "W104", "kind": "warning", "threshold": 75, "threshold_unit": "°C", "delay_s": 300 },
+      {
+        "code": "W108",
+        "kind": "warning",
+        "threshold": 6,
+        "threshold_unit": "per hour",
+        "delay_s": 0
+      },
+      {
+        "code": "X201",
+        "kind": "shutdown_warning",
+        "threshold": 85,
+        "threshold_unit": "°C",
+        "delay_s": 30
+      },
+      {
+        "code": "S301",
+        "kind": "shutdown",
+        "threshold": 95,
+        "threshold_unit": "°C",
+        "delay_s": 5
+      }
+    ],
+    "signals": [
+      {
+        "signal_id": "discharge_pressure",
+        "unit": "bar",
+        "kind": "analog",
+        "metropt_column": "TP2"
+      },
+      { "signal_id": "line_pressure", "unit": "bar", "kind": "analog", "metropt_column": "TP3" },
+      {
+        "signal_id": "purge_pressure",
+        "unit": "bar",
+        "kind": "analog",
+        "metropt_column": "DV_pressure"
+      },
+      {
+        "signal_id": "oil_temperature",
+        "unit": "°C",
+        "kind": "analog",
+        "metropt_column": "Oil_temperature"
+      },
+      {
+        "signal_id": "motor_current",
+        "unit": "A",
+        "kind": "analog",
+        "metropt_column": "Motor_current"
+      }
+    ]
+  }
+}

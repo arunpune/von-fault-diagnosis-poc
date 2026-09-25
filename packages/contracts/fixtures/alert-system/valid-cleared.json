@@ -1,0 +1,13 @@
+{
+  "schema": "urn:fdp:schema:alert-system:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T10:02:57.000Z",
+  "alert_id": "7c1e2d44-9a0b-4c6d-8e1f-2b3c4d5e6f70",
+  "kind": "decision_api_silent",
+  "state": "cleared",
+  "since_wall_ts": "2026-06-05T09:52:31.000Z",
+  "details": {
+    "consecutive_errors": 0,
+    "last_ok_wall_ts": "2026-06-05T10:02:57.000Z"
+  }
+}

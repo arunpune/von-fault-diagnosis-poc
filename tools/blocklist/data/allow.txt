@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Reviewed exemptions for the brand blocklist scanner.
+#
+# One per line:
+#
+#     <path-glob> :: <term>  # reason
+#
+# The glob is repository-relative (`*` stays inside one path segment, `**`
+# crosses segments), the term is compared after normalisation (NFKC, casefold,
+# runs of non-alphanumerics collapsed to one space) and the reason after two
+# spaces and a `#` is mandatory: a line without one is a parse error.
+#
+# An exemption is for a false positive only -- a word that happens to normalise
+# onto a listed term in one specific file. A real brand name is removed from
+# the file, never hidden here.
+#
+# The list starts empty and stays that way until a scan proves it has to grow.

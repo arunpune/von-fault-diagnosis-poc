@@ -1,0 +1,102 @@
+{
+  "benign": false,
+  "checks": [
+    "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+    "If it holds, open the valve again and repeat the hold test with the plant isolated section by section.",
+    "Walk the distribution network and listen at joints, couplings and hose ends, starting with the branches changed most recently.",
+    "Compare the pressure decay of a quiet night with the reference cycle of section 6.3."
+  ],
+  "conditions": [
+    {
+      "alarms": ["W101", "S305"],
+      "condition_id": "low_line_pressure",
+      "likelihood": "common",
+      "note": "The pressure falls at the same rate at night and at the weekend, when no consumer is drawing air.",
+      "title": "Line pressure below setpoint"
+    },
+    {
+      "alarms": ["W108"],
+      "condition_id": "frequent_cycling",
+      "likelihood": "common",
+      "note": "The clearest early sign; the idle pressure decay is faster than the reference figure long before the pressure itself drops.",
+      "title": "Compressor starts and loads too often"
+    },
+    {
+      "alarms": ["W102"],
+      "condition_id": "continuous_load",
+      "likelihood": "common",
+      "note": "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load.",
+      "title": "Compressor stays loaded and does not reach cut-out"
+    }
+  ],
+  "fault_id": "downstream_air_leak",
+  "maintenance": ["weekly_checks"],
+  "manual_ref": {
+    "anchor": "fault:downstream_air_leak",
+    "section": "8.3",
+    "title": "Line pressure below setpoint"
+  },
+  "name": "Leak in the distribution network",
+  "pages": {
+    "clean": [26, 28, 29],
+    "realistic": [27, 29]
+  },
+  "parts": [],
+  "related_alarms": ["W101", "S305", "W108", "W102"],
+  "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated. Record the decay you measure so the next comparison starts from a known figure. Leaks return, so add a walk-round listening check to the routine in task 7.3.2 rather than treating this as a one-off repair.",
+  "signal_moves": [
+    {
+      "behaviour": "unloaded_pressure_decay",
+      "direction": "faster",
+      "note": "The earliest sign, visible in the idle phase of every cycle.",
+      "onset": "gradual",
+      "text": "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle."
+    },
+    {
+      "behaviour": "load_cycle_rate",
+      "direction": "higher",
+      "onset": "gradual",
+      "text": "How often the compressor loads per hour is gradually higher."
+    },
+    {
+      "behaviour": "loaded_run_duration",
+      "direction": "longer",
+      "onset": "gradual",
+      "phase": "loaded",
+      "text": "How long each loaded run lasts is gradually longer while loaded."
+    },
+    {
+      "behaviour": "cut_out_reached",
+      "direction": "not_reached",
+      "note": "Late in the fault, once the loss matches what the unit can deliver.",
+      "text": "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver."
+    },
+    {
+      "direction": "falls",
+      "note": "Late in the fault the line sinks while the unit is still delivering.",
+      "onset": "sustained",
+      "phase": "loaded",
+      "signal": "line_pressure",
+      "text": "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering."
+    },
+    {
+      "direction": "on",
+      "note": "The switch closes only at that late stage, so it gives no early warning.",
+      "onset": "sustained",
+      "phase": "loaded",
+      "signal": "low_pressure_switch",
+      "text": "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+    }
+  ],
+  "signal_moves_text": [
+    "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+    "How often the compressor loads per hour is gradually higher.",
+    "How long each loaded run lasts is gradually longer while loaded.",
+    "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver.",
+    "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering.",
+    "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+  ],
+  "source": "yaml",
+  "subsystem": "distribution",
+  "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. Nothing inside the machine is faulty. The loss runs day and night, which is what separates it from a busy shift, and it grows slowly as more joints work loose."
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-error:v1",
+  "title": "Api error",
+  "description": "The body of every non-2xx answer of the REST API. `code` is a stable machine-readable token the frontend may branch on, `message` is one English sentence for a technician and `details` carries whatever helps to debug the call. No key, no prompt and no state digest ever appears here.",
+  "type": "object",
+  "properties": {
+    "error": {
+      "description": "The one error the request produced.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Stable token naming the failure, for example bad_request, not_found or upstream_unavailable.",
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "description": "One English sentence a technician can read.",
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "description": "Anything that helps to debug the call: the offending field, the validation issues, the upstream status."
+        }
+      },
+      "required": ["code", "message"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["error"],
+  "additionalProperties": false
+}

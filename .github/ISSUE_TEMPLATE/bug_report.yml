@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Bug report
+description: Something does not work as the README or the guides describe.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        **Do not paste API keys, tokens or passwords** (`TYPESAFE_API_KEY`, `LLM_API_KEY` or any value from your `.env`)
+        in this form, in logs or in screenshots. Redact them first.
+
+        A security vulnerability belongs in a private report, not here: see
+        [SECURITY.md](https://github.com/meddleconnect/jev-fault-diagnosis-poc/blob/main/SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: >-
+        The release (for example 0.4.0, as named in CHANGELOG.md) or the commit you ran. The `version` that
+        /api/health reports is the backend package's, not the release.
+      placeholder: "0.4.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Decision backend
+      options:
+        - Rules (no key)
+        - Jev
+        - LLM
+        - Not relevant
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: >-
+        Operating system, Docker and Compose versions, and the output of `make doctor` if the problem is in the
+        toolchain (it prints no environment variable values).
+      render: text
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The commands you ran and what you did in the UI, in order.
+      placeholder: |
+        1. make up
+        2. Press Play, then Jump to "Air leak – 5 Jun 2020"
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The relevant part of `make logs` or of the failing command's output, with every secret redacted.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: This report contains no API key, token, password or real manufacturer name.
+          required: true

@@ -1,0 +1,99 @@
+{
+  "schema": "urn:fdp:eval:metrics-fixture:v1",
+  "id": "depot_abstention",
+  "note": "A depot depressurisation: two explicit none_of_these decisions and one benign review item. The case is a correct abstention, and the benign ticket is neither a true nor a false positive.",
+  "backend": "rules",
+  "review_min": 0.6,
+  "native_alarm_codes": [],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": 5,
+    "llm_output_per_mtok": 25,
+    "as_of": "2026-09-19"
+  },
+  "binding": {
+    "id": "depot_lps_jul31",
+    "group": "abstain",
+    "split": "test",
+    "warmup_min": 60,
+    "replay": { "from": "2020-07-31T00:00:00.000Z", "to": "2020-07-31T08:00:00.000Z" },
+    "windows": [
+      {
+        "id": "depot-0200",
+        "from": "2020-07-31T02:00:00.000Z",
+        "to": "2020-07-31T03:00:00.000Z",
+        "lead_from": "2020-07-31T02:00:00.000Z",
+        "accepted": ["depot_depressurisation"],
+        "benign": true,
+        "onset": "2020-07-31T02:00:00.000Z",
+        "onset_known": true,
+        "headline": false
+      }
+    ],
+    "excluded": [],
+    "benign_fault_ids": ["depot_depressurisation"],
+    "expect": {
+      "tickets": "none",
+      "fault": "benign_or_none",
+      "max_false_tickets": 0,
+      "pass_level": "detection"
+    }
+  },
+  "tickets": [
+    {
+      "ticket_id": "t-301",
+      "episode_id": "e-301",
+      "opened_sim_ts": "2020-07-31T02:30:00.000Z",
+      "fault_at_open": "depot_depressurisation",
+      "fault_latest": "depot_depressurisation",
+      "max_level": "review",
+      "closed_sim_ts": "2020-07-31T04:00:00.000Z"
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "d-301",
+      "episode_id": "e-301",
+      "sim_ts": "2020-07-31T02:10:00.000Z",
+      "choice": "none_of_these",
+      "confidence": 0.72,
+      "gate": "log",
+      "abstained": true,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "backend": "rules",
+      "benign_choice": false
+    },
+    {
+      "decision_id": "d-302",
+      "episode_id": "e-301",
+      "sim_ts": "2020-07-31T02:30:00.000Z",
+      "choice": "depot_depressurisation",
+      "confidence": 0.65,
+      "gate": "review",
+      "abstained": false,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "backend": "rules",
+      "benign_choice": true
+    },
+    {
+      "decision_id": "d-303",
+      "episode_id": "e-301",
+      "sim_ts": "2020-07-31T02:50:00.000Z",
+      "choice": "none_of_these",
+      "confidence": 0.8,
+      "gate": "log",
+      "abstained": true,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "backend": "rules",
+      "benign_choice": false
+    }
+  ],
+  "alarms": [{ "code": "W101", "sim_ts": "2020-07-31T02:05:00.000Z" }],
+  "suspects": [
+    {
+      "event_id": "s-301",
+      "sim_ts": "2020-07-31T02:10:00.000Z",
+      "symptom_key": "low_line_pressure"
+    }
+  ]
+}

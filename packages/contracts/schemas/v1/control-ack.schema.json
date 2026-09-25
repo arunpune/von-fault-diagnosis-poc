@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:control-ack:v1",
+  "title": "Control ack",
+  "description": "The simulator's answer to one control-cmd, published on plant/{unit_id}/control/ack. Every command is acknowledged, successful or not, and the acknowledgement carries the status snapshot taken after the command was applied so a caller needs no second round trip.",
+  "type": "object",
+  "$defs": {
+    "control_error": {
+      "title": "Control error",
+      "description": "Why the simulator refused the command.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Machine-readable reason. out_of_range is a data time outside the replayed rows, speed_out_of_range a speed outside 1 to 3600, not_ready a simulator that has not finished indexing.",
+          "type": "string",
+          "enum": [
+            "unknown_cmd",
+            "bad_args",
+            "unknown_preset",
+            "unknown_injection",
+            "out_of_range",
+            "speed_out_of_range",
+            "not_ready",
+            "internal"
+          ]
+        },
+        "message": {
+          "description": "One English sentence for the operator; never a stack trace and never a secret.",
+          "type": "string"
+        }
+      },
+      "required": ["code", "message"],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:control-ack:v1" },
+    "cmd_id": {
+      "description": "The cmd_id of the command this answers.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/uuid"
+    },
+    "cmd": {
+      "description": "The command that was received, echoed unchanged.",
+      "$ref": "urn:fdp:schema:control-cmd:v1#/$defs/command"
+    },
+    "ok": {
+      "description": "True when the command was applied.",
+      "type": "boolean"
+    },
+    "error": {
+      "description": "Null when ok is true, the reason for the refusal otherwise.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/control_error" }]
+    },
+    "status": {
+      "title": "Sim snapshot",
+      "description": "The retained status-sim message as it stands after the command, so the caller sees the effect without waiting for the next status publication.",
+      "$ref": "urn:fdp:schema:status-sim:v1"
+    },
+    "instance_id": {
+      "description": "Identifier of the running fault injection a successful inject started; absent for every other command and for a refused inject.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/instance_id"
+    }
+  },
+  "required": ["schema", "cmd_id", "cmd", "ok", "error", "status"],
+  "additionalProperties": true
+}

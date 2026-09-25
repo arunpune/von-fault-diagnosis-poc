@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The ignore list of apps/frontend/Dockerfile. Its build context is the
+# repository root, and BuildKit looks for `<dockerfile>.dockerignore` before
+# `<context>/.dockerignore` and never for this path, so
+# `Dockerfile.dockerignore` next to the Dockerfile is a symlink to this file,
+# and this list replaces the root one for this image only.
+#
+# It is an allow-list: the context holds the workspace manifests,
+# @fdp/contracts and this package, and nothing else of the repository — no
+# `.env`, no dataset, no other service. Secrets reach the stack through the
+# environment only, and the dataset stays out of images as it stays out of Git.
+
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!packages/contracts
+!apps/frontend
+
+# Within those, nothing installed, built or left behind by a test run,
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/*.log
+**/test-results
+**/playwright-report
+**/blob-report
+
+# no test suite of this package, which the image never runs,
+apps/frontend/test
+apps/frontend/e2e
+
+# and never a secret: Vite would read an apps/frontend/.env while it builds.
+**/.env
+**/.env.*

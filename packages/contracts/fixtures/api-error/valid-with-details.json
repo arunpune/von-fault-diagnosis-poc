@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "bad_request",
+    "message": "The command arguments did not match the command.",
+    "details": {
+      "field": "args.speed",
+      "issue": "must be an integer between 1 and 3600"
+    }
+  }
+}

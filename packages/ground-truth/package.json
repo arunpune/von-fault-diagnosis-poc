@@ -1,0 +1,42 @@
+{
+  "name": "@fdp/ground-truth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The MetroPT-3 failure table, the replay presets and the label helpers the evaluation harness scores against",
+  "license": "Apache-2.0",
+  "author": "Meddle S.r.l.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meddleconnect/jev-fault-diagnosis-poc"
+  },
+  "exports": {
+    ".": {
+      "@fdp/source": "./src/index.ts",
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:integration": "node -e \"console.log('@fdp/ground-truth: no integration tests yet')\"",
+    "build-failure-table": "node --conditions=@fdp/source scripts/build-failure-table.ts",
+    "check-failure-table": "node --conditions=@fdp/source scripts/build-failure-table.ts --check"
+  },
+  "dependencies": {
+    "@fdp/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:"
+  }
+}

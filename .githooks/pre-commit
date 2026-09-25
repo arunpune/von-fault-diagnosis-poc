@@ -1,0 +1,25 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+#
+# Opt-in pre-commit hook (docs/development.md). Enable it with `make hooks`,
+# which sets core.hooksPath to this directory; bypass it once with
+# `git commit --no-verify`.
+#
+# Only the two fast checks that look at the staged content run here: the full
+# gate is `make check`. Git runs a hook from the top level of the work tree,
+# so `uv run` finds the workspace without any path juggling.
+#
+# `--frozen --all-packages` makes the hook work in a clone that has not run
+# `make install` yet: the console scripts of every workspace member are what
+# it calls, it never re-locks, and a synced environment costs ~0.1 s.
+
+set -eu
+
+if ! command -v uv >/dev/null 2>&1; then
+	echo "pre-commit: uv is not on PATH; run 'make doctor' (or commit with --no-verify)" >&2
+	exit 1
+fi
+
+uv run --frozen --all-packages fdp-checks spdx --staged
+uv run --frozen --all-packages fdp-blocklist scan --staged

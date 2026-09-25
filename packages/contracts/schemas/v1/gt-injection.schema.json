@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-injection:v1",
+  "title": "Fault injection event",
+  "description": "One start or stop of a fault injection instance, published on gt/{unit_id}/injection. It is the ground truth of what the machine data contains; no message under the plant root ever carries it.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-injection:v1" },
+    "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "event": {
+      "description": "Whether the instance begins or ends with this message.",
+      "type": "string",
+      "enum": ["start", "stop"]
+    },
+    "instance_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/instance_id" },
+    "injection_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/injection_id" },
+    "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+    "params": {
+      "description": "The parameters resolved for this instance, after defaults and bounds were applied.",
+      "$ref": "#/$defs/instance_params"
+    },
+    "ends_sim_ts": {
+      "description": "When the instance expires; on a stop message, when it was going to expire.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "reason": {
+      "description": "Why the instance ended; present on stop messages only.",
+      "type": "string",
+      "enum": ["expired", "cleared", "jump", "reset"]
+    }
+  },
+  "required": [
+    "schema",
+    "sim_ts",
+    "event",
+    "instance_id",
+    "injection_id",
+    "fault_id",
+    "params",
+    "ends_sim_ts"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "instance_params": {
+      "title": "Resolved instance parameters",
+      "description": "The two parameters an injection instance runs with.",
+      "type": "object",
+      "properties": {
+        "magnitude": { "type": "number" },
+        "duration_sim_min": { "type": "integer", "minimum": 1, "maximum": 14400 }
+      },
+      "required": ["magnitude", "duration_sim_min"],
+      "additionalProperties": false
+    }
+  }
+}

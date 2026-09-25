@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:alert-system:v1",
+  "title": "Alert system",
+  "description": "A self-diagnosis alert of the backend, published on plant/{unit_id}/alerts/system when telemetry or the decision API falls silent, and again when the condition clears.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:alert-system:v1" },
+    "alert_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "kind": {
+      "description": "Which watchdog raised the alert.",
+      "type": "string",
+      "enum": ["telemetry_silent", "decision_api_silent"]
+    },
+    "state": {
+      "description": "Whether this message raises the alert or clears it.",
+      "type": "string",
+      "enum": ["raised", "cleared"]
+    },
+    "since_wall_ts": {
+      "description": "Wall-clock instant the condition started; unchanged between the raised and the cleared message of one alert.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "details": {
+      "description": "Why the watchdog fired. Every field is optional so that a minor version can add one.",
+      "type": "object",
+      "properties": {
+        "timeout_s": { "type": "integer", "minimum": 0 },
+        "consecutive_errors": { "type": "integer", "minimum": 0 },
+        "last_ok_wall_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["schema", "alert_id", "kind", "state", "since_wall_ts", "details"],
+  "additionalProperties": true
+}

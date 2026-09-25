@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:build:v1",
+  "title": "manual/build.yaml",
+  "description": "Document metadata, chapter list and variant knobs for the manual build. See manual/README.md; the `pdf` block holds the PDF build's own keys.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "document": {
+      "type": "object",
+      "properties": {
+        "title": { "$ref": "common.schema.json#/$defs/text" },
+        "subtitle": { "$ref": "common.schema.json#/$defs/text" },
+        "number": { "$ref": "common.schema.json#/$defs/text" },
+        "revision": { "$ref": "common.schema.json#/$defs/text" },
+        "revision_date": { "$ref": "common.schema.json#/$defs/iso_date" },
+        "language": { "type": "string", "pattern": "^[a-z]{2}$" },
+        "license": { "$ref": "common.schema.json#/$defs/text" },
+        "issuer": { "$ref": "common.schema.json#/$defs/text" },
+        "revisions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "revision": { "$ref": "common.schema.json#/$defs/text" },
+              "date": { "$ref": "common.schema.json#/$defs/iso_date" },
+              "change": { "$ref": "common.schema.json#/$defs/text" }
+            },
+            "required": ["revision", "date", "change"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "title",
+        "subtitle",
+        "number",
+        "revision",
+        "revision_date",
+        "language",
+        "license",
+        "issuer",
+        "revisions"
+      ],
+      "additionalProperties": false
+    },
+    "source_date_epoch": { "type": "integer", "minimum": 0 },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "dir": { "$ref": "common.schema.json#/$defs/text" },
+        "basename": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["dir", "basename"],
+      "additionalProperties": false
+    },
+    "fonts": {
+      "type": "object",
+      "properties": {
+        "body": { "$ref": "common.schema.json#/$defs/text" },
+        "mono": { "$ref": "common.schema.json#/$defs/text" },
+        "dir": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["body", "mono", "dir"],
+      "additionalProperties": false
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": { "type": "integer", "minimum": 1 },
+          "slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "title": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["number", "slug", "title"],
+        "additionalProperties": false
+      }
+    },
+    "default_variant": { "$ref": "common.schema.json#/$defs/identifier" },
+    "variants": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "common.schema.json#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/variant" }
+    },
+    "lint": {
+      "type": "object",
+      "properties": {
+        "allowed_number_phrases": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/text" }
+        }
+      },
+      "required": ["allowed_number_phrases"],
+      "additionalProperties": false
+    },
+    "pdf": { "$ref": "#/$defs/pdf" }
+  },
+  "required": [
+    "schema_version",
+    "document",
+    "source_date_epoch",
+    "outputs",
+    "fonts",
+    "chapters",
+    "default_variant",
+    "variants",
+    "lint"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "pdf": {
+      "type": "object",
+      "description": "Keys owned by the PDF build (tools/manual-build) inside the manual's build file; the manual tools never read them. Optional, so a fixture tree may leave the block out and take the defaults of fdp_manual_build.config.",
+      "properties": {
+        "pdf_identifier": {
+          "type": "string",
+          "description": "WeasyPrint `pdf_identifier`; fixing it fixes the trailer /ID, which keeps two builds byte-identical.",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "page_budget": {
+          "type": "object",
+          "description": "Inclusive page range a rendered variant must land in; the build fails outside it.",
+          "properties": {
+            "min": { "type": "integer", "exclusiveMinimum": 0 },
+            "max": { "type": "integer", "exclusiveMinimum": 0 }
+          },
+          "required": ["min", "max"],
+          "additionalProperties": false
+        },
+        "outputs": {
+          "type": "object",
+          "properties": {
+            "manifest": { "$ref": "common.schema.json#/$defs/text" },
+            "catalog": { "$ref": "common.schema.json#/$defs/text" }
+          },
+          "required": ["manifest", "catalog"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["pdf_identifier", "page_budget", "outputs"],
+      "additionalProperties": false
+    },
+    "anchor": {
+      "type": "string",
+      "description": "An anchor from the chapter anchor registry or a dotted machine path.",
+      "pattern": "^([a-z]+:[a-z0-9_-]+|machine(\\.[a-z][a-z0-9_]*)+)$"
+    },
+    "variant": {
+      "type": "object",
+      "properties": {
+        "extends": { "$ref": "common.schema.json#/$defs/identifier" },
+        "enabled": { "type": "boolean" },
+        "layout": { "type": "string", "enum": ["single_column", "mixed", "two_column"] },
+        "two_column_chapters": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "tables": {
+          "type": "string",
+          "enum": ["fit_page", "span_pages_repeat_header"]
+        },
+        "fact_placement": {
+          "type": "string",
+          "enum": ["tables_only", "mixed", "prose_only"]
+        },
+        "prose_only": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/anchor" }
+        },
+        "table_only": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/anchor" }
+        },
+        "xref_style": {
+          "type": "string",
+          "enum": ["explicit", "short_with_footnotes"]
+        },
+        "units": { "type": "string", "enum": ["si", "si_plus_imperial"] },
+        "page_furniture": {
+          "type": "string",
+          "enum": ["page_numbers", "running_headers_footers_revision_stamp"]
+        },
+        "footnotes": { "type": "boolean" },
+        "raster_dpi": { "type": "integer", "exclusiveMinimum": 0 },
+        "skew_deg": { "type": "number" },
+        "noise": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

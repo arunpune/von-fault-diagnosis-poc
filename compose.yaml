@@ -1,0 +1,254 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The whole stack. `make up` builds and starts it from a clean clone with
+# nothing but Docker: every variable carries its default here, so no service
+# uses `env_file` and no `.env` is needed. Compose reads the project `.env` for
+# interpolation only, which is why the two API keys reach `backend` (both) and
+# `init` (LLM_API_KEY) and nothing else: secrets come from the environment
+# only. Values that are not user-facing are literals.
+#
+# Overrides: compose.dev.yaml publishes fixed development ports,
+# compose.ci.yaml swaps in the fixture dataset and the mock decision service.
+# `make compose-check` asserts every invariant this file is supposed to hold.
+name: fault-diagnosis-poc
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+x-mqtt-url: &mqtt-url mqtt://mqtt:1883
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg18-trixie
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fdp_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fdp_admin}
+      POSTGRES_DB: ${POSTGRES_DB:-fdp}
+      PG_APP_PASSWORD: ${PG_APP_PASSWORD:-app_rw}
+      PG_GT_PASSWORD: ${PG_GT_PASSWORD:-gt_rw}
+      PG_EVAL_PASSWORD: ${PG_EVAL_PASSWORD:-eval}
+    volumes:
+      # PostgreSQL 18 declares the volume at /var/lib/postgresql and puts the
+      # cluster in /var/lib/postgresql/18/docker; mounting the old .../data
+      # path would silently lose the database on restart.
+      - pgdata:/var/lib/postgresql
+      - ./infra/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    logging: *logging
+
+  mqtt:
+    build: { context: ., dockerfile: infra/mosquitto/Dockerfile }
+    environment:
+      MQTT_GATEWAY_PASSWORD: ${MQTT_GATEWAY_PASSWORD:-gateway}
+      MQTT_SIM_PASSWORD: ${MQTT_SIM_PASSWORD:-sim}
+      MQTT_BACKEND_DIAG_PASSWORD: ${MQTT_BACKEND_DIAG_PASSWORD:-backend-diag}
+      MQTT_BACKEND_OPS_PASSWORD: ${MQTT_BACKEND_OPS_PASSWORD:-backend-ops}
+      MQTT_EVAL_PASSWORD: ${MQTT_EVAL_PASSWORD:-eval}
+    ports:
+      - "${MQTT_PORT:-1883}:1883"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mosquitto_sub",
+          "-h",
+          "127.0.0.1",
+          "-t",
+          "$$SYS/broker/uptime",
+          "-C",
+          "1",
+          "-W",
+          "3",
+          "-i",
+          "hc",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+    logging: *logging
+
+  init:
+    build: { context: ., dockerfile: tools/init/Dockerfile }
+    restart: "no"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-fdp_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fdp_admin}
+      POSTGRES_DB: ${POSTGRES_DB:-fdp}
+      MQTT_URL: *mqtt-url
+      METROPT_CSV: ${METROPT_CSV:-/data/metropt3/MetroPT3(AirCompressor).csv}
+      METROPT_URL: ${METROPT_URL:-https://archive.ics.uci.edu/static/public/791/metropt+3+dataset.zip}
+      METROPT_FALLBACK_URL: ${METROPT_FALLBACK_URL:-https://archive.ics.uci.edu/static/public/791/metropt+3+dataset.zip}
+      SHA256SUMS_PATH: /data/SHA256SUMS
+      MANUAL_PATH: ${MANUAL_PATH:-data/manual/cau-7-realistic.pdf}
+      MODEL_CACHE_DIR: /models
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-claude-opus-5}
+      INIT_WAIT_TIMEOUT_S: ${INIT_WAIT_TIMEOUT_S:-120}
+      INIT_DOWNLOAD_TIMEOUT_S: ${INIT_DOWNLOAD_TIMEOUT_S:-3600}
+      INIT_FORCE_INGEST: ${INIT_FORCE_INGEST:-0}
+      INIT_REPORT_DIR: /reports
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ./data/metropt3:/data/metropt3 # rw: init downloads the CSV here
+      - ./data/fixtures:/data/fixtures:ro # fixture mode; `make fixtures` fills it
+      - ./data/manual:/data/manual:ro
+      - ./data/byo-manual:/data/byo-manual:ro
+      - ./data/SHA256SUMS:/data/SHA256SUMS:ro
+      - model-cache:/models
+      - ./reports:/reports
+    depends_on:
+      postgres: { condition: service_healthy }
+      mqtt: { condition: service_healthy }
+    logging: *logging
+
+  modbus-sim:
+    build: { context: ., dockerfile: services/modbus/Dockerfile, target: sim }
+    environment:
+      METROPT_CSV: ${METROPT_CSV:-/data/metropt3/MetroPT3(AirCompressor).csv}
+      REPLAY_SPEED: ${REPLAY_SPEED:-600}
+      SIM_AUTOPLAY: "false"
+      SIM_LOOP: "true"
+      MQTT_URL: *mqtt-url
+      MQTT_SIM_PASSWORD: ${MQTT_SIM_PASSWORD:-sim}
+      UNIT_ID: cau-7
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ./data/metropt3:/data/metropt3:ro
+      - ./data/fixtures:/data/fixtures:ro
+    ports:
+      - "${MODBUS_PORT:-5020}:5020"
+    healthcheck:
+      test: ["CMD", "/modbus-sim", "probe"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 60s # index build over the full CSV on a slow disk
+    depends_on:
+      init: { condition: service_completed_successfully }
+      mqtt: { condition: service_healthy }
+    restart: unless-stopped
+    logging: *logging
+
+  gateway:
+    build: { context: ., dockerfile: services/modbus/Dockerfile, target: gateway }
+    environment:
+      MODBUS_ADDR: modbus-sim:5020
+      POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-50}
+      MQTT_URL: *mqtt-url
+      MQTT_GATEWAY_PASSWORD: ${MQTT_GATEWAY_PASSWORD:-gateway}
+      UNIT_ID: cau-7
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    healthcheck:
+      test: ["CMD", "/gateway", "probe"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    depends_on:
+      modbus-sim: { condition: service_healthy }
+      mqtt: { condition: service_healthy }
+    restart: unless-stopped
+    logging: *logging
+
+  backend:
+    build: { context: ., dockerfile: apps/backend/Dockerfile }
+    environment:
+      PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      UNIT_ID: cau-7
+      MQTT_URL: *mqtt-url
+      MQTT_BACKEND_DIAG_PASSWORD: ${MQTT_BACKEND_DIAG_PASSWORD:-backend-diag}
+      MQTT_BACKEND_OPS_PASSWORD: ${MQTT_BACKEND_OPS_PASSWORD:-backend-ops}
+      # Discrete connection parts, not a URL: config/env.ts composes the two
+      # pool URLs from them.
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-fdp}
+      PG_APP_PASSWORD: ${PG_APP_PASSWORD:-app_rw}
+      PG_GT_PASSWORD: ${PG_GT_PASSWORD:-gt_rw}
+      # Empty means "unset": the backend then picks jev when a key is set and
+      # the rules engine otherwise.
+      DECISION_BACKEND: ${DECISION_BACKEND:-}
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
+      TYPESAFE_BASE_URL: ${TYPESAFE_BASE_URL:-https://api.typesafe.ai}
+      JEV_MODEL: ${JEV_MODEL:-jev-1.13.0}
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-claude-opus-5}
+      JEV_PRICE_INPUT_PER_MTOK: ${JEV_PRICE_INPUT_PER_MTOK:-0.042}
+      LLM_PRICE_INPUT_PER_MTOK: ${LLM_PRICE_INPUT_PER_MTOK:-5}
+      LLM_PRICE_OUTPUT_PER_MTOK: ${LLM_PRICE_OUTPUT_PER_MTOK:-25}
+      PRICES_AS_OF: ${PRICES_AS_OF:-2026-09-19}
+      GATE_TICKET_MIN_CONFIDENCE: ${GATE_TICKET_MIN_CONFIDENCE:-0.85}
+      GATE_REVIEW_MIN_CONFIDENCE: ${GATE_REVIEW_MIN_CONFIDENCE:-0.60}
+      GATE_PERSIST_SIM_MIN: ${GATE_PERSIST_SIM_MIN:-1}
+      # Jev's own pair, the pre-registered choice; the rules and llm backends keep GATE_*.
+      JEV_GATE_TICKET_MIN_CONFIDENCE: ${JEV_GATE_TICKET_MIN_CONFIDENCE:-0.85}
+      JEV_GATE_REVIEW_MIN_CONFIDENCE: ${JEV_GATE_REVIEW_MIN_CONFIDENCE:-0.65}
+      DECISION_INTERVAL_SIM_MIN: ${DECISION_INTERVAL_SIM_MIN:-30}
+      EPISODE_CLEAR_SIM_MIN: ${EPISODE_CLEAR_SIM_MIN:-120}
+      HEARTBEAT_TELEMETRY_TIMEOUT_S: ${HEARTBEAT_TELEMETRY_TIMEOUT_S:-15}
+      HEARTBEAT_DECISION_TIMEOUT_S: ${HEARTBEAT_DECISION_TIMEOUT_S:-60}
+      TELEMETRY_RETENTION_SIM_DAYS: ${TELEMETRY_RETENTION_SIM_DAYS:-365}
+      MODEL_CACHE_DIR: /models
+      EMBEDDER_ALLOW_DOWNLOAD: ${EMBEDDER_ALLOW_DOWNLOAD:-false}
+      RULES_DISABLED: ${RULES_DISABLED:-flow_pulses_missing}
+      WS_TELEMETRY_INTERVAL_MS: ${WS_TELEMETRY_INTERVAL_MS:-250}
+    volumes:
+      # Read-only: only init writes the model cache (EMBEDDER_ALLOW_DOWNLOAD
+      # defaults to false).
+      - model-cache:/models:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    depends_on:
+      init: { condition: service_completed_successfully }
+      postgres: { condition: service_healthy }
+      mqtt: { condition: service_healthy }
+    restart: unless-stopped
+    logging: *logging
+
+  frontend:
+    build: { context: ., dockerfile: apps/frontend/Dockerfile }
+    environment:
+      BACKEND_UPSTREAM: backend:3000
+    ports:
+      - "${UI_PORT:-8080}:8080"
+    healthcheck:
+      # 127.0.0.1, not localhost: nginx listens on IPv4 only and busybox wget
+      # tries ::1 first for localhost (apps/frontend/Dockerfile).
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      backend: { condition: service_healthy }
+    restart: unless-stopped
+    logging: *logging
+
+volumes:
+  pgdata:
+  model-cache:

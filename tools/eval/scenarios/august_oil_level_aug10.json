@@ -1,0 +1,31 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "august_oil_level_aug10",
+  "title": "Low oil level warning, 10 August 2020",
+  "group": "diagnostic",
+  "profiles": ["dev"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "august-aug10"
+  },
+  "replay": {
+    "from": "2020-08-10T00:00:00.000Z",
+    "to": "2020-08-11T00:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "diagnostic",
+    "note": "the oil-level input reads low for long stretches of August; the rule behind W116 fires and the question is whether the pipeline explains it as an oil-level cause rather than as a leak"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "any",
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "native_alarm_codes": ["W116"],
+  "warmup_min": 60,
+  "seed": 43,
+  "notes": "W116 is the one controller message the default lead-time comparison leaves out, because it is a maintenance state rather than a fault the data turns on. This scenario is where it is looked at on purpose, so the code is named here explicitly. Reported, never gated."
+}

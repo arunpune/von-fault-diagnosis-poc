@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# MetroPT-3 for a job that reads it (docs/dataset.md).
+#
+# No MetroPT-3 row is committed, so a job that needs the data restores the
+# verified 218 MB CSV from `actions/cache` keyed on `data/SHA256SUMS` — the file
+# that pins its SHA-256 — and downloads it only when that cache misses. The
+# weekly, advisory `quickstart-download` job is the one place where the download
+# path is exercised on purpose; every other job is expected to hit the cache.
+#
+# After the source is in place the action cuts the slices the tests read
+# (`make fixtures` → the gitignored `data/fixtures/metropt3/`) and exports
+# `FDP_REQUIRE_DATASET=1`, so a test that would otherwise skip for a missing
+# slice fails the job instead.
+#
+# It fills `$GITHUB_WORKSPACE` and nothing else: a job that clones the
+# repository elsewhere copies the slice it needs into that clone itself.
+
+name: Set up the MetroPT-3 dataset
+description: Restore or download the verified MetroPT-3 CSV, cut the test slices and require them.
+
+inputs:
+  metropt-url:
+    description: A mirror to download from on a cache miss; empty means the UCI archive.
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Restore the verified MetroPT-3 source
+      id: restore
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: data/metropt3
+        key: metropt3-${{ hashFiles('data/SHA256SUMS') }}
+
+    # The script verifies whatever arrives against `data/SHA256SUMS` and deletes
+    # it when it matches no line, so an unverified file can never look like the
+    # dataset. The URL reaches it as data, never as command text.
+    - name: Download and verify MetroPT-3
+      if: steps.restore.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        METROPT_URL: ${{ inputs.metropt-url }}
+      run: scripts/data/fetch-metropt3.sh
+
+    # Before `make fixtures`, so the cutter fails instead of printing a skip.
+    - name: Require the dataset for the rest of the job
+      shell: bash
+      run: echo "FDP_REQUIRE_DATASET=1" >> "$GITHUB_ENV"
+
+    - name: Cut the slices the tests read
+      shell: bash
+      run: make fixtures

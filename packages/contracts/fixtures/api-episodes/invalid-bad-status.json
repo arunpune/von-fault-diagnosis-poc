@@ -1,0 +1,21 @@
+{
+  "$expect_error": "/items/0/status must be equal to one of the allowed values",
+  "items": [
+    {
+      "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+      "unit_id": "cau-7",
+      "symptom_key": "continuous_load",
+      "symptom_keys": ["continuous_load", "purge_pressure_high"],
+      "status": "paused",
+      "opened_sim_ts": "2020-06-05T08:58:40.000Z",
+      "last_event_sim_ts": "2020-06-05T09:41:12.000Z",
+      "last_decision_sim_ts": "2020-06-05T09:41:12.000Z",
+      "closed_sim_ts": null,
+      "close_reason": null,
+      "ticket_id": "2c7f8a15-4b90-4d63-8e27-1a0b9c8d7e60",
+      "event_count": 3,
+      "decision_count": 3
+    }
+  ],
+  "next_cursor": null
+}

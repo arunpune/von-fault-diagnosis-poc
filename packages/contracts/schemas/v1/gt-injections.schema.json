@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-injections:v1",
+  "title": "Fault injection catalog document",
+  "description": "The file packages/ground-truth/data/injections.json, authored by the simulator's owner and validated by @fdp/ground-truth. Unique injection_id values and tags that exist in the register map are referential tests, not schema rules.",
+  "type": "object",
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-injections:v1" },
+    "injections": {
+      "description": "Every injection type the simulator offers, in menu order.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "urn:fdp:schema:gt-injection-def:v1" }
+    }
+  },
+  "required": ["schema", "injections"],
+  "additionalProperties": false
+}

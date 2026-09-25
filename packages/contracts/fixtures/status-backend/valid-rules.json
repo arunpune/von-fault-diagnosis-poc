@@ -1,0 +1,24 @@
+{
+  "schema": "urn:fdp:schema:status-backend:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:05.000Z",
+  "backend": {
+    "name": "rules",
+    "model": "rules-v1"
+  },
+  "decision": {
+    "total": 0,
+    "ok": 0,
+    "failed": 0,
+    "consecutive_errors": 0,
+    "last_ok_wall_ts": null,
+    "last_error_wall_ts": null
+  },
+  "heartbeat": {
+    "telemetry_silent": true,
+    "decision_api_silent": false
+  },
+  "episodes_open": 0,
+  "tickets_open": 0,
+  "version": "1.0.0"
+}

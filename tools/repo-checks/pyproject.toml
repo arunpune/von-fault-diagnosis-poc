@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+[project]
+name = "fdp-repo-checks"
+version = "0.1.0"
+description = "Repository hygiene checks: SPDX headers, ground-truth paths, env example, commits, licences"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+dependencies = [] # stdlib only: the checks must run before anything is installed
+
+[project.scripts]
+fdp-checks = "fdp_repo_checks.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"

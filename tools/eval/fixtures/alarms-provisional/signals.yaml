@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional signal registry for the CTRL-7 port.
+#
+# It is the fallback `loadAlarmRegistry` reads when a worktree carries no
+# manual/spec, and a unit-test fixture in every other case: the tag ids are the
+# manual's own, so nothing is renamed when the real registry lands, and
+# only the tags the five provisional messages reference are declared. The lanes
+# themselves come from the register map at run time, so this file carries no
+# register offset, no scale and no CSV column.
+schema_version: 1
+signals:
+  - id: dryer_purge_pressure
+    group: analog
+    unit: bar
+  - id: oil_temperature
+    group: analog
+    unit: degC
+  - id: motor_current
+    group: analog
+    unit: A
+  - id: low_pressure_switch
+    group: digital
+    unit: bool
+machine_states:
+  order: ["off", unloaded, loaded]
+  aliases: { running: [unloaded, loaded] }
+derived:
+  - { id: continuous_load_time, kind: time_in_state, state: loaded, unit: min }

@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/meddleconnect/jev-fault-diagnosis-poc/security/advisories/new
+    about: Report vulnerabilities privately, never in a public issue. See SECURITY.md.

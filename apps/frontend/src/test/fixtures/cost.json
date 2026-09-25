@@ -1,0 +1,66 @@
+{
+  "totals": {
+    "usd": 0.0318412,
+    "calls": 41,
+    "input_tokens": 74892,
+    "output_tokens": 1420
+  },
+  "by_backend": {
+    "jev": {
+      "usd": 0.0031455,
+      "calls": 38,
+      "input_tokens": 70512,
+      "output_tokens": 0,
+      "model": "jev-1.13.0"
+    },
+    "llm": {
+      "usd": 0.0286957,
+      "calls": 3,
+      "input_tokens": 4380,
+      "output_tokens": 1420,
+      "model": "small-language-model-v2"
+    }
+  },
+  "by_day": [
+    {
+      "day_wall": "2026-06-03",
+      "usd": 0.0091204
+    },
+    {
+      "day_wall": "2026-06-04",
+      "usd": 0.0114806
+    },
+    {
+      "day_wall": "2026-06-05",
+      "usd": 0.0112402
+    }
+  ],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": 3,
+    "llm_output_per_mtok": 15,
+    "as_of": "2026-09-19"
+  },
+  "recent": [
+    {
+      "decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+      "backend": "jev",
+      "model": "jev-1.13.0",
+      "input_tokens": 1834,
+      "output_tokens": 0,
+      "cost_usd": 7.7028e-5,
+      "wall_ts": "2026-06-05T09:41:13.640Z",
+      "sim_ts": "2020-06-05T09:41:12.000Z"
+    },
+    {
+      "decision_id": "1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9",
+      "backend": "llm",
+      "model": "small-language-model-v2",
+      "input_tokens": 1460,
+      "output_tokens": 473,
+      "cost_usd": 0.01147,
+      "wall_ts": "2026-06-05T09:22:41.180Z",
+      "sim_ts": "2020-06-05T08:12:30.000Z"
+    }
+  ]
+}

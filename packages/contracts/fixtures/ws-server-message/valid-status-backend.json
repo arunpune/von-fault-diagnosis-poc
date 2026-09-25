@@ -1,0 +1,30 @@
+{
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "type": "status.backend",
+  "payload": {
+    "schema": "urn:fdp:schema:status-backend:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-09-19T10:00:05.000Z",
+    "backend": {
+      "name": "jev",
+      "model": "jev-1.13.0"
+    },
+    "decision": {
+      "total": 42,
+      "ok": 41,
+      "failed": 1,
+      "consecutive_errors": 0,
+      "last_ok_wall_ts": "2026-09-19T09:59:58.412Z",
+      "last_error_wall_ts": "2026-09-19T09:41:03.907Z"
+    },
+    "heartbeat": {
+      "telemetry_silent": false,
+      "decision_api_silent": false
+    },
+    "episodes_open": 2,
+    "tickets_open": 1,
+    "version": "1.0.0"
+  }
+}

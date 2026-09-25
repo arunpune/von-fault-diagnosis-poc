@@ -1,0 +1,28 @@
+# The build context of tools/manual-build/Dockerfile is the repository root,
+# and the image only needs the lock files, the members' metadata and this
+# package's sources. BuildKit looks for `<dockerfile>.dockerignore` first and
+# for `<context>/.dockerignore` second, and never for this path, so
+# `Dockerfile.dockerignore` next to it is a symlink to this file. The root
+# `.dockerignore` serves the service images and is not the one read here.
+
+.git
+.github
+.venv
+**/.venv
+node_modules
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# Local tool state and data/metropt3 stay out: a linked worktree may symlink
+# both out of the checkout, and the MetroPT-3 CSV alone is about 208 MB.
+.claude
+data/metropt3
+reports
+
+# Build output, never an input.
+**/.build
+**/dist
+**/coverage

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:telemetry-samples:v1",
+  "title": "Telemetry samples",
+  "description": "A batch of 1 to 25 decoded ring-buffer slots, published by the gateway on plant/{unit_id}/telemetry/samples. The gateway decodes registers into SI numbers and booleans and forwards them; it never interprets a value and adds nothing the simulator did not write.",
+  "type": "object",
+  "$defs": {
+    "sample": {
+      "title": "Sample",
+      "description": "One slot of the simulator's ring buffer, decoded into the tag ids of the signal registry.",
+      "type": "object",
+      "properties": {
+        "seq": {
+          "description": "Sequence number the simulator wrote with the slot. It starts at 1 on every simulator start and wraps at 2^32 - 1.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "sim_ts": {
+          "description": "Data time of the slot, taken from the replayed row and never from wall time.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+        },
+        "flags": {
+          "description": "The two slot flags of the register model, copied through unchanged.",
+          "type": "object",
+          "properties": {
+            "discontinuity": {
+              "description": "True when data time jumped before this sample, after a gap in the source, a jump or a restart.",
+              "type": "boolean"
+            },
+            "missing": {
+              "description": "True when at least one source column of this row could not be parsed; the affected tags keep their previous value.",
+              "type": "boolean"
+            }
+          },
+          "required": ["discontinuity", "missing"],
+          "additionalProperties": false
+        },
+        "values": {
+          "description": "One decoded value per tag id of the signal registry: a number for an analog tag, a boolean for a digital one. The synthetic ambient_temperature tag is part of the map like any other.",
+          "type": "object",
+          "propertyNames": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+          "additionalProperties": { "$ref": "urn:fdp:schema:common:v1#/$defs/sample_value" },
+          "minProperties": 1
+        },
+        "alarms": {
+          "description": "The controller alarm codes active on this row, expanded from the alarm bits in ascending bit order. Empty when the controller reports none.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["seq", "sim_ts", "flags", "values", "alarms"],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:telemetry-samples:v1" },
+    "samples": {
+      "description": "The samples of one poll batch, ordered by ascending seq. A consumer that sees a gap between batches reads the counters of the gateway status message.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 25,
+      "items": { "$ref": "#/$defs/sample" }
+    },
+    "poll": {
+      "description": "What the gateway measured while reading this batch. Optional, for diagnostics only.",
+      "type": "object",
+      "properties": {
+        "poll_seq": {
+          "description": "Number of poll cycles the gateway has completed since it started.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "read_ms": {
+          "description": "Milliseconds the register reads of this batch took.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["schema", "samples"],
+  "additionalProperties": true
+}

@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "types": ["node"]
+  },
+  // `vitest.config.ts` is deliberately absent: it imports `../../vitest.base.ts`,
+  // which sits outside `rootDir` and would break `tsc -b`. Configuration files are
+  // outside every boundary rule and vitest type-checks its own config when it loads it.
+  // `mock/**/*.json` is listed because `mock/typesafe-mock.ts` and `mock/anthropic-mock.ts`
+  // import their request and response schemas with `with { type: "json" }`. Listing them also
+  // makes `tsc -b` copy the files into `dist/mock/schemas/`, so the built entry point of
+  // `@fdp/contracts/mock` — the one the CI image runs — carries its own schemas.
+  "include": ["src/**/*.ts", "mock/**/*.ts", "mock/**/*.json", "scripts/**/*.ts", "test/**/*.ts"]
+}

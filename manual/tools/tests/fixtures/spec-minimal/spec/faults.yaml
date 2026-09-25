@@ -1,0 +1,211 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Test fixture: three symptom conditions over eleven causes. The cause set
+# covers every subsystem that carries a signal (rule A2), holds one benign
+# cause (rule A3) and shares causes across conditions (rules A1 and A4).
+schema_version: 1
+conditions:
+  - id: oil_temperature_high
+    title: Oil temperature high
+    symptom: The controller shows a high oil temperature message and the unit runs hotter than usual.
+    alarms: [W104, X201, S301]
+    signals: [oil_temperature]
+    causes:
+      - {fault_id: oil_cooler_fouled, likelihood: common}
+      - {fault_id: oil_filter_clogged, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: occasional, note: The unit runs loaded far longer than the reference duty.}
+      - {fault_id: oil_temperature_sensor_fault, likelihood: rare}
+      - {fault_id: airend_bearing_wear, likelihood: rare}
+  - id: low_line_pressure
+    title: Line pressure below setpoint
+    symptom: Line pressure stays below the setpoint even though the unit keeps delivering.
+    alarms: []
+    signals: [line_pressure, reservoir_pressure]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common}
+      - {fault_id: dryer_purge_leak, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: common}
+      - {fault_id: intake_filter_clogged, likelihood: occasional}
+      - {fault_id: condensate_drain_stuck_open, likelihood: occasional}
+      - {fault_id: reservoir_isolation_valve_closed, likelihood: rare}
+      - {fault_id: supply_voltage_low_or_unbalanced, likelihood: rare}
+  - id: frequent_cycling
+    title: Compressor starts and loads too often
+    symptom: The unit loads and unloads far more often than the reference duty suggests.
+    alarms: []
+    signals: [line_pressure, load_valve]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: common}
+      - {fault_id: condensate_drain_stuck_open, likelihood: occasional}
+      - {fault_id: reservoir_isolation_valve_closed, likelihood: rare}
+causes:
+  - fault_id: oil_cooler_fouled
+    name: Oil cooler fouled
+    subsystem: cooling
+    benign: false
+    summary: Dust and oil mist on the cooler block stop the cooling air from carrying the heat away.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: any, onset: gradual}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Look at the cooler block and the fan guard for a dust or oil film.
+      - Compare the oil temperature with the ambient temperature over a full load cycle.
+    remedy: Clean the cooler block and the fan guard, then let the unit reach its reference temperature again.
+    parts: []
+    maintenance: []
+    components: [oil_cooler]
+  - fault_id: oil_filter_clogged
+    name: Oil filter clogged
+    subsystem: oil
+    benign: false
+    summary: The filter element restricts the oil flow, so less oil reaches the compression element.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+    checks:
+      - Read the service hours since the last oil filter change.
+      - Feel the filter housing for an unusual temperature difference.
+    remedy: Fit a new oil filter element and top the oil up to the mark.
+    parts: [oil_filter_element, compressor_oil]
+    maintenance: [oil_change]
+    components: []
+  - fault_id: oil_temperature_sensor_fault
+    name: Oil temperature sensor fault
+    subsystem: control
+    benign: false
+    summary: The temperature sensor or its wiring reports a value that the oil itself does not have.
+    signal_moves:
+      - {signal: oil_temperature, direction: fluctuates, phase: any, onset: intermittent}
+      - {behaviour: loaded_run_duration, direction: unchanged}
+    checks:
+      - Compare the reading with a hand-held thermometer at the airend outlet.
+      - Inspect the sensor wiring for damage at the terminal strip.
+    remedy: Repair the wiring or replace the sensor, then confirm the reading against a reference instrument.
+    parts: []
+    maintenance: []
+    components: [controller]
+  - fault_id: airend_bearing_wear
+    name: Airend bearing wear
+    subsystem: compressor
+    benign: false
+    summary: Worn bearings in the compression element add friction, which shows up as heat and current.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+      - {signal: motor_current, direction: rises, phase: loaded, onset: gradual}
+    checks:
+      - Listen for a changed running noise at the compression element.
+      - Compare the loaded current with the reference figure of the technical data.
+    remedy: Have the compression element inspected and overhauled by a service engineer.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: high_air_demand
+    name: Air demand above the rated delivery
+    subsystem: distribution
+    benign: true
+    summary: The consumers simply ask for more air than the unit can deliver, so the machine itself is sound.
+    signal_moves:
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded}
+      - {behaviour: load_cycle_rate, direction: higher}
+      - {signal: line_pressure, direction: low, phase: loaded, onset: sustained}
+    checks:
+      - Ask the operators whether a new consumer went into service.
+      - Watch the line pressure over a shift and compare it with the reference duty.
+    remedy: Reduce the demand or plan additional compressed-air capacity; no repair is needed on the unit.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: downstream_air_leak
+    name: Leak in the distribution network
+    subsystem: distribution
+    benign: false
+    summary: Air escapes from the pipework behind the reservoirs, so the unit keeps replacing what is lost.
+    signal_moves:
+      - {behaviour: unloaded_pressure_decay, direction: faster}
+      - {behaviour: load_cycle_rate, direction: higher, onset: gradual}
+      - {signal: line_pressure, direction: falls, phase: unloaded, onset: sustained}
+    checks:
+      - Close the isolation valve at the panel and watch whether the pressure still falls.
+      - Walk the distribution network and listen at joints and couplings.
+    remedy: Find and seal the leaking joints, then repeat the pressure-hold check.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: dryer_purge_leak
+    name: Dryer purge valve not seating
+    subsystem: dryer
+    benign: false
+    summary: The purge valve stays partly open, so dried air escapes continuously at the silencer.
+    signal_moves:
+      - {signal: dryer_purge_pressure, direction: high, phase: loaded, onset: sustained}
+      - {behaviour: cut_out_reached, direction: not_reached}
+      - {signal: purge_switch, direction: stays_on, phase: loaded}
+    checks:
+      - Listen at the purge silencer while the unit is loaded.
+      - Watch the purge pressure through a complete tower changeover.
+    remedy: Service or replace the purge valve and check the silencer for damage.
+    parts: []
+    maintenance: []
+    components: [purge_valve]
+  - fault_id: intake_filter_clogged
+    name: Air intake filter clogged
+    subsystem: intake_unloading
+    benign: false
+    summary: A blocked intake element throttles the suction side, so the unit delivers less air per loaded run.
+    signal_moves:
+      - {signal: motor_current, direction: low, phase: loaded, onset: sustained}
+      - {behaviour: pressure_rise_while_loaded, direction: slower}
+    checks:
+      - Inspect the intake element against the light.
+      - Read the service hours since the last intake filter service.
+    remedy: Replace the intake filter element and record the service.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: condensate_drain_stuck_open
+    name: Condensate drain stuck open
+    subsystem: separator_drain
+    benign: false
+    summary: The automatic drain no longer closes, so compressed air escapes with the condensate.
+    signal_moves:
+      - {signal: separator_discharge_pressure, direction: near_zero, phase: unloaded, onset: sustained}
+      - {behaviour: load_cycle_rate, direction: higher}
+    checks:
+      - Listen at the drain outlet between drain pulses.
+      - Watch the separator discharge pressure while the unit is unloaded.
+    remedy: Clean or rebuild the drain valve and confirm that it closes between pulses.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: reservoir_isolation_valve_closed
+    name: Reservoir isolation valve closed
+    subsystem: reservoirs
+    benign: false
+    summary: With a reservoir cut off, the unit works against a much smaller volume and cycles quickly.
+    signal_moves:
+      - {signal: reservoir_pressure, direction: unchanged, phase: any}
+      - {behaviour: loaded_run_duration, direction: shorter}
+      - {signal: flow_pulse, direction: no_pulse, phase: loaded}
+    checks:
+      - Check the position of the isolation valve at each reservoir.
+      - Compare the reservoir pressure with the line pressure over a full cycle.
+    remedy: Open the isolation valve and secure it against accidental closing.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: supply_voltage_low_or_unbalanced
+    name: Supply voltage low or unbalanced
+    subsystem: electrical
+    benign: false
+    summary: A weak or unbalanced supply makes the motor work harder and the delivery fall short.
+    signal_moves:
+      - {signal: motor_current, direction: rises, phase: loaded, onset: sustained}
+      - {behaviour: start_current_peak, direction: higher, phase: start}
+    checks:
+      - Measure the supply voltage at the terminals under load.
+      - Compare the phases against each other while the unit is loaded.
+    remedy: Have the supply and the connections checked by an electrician.
+    parts: []
+    maintenance: []
+    components: []

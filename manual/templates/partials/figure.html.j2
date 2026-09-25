@@ -1,0 +1,10 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# One figure, its SVG inlined (phase1-pdf-build.md §9). Inlining rather than
+   linking keeps the text inside the drawing extractable with pdfplumber and
+   scannable by the brand blocklist. `svg` is already parsed and validated by
+   fdp_manual_build.templating.inline_svg; caption and id are escaped here. #}
+<figure class="figure" id="figure-{{ figure_id | e }}">
+{{ svg }}
+<figcaption><span class="figure-number">Figure {{ number | e }}</span> — {{ caption | e }}</figcaption>
+</figure>

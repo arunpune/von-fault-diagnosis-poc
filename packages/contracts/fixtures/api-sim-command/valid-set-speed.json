@@ -1,0 +1,6 @@
+{
+  "cmd": "set_speed",
+  "args": {
+    "speed": 600
+  }
+}

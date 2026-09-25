@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-status:v1",
+  "title": "Api status",
+  "description": "The body of GET /api/status: everything the status bar and the lamps need in one call. The frontend reads it on every WebSocket open, so a reconnect never leaves the header stale. There is no review feature flag: review is a ticket status, not a route, so there is nothing to switch on.",
+  "type": "object",
+  "properties": {
+    "sim": {
+      "description": "The retained simulator status, null while none has been received.",
+      "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:status-sim:v1" }]
+    },
+    "gateway": {
+      "description": "The retained gateway status, null while none has been received.",
+      "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:status-gateway:v1" }]
+    },
+    "backend": {
+      "description": "The backend's own status; it is built in process, so it is always present.",
+      "$ref": "urn:fdp:schema:status-backend:v1"
+    },
+    "alerts_active": {
+      "description": "The system alerts that are raised right now.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:alert-system:v1" }
+    },
+    "injections_active": {
+      "description": "The fault injections running right now, as the ground-truth overlay reports them. The array is the `active` list of gt-injection-active and is empty when nothing is injected.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:gt-injection-active:v1#/$defs/active_instance" }
+    },
+    "gate": {
+      "description": "The two confidence thresholds the decision gate is running with, and the persistence a symptom's evidence needs before it can open a review or a ticket.",
+      "type": "object",
+      "properties": {
+        "ticket_min_confidence": {
+          "description": "The ticket threshold of the running decision backend: JEV_GATE_TICKET_MIN_CONFIDENCE for jev, GATE_TICKET_MIN_CONFIDENCE for rules and llm.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
+        },
+        "review_min_confidence": {
+          "description": "The review threshold of the running decision backend: JEV_GATE_REVIEW_MIN_CONFIDENCE for jev, GATE_REVIEW_MIN_CONFIDENCE for rules and llm.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
+        },
+        "persist_sim_min": {
+          "description": "GATE_PERSIST_SIM_MIN, in sim minutes; 0 decides at once. Optional: a backend that predates the parameter does not send it.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["ticket_min_confidence", "review_min_confidence"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["sim", "gateway", "backend", "alerts_active", "injections_active", "gate"],
+  "additionalProperties": true
+}

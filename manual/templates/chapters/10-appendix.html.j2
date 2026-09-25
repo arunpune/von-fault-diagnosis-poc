@@ -1,0 +1,31 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# Chapter 10, Appendix (spec §4: glossary, revision history, CC BY 4.0
+   notice). The prose and the revision-history table come from the partial —
+   the table through MAN's tables.revision_history() macro, so nothing is
+   printed twice. The glossary list is derived from machine.components, and the
+   colophon repeats the licence and the MetroPT-3 credit of README.md
+   "License and credits" verbatim, because spec §4 requires them in the
+   document itself. The colophon carries no anchor: it is not a numbered
+   section of the outline. #}
+<div class="body">
+{{ ch.body }}
+<dl class="glossary">
+{% for component in machine.components %}
+  <dt id="glossary-{{ component.id | e }}">{{ component.name | e }}</dt>
+  <dd>{{ component.description_html if component.description_html else component.subsystem | replace("_", " ") | e }}</dd>
+{% endfor %}
+</dl>
+<section class="colophon">
+  <p class="colophon-licence">Manual, fault catalog and synthetic data: CC BY 4.0
+  (<a href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a>).
+  Code: Apache-2.0.</p>
+  <p class="colophon-credit">MetroPT-3: Davari, N., Veloso, B., Ribeiro, R., &amp; Gama, J. (2021).
+  <em>MetroPT-3 Dataset</em>. UCI Machine Learning Repository.
+  <a href="https://doi.org/10.24432/C5VW3R">https://doi.org/10.24432/C5VW3R</a>.
+  Licensed CC BY 4.0, redistributed unchanged.</p>
+  <p class="colophon-disclaimer">{{ machine.identity.name | e }} and
+  {{ machine.identity.controller | e }} are fictional. Do not use this manual to operate or
+  maintain real equipment.</p>
+</section>
+</div>

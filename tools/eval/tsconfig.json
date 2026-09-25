@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  // No `composite`, no `outDir` and no build script: @fdp/eval is a dev-time
+  // package that nothing imports and no image ships. It runs from source
+  // through the `@fdp/source` condition the base config already sets in
+  // `customConditions`, so `tsc` here only ever
+  // type-checks.
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  // `vitest.config.ts` and `vitest.integration.config.ts` are deliberately
+  // absent: they import `../../vitest.base.ts`, and configuration files sit
+  // outside every boundary rule.
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts"]
+}

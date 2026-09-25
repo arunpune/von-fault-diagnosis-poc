@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+  A renderer probe for tools/manual-build/tests: several A4 pages that exercise
+  the layout features WeasyPrint was chosen for — a bordered table with a
+  repeated header broken across a page, a floated footnote, a two-column section
+  and a target-counter cross reference. It carries its own stylesheet so it
+  still renders on its own, but render.py always adds manual/templates/css,
+  whose rules win the cascade; the table is therefore kept comfortably longer
+  than one page so the break survives a change to those sheets. It declares no
+  `dcterms.created`, so WeasyPrint writes no CreationDate.
+
+  Fictional content only: no real machine, controller or part exists here.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Renderer probe</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm 20mm 16mm;
+        @bottom-center {
+          content: counter(page);
+          font-size: 9pt;
+        }
+        @footnote {
+          border-top: 0.4pt solid #000;
+          margin-top: 3mm;
+          padding-top: 1mm;
+        }
+      }
+      html {
+        font-size: 10pt;
+        line-height: 1.45;
+        hyphens: manual;
+      }
+      h1 {
+        font-size: 15pt;
+        margin: 0 0 4mm 0;
+        string-set: chapter content();
+      }
+      h2 {
+        font-size: 12pt;
+        margin: 6mm 0 2mm 0;
+        break-after: avoid;
+      }
+      /* Only the table starts a new page; the two-column section follows the
+         broken table on the same page. */
+      #tabulated {
+        break-before: page;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 9pt;
+      }
+      thead {
+        display: table-header-group;
+      }
+      th,
+      td {
+        border: 0.4pt solid #000;
+        padding: 1mm 1.5mm;
+        text-align: left;
+      }
+      .two-column {
+        columns: 2;
+        column-gap: 7mm;
+      }
+      .fn {
+        float: footnote;
+        font-size: 8pt;
+      }
+      .xref::after {
+        content: " (page " target-counter(attr(href url), page) ")";
+      }
+    </style>
+  </head>
+  <body>
+    <section id="overview">
+      <h1>Renderer probe</h1>
+      <p>
+        This document exists so the manual build can prove that two renders of
+        the same input give the same bytes. It names no real product and quotes
+        no real document.<span class="fn"
+          >Footnotes are floated into the page footnote area, which is the
+          feature the realistic manual variant relies on.</span
+        >
+      </p>
+      <p>
+        The reading order continues in
+        <a class="xref" href="#tabulated">the tabulated values</a> and ends with
+        <a class="xref" href="#columns">the two-column section</a>.
+      </p>
+      <h2>Why the probe runs long</h2>
+      <p>
+        The probe has to be long enough for a table to break across a page
+        boundary and for the page counter to reach a value the cross references
+        can resolve to. A shorter probe would pass without exercising either.
+      </p>
+    </section>
+
+    <section id="tabulated">
+      <h1>Tabulated values</h1>
+      <p>
+        The table below is long enough to break, so its header row has to repeat
+        on the following page.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Row</th>
+            <th>Tag</th>
+            <th>Nominal</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>p_line</td><td>8.0 bar</td><td>Reservoir header pressure</td></tr>
+          <tr><td>2</td><td>p_line</td><td>8.5 bar</td><td>Reservoir header pressure</td></tr>
+          <tr><td>3</td><td>p_line</td><td>9.0 bar</td><td>Reservoir header pressure</td></tr>
+          <tr><td>4</td><td>p_line</td><td>9.5 bar</td><td>Reservoir header pressure</td></tr>
+          <tr><td>5</td><td>t_oil</td><td>62 &#176;C</td><td>Oil temperature after the cooler</td></tr>
+          <tr><td>6</td><td>t_oil</td><td>66 &#176;C</td><td>Oil temperature after the cooler</td></tr>
+          <tr><td>7</td><td>t_oil</td><td>70 &#176;C</td><td>Oil temperature after the cooler</td></tr>
+          <tr><td>8</td><td>t_oil</td><td>74 &#176;C</td><td>Oil temperature after the cooler</td></tr>
+          <tr><td>9</td><td>i_motor</td><td>6.8 A</td><td>Motor current, loaded</td></tr>
+          <tr><td>10</td><td>i_motor</td><td>7.0 A</td><td>Motor current, loaded</td></tr>
+          <tr><td>11</td><td>i_motor</td><td>7.2 A</td><td>Motor current, loaded</td></tr>
+          <tr><td>12</td><td>i_motor</td><td>7.4 A</td><td>Motor current, loaded</td></tr>
+          <tr><td>13</td><td>f_air</td><td>1.1 m&#179;/min</td><td>Delivered free air</td></tr>
+          <tr><td>14</td><td>f_air</td><td>1.2 m&#179;/min</td><td>Delivered free air</td></tr>
+          <tr><td>15</td><td>f_air</td><td>1.3 m&#179;/min</td><td>Delivered free air</td></tr>
+          <tr><td>16</td><td>f_air</td><td>1.4 m&#179;/min</td><td>Delivered free air</td></tr>
+          <tr><td>17</td><td>dp_filter</td><td>0.2 bar</td><td>Separator element drop</td></tr>
+          <tr><td>18</td><td>dp_filter</td><td>0.3 bar</td><td>Separator element drop</td></tr>
+          <tr><td>19</td><td>dp_filter</td><td>0.4 bar</td><td>Separator element drop</td></tr>
+          <tr><td>20</td><td>dp_filter</td><td>0.5 bar</td><td>Separator element drop</td></tr>
+          <tr><td>21</td><td>t_ambient</td><td>18 &#176;C</td><td>Room temperature at the intake</td></tr>
+          <tr><td>22</td><td>t_ambient</td><td>22 &#176;C</td><td>Room temperature at the intake</td></tr>
+          <tr><td>23</td><td>t_ambient</td><td>26 &#176;C</td><td>Room temperature at the intake</td></tr>
+          <tr><td>24</td><td>t_ambient</td><td>30 &#176;C</td><td>Room temperature at the intake</td></tr>
+          <tr><td>25</td><td>h_run</td><td>1,000 h</td><td>Running hours since commissioning</td></tr>
+          <tr><td>26</td><td>h_run</td><td>2,000 h</td><td>Running hours since commissioning</td></tr>
+          <tr><td>27</td><td>h_run</td><td>3,000 h</td><td>Running hours since commissioning</td></tr>
+          <tr><td>28</td><td>h_run</td><td>4,000 h</td><td>Running hours since commissioning</td></tr>
+          <tr><td>29</td><td>h_load</td><td>700 h</td><td>Loaded hours since commissioning</td></tr>
+          <tr><td>30</td><td>h_load</td><td>1,400 h</td><td>Loaded hours since commissioning</td></tr>
+          <tr><td>31</td><td>h_load</td><td>2,100 h</td><td>Loaded hours since commissioning</td></tr>
+          <tr><td>32</td><td>h_load</td><td>2,800 h</td><td>Loaded hours since commissioning</td></tr>
+          <tr><td>33</td><td>n_starts</td><td>4 count</td><td>Motor starts in the last hour</td></tr>
+          <tr><td>34</td><td>n_starts</td><td>6 count</td><td>Motor starts in the last hour</td></tr>
+          <tr><td>35</td><td>n_starts</td><td>8 count</td><td>Motor starts in the last hour</td></tr>
+          <tr><td>36</td><td>n_starts</td><td>10 count</td><td>Motor starts in the last hour</td></tr>
+          <tr><td>37</td><td>p_sump</td><td>6.0 bar</td><td>Sump pressure while unloaded</td></tr>
+          <tr><td>38</td><td>p_sump</td><td>6.1 bar</td><td>Sump pressure while unloaded</td></tr>
+          <tr><td>39</td><td>p_sump</td><td>6.2 bar</td><td>Sump pressure while unloaded</td></tr>
+          <tr><td>40</td><td>p_sump</td><td>6.3 bar</td><td>Sump pressure while unloaded</td></tr>
+          <tr><td>41</td><td>t_air_out</td><td>40 °C</td><td>Air temperature at the outlet</td></tr>
+          <tr><td>42</td><td>t_air_out</td><td>41 °C</td><td>Air temperature at the outlet</td></tr>
+          <tr><td>43</td><td>t_air_out</td><td>42 °C</td><td>Air temperature at the outlet</td></tr>
+          <tr><td>44</td><td>t_air_out</td><td>43 °C</td><td>Air temperature at the outlet</td></tr>
+          <tr><td>45</td><td>dew_point</td><td>-36 °C</td><td>Pressure dew point after the dryer</td></tr>
+          <tr><td>46</td><td>dew_point</td><td>-37 °C</td><td>Pressure dew point after the dryer</td></tr>
+          <tr><td>47</td><td>dew_point</td><td>-38 °C</td><td>Pressure dew point after the dryer</td></tr>
+          <tr><td>48</td><td>dew_point</td><td>-39 °C</td><td>Pressure dew point after the dryer</td></tr>
+          <tr><td>49</td><td>v_purge</td><td>0.10 m&#179;/min</td><td>Purge flow taken from the dried air</td></tr>
+          <tr><td>50</td><td>v_purge</td><td>0.11 m&#179;/min</td><td>Purge flow taken from the dried air</td></tr>
+          <tr><td>51</td><td>v_purge</td><td>0.12 m&#179;/min</td><td>Purge flow taken from the dried air</td></tr>
+          <tr><td>52</td><td>v_purge</td><td>0.13 m&#179;/min</td><td>Purge flow taken from the dried air</td></tr>
+          <tr><td>53</td><td>h_service</td><td>500 h</td><td>Hours to the next service message</td></tr>
+          <tr><td>54</td><td>h_service</td><td>600 h</td><td>Hours to the next service message</td></tr>
+          <tr><td>55</td><td>h_service</td><td>700 h</td><td>Hours to the next service message</td></tr>
+          <tr><td>56</td><td>h_service</td><td>800 h</td><td>Hours to the next service message</td></tr>
+          <tr><td>57</td><td>n_cycles</td><td>12 count</td><td>Load cycles in the last hour</td></tr>
+          <tr><td>58</td><td>n_cycles</td><td>13 count</td><td>Load cycles in the last hour</td></tr>
+          <tr><td>59</td><td>n_cycles</td><td>14 count</td><td>Load cycles in the last hour</td></tr>
+          <tr><td>60</td><td>n_cycles</td><td>15 count</td><td>Load cycles in the last hour</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="columns">
+      <h1>Two-column body</h1>
+      <div class="two-column">
+        <p>
+          Multi-column flow is the last feature this probe covers. The text is
+          filler, but it has to be long enough for the second column to fill,
+          otherwise the column balancing code never runs.
+        </p>
+        <p>
+          A screw compressor package alternates between a loaded state, in which
+          the intake valve is open and the unit delivers air, and an unloaded
+          state, in which it keeps turning against a closed intake. The
+          controller decides between the two from the header pressure.
+        </p>
+        <p>
+          A desiccant dryer alternates between its two towers on a timer. While
+          one tower dries the air, the other is regenerated with a small purge
+          flow taken from the dried air.
+        </p>
+        <p>
+          Every number on this page is invented for the probe and carries no
+          engineering meaning beyond making the layout realistic.
+        </p>
+      </div>
+    </section>
+  </body>
+</html>

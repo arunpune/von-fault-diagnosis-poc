@@ -1,0 +1,37 @@
+{
+  "$expect_error": "/rule_ids must NOT have fewer than 1 items",
+  "schema": "urn:fdp:schema:suspect-event:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "event_id": "3d4a1f02-5c6b-4e71-9a83-0b1c2d3e4f50",
+  "sim_ts": "2020-06-05T09:41:12.000Z",
+  "symptom_key": "continuous_load",
+  "rule_ids": [],
+  "machine_state": {
+    "mode": "loaded",
+    "since_sim_ts": "2020-06-05T08:12:30.000Z",
+    "dryer_tower": 1
+  },
+  "window": {
+    "from_sim_ts": "2020-06-05T08:41:12.000Z",
+    "to_sim_ts": "2020-06-05T09:41:12.000Z",
+    "samples": 3600
+  },
+  "evidence": [
+    {
+      "metric": "loaded_run_duration",
+      "observation": "The unit has been loaded without reaching cut-out for about an hour."
+    }
+  ],
+  "observations": [
+    {
+      "signal": "line_pressure",
+      "level": "below",
+      "trend": "flat",
+      "since": "about an hour"
+    }
+  ],
+  "active_alarms": ["W102"],
+  "co_symptoms": [],
+  "ambient": "warm"
+}

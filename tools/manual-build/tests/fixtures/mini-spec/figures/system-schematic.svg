@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" width="160mm" height="57mm" role="img"
+     font-family="IBM Plex Sans, sans-serif" font-size="16" text-anchor="middle">
+  <!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+       SPDX-License-Identifier: CC-BY-4.0 -->
+  <title>CAU-7 system schematic (mini fixture)</title>
+  <desc>Air path from the intake valve through the airend and the separator vessel to the
+  reservoirs and the consumers, with the oil cooler on the oil circuit and the controller box.</desc>
+  <rect x="0" y="0" width="900" height="320" fill="#ffffff" stroke="none"/>
+
+  <g fill="none" stroke="#333333" stroke-width="2">
+    <rect x="30" y="60" width="140" height="70" data-component="intake_valve"/>
+    <rect x="230" y="60" width="140" height="70"/>
+    <rect x="430" y="60" width="140" height="70"/>
+    <rect x="630" y="60" width="150" height="70"/>
+    <rect x="230" y="200" width="140" height="70" data-component="oil_cooler"/>
+    <rect x="630" y="200" width="150" height="70" data-component="controller"/>
+    <path d="M170 95 H230 M370 95 H430 M570 95 H630 M780 95 H860"/>
+    <path d="M500 130 V235 H370"/>
+    <path d="M230 235 H150 V130"/>
+  </g>
+
+  <g fill="#333333">
+    <text x="100" y="100">Intake valve</text>
+    <text x="300" y="100">Airend</text>
+    <text x="500" y="100">Separator vessel</text>
+    <text x="705" y="100">Reservoirs</text>
+    <text x="300" y="240">Oil cooler</text>
+    <text x="705" y="240">CTRL-7 controller</text>
+    <text x="860" y="118">Consumers</text>
+    <text x="500" y="150" data-signal="oil_temperature">T1</text>
+    <text x="705" y="150" data-signal="line_pressure">P2</text>
+    <text x="300" y="290" data-signal="ambient_temperature">T2</text>
+    <text x="705" y="290" data-signal="intake_closed">D1</text>
+  </g>
+</svg>

@@ -1,0 +1,79 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.technical_data() and tables.parts() macros for print
+   (phase1-pdf-build.md §8, decision R-04): the nameplate data of chapter 9.
+
+   One table in three groups — ratings, limits, reference conditions — because
+   spec §6 check #3 searches the extracted text for every one of these values
+   with its unit and a reader looks them up by name. A limit whose key starts
+   with a tag id prints that tag next to the item, which is the only link the
+   sources hold between `machine.limits` and `signals.yaml`.
+
+   Fact placement (phase1-manual-content.md §8.4): an item the realistic
+   variant lists under `prose_only` keeps its row and prints "see text", so the
+   number lives in the prose alone while the item stays in the table of
+   contents of the chapter. #}
+{%- macro item_label(key) -%}
+{{ key | replace('_', ' ') | capitalize | e }}
+{%- endmacro -%}
+
+{#- The tag a `machine.limits` key names, when it names one at all. -#}
+{%- macro item_tag(key) -%}
+{%- for signal in manual.signals -%}
+{%- if key.startswith(signal.id) %} <a class="xref" href="#signal-{{ signal.id | e }}"><span class="tag">{{ signal.panel_label | e }}</span></a>{% endif -%}
+{%- endfor -%}
+{%- endmacro -%}
+
+{%- macro value_cell(value) -%}
+{%- if value.value is defined -%}
+{{ qty(value.value, value.unit, units_mode=units_mode) }}
+{%- else -%}
+{{ qty_range(value.min, value.max, value.unit, units_mode=units_mode) }}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro fact_rows(prefix, items) -%}
+{% for key, value in items.items() %}
+{%- set anchor = prefix ~ '.' ~ key -%}
+<tr data-fact="{{ anchor | e }}">
+<td>{{ item_label(key) }}{{ item_tag(key) }}</td>
+<td>{% if variant.fact_in_table(anchor) %}{{ value_cell(value) }}{% else %}<span class="see-text">see text</span>{% endif %}</td>
+</tr>
+{% endfor %}
+{%- endmacro -%}
+
+{%- macro group_row(title) -%}
+<tr class="group"><td colspan="2">{{ title | e }}</td></tr>
+{%- endmacro -%}
+
+{%- macro technical_data() -%}
+<table class="technical-data">
+<caption>Technical data</caption>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+{{ group_row('Ratings') }}
+{{ fact_rows('machine.ratings', machine.ratings) }}
+{{ group_row('Limits') }}
+{{ fact_rows('machine.limits', machine.limits) }}
+{{ group_row('Reference conditions') }}
+{{ fact_rows('machine.reference_conditions', machine.reference_conditions) }}
+</tbody>
+</table>
+{%- endmacro -%}
+
+{%- macro parts() -%}
+<table class="parts">
+<caption>Spare parts and consumables</caption>
+<thead><tr><th>Code</th><th>Part</th><th>Unit</th><th>Description</th></tr></thead>
+<tbody>
+{% for part in machine.parts %}
+<tr id="part-{{ part.id | e }}">
+<td><span class="mono">{{ part.code | e }}</span></td>
+<td>{{ part.name | e }}</td>
+<td>{{ man.unit_label(part.unit) | e if part.unit else 'each' }}</td>
+<td>{% if part.description_html %}{{ part.description_html }}{% else %}&mdash;{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}

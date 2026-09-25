@@ -1,0 +1,32 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "f2_air_leak_may30",
+  "title": "Air leak, signature A, 30 May 2020",
+  "group": "recording_positive",
+  "profiles": ["core", "full"],
+  "split": "test",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "f2-may30"
+  },
+  "replay": {
+    "from": "2020-05-29T18:00:00.000Z",
+    "to": "2020-05-30T12:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "failure",
+    "failure_id": "F2"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "accepted",
+    "within_min": 120,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "native_alarm_codes": ["W101", "W102", "W103"],
+  "warmup_min": 60,
+  "seed": 9,
+  "notes": "Five and a half hours of normal operation before the turn, so the detector has a band to learn from. The failure table puts the onset at 23:14:56 and the recovery at 05:56:46; the controller raised no alarm of its own in this window, which is the case the lead-time metric exists for."
+}

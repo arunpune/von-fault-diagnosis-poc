@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // The browser sources and their unit tests. The workspace base stays in force
+  // (strict, noUncheckedIndexedAccess, verbatimModuleSyntax, erasableSyntaxOnly,
+  // the `@fdp/source` condition); module resolution follows the bundler.
+  //
+  // `@fdp/contracts` is mapped to its generated types module. The UI imports the
+  // package for types only, and the package root also loads the Ajv validators,
+  // whose CommonJS default-import cast type-checks under the workspace's NodeNext
+  // resolution but not under the bundler's; the mapping keeps them out of this
+  // program and turns a value import into a compile error.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": [],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@fdp/contracts": ["./node_modules/@fdp/contracts/src/generated/types.ts"]
+    }
+  },
+  "include": ["src"]
+}

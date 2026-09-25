@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-episodes:v1",
+  "title": "Api episodes",
+  "description": "The body of GET /api/episodes: one page of episodes, newest first. An episode groups the suspect events and decisions of one continuing symptom, so the technician sees one story instead of a stream. `next_cursor` is the opaque token of the next page and is null on the last one. The episode definition below is the one the WebSocket snapshot frame embeds.",
+  "type": "object",
+  "$defs": {
+    "episode": {
+      "title": "Episode",
+      "description": "One continuing symptom on one unit, from the first suspect event to the moment silence, a discontinuity or a technician closed it.",
+      "type": "object",
+      "properties": {
+        "episode_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+        "unit_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/unit_id" },
+        "symptom_key": {
+          "description": "The symptom the episode was opened on.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/symptom_key"
+        },
+        "symptom_keys": {
+          "description": "Every symptom seen inside the episode, in first-seen order.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/symptom_key" }
+        },
+        "status": {
+          "description": "open while events keep arriving, closed after it resolved, aborted when a replay jump cut it short.",
+          "type": "string",
+          "enum": ["open", "closed", "aborted"]
+        },
+        "opened_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "last_event_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "last_decision_sim_ts": {
+          "description": "Data time of the newest decision, null while none was made.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }]
+        },
+        "closed_sim_ts": {
+          "description": "Data time the episode closed at, null while it is open.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }]
+        },
+        "close_reason": {
+          "description": "Why the episode closed, null while it is open.",
+          "type": ["string", "null"]
+        },
+        "ticket_id": {
+          "description": "The ticket this episode produced, null while it produced none.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" }]
+        },
+        "event_count": {
+          "description": "Suspect events inside the episode.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "decision_count": {
+          "description": "Decisions made inside the episode.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "episode_id",
+        "unit_id",
+        "symptom_key",
+        "symptom_keys",
+        "status",
+        "opened_sim_ts",
+        "last_event_sim_ts",
+        "last_decision_sim_ts",
+        "closed_sim_ts",
+        "close_reason",
+        "ticket_id",
+        "event_count",
+        "decision_count"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "items": {
+      "description": "The episodes of this page, newest first.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/episode" }
+    },
+    "next_cursor": {
+      "description": "Opaque token of the next page, null on the last one.",
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["items", "next_cursor"],
+  "additionalProperties": true
+}

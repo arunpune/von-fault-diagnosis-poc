@@ -1,0 +1,49 @@
+{
+  "schema": "urn:fdp:schema:gt-injections:v1",
+  "injections": [
+    {
+      "injection_id": "air_leak_downstream",
+      "fault_id": "downstream_air_leak",
+      "label": "Downstream air leak",
+      "benign": false,
+      "description": "The line loses pressure far faster than normal between two loaded runs.",
+      "default_duration_sim_min": 240,
+      "envelope": {
+        "ramp_in_min": 10,
+        "ramp_out_min": 10
+      },
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.5,
+          "max": 2.0
+        },
+        {
+          "name": "duration_sim_min",
+          "default": 240.0,
+          "min": 30.0,
+          "max": 1440.0
+        }
+      ],
+      "transforms": [
+        {
+          "tag": "line_pressure",
+          "op": "ramp",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "state_entry",
+          "when": "not_loaded"
+        },
+        {
+          "tag": "reservoir_pressure",
+          "op": "ramp",
+          "rate_per_min": -0.3,
+          "cap": 2.5,
+          "anchor": "state_entry",
+          "when": "not_loaded"
+        }
+      ]
+    }
+  ]
+}

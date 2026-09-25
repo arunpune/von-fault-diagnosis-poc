@@ -1,0 +1,30 @@
+{
+  "injection_id": "air_leak_downstream",
+  "fault_id": "downstream_air_leak",
+  "label": "Air leak downstream",
+  "benign": false,
+  "description": "Coverage fixture for the guard_entry anchor: the ramp starts when the unit stops compressing and keeps running while it goes from unloaded to off, so the pressure never steps back up inside one idle period.",
+  "default_duration_sim_min": 240,
+  "envelope": {
+    "ramp_in_min": 10,
+    "ramp_out_min": 10
+  },
+  "params": [
+    {
+      "name": "magnitude",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 2.0
+    }
+  ],
+  "transforms": [
+    {
+      "tag": "line_pressure",
+      "op": "ramp",
+      "rate_per_min": -0.3,
+      "cap": 2.5,
+      "anchor": "guard_entry",
+      "when": "not_loaded"
+    }
+  ]
+}

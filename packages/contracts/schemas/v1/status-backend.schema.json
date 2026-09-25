@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:status-backend:v1",
+  "title": "Status backend",
+  "description": "Self-reported health of the diagnosis backend, published retained on plant/{unit_id}/status/backend every few seconds and on every change. It says which decision backend is answering, how its calls are going and how much work is open; it never carries a prompt, a key or a decision payload.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:status-backend:v1" },
+    "backend": {
+      "description": "Which decision backend is selected and which model it calls.",
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+        "model": {
+          "description": "Model identifier of the selected backend: the pinned decision-model version, the language-model identifier, or the version of the rule set.",
+          "type": "string"
+        }
+      },
+      "required": ["name", "model"],
+      "additionalProperties": false
+    },
+    "decision": {
+      "description": "Counters over the decision calls since the backend started.",
+      "type": "object",
+      "properties": {
+        "total": {
+          "description": "Decision calls attempted.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "ok": {
+          "description": "Decision calls that returned an answer.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "description": "Decision calls that ended in an error.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "consecutive_errors": {
+          "description": "Errors since the last successful call; reset to 0 by a success.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_ok_wall_ts": {
+          "description": "Wall-clock time of the last successful call, null before the first one.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }]
+        },
+        "last_error_wall_ts": {
+          "description": "Wall-clock time of the last failed call, null while none failed.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }]
+        }
+      },
+      "required": [
+        "total",
+        "ok",
+        "failed",
+        "consecutive_errors",
+        "last_ok_wall_ts",
+        "last_error_wall_ts"
+      ],
+      "additionalProperties": false
+    },
+    "heartbeat": {
+      "description": "The two watchdogs of the backend, in the state they are in right now. A raised watchdog also publishes an alert-system message.",
+      "type": "object",
+      "properties": {
+        "telemetry_silent": {
+          "description": "True while the simulator is playing and no telemetry sample has arrived within the timeout.",
+          "type": "boolean"
+        },
+        "decision_api_silent": {
+          "description": "True while the decision API keeps failing and no call has succeeded since.",
+          "type": "boolean"
+        }
+      },
+      "required": ["telemetry_silent", "decision_api_silent"],
+      "additionalProperties": false
+    },
+    "episodes_open": {
+      "description": "Episodes that are still open.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "tickets_open": {
+      "description": "Tickets in the review or open state.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "version": {
+      "description": "Version of the backend image or package that publishes this message.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "backend",
+    "decision",
+    "heartbeat",
+    "episodes_open",
+    "tickets_open",
+    "version"
+  ],
+  "additionalProperties": true
+}

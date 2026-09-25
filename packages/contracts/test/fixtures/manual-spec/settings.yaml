@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional controller parameters: the defaults the alarm triggers resolve their thresholds
+# and delays against. Only id, unit and default are kept, because those are the only fields the
+# generator reads.
+schema_version: 1
+settings:
+  - id: cut_in_pressure
+    unit: bar
+    default: 8
+  - id: cut_out_pressure
+    unit: bar
+    default: 10
+  - id: unload_run_on_time
+    unit: s
+    default: 420
+  - id: restart_delay
+    unit: s
+    default: 30
+  - id: motor_start_mask_time
+    unit: s
+    default: 15
+  - id: max_continuous_load_time
+    unit: min
+    default: 10
+  - id: max_starts_per_hour
+    unit: per_hour
+    default: 6
+  - id: low_pressure_alarm_delay
+    unit: s
+    default: 10
+  - id: oil_temperature_warning
+    unit: degC
+    default: 75
+  - id: oil_temperature_shutdown_warning
+    unit: degC
+    default: 85
+  - id: oil_temperature_shutdown
+    unit: degC
+    default: 95
+  - id: discharge_pressure_shutdown_warning
+    unit: bar
+    default: 11
+  - id: discharge_pressure_shutdown
+    unit: bar
+    default: 11.5
+  - id: motor_current_warning
+    unit: A
+    default: 7.5
+  - id: motor_current_shutdown_warning
+    unit: A
+    default: 8.5
+  - id: motor_current_shutdown
+    unit: A
+    default: 9.5
+  - id: motor_current_low_warning
+    unit: A
+    default: 5
+  - id: ambient_temperature_high_warning
+    unit: degC
+    default: 40
+  - id: ambient_temperature_low_warning
+    unit: degC
+    default: 2
+  - id: dryer_tower_period
+    unit: s
+    default: 60
+  - id: dryer_changeover_timeout
+    unit: s
+    default: 180
+  - id: purge_pressure_warning
+    unit: bar
+    default: 0.5
+  - id: separator_pressure_warning
+    unit: bar
+    default: 0.5
+  - id: reservoir_deviation_warning
+    unit: bar
+    default: 0.5
+  - id: separator_element_dp_warning
+    unit: bar
+    default: 1

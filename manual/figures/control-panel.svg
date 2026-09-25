@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="160mm" height="100mm" role="img"
+     font-family="IBM Plex Sans, sans-serif" font-size="30" text-anchor="middle">
+  <!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+       SPDX-License-Identifier: CC-BY-4.0 -->
+  <title>CTRL-7 control panel</title>
+  <desc>Front view of the CTRL-7 control panel: name plate, two-line character display showing a
+  controller message, four indicator lamps for power, warning, shutdown and service, the operating
+  keys and the emergency-stop button.</desc>
+
+  <rect x="0" y="0" width="1600" height="1000" fill="#ffffff" stroke="none"/>
+
+  <g data-component="controller" fill="none" stroke="#1f2933" stroke-width="3">
+    <!-- panel body -->
+    <rect x="30" y="30" width="1540" height="940" rx="32" fill="#e7ebf0"/>
+    <rect x="60" y="60" width="1480" height="880" rx="20" fill="#f8fafc"/>
+
+    <!-- name plate -->
+    <rect x="100" y="100" width="380" height="90" rx="10" fill="#ffffff"/>
+    <text x="290" y="160" fill="#1f2933" stroke="none" font-size="48" font-weight="600">CTRL-7</text>
+    <text x="520" y="160" fill="#1f2933" stroke="none" text-anchor="start">Operator panel</text>
+
+    <!-- message display -->
+    <rect x="100" y="235" width="800" height="245" rx="14" fill="#13251c"/>
+    <rect x="130" y="262" width="740" height="193" rx="6" fill="#1b3728" stroke="#3f6c55"
+          stroke-width="2"/>
+    <text x="160" y="340" fill="#a5f3c3" stroke="none" text-anchor="start"
+          font-family="IBM Plex Mono, monospace" font-size="64">W104</text>
+    <text x="160" y="428" fill="#a5f3c3" stroke="none" text-anchor="start"
+          font-family="IBM Plex Mono, monospace" font-size="64">OIL TEMP HIGH</text>
+    <text x="500" y="525" fill="#1f2933" stroke="none">Message display</text>
+
+    <!-- indicator lamps -->
+    <g>
+      <circle cx="1030" cy="300" r="26" fill="#3aa35a"/>
+      <text x="1075" y="312" fill="#1f2933" stroke="none" text-anchor="start">Power</text>
+      <circle cx="1300" cy="300" r="26" fill="#e3a63c"/>
+      <text x="1345" y="312" fill="#1f2933" stroke="none" text-anchor="start">Warning</text>
+      <circle cx="1030" cy="420" r="26" fill="#c1272d"/>
+      <text x="1075" y="432" fill="#1f2933" stroke="none" text-anchor="start">Shutdown</text>
+      <circle cx="1300" cy="420" r="26" fill="#3b6fd4"/>
+      <text x="1345" y="432" fill="#1f2933" stroke="none" text-anchor="start">Service</text>
+    </g>
+
+    <!-- keys -->
+    <g data-key="start">
+      <rect x="100" y="570" width="200" height="100" rx="14" fill="#ffffff"/>
+      <text x="200" y="633" fill="#1f2933" stroke="none" font-size="34">START</text>
+    </g>
+    <g data-key="stop">
+      <rect x="330" y="570" width="200" height="100" rx="14" fill="#ffffff"/>
+      <text x="430" y="633" fill="#1f2933" stroke="none" font-size="34">STOP</text>
+    </g>
+    <g data-key="reset">
+      <rect x="560" y="570" width="200" height="100" rx="14" fill="#ffffff"/>
+      <text x="660" y="633" fill="#1f2933" stroke="none" font-size="34">RESET</text>
+    </g>
+    <g data-key="menu">
+      <rect x="790" y="570" width="200" height="100" rx="14" fill="#ffffff"/>
+      <text x="890" y="633" fill="#1f2933" stroke="none" font-size="34">MENU</text>
+    </g>
+    <g data-key="up">
+      <rect x="100" y="710" width="130" height="100" rx="14" fill="#ffffff"/>
+      <path d="M165 738 L197 786 H133 Z" fill="#1f2933" stroke="none"/>
+    </g>
+    <g data-key="down">
+      <rect x="260" y="710" width="130" height="100" rx="14" fill="#ffffff"/>
+      <path d="M325 786 L293 738 H357 Z" fill="#1f2933" stroke="none"/>
+    </g>
+    <g data-key="enter">
+      <rect x="420" y="710" width="260" height="100" rx="14" fill="#ffffff"/>
+      <text x="550" y="773" fill="#1f2933" stroke="none" font-size="34">ENTER</text>
+    </g>
+
+    <!-- emergency stop -->
+    <g data-key="emergency_stop">
+      <circle cx="1290" cy="690" r="130" fill="#d7dce3"/>
+      <circle cx="1290" cy="690" r="100" fill="#c1272d" stroke="#7d1a1e"/>
+      <circle cx="1290" cy="690" r="62" fill="none" stroke="#7d1a1e" stroke-width="2"/>
+      <text x="1290" y="880" fill="#1f2933" stroke="none" font-size="32">Emergency stop</text>
+    </g>
+  </g>
+</svg>

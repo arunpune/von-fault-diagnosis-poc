@@ -1,0 +1,17 @@
+{
+  "schema": "urn:fdp:schema:status-gateway:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:10.000Z",
+  "last_seq": 1225,
+  "dropped_total": 37,
+  "polls_total": 4845,
+  "poll_errors_total": 25,
+  "poll_interval_ms": 200,
+  "samples_per_s": 0,
+  "modbus": {
+    "host": "modbus-sim",
+    "port": 5020,
+    "connected": false
+  },
+  "last_error": "dial tcp modbus-sim:5020: connect: connection refused"
+}

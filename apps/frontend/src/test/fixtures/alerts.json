@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "schema": "urn:fdp:schema:alert-system:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-06-05T09:41:12.000Z",
+      "alert_id": "0f8f3b0a-1d3a-4f5e-9c2b-6a7d8e9f0a1b",
+      "kind": "telemetry_silent",
+      "state": "raised",
+      "since_wall_ts": "2026-06-05T09:39:42.000Z",
+      "details": {
+        "timeout_s": 90,
+        "last_ok_wall_ts": "2026-06-05T09:39:42.000Z",
+        "message": "No telemetry sample arrived for 90 s."
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "$expect_error": "/kind must be equal to one of the allowed values",
+  "schema": "urn:fdp:schema:gt-marker:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "kind": "inject",
+  "sim_ts_from": "2020-02-01T02:14:10.000Z",
+  "sim_ts_to": "2020-06-05T06:00:00.000Z"
+}

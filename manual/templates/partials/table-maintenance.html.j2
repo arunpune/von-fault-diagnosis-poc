@@ -1,0 +1,109 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.maintenance_schedule() and tables.maintenance_procedures()
+   macros for print (phase1-pdf-build.md §8, decision R-04): chapter 7.
+
+   The schedule is one table in source order; the procedures are one numbered
+   ### per task with id="task-<id>", the heading MAN's outline already reserved
+   at the macro's position (§8.3) and the target of ref('task:<id>').
+
+   `interval_text` must agree with `fdp_manual_build.export.interval_text`,
+   which writes the same string into the catalog; a unit test compares the two
+   for every task of the fixture. #}
+{%- macro interval_text(interval) -%}
+{%- set bits = [
+     ((interval.hours | fmt) ~ ' h') if interval.hours is not none else none,
+     ((interval.months | fmt) ~ ' months') if interval.months is not none else none,
+     interval.calendar if interval.calendar else none,
+     ('replacement at ' ~ (interval.replacement_hours | fmt) ~ ' h')
+       if interval.replacement_hours is not none else none,
+   ] | select('string') | list -%}
+{{ bits | join(' / ') if bits else 'as required' }}
+{%- endmacro -%}
+
+{%- macro consumables_text(task) -%}
+{%- if task.consumables -%}
+{%- for item in task.consumables -%}
+{%- set part = manual.machine.parts | selectattr('id', 'equalto', item.part) | first -%}
+{{ qty(item.quantity, item.unit, units_mode=units_mode) }} {{ part.name | e }}
+(<span class="mono">{{ part.code | e }}</span>){{ ', ' if not loop.last }}
+{%- endfor -%}
+{%- else -%}
+none
+{%- endif -%}
+{%- endmacro -%}
+
+{#- Chapter 7 is one of the two-column chapters of the realistic variant, and a
+    three-column schedule does not read in half a page width. WeasyPrint spans
+    a multi-column box only for a direct child that carries `column-span: all`,
+    and it drops that property when it wraps a <table> in its anonymous
+    table-wrapper box, so the table is put in a block of its own and
+    realistic.css spans the block. The single-column variant never lays the
+    chapter in columns and keeps the bare table. -#}
+{%- macro maintenance_schedule() -%}
+{% if variant.layout != 'single_column' %}<div class="wide">{% endif %}
+<table class="maintenance-schedule">
+<caption>Maintenance schedule</caption>
+<thead><tr><th>Task</th><th>Interval</th><th>Consumables</th></tr></thead>
+<tbody>
+{% for task in manual.maintenance %}
+<tr data-task="{{ task.id | e }}">
+<td><a class="xref" href="#task-{{ task.id | e }}">{{ task.name | e }}</a></td>
+<td>{{ interval_text(task.interval) }}</td>
+<td>{{ consumables_text(task) }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% if variant.layout != 'single_column' %}</div>{% endif %}
+{%- endmacro -%}
+
+{#- The tags the causes this task prevents are known to move, in source order. -#}
+{%- macro related_signals(task) -%}
+{%- set found = namespace(ids=[]) -%}
+{%- for fault_id in task.related_causes -%}
+{%- for move in manual.cause(fault_id).signal_moves -%}
+{%- if move.signal and move.signal not in found.ids -%}
+{%- set found.ids = found.ids + [move.signal] -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- if found.ids -%}
+<p class="related-signals">Signals to watch after the service:
+{% for signal_id in found.ids %}
+{%- set signal = manual.signal(signal_id) -%}
+<a class="xref" href="#signal-{{ signal.id | e }}"><span class="tag">{{ signal.panel_label | e }}</span></a>
+{{- ' ' }}{{ signal.name | e }}{{ ', ' if not loop.last else '.' }}
+{%- endfor %}</p>
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro procedure(task) -%}
+<h3 id="task-{{ task.id | e }}"><span class="num">{{ sections['task:' ~ task.id].number | e }}</span> {{ task.name | e }}</h3>
+<p class="task-meta">Interval {{ interval_text(task.interval) }} &middot;
+{{ qty(task.duration_min, 'min', units_mode=units_mode) }}
+{%- if task.service_message %} &middot; service message
+<a class="xref" href="#alarm-{{ task.service_message | e }}"><span class="alarm-code">{{ task.service_message | e }}</span></a>
+{%- endif -%}
+{%- if task.tools %} &middot; tools: {{ task.tools | map('e') | join(', ') }}{% endif %}</p>
+{% if task.safety_html %}
+<aside class="admonition warning"><p class="label">{{ admonition_labels['warning'] }}</p>
+{% for note in task.safety_html %}<p>{{ note }}</p>
+{% endfor %}</aside>
+{% endif %}
+<ol class="task-steps">
+{% for step in task.steps_html %}<li>{{ step }}</li>
+{% endfor %}</ol>
+{% if task.post_checks_html %}
+<p class="task-checks-label">After the service, check that:</p>
+<ul class="task-checks">
+{% for check in task.post_checks_html %}<li>{{ check }}</li>
+{% endfor %}</ul>
+{% endif %}
+{{ related_signals(task) }}
+{%- endmacro -%}
+
+{%- macro maintenance_procedures() -%}
+{% for task in manual.maintenance %}{{ procedure(task) }}
+{% endfor %}
+{%- endmacro -%}

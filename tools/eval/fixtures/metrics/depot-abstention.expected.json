@@ -1,0 +1,68 @@
+{
+  "schema": "urn:fdp:eval:metrics-expected:v1",
+  "id": "depot_abstention",
+  "scored_tickets": 1,
+  "warmup_tickets": 0,
+  "open_at_end": 0,
+  "match": {
+    "ticket": {
+      "tp": [],
+      "fp": [],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": [],
+      "fn": []
+    },
+    "review": {
+      "tp": [],
+      "fp": [],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": ["t-301"],
+      "fn": []
+    }
+  },
+  "precision_recall": {
+    "ticket": {
+      "micro": { "tp": 0, "fp": 0, "fn": 0, "windows": 0, "precision": null, "recall": null },
+      "macro": { "precision": null, "recall": null },
+      "per_fault": {}
+    },
+    "review": {
+      "micro": { "tp": 0, "fp": 0, "fn": 0, "windows": 0, "precision": null, "recall": null },
+      "macro": { "precision": null, "recall": null },
+      "per_fault": {}
+    }
+  },
+  "lead_times": [],
+  "rates": {
+    "tickets": 1,
+    "false_tickets": 0,
+    "covered_machine_days": 0.3333333333333333,
+    "negative_machine_days": 0.3333333333333333,
+    "tickets_per_machine_day": 3,
+    "false_tickets_per_machine_day": 0
+  },
+  "abstention": {
+    "correct": 1,
+    "total": 1,
+    "accuracy": 1,
+    "decisions": 3,
+    "explicit": 2,
+    "explicit_rate": 0.6666666666666666
+  },
+  "cost": {
+    "usd": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "calls": 3,
+    "per_decision": 0,
+    "per_ticket": 0
+  },
+  "detection": { "suspects": 1, "warmup_suspects": 0, "outside_windows": 1, "windows": [] },
+  "pass": { "detection": true, "review_diagnosis": true, "diagnosis": true }
+}

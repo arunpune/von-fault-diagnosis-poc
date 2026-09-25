@@ -1,0 +1,176 @@
+{
+  "signals": [
+    {
+      "signal_id": "discharge_pressure",
+      "label": "Discharge pressure",
+      "panel_label": "P1",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "TP2",
+      "source": "recorded",
+      "scale": 1000
+    },
+    {
+      "signal_id": "line_pressure",
+      "label": "Line pressure",
+      "panel_label": "P2",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "TP3",
+      "source": "recorded",
+      "scale": 1000,
+      "normal_bands": {
+        "loaded": [8.4, 9.8],
+        "unloaded": [8.2, 9.8]
+      }
+    },
+    {
+      "signal_id": "separator_discharge_pressure",
+      "label": "Separator discharge pressure",
+      "panel_label": "P3",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "H1",
+      "source": "recorded",
+      "scale": 1000
+    },
+    {
+      "signal_id": "dryer_purge_pressure",
+      "label": "Dryer purge pressure",
+      "panel_label": "P4",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "DV_pressure",
+      "source": "recorded",
+      "scale": 1000,
+      "normal_bands": {
+        "loaded": [-0.05, 0.1],
+        "unloaded": [-0.05, 0.1]
+      }
+    },
+    {
+      "signal_id": "reservoir_pressure",
+      "label": "Reservoir pressure",
+      "panel_label": "P5",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "Reservoirs",
+      "source": "recorded",
+      "scale": 1000
+    },
+    {
+      "signal_id": "oil_temperature",
+      "label": "Oil temperature",
+      "panel_label": "T1",
+      "unit": "degC",
+      "kind": "analog",
+      "metropt_column": "Oil_temperature",
+      "source": "recorded",
+      "scale": 100,
+      "normal_bands": {
+        "loaded": [45, 75],
+        "unloaded": [45, 75]
+      }
+    },
+    {
+      "signal_id": "motor_current",
+      "label": "Motor current",
+      "panel_label": "I1",
+      "unit": "A",
+      "kind": "analog",
+      "metropt_column": "Motor_current",
+      "source": "recorded",
+      "scale": 100
+    },
+    {
+      "signal_id": "intake_closed",
+      "label": "Intake valve closed",
+      "panel_label": "D1",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "COMP",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "load_valve",
+      "label": "Load solenoid",
+      "panel_label": "D2",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "DV_eletric",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "dryer_tower",
+      "label": "Dryer tower in service",
+      "panel_label": "D3",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "Towers",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "regulator_contact",
+      "label": "Pressure regulator contact",
+      "panel_label": "D4",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "MPG",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "low_pressure_switch",
+      "label": "Low-pressure switch",
+      "panel_label": "D5",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "LPS",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "purge_switch",
+      "label": "Purge pressure switch",
+      "panel_label": "D6",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "Pressure_switch",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "oil_level_ok",
+      "label": "Oil level switch",
+      "panel_label": "D7",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "Oil_level",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "flow_pulse",
+      "label": "Flow pulse",
+      "panel_label": "D8",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "Caudal_impulses",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "ambient_temperature",
+      "label": "Ambient temperature",
+      "panel_label": "T2",
+      "unit": "degC",
+      "kind": "analog",
+      "metropt_column": null,
+      "source": "synthetic",
+      "scale": 100
+    }
+  ]
+}

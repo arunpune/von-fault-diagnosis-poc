@@ -1,0 +1,151 @@
+{
+  "schema": "fdp-migration-conformance-v1",
+  "about": [
+    "The behaviour every implementation of the migration runner must show",
+    "(db/README.md, \"Running the migrations\"). Both runners iterate this file:",
+    "packages/db-migrate (TypeScript) and tools/init/src/fdp_init/migrate.py.",
+    "",
+    "A case runs its steps in order against one fresh, empty database.",
+    "Each step runs the runner over `dir`, relative to db/conformance, and then",
+    "checks the state the step describes:",
+    "  expect            'ok', or the error code the run must raise",
+    "  applied           how many rows this step added to public.schema_migrations",
+    "                    (optional; a step that raises may still have applied files)",
+    "  applied_versions  public.schema_migrations after the step, ascending;",
+    "                    an absent table counts as []",
+    "  tables_exist      schema-qualified relations that must exist afterwards",
+    "  tables_absent     schema-qualified relations that must not exist"
+  ],
+  "cases": [
+    {
+      "name": "basic",
+      "description": "Two files apply in ascending order on an empty database.",
+      "steps": [
+        {
+          "dir": "cases/basic",
+          "expect": "ok",
+          "applied": 2,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        }
+      ]
+    },
+    {
+      "name": "rerun",
+      "description": "Running the same directory twice applies nothing the second time. Both fixture files insert a row, so a re-application would fail on the primary key instead of reporting ok.",
+      "steps": [
+        {
+          "dir": "cases/basic",
+          "expect": "ok",
+          "applied": 2,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        },
+        {
+          "dir": "cases/basic",
+          "expect": "ok",
+          "applied": 0,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        }
+      ]
+    },
+    {
+      "name": "hash_change",
+      "description": "An applied file whose bytes changed stops the run before anything else is applied. The variant differs from the applied 0001 by one character of a comment.",
+      "steps": [
+        {
+          "dir": "cases/hash_change",
+          "expect": "ok",
+          "applied": 2,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        },
+        {
+          "dir": "cases/hash_change/variant-modified",
+          "expect": "hash_mismatch",
+          "applied": 0,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        }
+      ]
+    },
+    {
+      "name": "failing",
+      "description": "A file that raises halfway is rolled back whole: the table it created first is gone and no row records it.",
+      "steps": [
+        {
+          "dir": "cases/failing",
+          "expect": "apply_failed",
+          "applied": 1,
+          "applied_versions": [1],
+          "tables_exist": ["public.t_one"],
+          "tables_absent": ["public.t_partial"]
+        }
+      ]
+    },
+    {
+      "name": "out_of_order",
+      "description": "A file numbered below an applied version is refused; the gap is filled with a new higher number instead.",
+      "steps": [
+        {
+          "dir": "cases/out_of_order",
+          "expect": "ok",
+          "applied": 2,
+          "applied_versions": [1, 3],
+          "tables_exist": ["public.t_one", "public.t_three"],
+          "tables_absent": ["public.t_two"]
+        },
+        {
+          "dir": "cases/out_of_order/variant-inserted",
+          "expect": "out_of_order",
+          "applied": 0,
+          "applied_versions": [1, 3],
+          "tables_exist": ["public.t_one", "public.t_three"],
+          "tables_absent": ["public.t_two"]
+        }
+      ]
+    },
+    {
+      "name": "missing_file",
+      "description": "An applied version with no file on disk is refused: the directory no longer describes the database.",
+      "steps": [
+        {
+          "dir": "cases/missing_file",
+          "expect": "ok",
+          "applied": 2,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        },
+        {
+          "dir": "cases/missing_file/variant-removed",
+          "expect": "missing_file",
+          "applied": 0,
+          "applied_versions": [1, 2],
+          "tables_exist": ["public.t_one", "public.t_two"],
+          "tables_absent": []
+        }
+      ]
+    },
+    {
+      "name": "bad_filename",
+      "description": "One file that does not match NNNN_slug.sql refuses the whole directory, before the well-named file beside it is applied.",
+      "steps": [
+        {
+          "dir": "cases/bad_filename",
+          "expect": "invalid_filename",
+          "applied": 0,
+          "applied_versions": [],
+          "tables_exist": [],
+          "tables_absent": ["public.t_one", "public.t_four"]
+        }
+      ]
+    }
+  ]
+}

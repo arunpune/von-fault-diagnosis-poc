@@ -1,0 +1,30 @@
+{
+  "totals": {
+    "usd": 0,
+    "calls": 12,
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "by_backend": {
+    "rules": {
+      "usd": 0,
+      "calls": 12,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "model": "rules-v1"
+    }
+  },
+  "by_day": [
+    {
+      "day_wall": "2026-06-05",
+      "usd": 0
+    }
+  ],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": null,
+    "llm_output_per_mtok": null,
+    "as_of": "2026-09-19"
+  },
+  "recent": []
+}

@@ -1,0 +1,93 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.signals() and tables.normal_bands() macros for print
+   (phase1-pdf-build.md §8, decision R-04): the signal list of chapter 9.
+
+   This is where acceptance check #11 and CON's generated register map read the
+   same numbers, so the list prints the tag id next to the panel label
+   (decision R-09), the MetroPT-3 column each tag is mapped to, the measuring
+   range, the sample rate, the per-state normal bands and the Modbus register
+   the controller publishes the value in. The register offset is the tag's
+   position in `signals.yaml`, which ADR 0033 makes the register order.
+
+   Every row carries id="signal-<id>", the target of MAN's ref('signal:<id>')
+   (§8.3). clean splits the list by group so each table fits one page;
+   realistic prints one table that spans pages. #}
+{%- set group_labels = {
+     'analog': 'Analog signals',
+     'digital': 'Digital signals',
+     'extra': 'Additional signals',
+   } -%}
+
+{%- macro band_cell(signal, state) -%}
+{%- set band = signal.normal_bands[state] -%}
+{%- if band.expected is defined -%}
+{{ band.expected | e }}
+{%- else -%}
+{{ qty_range(band.low, band.high, signal.unit, units_mode=units_mode) }}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro signal_row(signal, offset) -%}
+<tr id="signal-{{ signal.id | e }}" data-group="{{ signal.group | e }}">
+<td><span class="tag">{{ signal.panel_label | e }}</span> <br><span class="mono">{{ signal.id | e }}</span></td>
+<td>{% if signal.metropt_column %}<span class="mono">{{ signal.metropt_column | e }}</span>{% else %}&mdash;{% endif %}</td>
+<td>{{ signal.name | e }} &mdash; {{ signal.description_html if signal.description_html else signal.description_md | e }}</td>
+<td>{{ man.unit_label(signal.unit) | e }}</td>
+<td>{% if signal.range %}{{ qty_range(signal.range.min, signal.range.max, signal.unit, units_mode=units_mode) }}{% else %}&mdash;{% endif %}</td>
+<td>{{ qty(signal.sample_rate_s, 's', units_mode=units_mode) }}</td>
+<td>{{ band_cell(signal, 'loaded') }}</td>
+<td>{{ band_cell(signal, 'unloaded') }}</td>
+<td>{{ band_cell(signal, 'off') }}</td>
+<td><span class="mono">{{ offset }}</span> {{ signal.modbus.type | e }} &times;{{ signal.modbus.scale | fmt }}</td>
+</tr>
+{%- endmacro -%}
+
+{#- Fixed column widths: see the `.signals col` rules of base.css. -#}
+{%- macro colgroup() -%}
+<colgroup><col class="c-tag"><col class="c-metropt"><col class="c-description"><col class="c-unit"><col class="c-range"><col class="c-sample"><col class="c-band"><col class="c-band"><col class="c-band"><col class="c-register"></colgroup>
+{%- endmacro -%}
+
+{%- macro signal_table(caption, rows) -%}
+<table class="signals">
+<caption>{{ caption | e }}</caption>
+{{ colgroup() }}
+<thead><tr><th>Tag</th><th>MetroPT-3 column</th><th>Description</th><th>Unit</th><th>Range</th><th>Sample rate</th><th>Normal, loaded</th><th>Normal, unloaded</th><th>Normal, off</th><th>Register</th></tr></thead>
+<tbody>
+{% for signal in rows %}{{ signal_row(signal, manual.signals.index(signal)) }}
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}
+
+{%- macro signals() -%}
+{%- if variant.tables == 'span_pages_repeat_header' -%}
+{{ signal_table('Signal list', manual.signals) }}
+{%- else -%}
+{%- for group, label in group_labels.items() -%}
+{%- set rows = manual.signals | selectattr('group', 'equalto', group) | list -%}
+{%- if rows %}{{ signal_table(label, rows) }}{% endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro -%}
+
+{#- The provenance of the bands the signal list prints (ADR 0011). -#}
+{%- macro normal_bands() -%}
+<table class="normal-bands">
+<caption>Normal bands and how they were derived</caption>
+<thead><tr><th>Tag</th><th>State</th><th>Normal band</th><th>Step</th><th>Source</th></tr></thead>
+<tbody>
+{% for signal in manual.signals %}
+{% for state in manual.machine_states.order %}
+<tr data-signal="{{ signal.id | e }}" data-state="{{ state | e }}">
+<td><span class="tag">{{ signal.panel_label | e }}</span></td>
+<td>{{ state | e }}</td>
+<td>{{ band_cell(signal, state) }}</td>
+<td>{{ qty(signal.band_step, signal.unit, units_mode=units_mode) }}</td>
+<td>{{ signal.band_source | e }}</td>
+</tr>
+{% endfor %}
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}

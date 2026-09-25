@@ -1,0 +1,26 @@
+{
+  "schema": "urn:fdp:schema:control-ack:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:10.031Z",
+  "cmd_id": "6f7a8b9c-0d1e-4f2a-9b4c-5d6e7f8091a2",
+  "cmd": "inject",
+  "ok": true,
+  "error": null,
+  "status": {
+    "schema": "urn:fdp:schema:status-sim:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-09-19T10:00:10.031Z",
+    "sim_ts": "2020-06-05T10:28:20.000Z",
+    "state": "playing",
+    "speed": 600,
+    "head_seq": 128634,
+    "dataset": {
+      "first_ts": "2020-02-01T00:00:00.000Z",
+      "last_ts": "2020-09-01T03:59:50.000Z",
+      "rows": 1516948
+    },
+    "loop": false,
+    "uptime_s": 3724
+  },
+  "instance_id": "inj-4f21-3"
+}

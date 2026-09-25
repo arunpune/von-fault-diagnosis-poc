@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional controller parameters for the CTRL-7 port: the defaults the five
+# provisional messages resolve their thresholds and delays against. The ids are
+# the manual's; the values are the fixture's own and deliberately not the
+# manual's, so a test can tell the two registries apart by their numbers.
+schema_version: 1
+settings:
+  - id: low_pressure_alarm_delay
+    unit: s
+    default: 10
+  - id: max_continuous_load_time
+    unit: min
+    default: 10
+  - id: motor_start_mask_time
+    unit: s
+    default: 20
+  - id: purge_pressure_warning
+    unit: bar
+    default: 0.5
+  - id: oil_temperature_warning
+    unit: degC
+    default: 72
+  - id: motor_current_warning
+    unit: A
+    default: 6.8

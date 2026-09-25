@@ -1,0 +1,4 @@
+{
+  "$expect_error": "/verdict must be equal to one of the allowed values",
+  "verdict": "maybe"
+}

@@ -1,0 +1,9 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# One admonition, the template form of the `{.note}` / `{.warning}` /
+   `{.caution}` paragraphs fdp_manual_build.markdown renders (§6.3). The markup
+   must stay identical to markdown.admonition_html; test_markdown.py renders
+   both and compares them. `body` is HTML already. #}
+{%- macro admonition(kind, body) -%}
+<aside class="admonition {{ kind }}"><p class="label">{{ admonition_labels[kind] }}</p><p>{{ body }}</p></aside>
+{%- endmacro -%}

@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+# The optional scanned variant (phase1-acceptance.md §8): `make manual-scanned`
+# writes it for OCR tests, and at about 13 MB it is never committed.
+cau-7-scanned.pdf

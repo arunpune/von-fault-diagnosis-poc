@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-telemetry-series:v1",
+  "title": "Api telemetry series",
+  "description": "The body of GET /api/telemetry/series (alias GET /api/series): the downsampled history the recorder seeds its charts from. The backend decimates — an analog tag keeps the minimum and the maximum of every bucket in time order so short excursions survive, a digital tag keeps its transitions — and never returns more than two thousand points per tag. `source` says whether the window came from the live ring or from the one-minute aggregates; `discontinuities` lists the instants where the client breaks its lines.",
+  "type": "object",
+  "$defs": {
+    "series_point": {
+      "title": "Series point",
+      "description": "One charted value as a two-element tuple of the data time and the value; null is a break in the line. The WebSocket frame telemetry.series carries the same tuple.",
+      "type": "array",
+      "prefixItems": [
+        { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        { "type": ["number", "null"] }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "series_entry": {
+      "title": "Series entry",
+      "description": "The downsampled history of one tag over the requested window.",
+      "type": "object",
+      "properties": {
+        "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+        "kind": {
+          "description": "Whether the tag is an analog measurement or a digital state.",
+          "type": "string",
+          "enum": ["analog", "digital"]
+        },
+        "unit": {
+          "description": "Unit of the values, as the signal registry declares it; the empty string for a digital state.",
+          "type": "string"
+        },
+        "points": {
+          "description": "The points in ascending time order, at most two thousand of them.",
+          "type": "array",
+          "maxItems": 2000,
+          "items": { "$ref": "#/$defs/series_point" }
+        }
+      },
+      "required": ["tag", "kind", "unit", "points"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "unit_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/unit_id" },
+    "from": {
+      "description": "Start of the returned window in data time.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "to": {
+      "description": "End of the returned window in data time.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "source": {
+      "description": "Where the points came from: the live sample ring, or the one-minute aggregates for a window older than the ring.",
+      "type": "string",
+      "enum": ["ring", "agg_1m"]
+    },
+    "series": {
+      "description": "One entry per requested tag, in the order the request named them.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/series_entry" }
+    },
+    "discontinuities": {
+      "description": "Every instant inside the window where data time jumped, in ascending order.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+    }
+  },
+  "required": ["unit_id", "from", "to", "source", "series", "discontinuities"],
+  "additionalProperties": true
+}

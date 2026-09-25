@@ -1,0 +1,1356 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Troubleshooting catalog of the CAU-7 (manual chapter 8). Seventeen symptom
+# conditions reference thirty-nine causes; every cause is defined once and keeps
+# its fault_id wherever it is listed. See docs/plan/phase1-manual-content.md
+# section 7 and ADR 0013 for the registry and the signal-move vocabulary.
+#
+# Numeric fault signatures belong to the fault injector, never here (spec
+# section 3): no thresholds, percentages or durations in any text field, and no
+# digit at all in a cause summary or a move note.
+schema_version: 1
+conditions:
+  - id: low_line_pressure
+    title: Line pressure below setpoint
+    symptom: >-
+      The display shows a line pressure below the cut-in setting and
+      {{ ref('alarm:W101') }} appears once the delay has run out. Consumers lose
+      pressure although the unit is running, and the low-pressure switch may
+      close. Loaded runs last far longer than the reference cycle in
+      {{ ref('sec:normal-cycle') }}.
+    alarms: [W101, S305]
+    signals: [line_pressure, reservoir_pressure, low_pressure_switch]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common, note: "The pressure falls at the same rate at night and at the weekend, when no consumer is drawing air."}
+      - {fault_id: high_air_demand, likelihood: common, note: "The shortfall follows the production pattern and disappears when the plant stops."}
+      - {fault_id: dryer_purge_leak, likelihood: common, note: "Look at the purge line before the distribution network; the loss is inside the unit."}
+      - {fault_id: intake_filter_clogged, likelihood: occasional}
+      - {fault_id: condensate_drain_stuck_open, likelihood: occasional}
+      - {fault_id: airend_element_wear, likelihood: occasional}
+      - {fault_id: minimum_pressure_valve_fault, likelihood: occasional, note: "The vessel pressure stays high while the line stays low; that split points at the valve."}
+      - {fault_id: intake_valve_not_opening, likelihood: occasional}
+      - {fault_id: unloader_solenoid_fault, likelihood: rare, note: "Only when the solenoid fails in the idle position, so the unit never loads."}
+      - {fault_id: regulator_contact_fault, likelihood: rare}
+      - {fault_id: line_pressure_transducer_fault, likelihood: rare, note: "The pressure is only low on the display; a test gauge at the panel disagrees with it."}
+  - id: frequent_cycling
+    title: Compressor starts and loads too often
+    symptom: >-
+      The unit loads and unloads much more often than the reference duty allows
+      and {{ ref('alarm:W108') }} appears. Each loaded run is followed by a short
+      idle phase, and the unit rarely stops. Operators notice the noise of the
+      repeated starts before the controller reports anything.
+    alarms: [W108]
+    signals: [line_pressure, load_valve, intake_closed]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common, note: "The clearest early sign; the idle pressure decay is faster than the reference figure long before the pressure itself drops."}
+      - {fault_id: high_air_demand, likelihood: common}
+      - {fault_id: condensate_drain_stuck_open, likelihood: occasional}
+      - {fault_id: reservoir_isolation_valve_closed, likelihood: rare, note: "Here the loaded runs get shorter rather than longer, because the unit fills a much smaller volume."}
+  - id: continuous_load
+    title: Compressor stays loaded and does not reach cut-out
+    symptom: >-
+      The unit delivers without pause and {{ ref('alarm:W102') }} appears once the
+      permitted continuous load time has passed. The line pressure settles on a
+      plateau below the cut-out setting instead of rising to it, and the oil
+      temperature climbs while the unit keeps running.
+    alarms: [W102]
+    signals: [line_pressure, load_valve, oil_temperature]
+    causes:
+      - {fault_id: dryer_purge_leak, likelihood: common, note: "Signature of a loss inside the unit; the purge pressure stays raised while the unit delivers and the low-pressure switch never closes."}
+      - {fault_id: downstream_air_leak, likelihood: common, note: "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load."}
+      - {fault_id: high_air_demand, likelihood: common}
+      - {fault_id: intake_filter_clogged, likelihood: occasional}
+      - {fault_id: airend_element_wear, likelihood: occasional}
+      - {fault_id: intake_valve_not_opening, likelihood: occasional}
+      - {fault_id: purge_silencer_damaged, likelihood: rare}
+  - id: purge_pressure_high
+    title: Dryer purge pressure high, air escaping at the purge silencer
+    symptom: >-
+      {{ ref('alarm:W103') }} appears while the unit is loaded and air can be
+      heard leaving the purge silencer between tower changeovers. The purge
+      pressure stands well above its resting value instead of falling back after
+      each regeneration pulse.
+    alarms: [W103]
+    signals: [dryer_purge_pressure, purge_switch, dryer_tower]
+    causes:
+      - {fault_id: dryer_purge_leak, likelihood: common, note: "The purge pressure is high continuously, not only around a changeover."}
+      - {fault_id: purge_silencer_damaged, likelihood: occasional, note: "The discharge is much louder than usual and the purge pressure decays slowly after each pulse."}
+      - {fault_id: tower_changeover_valve_fault, likelihood: occasional}
+  - id: oil_temperature_high
+    title: Oil temperature high
+    symptom: >-
+      The controller shows a rising oil temperature and works up the warning
+      chain from {{ ref('alarm:W104') }} to {{ ref('alarm:X201') }} and finally
+      {{ ref('alarm:S301') }}, which stops the unit. The machine feels hotter
+      than usual and the cooling air leaving it is warm.
+    alarms: [W104, X201, S301, W109, W116, S306]
+    signals: [oil_temperature, ambient_temperature, motor_current]
+    causes:
+      - {fault_id: oil_cooler_fouled, likelihood: common, note: "The rise is slow and shows in every state, including the idle and stopped phases."}
+      - {fault_id: high_ambient_temperature, likelihood: common, note: "The room itself is warm; the difference between oil and cooling air is the same as always."}
+      - {fault_id: oil_level_low, likelihood: common}
+      - {fault_id: oil_filter_clogged, likelihood: occasional}
+      - {fault_id: cooling_fan_failure, likelihood: occasional, note: "The rise sets in abruptly at the next loaded run rather than over days."}
+      - {fault_id: high_air_demand, likelihood: occasional, note: "The unit is simply loaded far more of the time; the cooling circuit itself is sound."}
+      - {fault_id: thermostatic_valve_stuck, likelihood: occasional}
+      - {fault_id: wrong_oil_grade, likelihood: rare}
+      - {fault_id: oil_temperature_sensor_fault, likelihood: rare, note: "Nothing else on the unit is hot; a hand-held thermometer contradicts the display."}
+  - id: oil_temperature_low
+    title: Oil temperature stays low, condensate in the oil
+    symptom: >-
+      {{ ref('alarm:W105') }} appears and the oil does not reach its working
+      temperature even after a long run. The oil looks milky at the sight glass
+      and water separates out at the drain point, because the charge never gets
+      warm enough to drive the moisture off.
+    alarms: [W105, W110, S306]
+    signals: [oil_temperature, ambient_temperature]
+    causes:
+      - {fault_id: low_ambient_temperature, likelihood: common}
+      - {fault_id: thermostatic_valve_stuck, likelihood: occasional, note: "Here the oil stays cold whatever the room does, because the whole flow goes through the cooler."}
+      - {fault_id: oil_temperature_sensor_fault, likelihood: rare}
+  - id: motor_current_high
+    title: Motor current high
+    symptom: >-
+      The current of the monitored phase runs above the normal loaded band and
+      the controller works up from {{ ref('alarm:W106') }} through
+      {{ ref('alarm:X203') }} to {{ ref('alarm:S303') }}. The motor sounds
+      strained and its housing is warmer than usual.
+    alarms: [W106, X203, S303]
+    signals: [motor_current, discharge_pressure, oil_temperature]
+    causes:
+      - {fault_id: separator_element_clogged, likelihood: common, note: "The vessel pressure rises with the current while the line pressure keeps its setting."}
+      - {fault_id: intake_valve_not_closing, likelihood: occasional, note: "The current stays at load level during the idle phase as well, which no mechanical drag explains."}
+      - {fault_id: supply_voltage_low_or_unbalanced, likelihood: occasional}
+      - {fault_id: blowdown_valve_fault, likelihood: occasional, note: "The peak appears at the start, against a vessel that was never vented."}
+      - {fault_id: minimum_pressure_valve_fault, likelihood: occasional}
+      - {fault_id: airend_bearing_wear, likelihood: rare}
+      - {fault_id: wrong_oil_grade, likelihood: rare}
+  - id: motor_current_low
+    title: Motor current low under load, delivery low
+    symptom: >-
+      {{ ref('alarm:W107') }} appears while the unit is loaded: the motor draws
+      less current than the normal loaded band, because the element is not
+      compressing a full charge of air. The line pressure rises slowly and the
+      unit runs quietly.
+    alarms: [W107]
+    signals: [motor_current, line_pressure, discharge_pressure]
+    causes:
+      - {fault_id: intake_filter_clogged, likelihood: common, note: "The element is visibly dirty and the change came on over the whole service interval."}
+      - {fault_id: intake_valve_not_opening, likelihood: occasional, note: "The change was abrupt and the valve feedback contradicts the load command."}
+      - {fault_id: airend_element_wear, likelihood: rare}
+  - id: discharge_pressure_high
+    title: Discharge pressure high, safety valve blows
+    symptom: >-
+      The pressure in the separator vessel runs above the line pressure by more
+      than the normal element difference; {{ ref('alarm:W117') }} and then
+      {{ ref('alarm:X202') }} appear, and {{ ref('alarm:S302') }} stops the unit.
+      The safety valve may lift and vent the vessel audibly.
+    alarms: [X202, S302, W117]
+    signals: [discharge_pressure, line_pressure, motor_current]
+    causes:
+      - {fault_id: separator_element_clogged, likelihood: common}
+      - {fault_id: minimum_pressure_valve_fault, likelihood: occasional, note: "The line pressure stays low while the vessel pressure climbs, which a clogged element does not do."}
+      - {fault_id: intake_valve_not_closing, likelihood: occasional, note: "The vessel pressure keeps climbing after the controller has asked the unit to unload."}
+  - id: separator_pressure_abnormal
+    title: Separator discharge pressure abnormal
+    symptom: >-
+      The pressure at the cyclonic separator discharge no longer follows the
+      pattern of a normal cycle, and {{ ref('alarm:W112') }} appears while the
+      unit is loaded. Instead of falling away under load and matching the line
+      when the unit idles, it stays at the wrong level throughout.
+    alarms: [W112]
+    signals: [separator_discharge_pressure, line_pressure]
+    causes:
+      - {fault_id: condensate_drain_stuck_open, likelihood: common, note: "The reading collapses towards zero while the unit idles, and air is heard at the drain outlet."}
+      - {fault_id: condensate_drain_blocked, likelihood: occasional, note: "The reading stays high under load and no condensate leaves the drain at all."}
+  - id: water_in_air
+    title: Condensate or moisture in the delivered air
+    symptom: >-
+      Water collects in the filters, hoses and tools of the consumers, and the
+      air leaving the unit feels damp. The controller often reports nothing at
+      all, because every pressure and temperature is inside its normal band; the
+      dew point is not measured.
+    alarms: []
+    signals: [dryer_tower, purge_switch, ambient_temperature]
+    causes:
+      - {fault_id: desiccant_exhausted, likelihood: common, note: "The towers change over correctly and nothing else moves; only the delivered air is wet."}
+      - {fault_id: condensate_drain_blocked, likelihood: common, note: "The dryer receives far more water than it was sized for, because the separator no longer drains."}
+      - {fault_id: tower_changeover_valve_fault, likelihood: occasional}
+      - {fault_id: high_ambient_temperature, likelihood: occasional, note: "Warm, humid intake air carries more water into the towers than the regeneration cycle removes."}
+      - {fault_id: dryer_controller_fault, likelihood: rare}
+  - id: oil_in_air
+    title: Oil carry-over, high oil consumption
+    symptom: >-
+      Oil appears in the downstream filters and at the consumers, and the unit
+      needs topping up between oil changes. {{ ref('alarm:W116') }} eventually
+      appears as the level falls below the minimum, although no leak is visible
+      under the machine.
+    alarms: [W116]
+    signals: [oil_level_ok, discharge_pressure]
+    causes:
+      - {fault_id: separator_element_clogged, likelihood: common, note: "Carry-over here comes with a growing difference between the vessel and the line pressure."}
+      - {fault_id: oil_level_high, likelihood: common, note: "Always the first thing to check after an oil change or a top-up."}
+      - {fault_id: separator_element_damaged, likelihood: occasional, note: "Heavy carry-over with no rise in the vessel pressure at all."}
+      - {fault_id: scavenge_line_blocked, likelihood: occasional}
+      - {fault_id: wrong_oil_grade, likelihood: rare}
+  - id: no_start
+    title: Compressor does not start
+    symptom: >-
+      The motor does not turn when the unit is started. The controller either
+      shows {{ ref('alarm:S307') }} or {{ ref('alarm:S308') }} at once, or it
+      energises the load solenoid, sees no current and stops with
+      {{ ref('alarm:S304') }}. Start stays inhibited until the message is reset.
+    alarms: [S304, S307, S308]
+    signals: [motor_current, load_valve, ambient_temperature]
+    causes:
+      - {fault_id: emergency_stop_active, likelihood: common, note: "Always check this first; it costs nothing and explains most sudden no-start calls."}
+      - {fault_id: motor_overload_relay_tripped, likelihood: common}
+      - {fault_id: supply_voltage_low_or_unbalanced, likelihood: occasional}
+      - {fault_id: blowdown_valve_fault, likelihood: occasional, note: "The unit is being asked to start against a vessel that still holds pressure."}
+      - {fault_id: low_ambient_temperature, likelihood: occasional, note: "Cold, thick oil makes the first turns so heavy that the protection drops out."}
+      - {fault_id: airend_bearing_wear, likelihood: rare}
+  - id: no_unload
+    title: Compressor does not unload at cut-out
+    symptom: >-
+      The line pressure passes the cut-out setting and keeps rising, and
+      {{ ref('alarm:X204') }} appears. The unit goes on compressing, the vessel
+      is not vented and the safety valve can lift. Pressing stop is the safe
+      immediate action.
+    alarms: [X204]
+    signals: [line_pressure, load_valve, intake_closed, regulator_contact]
+    causes:
+      - {fault_id: unloader_solenoid_fault, likelihood: common}
+      - {fault_id: intake_valve_not_closing, likelihood: common, note: "The solenoid drops out correctly but the valve itself stays open, so air keeps coming in."}
+      - {fault_id: regulator_contact_fault, likelihood: occasional}
+      - {fault_id: blowdown_valve_fault, likelihood: occasional, note: "Here the unit does stop taking in air, but the vessel is never relieved."}
+      - {fault_id: line_pressure_transducer_fault, likelihood: rare, note: "The controller never sees the cut-out point, because the reading lags the real pressure."}
+  - id: reservoir_deviation
+    title: Reservoir pressure differs from line pressure
+    symptom: >-
+      {{ ref('alarm:W113') }} appears: the reservoir reading and the line reading
+      no longer agree, although both are taken from the same air circuit. The
+      unit otherwise runs normally and the consumers may notice nothing.
+    alarms: [W113]
+    signals: [reservoir_pressure, line_pressure]
+    causes:
+      - {fault_id: reservoir_isolation_valve_closed, likelihood: common, note: "The reservoir reading stands still while the line reading cycles."}
+      - {fault_id: reservoir_pressure_transducer_fault, likelihood: occasional, note: "A test gauge at the reservoir agrees with the line, not with the display."}
+      - {fault_id: line_pressure_transducer_fault, likelihood: occasional, note: "Here the regulation itself also misbehaves, because the controller regulates on the faulty reading."}
+  - id: dryer_changeover_fault
+    title: Dryer towers do not change over
+    symptom: >-
+      {{ ref('alarm:W111') }} or {{ ref('alarm:W115') }} appears while the unit is
+      loaded: the controller no longer sees the tower change or the discharge
+      that goes with it. The tower indication on the display stops alternating
+      and the air leaving the dryer becomes wet in the hours that follow.
+    alarms: [W111, W115]
+    signals: [dryer_tower, purge_switch, dryer_purge_pressure]
+    causes:
+      - {fault_id: tower_changeover_valve_fault, likelihood: common, note: "The purge line still shows pressure, but the duty never moves to the other tower."}
+      - {fault_id: dryer_controller_fault, likelihood: occasional, note: "No purge flow at all, because the changeover command is never issued."}
+      - {fault_id: purge_switch_fault, likelihood: occasional, note: "The dryer works correctly; only the confirmation of the discharge is missing."}
+  - id: no_flow_signal
+    title: Flow signal missing
+    symptom: >-
+      {{ ref('alarm:W114') }} appears while the unit is loaded, because no flow
+      pulse reaches the controller from the reservoir inlet. The pressures on the
+      display can look completely normal, so the message is easy to dismiss.
+    alarms: [W114]
+    signals: [flow_pulse, reservoir_pressure]
+    causes:
+      - {fault_id: flow_sensor_fault, likelihood: common, note: "The reservoirs keep filling, which proves that air is passing the sensor."}
+      - {fault_id: reservoir_isolation_valve_closed, likelihood: occasional, note: "Here no air passes at all, and the reservoir pressure confirms it."}
+causes:
+  - fault_id: downstream_air_leak
+    name: Leak in the distribution network
+    subsystem: distribution
+    benign: false
+    summary: >-
+      Air escapes from the pipework, hoses or couplings behind the reservoirs, so
+      the unit has to replace what the plant loses. Nothing inside the machine is
+      faulty. The loss runs day and night, which is what separates it from a busy
+      shift, and it grows slowly as more joints work loose.
+    signal_moves:
+      - {behaviour: unloaded_pressure_decay, direction: faster, onset: gradual, note: "The earliest sign, visible in the idle phase of every cycle."}
+      - {behaviour: load_cycle_rate, direction: higher, onset: gradual}
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: gradual}
+      - {behaviour: cut_out_reached, direction: not_reached, note: "Late in the fault, once the loss matches what the unit can deliver."}
+      - {signal: line_pressure, direction: falls, phase: loaded, onset: sustained, note: "Late in the fault the line sinks while the unit is still delivering."}
+      - {signal: low_pressure_switch, direction: on, phase: loaded, onset: sustained, note: "The switch closes only at that late stage, so it gives no early warning."}
+    checks:
+      - Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.
+      - If it holds, open the valve again and repeat the hold test with the plant isolated section by section.
+      - Walk the distribution network and listen at joints, couplings and hose ends, starting with the branches changed most recently.
+      - Compare the pressure decay of a quiet night with the reference cycle of {{ ref('sec:normal-cycle') }}.
+    remedy: >-
+      Seal or replace the leaking joints, hoses and couplings, then repeat the
+      pressure-hold test with the unit stopped and the plant isolated. Record the
+      decay you measure so the next comparison starts from a known figure. Leaks
+      return, so add a walk-round listening check to the routine in
+      {{ ref('task:weekly_checks') }} rather than treating this as a one-off
+      repair.
+    parts: []
+    maintenance: [weekly_checks]
+    components: [pneumatic_panel, reservoirs]
+  - fault_id: dryer_purge_leak
+    name: Dryer purge valve not seating
+    subsystem: dryer
+    benign: false
+    summary: >-
+      The purge valve no longer closes fully, so dried air escapes continuously
+      through the regeneration line and the silencer. The unit delivers against
+      that loss and never reaches its cut-out point, while the line stays above
+      the low-pressure switch setting, so the controller gives no warning of a
+      pressure problem at all.
+    signal_moves:
+      - {signal: dryer_purge_pressure, direction: high, phase: loaded, onset: sustained, note: "The clearest single sign; the purge line is pressurised continuously, not only at a changeover."}
+      - {behaviour: cut_out_reached, direction: not_reached}
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: sustained}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual, note: "The unit is loaded for hours on end, so the oil keeps taking up heat."}
+      - {signal: motor_current, direction: low, phase: loaded, onset: sustained, note: "The element works against a plateau below the normal delivery pressure."}
+      - {signal: low_pressure_switch, direction: stays_off, phase: any, note: "The line never falls far enough to close the switch, so the native warning is absent."}
+    checks:
+      - Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.
+      - Watch {{ sig('dryer_purge_pressure') }} through a complete changeover and check whether it falls back to its resting value.
+      - Isolate the dryer and see whether the unit reaches its cut-out pressure again.
+      - Inspect the purge valve seat, spring and pilot line as described in {{ ref('task:dryer_purge_valve_service') }}.
+    remedy: >-
+      Fit a new purge valve kit and check the silencer for erosion while the
+      valve is out. Refit, run a full regeneration cycle and confirm that the
+      purge pressure returns to its resting value between changeovers and that
+      the unit reaches its cut-out point again. A valve that has leaked for a
+      long time usually means the silencer packing is damaged too; replace both
+      together.
+    parts: [purge_valve_kit, purge_silencer]
+    maintenance: [dryer_purge_valve_service]
+    components: [purge_valve, purge_silencer]
+  - fault_id: purge_silencer_damaged
+    name: Purge silencer damaged
+    subsystem: dryer
+    benign: false
+    summary: >-
+      The silencer packing has broken up or blown out, so the regeneration air
+      leaves almost unrestricted and far more loudly than usual. The purge line
+      drains slowly after every changeover instead of clearing at once, and the
+      unit loses more air to regeneration than it was sized for.
+    signal_moves:
+      - {signal: dryer_purge_pressure, direction: high, phase: any, onset: intermittent, note: "Raised for a long while after each changeover rather than continuously."}
+      - {signal: purge_switch, direction: stays_on, phase: loaded, note: "The discharge is still being detected long after the pulse should have ended."}
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: gradual}
+      - {behaviour: cut_out_reached, direction: not_reached, note: "Only in the worst case, when the escaping regeneration air matches the delivery."}
+    checks:
+      - Look at the silencer body for cracks, missing packing or loose material around the outlet.
+      - Compare the noise of a regeneration pulse with the noise the unit made when it was commissioned.
+      - Watch how long the purge pressure takes to fall back after a changeover.
+    remedy: >-
+      Fit a new silencer and clear any packing material that has been carried
+      into the purge line. Run a full regeneration cycle and confirm that the
+      purge pressure falls back promptly and that the discharge noise is back to
+      its usual level. Check the purge valve at the same time, because packing
+      debris often damages the seat.
+    parts: [purge_silencer]
+    maintenance: [dryer_purge_valve_service]
+    components: [purge_silencer, purge_valve]
+  - fault_id: tower_changeover_valve_fault
+    name: Tower changeover valve fault
+    subsystem: dryer
+    benign: false
+    summary: >-
+      A changeover valve no longer moves the drying duty from one tower to the
+      other. One tower carries the whole load and is never regenerated, while the
+      purge line behaves abnormally because the regeneration path is only partly
+      open. The air leaving the dryer turns wet within hours.
+    signal_moves:
+      - {signal: dryer_tower, direction: stays_on, phase: any, onset: sustained, note: "The tower indication stops alternating and holds one position."}
+      - {signal: dryer_purge_pressure, direction: high, phase: loaded, onset: intermittent}
+      - {signal: purge_switch, direction: no_pulse, phase: loaded, note: "No clean discharge is detected, because the regeneration path never opens fully."}
+      - {behaviour: load_cycle_rate, direction: unchanged, note: "The compressor side of the unit is untouched by this fault."}
+    checks:
+      - Watch the tower indication on the display over several changeover periods and note whether it alternates.
+      - Feel both tower bodies; the tower in service is warmer than the one being regenerated, and a stuck valve leaves them alike.
+      - Operate the changeover valves by hand where the design allows it and listen for the regeneration discharge.
+      - Inspect the valve pilot lines and actuators for leaks or damage.
+    remedy: >-
+      Free or replace the faulty changeover valve and its pilot line, then run
+      several changeover periods and confirm that both towers take the duty in
+      turn. Have the desiccant of the tower that was left in service inspected
+      under {{ ref('task:dryer_desiccant_inspection') }}, because a charge that
+      has run without regeneration is usually saturated and may need replacing.
+    parts: [purge_valve_kit]
+    maintenance: [dryer_desiccant_inspection]
+    components: [changeover_valves, dryer_tower_1, dryer_tower_2]
+  - fault_id: dryer_controller_fault
+    name: Dryer control fault
+    subsystem: dryer
+    benign: false
+    summary: >-
+      The dryer control no longer issues the changeover command, so the towers
+      keep their duty far past the intended period. Regeneration never starts,
+      the purge line stays quiet and moisture passes through to the consumers,
+      although the valves themselves are sound.
+    signal_moves:
+      - {signal: dryer_tower, direction: stays_on, phase: any, onset: sustained}
+      - {signal: dryer_purge_pressure, direction: near_zero, phase: loaded, onset: sustained, note: "No regeneration flow at all, which separates this from a stuck valve."}
+      - {signal: purge_switch, direction: no_pulse, phase: loaded, onset: sustained}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Check that the dryer control has power and that its changeover period is still set as commissioned.
+      - Watch the purge line through more than one changeover period and confirm that no discharge happens at all.
+      - Operate a changeover valve by hand; if the towers then swap cleanly, the valves are sound and the command is missing.
+      - Inspect the wiring between the control and the changeover valves for damage at the terminals.
+    remedy: >-
+      Repair the wiring or replace the dryer control, then confirm over several
+      periods that the towers alternate and that a regeneration discharge follows
+      every changeover. Have the desiccant inspected afterwards, because a charge
+      that has been left without regeneration holds far more water than the
+      following cycles can drive out.
+    parts: []
+    maintenance: [dryer_desiccant_inspection]
+    components: [controller, changeover_valves]
+  - fault_id: desiccant_exhausted
+    name: Desiccant charge exhausted
+    subsystem: dryer
+    benign: false
+    summary: >-
+      The desiccant has taken up more water than regeneration removes, or it has
+      simply aged past its service life. The towers still change over correctly
+      and every pressure on the display looks normal, yet the dew point of the
+      delivered air climbs and water reaches the consumers.
+    signal_moves:
+      - {signal: dryer_tower, direction: toggles, phase: any, note: "The changeover sequence itself is still exactly as it should be."}
+      - {signal: dryer_purge_pressure, direction: unchanged, phase: any, note: "Regeneration still runs; it is the charge that can no longer hold the water."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+      - {signal: ambient_temperature, direction: high, phase: any, onset: sustained, note: "A warm intake carries more moisture into the towers and shortens the life of the charge."}
+    checks:
+      - Read the running hours of the desiccant charge against the interval in {{ ref('task:dryer_desiccant_inspection') }}.
+      - Confirm that the towers change over and that a regeneration discharge follows each changeover.
+      - Check the colour and the dust content of the charge through the inspection port.
+      - Check that the condensate drain upstream of the dryer is working, because a flooded dryer exhausts a sound charge quickly.
+    remedy: >-
+      Replace the desiccant charge in both towers and clean the tower screens
+      while they are open. Put the cause of the overload right at the same time:
+      a blocked separator drain, a warm intake or a missed regeneration will
+      exhaust the new charge just as fast. Record the change so the next
+      inspection interval starts from the correct date.
+    parts: [desiccant_charge]
+    maintenance: [dryer_desiccant_inspection]
+    components: [dryer_tower_1, dryer_tower_2]
+  - fault_id: purge_switch_fault
+    name: Purge pressure switch fault
+    subsystem: dryer
+    benign: false
+    summary: >-
+      The switch that confirms the tower discharge no longer reports, although
+      the towers change over and the purge line works as it should. The
+      controller cannot see the regeneration pulse and reports a changeover
+      problem that the dryer does not have.
+    signal_moves:
+      - {signal: purge_switch, direction: no_pulse, phase: loaded, onset: sustained}
+      - {signal: dryer_purge_pressure, direction: unchanged, phase: any, note: "The purge line still pulses at every changeover, which is what rules the dryer itself out."}
+      - {signal: dryer_tower, direction: toggles, phase: any}
+    checks:
+      - Watch {{ sig('dryer_purge_pressure') }} and the purge switch together through one changeover; a pulse on the pressure with no switch signal isolates the switch.
+      - Listen at the silencer to confirm that the discharge really happens.
+      - Inspect the switch wiring and its connection at the controller terminals.
+    remedy: >-
+      Repair the wiring or replace the pressure switch, then confirm over a
+      complete changeover that the switch reports at the same moment as the
+      purge pressure pulse. Until the repair is made the dryer is still drying,
+      so the air quality is not at risk; only the supervision of it is.
+    parts: []
+    maintenance: []
+    components: [controller, purge_valve]
+  - fault_id: high_air_demand
+    name: Air demand above the rated delivery
+    subsystem: distribution
+    benign: true
+    summary: >-
+      The consumers ask for more air than the unit is rated to deliver, usually
+      after a new machine went into service or a shift pattern changed. The unit
+      works exactly as designed and needs no repair; it simply cannot keep up
+      with what is now being asked of it.
+    signal_moves:
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: sustained}
+      - {behaviour: load_cycle_rate, direction: higher, onset: sustained}
+      - {signal: line_pressure, direction: low, phase: loaded, onset: sustained}
+      - {behaviour: unloaded_pressure_decay, direction: faster, note: "The decay follows the production pattern and stops when the plant stops, unlike a leak."}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual, note: "A consequence of the long loaded runs, not of a cooling problem."}
+    checks:
+      - Ask the operators whether a consumer was added, enlarged or moved to a longer duty.
+      - Watch the line pressure across a full shift and across a quiet night, and compare the two.
+      - Confirm that the pressure holds when the plant is idle; a demand problem disappears then, a leak does not.
+      - Compare the loaded time per hour with the reference duty of {{ ref('sec:normal-cycle') }}.
+    remedy: >-
+      No repair is needed on the unit. Reduce the demand, move the heaviest
+      consumers out of the peak, or plan additional compressed-air capacity.
+      Until then, monitor the oil temperature and the loaded time per hour: the
+      long loaded runs are what push the temperature up, and a unit that is
+      loaded almost continuously has no margin left for a real fault. Record the
+      new demand so later comparisons start from it.
+    parts: []
+    maintenance: [weekly_checks]
+    components: [pneumatic_panel]
+  - fault_id: high_ambient_temperature
+    name: Ambient temperature above the operating range
+    subsystem: cooling
+    benign: true
+    summary: >-
+      The cooling air reaching the unit is warmer than the reference conditions
+      allow, so the cooler cannot pull the oil down to its usual temperature. The
+      unit and its cooling circuit are sound; the room around them has changed.
+      Warm air also carries more moisture into the dryer.
+    signal_moves:
+      - {signal: ambient_temperature, direction: high, phase: any, onset: sustained}
+      - {signal: oil_temperature, direction: rises, phase: any, onset: gradual, note: "The difference between oil and cooling air stays as it always was; both simply sit higher."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+      - {signal: motor_current, direction: unchanged, phase: loaded, note: "Nothing is dragging; this separates a warm room from mechanical wear."}
+    checks:
+      - Read the ambient temperature at the cooling-air inlet and compare it with the operating limits of {{ ref('sec:reference-conditions') }}.
+      - Check that the cooling-air inlet and outlet are clear and that warm outlet air is not being drawn back in.
+      - Compare the oil temperature with the ambient temperature; when the difference between them is normal, the cooler is doing its job.
+      - Check whether other equipment in the room has started to give off heat.
+    remedy: >-
+      No repair is needed on the unit. Improve the ventilation of the room, duct
+      the warm outlet air away from the intake, or move the heat source. Until
+      the room is put right, monitor the oil temperature and the difference
+      between it and the ambient reading: as long as that difference stays
+      normal, the cooling circuit is sound. Watch the delivered air for moisture
+      as well, because a warm intake loads the dryer more heavily.
+    parts: []
+    maintenance: [oil_cooler_cleaning]
+    components: [oil_cooler, aftercooler, cooling_fan]
+  - fault_id: low_ambient_temperature
+    name: Ambient temperature below the operating range
+    subsystem: cooling
+    benign: true
+    summary: >-
+      The unit stands in a cold room, so the oil is thick at rest and warms very
+      slowly. Water condenses in a charge that never reaches its working
+      temperature, and a cold start is hard enough to trip the motor protection.
+      The machine itself is undamaged.
+    signal_moves:
+      - {signal: ambient_temperature, direction: low, phase: any, onset: sustained}
+      - {signal: oil_temperature, direction: low, phase: any, onset: sustained}
+      - {behaviour: start_current_peak, direction: higher, phase: start, note: "Thick oil makes the motor work much harder for the first turns of a start."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Read the ambient temperature at the cooling-air inlet and compare it with the operating limits of {{ ref('sec:reference-conditions') }}.
+      - Watch how long the oil takes to reach its working temperature after a cold start.
+      - Look at the oil through the sight glass for the milky appearance that water in the oil gives.
+      - Check whether a door, a broken window or a failed room heater is letting cold air in.
+    remedy: >-
+      No repair is needed on the unit. Keep the room above the lower operating
+      limit, close the source of the cold draught, or fit room heating. Until
+      then, monitor the oil temperature during the warm-up after each start and
+      drain condensate from the vessel more often, because water separates out of
+      oil that never gets warm. Report repeated hard starts, since they shorten
+      the life of the motor.
+    parts: []
+    maintenance: [daily_checks]
+    components: [oil_cooler, thermostatic_valve]
+  - fault_id: intake_filter_clogged
+    name: Air intake filter clogged
+    subsystem: intake_unloading
+    benign: false
+    summary: >-
+      A blocked intake element throttles the suction side, so the compression
+      element never receives a full charge of air. The motor turns more easily
+      than it should, the unit delivers less per loaded run, and the restriction
+      grows slowly over the whole service interval.
+    signal_moves:
+      - {signal: motor_current, direction: low, phase: loaded, onset: gradual}
+      - {behaviour: pressure_rise_while_loaded, direction: slower, onset: gradual}
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: gradual}
+    checks:
+      - Inspect the intake element against the light and look for an even layer of dust over the whole surface.
+      - Read the running hours since the last intake filter service and compare them with {{ ref('task:air_filter_service') }}.
+      - Check the condition of the room; a dusty site shortens the life of the element considerably.
+    remedy: >-
+      Fit a new intake filter element, clean the housing and the intake grille,
+      and record the service so the next interval starts from the right hour
+      count. Confirm afterwards that the loaded current and the pressure rise
+      per loaded run are back in their normal bands. On a dusty site, shorten the
+      interval rather than waiting for the symptom to come back.
+    parts: [air_filter_element]
+    maintenance: [air_filter_service]
+    components: [intake_filter]
+  - fault_id: intake_valve_not_opening
+    name: Intake valve not opening fully
+    subsystem: intake_unloading
+    benign: false
+    summary: >-
+      The intake and unloading valve stays partly closed when the unit loads, so
+      the element never gets its full charge of air. The motor turns easily and
+      the unit delivers far less than its rating. Unlike a clogged filter, the
+      change is abrupt and the intake element is clean.
+    signal_moves:
+      - {signal: motor_current, direction: low, phase: loaded, onset: sustained, note: "The change appears from one cycle to the next rather than over weeks."}
+      - {behaviour: pressure_rise_while_loaded, direction: slower, onset: sustained}
+      - {signal: intake_closed, direction: stays_on, phase: loaded, note: "The valve feedback still reports closed while the controller is asking for load."}
+      - {behaviour: cut_out_reached, direction: not_reached}
+    checks:
+      - Compare the valve feedback with the load command while the unit is delivering; a disagreement isolates the valve.
+      - Inspect the intake element first, to rule out the far more common blockage.
+      - Check the pilot line and the actuator of the intake valve for leaks and for a sticking stem.
+      - Look for gum or dust deposits on the valve seat and guide.
+    remedy: >-
+      Clean or overhaul the intake valve, free the stem and renew the pilot line
+      if it leaks. Refit and confirm over a full cycle that the valve feedback
+      follows the load command and that the loaded current and the pressure rise
+      per loaded run are back in their normal bands. Fit a new intake filter
+      element at the same time, because dust carried past a worn element is the
+      usual reason the valve sticks.
+    parts: [air_filter_element]
+    maintenance: [air_filter_service]
+    components: [intake_valve]
+  - fault_id: intake_valve_not_closing
+    name: Intake valve not closing
+    subsystem: intake_unloading
+    benign: false
+    summary: >-
+      The intake valve does not shut when the controller unloads, so the unit
+      keeps drawing and compressing air past its cut-out point. Pressure and
+      current stay at their loaded values through what should be the idle phase,
+      and the safety valve can lift.
+    signal_moves:
+      - {signal: intake_closed, direction: stays_off, phase: unloaded, onset: sustained, note: "The feedback shows the valve open when the unit should be idling."}
+      - {signal: discharge_pressure, direction: high, phase: unloaded, onset: sustained}
+      - {signal: motor_current, direction: high, phase: unloaded, onset: sustained, note: "The motor keeps doing compression work during a phase in which it should be running light."}
+      - {signal: line_pressure, direction: rises, phase: unloaded, onset: sustained, note: "The line climbs past the cut-out setting instead of settling."}
+    checks:
+      - Stop the unit at once if the safety valve is lifting, then investigate.
+      - Watch the valve feedback at the moment the controller unloads; a feedback that does not change isolates the valve.
+      - Check the pilot line, the actuator and the return spring of the intake valve.
+      - Inspect the valve seat for deposits or damage that would hold it off its seat.
+    remedy: >-
+      Overhaul or replace the intake valve, renew the return spring and the pilot
+      line, and clear any deposits from the seat. Refit and confirm over several
+      cycles that the unit unloads at its cut-out setting and that the vessel
+      vents afterwards. Have the safety valve tested under
+      {{ ref('task:safety_valve_test') }} if it lifted, because a valve that has
+      blown does not always reseat cleanly.
+    parts: []
+    maintenance: [safety_valve_test]
+    components: [intake_valve, safety_valve]
+  - fault_id: unloader_solenoid_fault
+    name: Unloader solenoid fault
+    subsystem: intake_unloading
+    benign: false
+    summary: >-
+      The solenoid that switches the unit between load and idle no longer follows
+      the controller. Stuck in the load position the unit compresses past its
+      cut-out point; stuck in the idle position it runs on without ever building
+      pressure. The coil, its wiring and the pilot air are all possible reasons.
+    signal_moves:
+      - {signal: load_valve, direction: stays_on, phase: any, onset: sustained, note: "With the solenoid stuck in the load position; stuck the other way it stays off instead."}
+      - {signal: intake_closed, direction: stays_off, phase: unloaded, onset: sustained}
+      - {signal: line_pressure, direction: rises, phase: unloaded, onset: sustained}
+      - {behaviour: cut_out_reached, direction: not_reached, note: "With the solenoid stuck in the idle position the unit never builds pressure to the cut-out point."}
+    checks:
+      - Compare the load command of the controller with the solenoid state while the unit cycles.
+      - Listen at the solenoid as the controller switches; a coil that does not pick up is usually audible.
+      - Measure the coil and check its wiring at the terminal strip.
+      - Check the pilot air supply to the solenoid for blockage or moisture.
+    remedy: >-
+      Replace the solenoid or repair its wiring, and clear the pilot air line of
+      moisture and debris. Refit and confirm over several complete cycles that
+      the unit loads at the cut-in setting and unloads at the cut-out setting.
+      Where wet pilot air caused the fault, check the condensate drain as well,
+      because it will otherwise ruin the new coil in the same way.
+    parts: []
+    maintenance: [condensate_drain_service]
+    components: [intake_valve, controller]
+  - fault_id: regulator_contact_fault
+    name: Pressure regulator contact fault
+    subsystem: control
+    benign: false
+    summary: >-
+      The regulator contact that tells the controller whether the line pressure
+      is satisfied no longer changes state. The controller keeps the unit in
+      whatever mode the stuck contact reports, however the real pressure behaves,
+      so regulation stops working while every sensor still reads correctly.
+    signal_moves:
+      - {signal: regulator_contact, direction: stays_off, phase: any, onset: sustained, note: "A contact stuck in the load-requested position keeps the unit loaded; stuck the other way it keeps the unit idle."}
+      - {signal: line_pressure, direction: rises, phase: loaded, onset: sustained}
+      - {behaviour: cut_out_reached, direction: not_reached, note: "The run overshoots the cut-out point instead of ending at it."}
+      - {signal: load_valve, direction: stays_on, phase: any}
+    checks:
+      - Watch the regulator contact while the line pressure passes the cut-out setting; a contact that does not change isolates the fault.
+      - Compare the pressure on the display with a test gauge at the panel to rule out a transducer fault.
+      - Inspect the contact, its pilot connection and its wiring at the pneumatic panel.
+    remedy: >-
+      Clean or replace the regulator contact and renew its pilot connection and
+      wiring as needed. Confirm over several cycles that the contact changes
+      state at the cut-in and cut-out settings and that the unit follows it.
+      Until the repair is made, keep the unit under supervision: with regulation
+      out of action the only protection left against overpressure is the safety
+      valve.
+    parts: []
+    maintenance: []
+    components: [pneumatic_panel, controller]
+  - fault_id: blowdown_valve_fault
+    name: Blow-down valve fault
+    subsystem: intake_unloading
+    benign: false
+    summary: >-
+      The blow-down valve does not vent the separator vessel when the unit idles
+      or stops. The element stays under pressure, so the next start is made
+      against a full vessel and the motor draws far more current than it should.
+      A vessel that is never relieved also keeps its heat.
+    signal_moves:
+      - {signal: discharge_pressure, direction: not_venting, phase: unloaded, onset: sustained, note: "The vessel should fall towards zero as soon as the unit stops delivering."}
+      - {behaviour: start_current_peak, direction: higher, phase: start}
+      - {signal: motor_current, direction: high, phase: start, onset: sudden, note: "The peak is high enough to drop the motor protection out before the unit reaches speed."}
+      - {signal: oil_temperature, direction: rises, phase: unloaded, onset: gradual, note: "The vessel stays hot because it is never relieved."}
+    checks:
+      - Watch {{ sig('discharge_pressure') }} at the moment the unit unloads and again when it stops; it should fall away in both cases.
+      - Listen at the blow-down outlet for the vent that should follow every unload.
+      - Inspect the valve, its pilot line and its silencer for blockage or a sticking stem.
+      - Check the condensate drain, because carried-over water is what usually blocks the vent path.
+    remedy: >-
+      Free or replace the blow-down valve and clear its pilot line and outlet.
+      Confirm that the vessel vents within the usual time after every unload and
+      after a stop, and that the start current is back in its normal band. Where
+      the motor protection has dropped out repeatedly, have the motor and its
+      protection checked before the unit goes back into normal service.
+    parts: []
+    maintenance: [condensate_drain_service]
+    components: [blowdown_valve, separator_vessel]
+  - fault_id: minimum_pressure_valve_fault
+    name: Minimum-pressure valve fault
+    subsystem: compressor
+    benign: false
+    summary: >-
+      The minimum-pressure valve no longer opens at its setting or no longer
+      holds. Stuck shut, it lets the vessel pressure climb while the line stays
+      low; leaking back, it lets the vessel drain into the line so that the oil
+      circuit never gets the pressure it needs to circulate.
+    signal_moves:
+      - {signal: discharge_pressure, direction: high, phase: loaded, onset: sustained, note: "With the valve stuck shut; when it leaks back the vessel pressure stays low instead."}
+      - {signal: line_pressure, direction: low, phase: loaded, onset: sustained}
+      - {signal: motor_current, direction: high, phase: loaded, onset: sustained}
+      - {behaviour: pressure_rise_while_loaded, direction: slower, note: "The line sees little of the air the element is actually delivering."}
+    checks:
+      - Compare the vessel pressure with the line pressure while the unit delivers; a much larger difference than usual points at this valve.
+      - Rule out a clogged separator element first, since it produces a similar difference but builds up slowly.
+      - Check the valve seat, spring and guide for deposits and for a sticking stem.
+      - Look for oil starvation at the element, which a valve that leaks back will cause.
+    remedy: >-
+      Overhaul or replace the minimum-pressure valve, renew its spring and clear
+      the seat. Refit and confirm over a full cycle that the vessel and line
+      pressures track each other with the normal difference between them and that
+      the loaded current is back in its band. Have the oil circuit checked if the
+      valve was leaking back, because the element may have run with too little
+      oil.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [minimum_pressure_valve, separator_vessel]
+  - fault_id: separator_element_clogged
+    name: Separator element clogged
+    subsystem: compressor
+    benign: false
+    summary: >-
+      The separator element is loaded with dirt and oil residue, so the air has
+      to force its way through it. The vessel works at a higher pressure than the
+      line, the motor takes more current for the same delivery, and the element
+      starts to let oil through with the air.
+    signal_moves:
+      - {signal: discharge_pressure, direction: high, phase: loaded, onset: gradual}
+      - {signal: motor_current, direction: high, phase: loaded, onset: gradual}
+      - {signal: line_pressure, direction: unchanged, phase: loaded, note: "The line still follows its setting; it is the difference across the element that grows."}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+    checks:
+      - Compare the vessel pressure with the line pressure while the unit delivers and watch how the difference has grown over recent weeks.
+      - Read the running hours since the last separator element change against {{ ref('task:separator_element_change') }}.
+      - Check whether the oil grade and the oil change interval have been kept, since the wrong oil blocks an element quickly.
+      - Inspect the downstream filters for oil carry-over.
+    remedy: >-
+      Fit a new separator element and renew its seals and the scavenge line
+      strainer while the vessel is open. Change the oil and the oil filter at the
+      same time if the element blocked early, because that is almost always a
+      sign of the wrong grade or an overdue oil change. Confirm afterwards that
+      the difference between the vessel and line pressures is back to its
+      reference figure.
+    parts: [separator_element, compressor_oil, oil_filter_element]
+    maintenance: [separator_element_change]
+    components: [separator_vessel]
+  - fault_id: separator_element_damaged
+    name: Separator element damaged
+    subsystem: compressor
+    benign: false
+    summary: >-
+      The element is split, or its seal has failed, so part of the air bypasses
+      the separating media entirely. Oil leaves with the air without the
+      difference across the element growing at all, and the level in the vessel
+      falls much faster than the service schedule expects.
+    signal_moves:
+      - {signal: discharge_pressure, direction: unchanged, phase: loaded, note: "A torn element does not restrict the flow, so the vessel pressure looks entirely normal."}
+      - {signal: oil_level_ok, direction: off, phase: any, onset: gradual, note: "The level switch eventually reports that the charge has fallen below the minimum."}
+      - {signal: motor_current, direction: unchanged, phase: loaded}
+    checks:
+      - Compare the vessel pressure with the line pressure; heavy carry-over with a normal difference between them points at a damaged element rather than a clogged one.
+      - Check how much oil has been added since the last oil change and compare it with the fill volume.
+      - Inspect the downstream filters and the pipework for oil.
+      - Open the vessel and examine the element and its seal for splits and for tracking marks.
+    remedy: >-
+      Fit a new separator element with new seals and top the oil back up to the
+      mark with the specified grade. Confirm that the carry-over stops and that
+      the oil level then holds between services. Check how the element was
+      damaged before closing the vessel: a collapsed element usually means it was
+      already blocked, and refitting into the same conditions will destroy the
+      new one as well.
+    parts: [separator_element, compressor_oil]
+    maintenance: [separator_element_change]
+    components: [separator_vessel]
+  - fault_id: scavenge_line_blocked
+    name: Scavenge line blocked
+    subsystem: oil
+    benign: false
+    summary: >-
+      The line that returns collected oil from the bottom of the separator
+      element to the compression element is blocked. Oil gathers in the element
+      until it is carried out with the air, although the element itself is
+      undamaged and the pressures on the display look normal.
+    signal_moves:
+      - {signal: oil_level_ok, direction: off, phase: any, onset: gradual}
+      - {signal: discharge_pressure, direction: unchanged, phase: loaded, note: "Nothing restricts the air path, so the vessel pressure is exactly where it should be."}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual, note: "Less oil circulates through the element, so it carries away less heat."}
+    checks:
+      - Rule out an overfilled vessel and a damaged element first; both are more common and easier to see.
+      - Check the scavenge line, its strainer and its orifice for sludge and carbon deposits.
+      - Feel the scavenge line while the unit is loaded; a line that is returning oil is warm along its length.
+      - Check the oil change record, since sludge comes from oil left in service too long.
+    remedy: >-
+      Clear or replace the scavenge line, its strainer and its orifice, then
+      change the oil and the oil filter so the new line does not block again on
+      the same sludge. Confirm afterwards that the carry-over stops and that the
+      oil level holds. Shorten the oil change interval if the deposits were
+      heavy.
+    parts: [compressor_oil, oil_filter_element]
+    maintenance: [oil_change]
+    components: [separator_vessel, airend]
+  - fault_id: oil_level_high
+    name: Oil level above the mark
+    subsystem: oil
+    benign: false
+    summary: >-
+      The vessel has been filled above the mark, so oil reaches the separator
+      element faster than it can be separated out. Oil leaves with the air even
+      though every part of the unit is sound. This is the first thing to rule out
+      after any oil change or top-up.
+    signal_moves:
+      - {signal: oil_level_ok, direction: stays_on, phase: any, note: "The switch only reports the minimum, so an overfill never shows on it."}
+      - {signal: discharge_pressure, direction: unchanged, phase: loaded}
+      - {signal: oil_temperature, direction: unchanged, phase: any}
+    checks:
+      - Stop the unit, let the vessel vent and stand, then read the level at the sight glass.
+      - Compare the quantity recorded at the last oil change with the fill volume in {{ ref('sec:technical-data') }}.
+      - Ask whether anyone has topped the unit up since the last service.
+    remedy: >-
+      Drain the excess oil down to the mark with the unit stopped and the vessel
+      vented, then run the unit and check the level again once it has settled.
+      Confirm that the carry-over stops. Record the quantity that was drained,
+      and note in the service record how much oil the unit actually takes, so the
+      next top-up does not repeat the mistake.
+    parts: []
+    maintenance: [oil_change, daily_checks]
+    components: [separator_vessel, oil_level_switch]
+  - fault_id: oil_level_low
+    name: Oil level below the minimum
+    subsystem: oil
+    benign: false
+    summary: >-
+      Too little oil circulates, so the charge that is left has to take up the
+      heat of the whole compression process. The temperature climbs while the
+      unit otherwise behaves normally. A level that keeps falling always has a
+      second cause behind it, which has to be found as well.
+    signal_moves:
+      - {signal: oil_level_ok, direction: off, phase: any, onset: sustained}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Stop the unit, let the vessel vent and stand, then read the level at the sight glass.
+      - Look under and around the machine for oil at the cooler, the hoses and the shaft seal.
+      - Check the downstream filters for oil, which would point at carry-over rather than a leak.
+      - Compare how much oil has been added recently with the interval in {{ ref('task:oil_change') }}.
+    remedy: >-
+      Top the charge back up to the mark with the specified grade, then find out
+      where it went: an external leak, carry-over through the separator, or a
+      blocked scavenge line. Topping up alone treats the symptom only. Confirm
+      once the level holds that the oil temperature comes back into its normal
+      band.
+    parts: [compressor_oil]
+    maintenance: [oil_change, daily_checks]
+    components: [separator_vessel, oil_level_switch]
+  - fault_id: wrong_oil_grade
+    name: Wrong oil grade in service
+    subsystem: oil
+    benign: false
+    summary: >-
+      The unit has been filled with an oil that is not the specified grade, or
+      with two grades mixed together. It carries heat away less well, drags in
+      the element and separates poorly, so temperature, current and carry-over
+      all move at once without any single part being at fault.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+      - {signal: motor_current, direction: rises, phase: loaded, onset: gradual}
+      - {signal: oil_level_ok, direction: off, phase: any, onset: gradual, note: "Poor separation carries oil out with the air, so the level falls between services."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Read the service record for the grade and the quantity used at the last oil change.
+      - Look at the oil at the sight glass for a colour or a foaming behaviour that does not match the specified grade.
+      - Check whether the separator element blocked earlier than its interval, which the wrong grade will cause.
+      - Compare the oil temperature and the loaded current with the figures recorded before the last oil change.
+    remedy: >-
+      Drain the charge completely, flush the circuit, and refill with the
+      specified grade and quantity given in {{ ref('sec:technical-data') }}.
+      Change the oil filter and the separator element at the same time, because
+      the wrong grade damages both. Record the grade used so the mistake is not
+      repeated, and confirm afterwards that the oil temperature and the loaded
+      current return to their normal bands.
+    parts: [compressor_oil, oil_filter_element, separator_element]
+    maintenance: [oil_change]
+    components: [separator_vessel, oil_cooler]
+  - fault_id: oil_filter_clogged
+    name: Oil filter clogged
+    subsystem: oil
+    benign: false
+    summary: >-
+      The filter element restricts the oil flow, so less oil reaches the
+      compression element and the injected charge carries away less heat. The
+      restriction builds up slowly across the service interval, and nothing else
+      on the unit changes with it.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+      - {signal: motor_current, direction: unchanged, phase: loaded}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Read the running hours since the last oil filter change against {{ ref('task:oil_filter_change') }}.
+      - Feel the filter housing while the unit is loaded and compare the temperature across it.
+      - Check the oil change record, since oil left in service too long blocks a filter early.
+    remedy: >-
+      Fit a new oil filter element and top the charge up to the mark. Change the
+      oil as well if it is anywhere near its interval, because a filter that
+      blocked early is a sign of the oil, not of the filter. Confirm that the oil
+      temperature comes back into its normal band over the next few loaded runs
+      and record the service.
+    parts: [oil_filter_element, compressor_oil]
+    maintenance: [oil_filter_change]
+    components: [oil_filter]
+  - fault_id: oil_cooler_fouled
+    name: Oil cooler fouled
+    subsystem: cooling
+    benign: false
+    summary: >-
+      Dust and oil mist have settled on the cooler block, so the cooling air can
+      no longer carry the heat away. The oil runs hotter in every state, while
+      the duty of the unit and the room around it stay exactly as they were. The
+      change comes on slowly, over weeks rather than hours.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: any, onset: gradual, note: "The rise shows in the idle and stopped phases too, not only under load."}
+      - {signal: ambient_temperature, direction: unchanged, phase: any, note: "The room is as warm as it always was, which rules out a hot site."}
+      - {behaviour: load_cycle_rate, direction: unchanged, note: "The unit is not working any harder than before."}
+      - {signal: motor_current, direction: unchanged, phase: loaded}
+    checks:
+      - Look at the cooler block and the fan guard against the light for a dust or oil film between the fins.
+      - Compare the oil temperature with the ambient temperature over a full cycle; a difference larger than usual points at the cooler.
+      - Confirm that the fan turns freely and at its usual speed, to separate this from a fan failure.
+      - Read the running hours since the last cooler cleaning against {{ ref('task:oil_cooler_cleaning') }}.
+    remedy: >-
+      Clean the cooler block, the aftercooler and the fan guard with the unit
+      stopped and isolated, working from the clean side outwards so the dirt is
+      not driven further in. Confirm over the next loaded runs that the oil
+      temperature comes back to its reference figure. Where the site is dusty,
+      shorten the cleaning interval instead of waiting for the warning to return.
+    parts: [cooler_cleaning_kit]
+    maintenance: [oil_cooler_cleaning]
+    components: [oil_cooler, aftercooler, cooling_fan]
+  - fault_id: cooling_fan_failure
+    name: Cooling fan failure
+    subsystem: cooling
+    benign: false
+    summary: >-
+      The cooling fan has stopped or turns far too slowly, so almost no air
+      passes through the cooler block. The oil temperature climbs sharply as soon
+      as the unit loads, much faster than a fouled block could explain, and it
+      keeps climbing until the controller stops the unit.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: sudden, note: "The onset is abrupt, which is what separates this from a slowly fouling cooler."}
+      - {signal: ambient_temperature, direction: unchanged, phase: any}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+      - {signal: motor_current, direction: unchanged, phase: loaded, note: "The compression side is unaffected; only the cooling air is missing."}
+    checks:
+      - Look and listen at the fan while the unit is loaded, and feel for air leaving the cooler outlet.
+      - Isolate the unit and turn the fan by hand to check for a seized bearing or a fouled impeller.
+      - Check the fan supply, its protection and its wiring at the terminal strip.
+      - Look for anything blocking the cooling-air inlet or outlet.
+    remedy: >-
+      Free or replace the fan and its motor, clear whatever blocked the airway
+      and restore the supply. Confirm over the next loaded runs that the oil
+      temperature settles at its reference figure. Clean the cooler block while
+      the fan is out, because a unit that has run hot has usually baked oil mist
+      onto the fins as well.
+    parts: [cooler_cleaning_kit]
+    maintenance: [oil_cooler_cleaning]
+    components: [cooling_fan, oil_cooler]
+  - fault_id: thermostatic_valve_stuck
+    name: Thermostatic valve stuck
+    subsystem: cooling
+    benign: false
+    summary: >-
+      The valve that decides how much oil passes through the cooler has stuck.
+      Held towards the bypass, the oil never cools; held towards the cooler, it
+      never warms up and water separates out in it. In both cases the oil
+      temperature stops responding to the duty and to the room.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual, note: "With the valve stuck towards the bypass, so the oil hardly passes through the cooler."}
+      - {signal: oil_temperature, direction: low, phase: any, onset: sustained, note: "With the valve stuck towards the cooler, so the oil stays below its working temperature even after a long run."}
+      - {signal: ambient_temperature, direction: unchanged, phase: any}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Feel the pipework on both sides of the valve while the unit warms up; a working valve sends the oil to the cooler only once it is warm.
+      - Watch the warm-up curve after a cold start and note whether the oil settles at its working temperature.
+      - Rule out a fouled cooler and a failed fan first, since both are more common.
+      - Inspect the valve element for deposits and for a stem that no longer moves.
+    remedy: >-
+      Replace the thermostatic element and clean its housing. Confirm after a
+      cold start that the oil warms up at its usual rate and then settles at its
+      working temperature. Drain any condensate from the vessel if the valve was
+      stuck towards the cooler, because oil that has run cold for a long time
+      holds water.
+    parts: []
+    maintenance: [oil_cooler_cleaning]
+    components: [thermostatic_valve, oil_cooler]
+  - fault_id: oil_temperature_sensor_fault
+    name: Oil temperature sensor fault
+    subsystem: control
+    benign: false
+    summary: >-
+      The temperature sensor or its wiring reports a value that the oil itself
+      does not have. The reading jumps or drifts while every other sign of a hot
+      or a cold machine is missing, and the controller acts on a temperature that
+      is not there.
+    signal_moves:
+      - {signal: oil_temperature, direction: fluctuates, phase: any, onset: intermittent, note: "Steps and jumps that no thermal process could produce."}
+      - {signal: ambient_temperature, direction: unchanged, phase: any}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+      - {signal: motor_current, direction: unchanged, phase: loaded, note: "Nothing else that would accompany a genuinely hot machine is present."}
+    checks:
+      - Compare the reading with a hand-held thermometer at the airend oil outlet.
+      - Feel the cooler outlet and the vessel; a machine that is really hot cannot be mistaken by hand.
+      - Inspect the sensor wiring and its terminals for damage, moisture and loose screws.
+      - Watch the reading through a full cycle and look for steps that no heating or cooling could explain.
+    remedy: >-
+      Repair the wiring or replace the sensor, then confirm the reading against a
+      reference instrument at the working temperature. Reset the message and
+      watch the next few cycles. Until the sensor is trusted again, do not raise
+      the temperature settings to silence the warning: that would leave the unit
+      without its real protection.
+    parts: []
+    maintenance: []
+    components: [controller]
+  - fault_id: airend_bearing_wear
+    name: Airend bearing wear
+    subsystem: compressor
+    benign: false
+    summary: >-
+      Worn bearings in the compression element add friction to every turn. The
+      motor has to work harder, the oil takes up the extra heat, and the running
+      noise changes. In the end the element can become too stiff for the motor to
+      start at all.
+    signal_moves:
+      - {signal: motor_current, direction: rises, phase: loaded, onset: gradual}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+      - {behaviour: start_current_peak, direction: higher, phase: start, onset: gradual}
+      - {behaviour: pressure_rise_while_loaded, direction: slower, note: "Worn clearances let compressed air slip back through the element."}
+    checks:
+      - Listen at the compression element for a changed running noise, and compare it with how the unit sounded when it was commissioned.
+      - Compare the loaded current with the reference figure of {{ ref('sec:technical-data') }}.
+      - Rule out a clogged separator element and the wrong oil grade first, since both raise the current as well.
+      - Check the oil for metal particles at the filter change.
+    remedy: >-
+      Stop the unit and have the compression element inspected and overhauled by
+      a service engineer; a bearing that is allowed to run to failure destroys
+      the rotors as well. Check the drive coupling at the same time under
+      {{ ref('task:drive_coupling_inspection') }}. Change the oil and both
+      filters after the overhaul, because metal particles will have reached the
+      whole circuit.
+    parts: [compressor_oil, oil_filter_element, coupling_element]
+    maintenance: [drive_coupling_inspection, annual_inspection]
+    components: [airend, coupling, motor]
+  - fault_id: airend_element_wear
+    name: Compression element worn
+    subsystem: compressor
+    benign: false
+    summary: >-
+      The clearances inside the compression element have opened up, so part of
+      the air slips back instead of being delivered. The unit turns easily and
+      quietly but no longer fills the line, and the difference between the vessel
+      and the line falls below its reference figure.
+    signal_moves:
+      - {signal: motor_current, direction: low, phase: loaded, onset: gradual}
+      - {behaviour: pressure_rise_while_loaded, direction: slower, onset: gradual}
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: gradual}
+      - {signal: discharge_pressure, direction: low, phase: loaded, onset: gradual, note: "The difference between the vessel and the line is smaller than the reference figure."}
+    checks:
+      - Compare the vessel pressure with the line pressure while the unit delivers; a difference that has shrunk over months points at wear.
+      - Rule out a clogged intake filter and a sticking intake valve first, since both also lower the loaded current.
+      - Compare the time a loaded run takes with the reference cycle of {{ ref('sec:normal-cycle') }}.
+      - Check the running hours of the unit against the inspection interval.
+    remedy: >-
+      Have the compression element inspected and overhauled or exchanged by a
+      service engineer. Wear of this kind is gradual and does not repair itself,
+      so plan the work rather than waiting for a breakdown. Change the oil and
+      both filters after the overhaul and record the new reference figures for
+      the loaded current and the pressure rise per loaded run.
+    parts: [compressor_oil, oil_filter_element, separator_element]
+    maintenance: [annual_inspection]
+    components: [airend]
+  - fault_id: supply_voltage_low_or_unbalanced
+    name: Supply voltage low or unbalanced
+    subsystem: electrical
+    benign: false
+    summary: >-
+      The supply is weak, or the phases are out of balance, so the motor draws
+      more current for the same work and heats up. A bad start can make the
+      protection drop out before the unit reaches speed. The extra heat is in the
+      motor, not in the oil, which is what gives it away.
+    signal_moves:
+      - {signal: motor_current, direction: rises, phase: loaded, onset: sustained}
+      - {behaviour: start_current_peak, direction: higher, phase: start}
+      - {signal: oil_temperature, direction: unchanged, phase: any, note: "The oil stays in its normal band, unlike every mechanical reason for a high current."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Measure the supply voltage at the terminals while the unit is loaded, not only at rest.
+      - Compare the three phases against each other under load and look for an imbalance.
+      - Feel the motor housing and the terminal box; a supply problem heats the motor while the oil stays normal.
+      - Inspect the supply cable, the fuses and the terminal connections for damage and heat marks.
+    remedy: >-
+      Have the supply, the protection and the connections checked and put right
+      by an electrician; nothing on the compressor side needs work. Confirm after
+      the repair that the loaded current and the start peak are back in their
+      normal bands. A motor that has run for a long time on an unbalanced supply
+      should be checked before the unit returns to full duty.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [motor, controller]
+  - fault_id: motor_overload_relay_tripped
+    name: Motor protection relay tripped
+    subsystem: electrical
+    benign: false
+    summary: >-
+      The motor protection has dropped out and holds the start circuit open. The
+      controller cannot start the unit until the relay is reset, and resetting it
+      without finding the reason for the trip simply repeats the event, usually
+      within a few cycles.
+    signal_moves:
+      - {signal: motor_current, direction: near_zero, phase: off, onset: sustained}
+      - {signal: load_valve, direction: off, phase: off, onset: sustained}
+      - {behaviour: start_current_peak, direction: not_reached, phase: start, note: "No start current appears at all, because the circuit never closes."}
+    checks:
+      - Look at the protection relay in the cabinet and confirm that it has tripped.
+      - Read the recorded current of the last loaded runs before the trip and look for a rise.
+      - Check the supply voltage and the balance of the phases before resetting anything.
+      - Turn the compression element by hand, with the unit isolated, to rule out a seizure.
+    remedy: >-
+      Find and remove the reason for the trip first, then reset the relay and
+      start the unit under supervision. A high current from a clogged separator
+      element, a blow-down valve that never vents, a weak supply or worn bearings
+      all trip the same relay, and each has its own repair. Repeated trips with
+      no cause found mean the motor and the relay setting themselves must be
+      checked.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [motor, controller]
+  - fault_id: emergency_stop_active
+    name: Emergency stop active
+    subsystem: control
+    benign: false
+    summary: >-
+      The emergency-stop button is still pressed, or it was never released after
+      an earlier stop. The controller keeps the start inhibited and shows the
+      corresponding message until the button is freed and the message is reset.
+      It is the cheapest possible check and the most commonly missed one.
+    signal_moves:
+      - {signal: motor_current, direction: near_zero, phase: off, onset: sustained}
+      - {signal: load_valve, direction: off, phase: off, onset: sustained}
+      - {signal: intake_closed, direction: stays_on, phase: off, onset: sustained}
+    checks:
+      - Look at every emergency-stop button on the unit and on any remote station and check that each is released.
+      - Read the message on the display, which names this state directly.
+      - Check the wiring of the emergency-stop circuit if every button is released and the message stays.
+    remedy: >-
+      Establish why the unit was stopped before releasing anything. Once it is
+      safe, turn the button to release it, reset the message and start the unit
+      under supervision. Where no button is pressed, the fault is in the
+      emergency-stop circuit itself and must be repaired by a qualified person;
+      that circuit is a safety function and must never be bridged.
+    parts: []
+    maintenance: []
+    components: [controller]
+  - fault_id: line_pressure_transducer_fault
+    name: Line pressure transducer fault
+    subsystem: control
+    benign: false
+    summary: >-
+      The line pressure transducer or its wiring reports a value that the
+      pipework does not have. The controller regulates on the wrong figure, so it
+      can hold the unit loaded past the real cut-out point or unload it while the
+      line is still empty, while every other reading stays correct.
+    signal_moves:
+      - {signal: line_pressure, direction: fluctuates, phase: any, onset: intermittent}
+      - {signal: reservoir_pressure, direction: unchanged, phase: any, note: "The reservoir transducer keeps reporting the true pressure, so the two readings drift apart."}
+      - {behaviour: cut_out_reached, direction: not_reached}
+      - {signal: low_pressure_switch, direction: stays_off, phase: any, note: "The mechanical switch follows the real pressure and contradicts the display."}
+    checks:
+      - Compare the display with a test gauge at the pneumatic panel, at rest and under load.
+      - Compare the line reading with the reservoir reading, which shares the same air circuit.
+      - Compare the reading with the state of the low-pressure switch, which is independent of the transducer.
+      - Inspect the transducer, its impulse line and its wiring for moisture, blockage and loose terminals.
+    remedy: >-
+      Clear the impulse line, repair the wiring or replace the transducer, then
+      confirm the reading against a test gauge across the working range. Keep the
+      unit under supervision until the reading is trusted again: with a faulty
+      regulation signal the unit can compress past its cut-out point, and only
+      the safety valve then stands between it and an overpressure.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [pneumatic_panel, controller]
+  - fault_id: reservoir_pressure_transducer_fault
+    name: Reservoir pressure transducer fault
+    subsystem: control
+    benign: false
+    summary: >-
+      The reservoir transducer reports a pressure the vessels do not have, while
+      the line reading stays correct. A deviation appears on the display although
+      nothing in the air circuit has changed, and the regulation of the unit is
+      not affected at all.
+    signal_moves:
+      - {signal: reservoir_pressure, direction: fluctuates, phase: any, onset: intermittent}
+      - {signal: line_pressure, direction: unchanged, phase: any, note: "Regulation is untouched, because it does not use this reading."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+      - {signal: flow_pulse, direction: toggles, phase: loaded, note: "Air is still reaching the reservoirs, so the flow sensor keeps pulsing normally."}
+    checks:
+      - Compare the display with a test gauge at the reservoir.
+      - Check the position of the reservoir isolation valves, which produce a real deviation rather than a false one.
+      - Inspect the transducer, its impulse line and its wiring for moisture, blockage and loose terminals.
+    remedy: >-
+      Clear the impulse line, repair the wiring or replace the transducer, then
+      confirm the reading against a test gauge and against the line reading with
+      the isolation valves open. The unit can stay in service in the meantime,
+      because regulation does not depend on this reading, but the deviation
+      message will keep appearing until the repair is made.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [reservoirs, controller]
+  - fault_id: reservoir_isolation_valve_closed
+    name: Reservoir isolation valve closed
+    subsystem: reservoirs
+    benign: false
+    summary: >-
+      An isolation valve at a reservoir has been left closed, usually after
+      maintenance, so the unit works against a much smaller volume. It fills and
+      empties that volume quickly, the reservoir reading no longer follows the
+      line, and no air passes the flow sensor.
+    signal_moves:
+      - {signal: reservoir_pressure, direction: unchanged, phase: any, note: "The pressure behind the closed valve stands still while the line pressure cycles."}
+      - {behaviour: loaded_run_duration, direction: shorter, phase: loaded, note: "Shorter runs, unlike a leak or heavy demand, which both make runs longer."}
+      - {behaviour: load_cycle_rate, direction: higher}
+      - {signal: flow_pulse, direction: no_pulse, phase: loaded, onset: sustained}
+    checks:
+      - Check the position of the isolation valve at each reservoir; this is the quickest check and the usual answer.
+      - Compare the reservoir reading with the line reading over a complete cycle.
+      - Ask whether any work has been done on the reservoirs or their safety valves recently.
+    remedy: >-
+      Open the isolation valve slowly, with the unit stopped, and let the
+      reservoir fill before starting again. Confirm that the reservoir and line
+      readings track each other and that the flow sensor pulses while the unit
+      delivers. Add a valve position check to the hand-over after any work on the
+      reservoirs, because this is a procedural fault, not a technical one.
+    parts: []
+    maintenance: [weekly_checks]
+    components: [reservoir_isolation_valve, reservoirs, flow_sensor]
+  - fault_id: condensate_drain_stuck_open
+    name: Condensate drain stuck open
+    subsystem: separator_drain
+    benign: false
+    summary: >-
+      The automatic drain no longer closes between pulses, so compressed air
+      escapes with the condensate. The unit replaces the loss and loads more
+      often, and the pressure at the separator discharge collapses instead of
+      following the line while the unit idles.
+    signal_moves:
+      - {signal: separator_discharge_pressure, direction: near_zero, phase: unloaded, onset: sustained, note: "It should follow the line pressure while the unit is not delivering."}
+      - {behaviour: load_cycle_rate, direction: higher, onset: sustained}
+      - {behaviour: unloaded_pressure_decay, direction: faster}
+      - {signal: dryer_purge_pressure, direction: unchanged, phase: any, note: "The purge line is normal, which separates this from a leaking purge valve."}
+    checks:
+      - Listen at the drain outlet between drain pulses; a steady hiss of air is the clearest sign.
+      - Watch {{ sig('separator_discharge_pressure') }} while the unit idles; it should match the line pressure.
+      - Inspect the drain valve seat and the strainer for debris holding the valve off its seat.
+      - Read the running hours since the last drain service against {{ ref('task:condensate_drain_service') }}.
+    remedy: >-
+      Clean or rebuild the drain valve, clear its strainer and confirm that it
+      closes tightly between pulses. Check the separator discharge pressure over
+      a complete cycle afterwards. Where debris caused the fault, shorten the
+      drain service interval, since the same debris will hold the rebuilt valve
+      open just as easily.
+    parts: [drain_valve_kit]
+    maintenance: [condensate_drain_service]
+    components: [condensate_drain, cyclonic_separator]
+  - fault_id: condensate_drain_blocked
+    name: Condensate drain blocked
+    subsystem: separator_drain
+    benign: false
+    summary: >-
+      The drain no longer opens, so condensate stands in the separator and is
+      carried forward into the dryer. The towers take far more water than they
+      were sized for, the desiccant is overwhelmed, and moisture reaches the
+      consumers while every pressure still looks plausible.
+    signal_moves:
+      - {signal: separator_discharge_pressure, direction: high, phase: loaded, onset: sustained, note: "It should fall away while the unit delivers, and standing condensate keeps it up."}
+      - {signal: dryer_tower, direction: toggles, phase: any, note: "The dryer keeps changing over correctly; it simply cannot cope with the water reaching it."}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Watch the drain through several drain intervals and confirm whether any condensate leaves it at all.
+      - Open the manual drain and see how much water has collected.
+      - Inspect the drain valve, its strainer and its outlet line for sludge, scale and ice.
+      - Check the delivered air at the consumers for water, which is the consequence to expect.
+    remedy: >-
+      Clear or rebuild the drain valve and its outlet line, then confirm over
+      several intervals that condensate leaves the unit normally. Have the dryer
+      desiccant inspected under {{ ref('task:dryer_desiccant_inspection') }},
+      because a charge that has been flooded rarely recovers and will keep
+      passing wet air until it is replaced.
+    parts: [drain_valve_kit]
+    maintenance: [condensate_drain_service, dryer_desiccant_inspection]
+    components: [condensate_drain, cyclonic_separator]
+  - fault_id: flow_sensor_fault
+    name: Flow sensor fault
+    subsystem: reservoirs
+    benign: false
+    summary: >-
+      The flow sensor at the reservoir inlet, or its wiring, no longer delivers
+      pulses although air is passing. The controller reports a missing flow
+      signal while every pressure on the unit behaves entirely normally, so the
+      message is easy to dismiss as a nuisance.
+    signal_moves:
+      - {signal: flow_pulse, direction: no_pulse, phase: loaded, onset: sustained}
+      - {signal: reservoir_pressure, direction: unchanged, phase: any, note: "The reservoirs still fill, which proves that air is reaching them."}
+      - {signal: line_pressure, direction: unchanged, phase: any}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Confirm that the reservoir pressure follows the line pressure, which proves that air is passing the sensor.
+      - Check the position of the reservoir isolation valves, since a closed valve gives the same missing signal for a real reason.
+      - Inspect the sensor, its wiring and its terminals at the controller.
+      - Check the sensor body for debris or water that would stop it from responding.
+    remedy: >-
+      Clean or replace the flow sensor and repair its wiring, then confirm while
+      the unit delivers that the pulses return. The unit can stay in service in
+      the meantime, because nothing in the air circuit is at fault, but the
+      supervision of the flow is lost until the repair is made and the message
+      will keep appearing.
+    parts: []
+    maintenance: [annual_inspection]
+    components: [flow_sensor, reservoirs]

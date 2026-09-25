@@ -1,0 +1,37 @@
+{
+  "signals": [
+    {
+      "signal_id": "line_pressure",
+      "label": "Line pressure",
+      "panel_label": "Line",
+      "unit": "bar",
+      "kind": "analog",
+      "metropt_column": "TP2",
+      "source": "recorded",
+      "scale": 100,
+      "normal_bands": {
+        "loaded": [8.4, 9.8],
+        "unloaded": [8.2, 9.8]
+      }
+    },
+    {
+      "signal_id": "load_valve",
+      "label": "Load valve",
+      "unit": "",
+      "kind": "digital",
+      "metropt_column": "MPG",
+      "source": "recorded",
+      "scale": 1
+    },
+    {
+      "signal_id": "ambient_temperature",
+      "label": "Ambient temperature",
+      "panel_label": "Ambient",
+      "unit": "degC",
+      "kind": "analog",
+      "metropt_column": null,
+      "source": "synthetic",
+      "scale": 10
+    }
+  ]
+}

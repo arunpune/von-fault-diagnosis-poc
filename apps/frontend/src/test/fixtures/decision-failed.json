@@ -1,0 +1,53 @@
+{
+  "schema": "urn:fdp:schema:decision:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T10:11:22.012Z",
+  "decision_id": "7e2a9c05-4d18-4b73-9e60-3a4b5c6d7e80",
+  "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+  "event_id": "1a9c8b74-2e60-4d35-af18-9b0c1d2e3f40",
+  "sim_ts": "2020-06-05T10:11:12.000Z",
+  "backend": "jev",
+  "model": "jev-1.13.0",
+  "status": "failed",
+  "choice": "none_of_these",
+  "probabilities": {
+    "none_of_these": 1
+  },
+  "confidence": 0,
+  "support": {},
+  "candidates": [],
+  "severity": {
+    "level": "low",
+    "score": 0,
+    "probabilities": {
+      "0": 1,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    "confidence": 0
+  },
+  "gate": {
+    "outcome": "log",
+    "abstained": false,
+    "reason": "A failed call never reaches the gate and is recorded as a log line.",
+    "ticket_min_confidence": 0.85,
+    "review_min_confidence": 0.6
+  },
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "cost": {
+    "usd": 0,
+    "price_input_per_mtok": 0.042,
+    "price_output_per_mtok": 0,
+    "prices_as_of": "2026-09-19"
+  },
+  "latency_ms": 10012,
+  "state_digest": "61b57e4906d0071811bc2dfaf6b38f22ed6a3c17b7560b80dd878f22faad2952",
+  "error": {
+    "kind": "timeout",
+    "message": "The decision backend did not answer within 10 s."
+  }
+}

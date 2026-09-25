@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Fixed development ports. `make up-dev` applies it on top of compose.yaml.
+# Tests and CI never use this file: they run with ephemeral ports (UI_PORT=0
+# MQTT_PORT=0 MODBUS_PORT=0) and a unique project name so several stacks can
+# share one machine.
+services:
+  # psql and the evaluation tool reach the stack at
+  # postgres://eval:eval@localhost:5432/fdp
+  postgres: { ports: ["5432:5432"] }
+  # `pnpm --filter @fdp/frontend dev` proxies /api and /ws here
+  backend: { ports: ["3000:3000"] }
+  # GET /status of the simulator
+  modbus-sim: { ports: ["8081:8081"] }
+  # GET /healthz of the gateway
+  gateway: { ports: ["8082:8082"] }

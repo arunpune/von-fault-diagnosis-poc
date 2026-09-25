@@ -1,0 +1,5 @@
+{
+  "$expect_error": "must match exactly one schema in oneOf",
+  "cmd": "set_speed",
+  "args": {}
+}

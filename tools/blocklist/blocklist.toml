@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Settings of the brand blocklist scanner.
+
+[scan]
+# Salt of the committed digests. Its purpose is to keep brand
+# names out of plain text, not secrecy: it is committed on purpose so that
+# `fdp-blocklist hash --from … --check` is reproducible everywhere. Changing it
+# invalidates every line of data/blocklist.sha256, so bump the suffix and
+# regenerate the file in the same commit.
+salt = "fdp-blocklist-v1"
+
+# Paths the scan never reads: the tool's own data (it holds the digests),
+# licence texts, lock files, downloaded data and models, generated reports and
+# binary assets that carry no reviewable text.
+exclude = [
+  "tools/blocklist/data/**",
+  "LICENSES/**",
+  "pnpm-lock.yaml",
+  "uv.lock",
+  "**/go.sum",
+  "data/metropt3/**",
+  "data/models/**",
+  "reports/**",
+  "manual/fonts/**",
+  "**/*.png",
+  "**/*.woff2",
+  "**/*.ttf",
+]
+
+# PDFs added to the scan set even when Git does not track them: the built
+# manual is the artefact manual acceptance check 6 is really about.
+pdf_globs = ["data/manual/*.pdf"]

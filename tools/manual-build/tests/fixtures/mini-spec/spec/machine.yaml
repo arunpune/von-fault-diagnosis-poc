@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: the smallest machine.yaml the real schema accepts, holding only
+# the four tags the rest of this fixture uses. Fictional machine and part names.
+schema_version: 1
+identity:
+  model: CAU-7
+  name: CAU-7 Compressed-Air Unit
+  controller: CTRL-7
+  type: Compressed-air production unit, oil-injected screw compressor with twin-tower desiccant dryer
+  serial_format: CAU7-YYYY-NNNN
+document: {number: CAU7-IOM-EN, revision: "1.0", revision_date: 2026-01-15}
+ratings:
+  motor_rated_current: {value: 7.0, unit: A}
+  max_working_pressure: {value: 11.0, unit: bar}
+  safety_valve_setting: {value: 12.0, unit: bar}
+  reservoir_design_pressure: {value: 12.0, unit: bar}
+  oil_fill_volume: {value: 8.0, unit: L}
+limits:
+  ambient_operating: {min: 2, max: 40, unit: degC}
+  ambient_storage: {min: -20, max: 60, unit: degC}
+reference_conditions:
+  ambient_temperature: {value: 20, unit: degC}
+sensors:
+  - {signal: line_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}}
+  - {signal: oil_temperature, kind: resistance_thermometer, range: {min: -20, max: 120, unit: degC}}
+  - {signal: intake_closed, kind: switch, range: {min: 0, max: 1, unit: bool}}
+  - {signal: ambient_temperature, kind: resistance_thermometer, range: {min: -20, max: 60, unit: degC}}
+components:
+  - {id: oil_cooler, name: Oil cooler, subsystem: cooling}
+  - {id: intake_valve, name: Air intake valve, subsystem: intake_unloading}
+  - {id: controller, name: CTRL-7 controller, subsystem: control}
+parts:
+  - {id: oil_filter_element, code: CAU7-OF-01, name: Oil filter element}
+  - {id: intake_filter_element, code: CAU7-AF-01, name: Air intake filter element}
+  - {id: compressor_oil, code: CAU7-OIL-46, name: Synthetic screw compressor oil, unit: L}
+reference_operation:
+  cut_in_pressure_observed: {value: 8.05, unit: bar}
+  cut_out_pressure_observed: {value: 10.03, unit: bar}
+  loaded_run_typical: {value: 109, unit: s}
+  loaded_run_band: {min: 99, max: 129, unit: s}
+  unloaded_run_on_typical: {value: 407, unit: s}
+  off_phase_typical: {value: 1329, unit: s}
+  load_cycles_per_hour: {value: 1.97, unit: per_hour}
+  pressure_rise_loaded: {value: 1.1, unit: bar_per_min}
+  pressure_decay_unloaded_typical: {value: 0.07, unit: bar_per_min}
+  pressure_decay_unloaded_band: {min: 0.05, max: 0.15, unit: bar_per_min}
+  discharge_minus_line_loaded: {value: 0.32, unit: bar}
+  tower_pulse_after_cut_in: {value: 60, unit: s}
+subsystems: [compressor, intake_unloading, oil, cooling, reservoirs, distribution, control]

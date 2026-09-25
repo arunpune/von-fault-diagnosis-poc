@@ -1,0 +1,713 @@
+{
+  "schema": "urn:fdp:schema:catalog:v1",
+  "generated_from": {
+    "file": "manual/build.yaml",
+    "manual_revision": "1.0",
+    "variant": "realistic"
+  },
+  "machine": {
+    "controller": "CTRL-7",
+    "name": "CAU-7 Compressed-Air Unit",
+    "short_name": "CAU-7"
+  },
+  "signals": [
+    {
+      "group": "analog",
+      "id": "discharge_pressure",
+      "kind": "pressure",
+      "metropt_column": "TP2",
+      "name": "Discharge pressure",
+      "normal_band": {
+        "loaded": [8.8, 10.4],
+        "off": [-0.1, 0.0],
+        "unloaded": [-0.1, 0.0]
+      },
+      "panel_label": "P1",
+      "range": [-1.0, 16.0],
+      "section": "9.2",
+      "subsystem": "compressor",
+      "unit": "bar"
+    },
+    {
+      "group": "analog",
+      "id": "line_pressure",
+      "kind": "pressure",
+      "metropt_column": "TP3",
+      "name": "Line pressure",
+      "normal_band": {
+        "loaded": [8.6, 10.1],
+        "off": [8.1, 9.4],
+        "unloaded": [9.0, 10.0]
+      },
+      "panel_label": "P2",
+      "range": [-1.0, 16.0],
+      "section": "9.2",
+      "subsystem": "reservoirs",
+      "unit": "bar"
+    },
+    {
+      "group": "analog",
+      "id": "separator_discharge_pressure",
+      "kind": "pressure",
+      "metropt_column": "H1",
+      "name": "Separator discharge pressure",
+      "normal_band": {
+        "loaded": [-0.1, 0.0],
+        "off": [8.1, 9.4],
+        "unloaded": [9.0, 10.0]
+      },
+      "panel_label": "P3",
+      "range": [-1.0, 16.0],
+      "section": "9.2",
+      "subsystem": "separator_drain",
+      "unit": "bar"
+    },
+    {
+      "group": "analog",
+      "id": "dryer_purge_pressure",
+      "kind": "pressure",
+      "metropt_column": "DV_pressure",
+      "name": "Dryer purge pressure",
+      "normal_band": {
+        "loaded": [-0.1, 0.0],
+        "off": [-0.1, 0.0],
+        "unloaded": [-0.1, 0.0]
+      },
+      "panel_label": "P4",
+      "range": [-1.0, 16.0],
+      "section": "9.2",
+      "subsystem": "dryer",
+      "unit": "bar"
+    },
+    {
+      "group": "analog",
+      "id": "reservoir_pressure",
+      "kind": "pressure",
+      "metropt_column": "Reservoirs",
+      "name": "Reservoir pressure",
+      "normal_band": {
+        "loaded": [8.6, 10.1],
+        "off": [8.1, 9.4],
+        "unloaded": [9.0, 10.0]
+      },
+      "panel_label": "P5",
+      "range": [-1.0, 16.0],
+      "section": "9.2",
+      "subsystem": "reservoirs",
+      "unit": "bar"
+    },
+    {
+      "group": "analog",
+      "id": "oil_temperature",
+      "kind": "temperature",
+      "metropt_column": "Oil_temperature",
+      "name": "Oil temperature",
+      "normal_band": {
+        "loaded": [48.0, 61.0],
+        "off": [50.0, 61.0],
+        "unloaded": [51.0, 64.0]
+      },
+      "panel_label": "T1",
+      "range": [-20.0, 120.0],
+      "section": "9.2",
+      "subsystem": "oil",
+      "unit": "degC"
+    },
+    {
+      "group": "analog",
+      "id": "motor_current",
+      "kind": "current",
+      "metropt_column": "Motor_current",
+      "name": "Motor current",
+      "normal_band": {
+        "loaded": [5.8, 6.3],
+        "off": [0.0, 0.1],
+        "unloaded": [3.6, 4.0]
+      },
+      "panel_label": "I1",
+      "range": [0.0, 20.0],
+      "section": "9.2",
+      "subsystem": "electrical",
+      "unit": "A"
+    },
+    {
+      "group": "digital",
+      "id": "intake_closed",
+      "kind": "status",
+      "metropt_column": "COMP",
+      "name": "Intake valve closed",
+      "normal_band": {
+        "loaded": 0,
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D1",
+      "section": "9.2",
+      "subsystem": "intake_unloading",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "load_valve",
+      "kind": "command",
+      "metropt_column": "DV_eletric",
+      "name": "Load solenoid",
+      "normal_band": {
+        "loaded": 1,
+        "off": 0,
+        "unloaded": 0
+      },
+      "panel_label": "D2",
+      "section": "9.2",
+      "subsystem": "intake_unloading",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "dryer_tower",
+      "kind": "status",
+      "metropt_column": "Towers",
+      "name": "Dryer tower in service",
+      "normal_band": {
+        "loaded": "alternating",
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D3",
+      "section": "9.2",
+      "subsystem": "dryer",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "regulator_contact",
+      "kind": "switch",
+      "metropt_column": "MPG",
+      "name": "Pressure regulator contact",
+      "normal_band": {
+        "loaded": 0,
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D4",
+      "section": "9.2",
+      "subsystem": "control",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "low_pressure_switch",
+      "kind": "switch",
+      "metropt_column": "LPS",
+      "name": "Low-pressure switch",
+      "normal_band": {
+        "loaded": 0,
+        "off": 0,
+        "unloaded": 0
+      },
+      "panel_label": "D5",
+      "section": "9.2",
+      "subsystem": "reservoirs",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "purge_switch",
+      "kind": "switch",
+      "metropt_column": "Pressure_switch",
+      "name": "Purge pressure switch",
+      "normal_band": {
+        "loaded": 1,
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D6",
+      "section": "9.2",
+      "subsystem": "dryer",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "oil_level_ok",
+      "kind": "switch",
+      "metropt_column": "Oil_level",
+      "name": "Oil level switch",
+      "normal_band": {
+        "loaded": 1,
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D7",
+      "section": "9.2",
+      "subsystem": "oil",
+      "unit": "bool"
+    },
+    {
+      "group": "digital",
+      "id": "flow_pulse",
+      "kind": "status",
+      "metropt_column": "Caudal_impulses",
+      "name": "Flow pulse",
+      "normal_band": {
+        "loaded": 1,
+        "off": 1,
+        "unloaded": 1
+      },
+      "panel_label": "D8",
+      "section": "9.2",
+      "subsystem": "reservoirs",
+      "unit": "bool"
+    },
+    {
+      "group": "extra",
+      "id": "ambient_temperature",
+      "kind": "temperature",
+      "metropt_column": null,
+      "name": "Ambient temperature",
+      "normal_band": {
+        "loaded": [2.0, 40.0],
+        "off": [2.0, 40.0],
+        "unloaded": [2.0, 40.0]
+      },
+      "panel_label": "T2",
+      "range": [-20.0, 60.0],
+      "section": "9.2",
+      "subsystem": "cooling",
+      "unit": "degC"
+    }
+  ],
+  "alarms": [
+    {
+      "bit": 0,
+      "code": "W101",
+      "delay_s": 10,
+      "direction": "equal",
+      "reset": "auto",
+      "section": "3.4",
+      "signal": "low_pressure_switch",
+      "text": "Switch off the consumers you can spare and watch whether line pressure (P2) recovers. If it does not, work through section 8.3.",
+      "threshold": {
+        "unit": "bool",
+        "value": 1.0
+      },
+      "title": "Line pressure low",
+      "type": "warning"
+    },
+    {
+      "bit": 1,
+      "code": "W102",
+      "delay_s": 0,
+      "direction": "above",
+      "reset": "auto",
+      "section": "3.4",
+      "signal": "continuous_load_time",
+      "text": "Check whether the demand is genuine. If no consumer explains it, look for escaping air at the purge silencer and in the distribution system, then follow section 8.5.",
+      "threshold": {
+        "unit": "min",
+        "value": 10.0
+      },
+      "title": "Continuous load time exceeded",
+      "type": "warning"
+    },
+    {
+      "bit": 2,
+      "code": "W103",
+      "delay_s": 60,
+      "direction": "above",
+      "reset": "auto_hysteresis",
+      "section": "3.4",
+      "signal": "dryer_purge_pressure",
+      "text": "Listen at the purge silencer for a permanent discharge and, if you hear one, arrange task 7.3.10.",
+      "threshold": {
+        "unit": "bar",
+        "value": 0.5
+      },
+      "title": "Dryer purge pressure high",
+      "type": "warning"
+    }
+  ],
+  "conditions": [
+    {
+      "alarms": ["W101"],
+      "causes": [
+        {
+          "fault_id": "downstream_air_leak",
+          "likelihood": "common",
+          "note": "The pressure falls at the same rate at night and at the weekend, when no consumer is drawing air."
+        },
+        {
+          "fault_id": "high_air_demand",
+          "likelihood": "common",
+          "note": "The shortfall follows the production pattern and disappears when the plant stops."
+        },
+        {
+          "fault_id": "dryer_purge_leak",
+          "likelihood": "common",
+          "note": "Look at the purge line before the distribution network; the loss is inside the unit."
+        }
+      ],
+      "id": "low_line_pressure",
+      "section": "8.3",
+      "symptom": "The display shows a line pressure below the cut-in setting and message W101 (section 3.4) appears once the delay has run out. Consumers lose pressure although the unit is running, and the low-pressure switch may close. Loaded runs last far longer than the reference cycle in section 6.3.",
+      "title": "Line pressure below setpoint"
+    },
+    {
+      "alarms": ["W102"],
+      "causes": [
+        {
+          "fault_id": "dryer_purge_leak",
+          "likelihood": "common",
+          "note": "Signature of a loss inside the unit; the purge pressure stays raised while the unit delivers and the low-pressure switch never closes."
+        },
+        {
+          "fault_id": "downstream_air_leak",
+          "likelihood": "common",
+          "note": "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load."
+        },
+        {
+          "fault_id": "high_air_demand",
+          "likelihood": "common"
+        }
+      ],
+      "id": "continuous_load",
+      "section": "8.5",
+      "symptom": "The unit delivers without pause and message W102 (section 3.4) appears once the permitted continuous load time has passed. The line pressure settles on a plateau below the cut-out setting instead of rising to it, and the oil temperature climbs while the unit keeps running.",
+      "title": "Compressor stays loaded and does not reach cut-out"
+    },
+    {
+      "alarms": ["W103"],
+      "causes": [
+        {
+          "fault_id": "dryer_purge_leak",
+          "likelihood": "common",
+          "note": "The purge pressure is high continuously, not only around a changeover."
+        }
+      ],
+      "id": "purge_pressure_high",
+      "section": "8.6",
+      "symptom": "message W103 (section 3.4) appears while the unit is loaded and air can be heard leaving the purge silencer between tower changeovers. The purge pressure stands well above its resting value instead of falling back after each regeneration pulse.",
+      "title": "Dryer purge pressure high, air escaping at the purge silencer"
+    }
+  ],
+  "causes": [
+    {
+      "benign": false,
+      "checks": [
+        "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+        "If it holds, open the valve again and repeat the hold test with the plant isolated section by section.",
+        "Walk the distribution network and listen at joints, couplings and hose ends, starting with the branches changed most recently.",
+        "Compare the pressure decay of a quiet night with the reference cycle of section 6.3."
+      ],
+      "conditions": [
+        {
+          "alarms": ["W101"],
+          "condition_id": "low_line_pressure",
+          "likelihood": "common",
+          "note": "The pressure falls at the same rate at night and at the weekend, when no consumer is drawing air.",
+          "title": "Line pressure below setpoint"
+        },
+        {
+          "alarms": ["W102"],
+          "condition_id": "continuous_load",
+          "likelihood": "common",
+          "note": "Signature of a loss in the plant; the cycles grew longer and closer for days before the unit stuck at load.",
+          "title": "Compressor stays loaded and does not reach cut-out"
+        }
+      ],
+      "fault_id": "downstream_air_leak",
+      "maintenance": ["weekly_checks"],
+      "manual_ref": {
+        "anchor": "fault:downstream_air_leak",
+        "section": "8.3",
+        "title": "Line pressure below setpoint"
+      },
+      "name": "Leak in the distribution network",
+      "pages": {
+        "clean": [26, 28, 29],
+        "realistic": [27, 29]
+      },
+      "parts": [],
+      "related_alarms": ["W101", "W102"],
+      "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated. Record the decay you measure so the next comparison starts from a known figure. Leaks return, so add a walk-round listening check to the routine in task 7.3.2 rather than treating this as a one-off repair.",
+      "signal_moves": [
+        {
+          "behaviour": "unloaded_pressure_decay",
+          "direction": "faster",
+          "note": "The earliest sign, visible in the idle phase of every cycle.",
+          "onset": "gradual",
+          "text": "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle."
+        },
+        {
+          "behaviour": "load_cycle_rate",
+          "direction": "higher",
+          "onset": "gradual",
+          "text": "How often the compressor loads per hour is gradually higher."
+        },
+        {
+          "behaviour": "loaded_run_duration",
+          "direction": "longer",
+          "onset": "gradual",
+          "phase": "loaded",
+          "text": "How long each loaded run lasts is gradually longer while loaded."
+        },
+        {
+          "behaviour": "cut_out_reached",
+          "direction": "not_reached",
+          "note": "Late in the fault, once the loss matches what the unit can deliver.",
+          "text": "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver."
+        },
+        {
+          "direction": "falls",
+          "note": "Late in the fault the line sinks while the unit is still delivering.",
+          "onset": "sustained",
+          "phase": "loaded",
+          "signal": "line_pressure",
+          "text": "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering."
+        },
+        {
+          "direction": "on",
+          "note": "The switch closes only at that late stage, so it gives no early warning.",
+          "onset": "sustained",
+          "phase": "loaded",
+          "signal": "low_pressure_switch",
+          "text": "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+        }
+      ],
+      "signal_moves_text": [
+        "How fast line pressure falls while the unit is not delivering is gradually faster. The earliest sign, visible in the idle phase of every cycle.",
+        "How often the compressor loads per hour is gradually higher.",
+        "How long each loaded run lasts is gradually longer while loaded.",
+        "Whether a loaded run ends at the cut-out pressure is not reached. Late in the fault, once the loss matches what the unit can deliver.",
+        "Line pressure (P2) falls persistently while loaded. Late in the fault the line sinks while the unit is still delivering.",
+        "Low-pressure switch (D5) is persistently on while loaded. The switch closes only at that late stage, so it gives no early warning."
+      ],
+      "source": "yaml",
+      "subsystem": "distribution",
+      "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. Nothing inside the machine is faulty. The loss runs day and night, which is what separates it from a busy shift, and it grows slowly as more joints work loose."
+    },
+    {
+      "benign": false,
+      "checks": [
+        "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+        "Watch dryer purge pressure (P4) through a complete changeover and check whether it falls back to its resting value.",
+        "Isolate the dryer and see whether the unit reaches its cut-out pressure again.",
+        "Inspect the purge valve seat, spring and pilot line as described in task 7.3.10."
+      ],
+      "conditions": [
+        {
+          "alarms": ["W101"],
+          "condition_id": "low_line_pressure",
+          "likelihood": "common",
+          "note": "Look at the purge line before the distribution network; the loss is inside the unit.",
+          "title": "Line pressure below setpoint"
+        },
+        {
+          "alarms": ["W102"],
+          "condition_id": "continuous_load",
+          "likelihood": "common",
+          "note": "Signature of a loss inside the unit; the purge pressure stays raised while the unit delivers and the low-pressure switch never closes.",
+          "title": "Compressor stays loaded and does not reach cut-out"
+        },
+        {
+          "alarms": ["W103"],
+          "condition_id": "purge_pressure_high",
+          "likelihood": "common",
+          "note": "The purge pressure is high continuously, not only around a changeover.",
+          "title": "Dryer purge pressure high, air escaping at the purge silencer"
+        }
+      ],
+      "fault_id": "dryer_purge_leak",
+      "maintenance": ["dryer_purge_valve_service"],
+      "manual_ref": {
+        "anchor": "fault:dryer_purge_leak",
+        "section": "8.3",
+        "title": "Line pressure below setpoint"
+      },
+      "name": "Dryer purge valve not seating",
+      "pages": {
+        "clean": [26, 29],
+        "realistic": [27, 29, 30]
+      },
+      "parts": ["purge_valve_kit", "purge_silencer"],
+      "related_alarms": ["W101", "W102", "W103"],
+      "remedy": "Fit a new purge valve kit and check the silencer for erosion while the valve is out. Refit, run a full regeneration cycle and confirm that the purge pressure returns to its resting value between changeovers and that the unit reaches its cut-out point again. A valve that has leaked for a long time usually means the silencer packing is damaged too; replace both together.",
+      "signal_moves": [
+        {
+          "direction": "high",
+          "note": "The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+          "onset": "sustained",
+          "phase": "loaded",
+          "signal": "dryer_purge_pressure",
+          "text": "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover."
+        },
+        {
+          "behaviour": "cut_out_reached",
+          "direction": "not_reached",
+          "text": "Whether a loaded run ends at the cut-out pressure is not reached."
+        },
+        {
+          "behaviour": "loaded_run_duration",
+          "direction": "longer",
+          "onset": "sustained",
+          "phase": "loaded",
+          "text": "How long each loaded run lasts is persistently longer while loaded."
+        },
+        {
+          "direction": "rises",
+          "note": "The unit is loaded for hours on end, so the oil keeps taking up heat.",
+          "onset": "gradual",
+          "phase": "loaded",
+          "signal": "oil_temperature",
+          "text": "Oil temperature (T1) rises gradually while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat."
+        },
+        {
+          "direction": "low",
+          "note": "The element works against a plateau below the normal delivery pressure.",
+          "onset": "sustained",
+          "phase": "loaded",
+          "signal": "motor_current",
+          "text": "Motor current (I1) is persistently low while loaded. The element works against a plateau below the normal delivery pressure."
+        },
+        {
+          "direction": "stays_off",
+          "note": "The line never falls far enough to close the switch, so the native warning is absent.",
+          "phase": "any",
+          "signal": "low_pressure_switch",
+          "text": "Low-pressure switch (D5) stays off in every state. The line never falls far enough to close the switch, so the native warning is absent."
+        }
+      ],
+      "signal_moves_text": [
+        "Dryer purge pressure (P4) is persistently high while loaded. The clearest single sign; the purge line is pressurised continuously, not only at a changeover.",
+        "Whether a loaded run ends at the cut-out pressure is not reached.",
+        "How long each loaded run lasts is persistently longer while loaded.",
+        "Oil temperature (T1) rises gradually while loaded. The unit is loaded for hours on end, so the oil keeps taking up heat.",
+        "Motor current (I1) is persistently low while loaded. The element works against a plateau below the normal delivery pressure.",
+        "Low-pressure switch (D5) stays off in every state. The line never falls far enough to close the switch, so the native warning is absent."
+      ],
+      "source": "yaml",
+      "subsystem": "dryer",
+      "summary": "The purge valve no longer closes fully, so dried air escapes continuously through the regeneration line and the silencer. The unit delivers against that loss and never reaches its cut-out point, while the line stays above the low-pressure switch setting, so the controller gives no warning of a pressure problem at all."
+    },
+    {
+      "benign": true,
+      "checks": [
+        "Ask the operators whether a consumer was added, enlarged or moved to a longer duty.",
+        "Watch the line pressure across a full shift and across a quiet night, and compare the two.",
+        "Confirm that the pressure holds when the plant is idle; a demand problem disappears then, a leak does not.",
+        "Compare the loaded time per hour with the reference duty of section 6.3."
+      ],
+      "conditions": [
+        {
+          "alarms": ["W101"],
+          "condition_id": "low_line_pressure",
+          "likelihood": "common",
+          "note": "The shortfall follows the production pattern and disappears when the plant stops.",
+          "title": "Line pressure below setpoint"
+        },
+        {
+          "alarms": ["W102"],
+          "condition_id": "continuous_load",
+          "likelihood": "common",
+          "title": "Compressor stays loaded and does not reach cut-out"
+        }
+      ],
+      "fault_id": "high_air_demand",
+      "maintenance": ["weekly_checks"],
+      "manual_ref": {
+        "anchor": "fault:high_air_demand",
+        "section": "8.3",
+        "title": "Line pressure below setpoint"
+      },
+      "name": "Air demand above the rated delivery",
+      "pages": {
+        "clean": [26, 28, 29, 31],
+        "realistic": [27, 29, 31]
+      },
+      "parts": [],
+      "related_alarms": ["W101", "W102"],
+      "remedy": "No repair is needed on the unit. Reduce the demand, move the heaviest consumers out of the peak, or plan additional compressed-air capacity. Until then, monitor the oil temperature and the loaded time per hour: the long loaded runs are what push the temperature up, and a unit that is loaded almost continuously has no margin left for a real fault. Record the new demand so later comparisons start from it.",
+      "signal_moves": [
+        {
+          "behaviour": "loaded_run_duration",
+          "direction": "longer",
+          "onset": "sustained",
+          "phase": "loaded",
+          "text": "How long each loaded run lasts is persistently longer while loaded."
+        },
+        {
+          "behaviour": "load_cycle_rate",
+          "direction": "higher",
+          "onset": "sustained",
+          "text": "How often the compressor loads per hour is persistently higher."
+        },
+        {
+          "direction": "low",
+          "onset": "sustained",
+          "phase": "loaded",
+          "signal": "line_pressure",
+          "text": "Line pressure (P2) is persistently low while loaded."
+        },
+        {
+          "behaviour": "unloaded_pressure_decay",
+          "direction": "faster",
+          "note": "The decay follows the production pattern and stops when the plant stops, unlike a leak.",
+          "text": "How fast line pressure falls while the unit is not delivering is faster. The decay follows the production pattern and stops when the plant stops, unlike a leak."
+        },
+        {
+          "direction": "rises",
+          "note": "A consequence of the long loaded runs, not of a cooling problem.",
+          "onset": "gradual",
+          "phase": "loaded",
+          "signal": "oil_temperature",
+          "text": "Oil temperature (T1) rises gradually while loaded. A consequence of the long loaded runs, not of a cooling problem."
+        }
+      ],
+      "signal_moves_text": [
+        "How long each loaded run lasts is persistently longer while loaded.",
+        "How often the compressor loads per hour is persistently higher.",
+        "Line pressure (P2) is persistently low while loaded.",
+        "How fast line pressure falls while the unit is not delivering is faster. The decay follows the production pattern and stops when the plant stops, unlike a leak.",
+        "Oil temperature (T1) rises gradually while loaded. A consequence of the long loaded runs, not of a cooling problem."
+      ],
+      "source": "yaml",
+      "subsystem": "distribution",
+      "summary": "The consumers ask for more air than the unit is rated to deliver, usually after a new machine went into service or a shift pattern changed. The unit works exactly as designed and needs no repair; it simply cannot keep up with what is now being asked of it."
+    }
+  ],
+  "maintenance": [
+    {
+      "id": "weekly_checks",
+      "interval": "weekly",
+      "section": "7.3.2",
+      "title": "Weekly checks"
+    },
+    {
+      "id": "dryer_purge_valve_service",
+      "interval": "4000 h",
+      "section": "7.3.10",
+      "title": "Purge valve and silencer service"
+    }
+  ],
+  "parameters": [
+    {
+      "default": 8.0,
+      "id": "cut_in_pressure",
+      "max": 9.5,
+      "min": 5.0,
+      "name": "Cut-in pressure",
+      "param_no": "P01",
+      "section": "4.2",
+      "unit": "bar"
+    },
+    {
+      "default": 10.0,
+      "id": "cut_out_pressure",
+      "max": 11.0,
+      "min": 6.0,
+      "name": "Cut-out pressure",
+      "param_no": "P02",
+      "section": "4.2",
+      "unit": "bar"
+    }
+  ]
+}

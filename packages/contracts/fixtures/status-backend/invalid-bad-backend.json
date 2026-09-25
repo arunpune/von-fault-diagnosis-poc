@@ -1,0 +1,25 @@
+{
+  "$expect_error": "/backend/name must be equal to one of the allowed values",
+  "schema": "urn:fdp:schema:status-backend:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:05.000Z",
+  "backend": {
+    "name": "oracle",
+    "model": "oracle-1"
+  },
+  "decision": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "consecutive_errors": 0,
+    "last_ok_wall_ts": "2026-09-19T09:59:58.412Z",
+    "last_error_wall_ts": null
+  },
+  "heartbeat": {
+    "telemetry_silent": false,
+    "decision_api_silent": false
+  },
+  "episodes_open": 0,
+  "tickets_open": 0,
+  "version": "1.0.0"
+}

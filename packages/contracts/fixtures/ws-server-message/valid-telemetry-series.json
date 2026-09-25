@@ -1,0 +1,42 @@
+{
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.250Z",
+  "type": "telemetry.series",
+  "payload": {
+    "from_sim_ts": "2020-06-05T09:41:10.000Z",
+    "to_sim_ts": "2020-06-05T09:41:12.000Z",
+    "bucket_ms": 1000,
+    "series": [
+      {
+        "tag": "line_pressure",
+        "points": [
+          ["2020-06-05T09:41:10.200Z", 8.29],
+          ["2020-06-05T09:41:10.800Z", 8.41],
+          ["2020-06-05T09:41:11.100Z", 8.31],
+          ["2020-06-05T09:41:11.900Z", 8.38]
+        ]
+      },
+      {
+        "tag": "oil_temperature",
+        "points": [
+          ["2020-06-05T09:41:10.400Z", 82.1],
+          ["2020-06-05T09:41:11.600Z", 82.6]
+        ]
+      },
+      {
+        "tag": "load_valve",
+        "points": [
+          ["2020-06-05T09:41:10.000Z", 1],
+          ["2020-06-05T09:41:11.400Z", 0]
+        ]
+      }
+    ],
+    "last": {
+      "line_pressure": 8.38,
+      "oil_temperature": 82.6,
+      "load_valve": false
+    },
+    "discontinuity": false
+  }
+}

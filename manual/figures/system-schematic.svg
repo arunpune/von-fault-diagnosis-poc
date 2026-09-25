@@ -1,0 +1,313 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1100" width="170mm" height="110mm" role="img"
+     font-family="IBM Plex Sans, sans-serif" font-size="28" text-anchor="middle">
+  <!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+       SPDX-License-Identifier: CC-BY-4.0 -->
+  <title>CAU-7 system schematic</title>
+  <desc>Process schematic of the CAU-7 compressed-air unit: air path from the intake filter through
+  the airend, oil separator vessel, aftercooler, cyclonic separator, twin desiccant dryer towers and
+  reservoirs to the pneumatic panel; the oil circuit as a dashed loop; and the sensors of the CTRL-7
+  controller shown as circles carrying their panel labels.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="11" refY="6"
+            markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M1 1 L11 6 L1 11 Z" fill="#1f2933" stroke="none"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1700" height="1100" fill="#ffffff" stroke="none"/>
+
+  <!-- ==================== air lines (solid) ==================== -->
+  <g fill="none" stroke="#1f2933" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- row 1: intake to cyclonic separator -->
+    <path d="M10 240 H60" marker-end="url(#arrow)"/>
+    <path d="M230 240 H278" marker-end="url(#arrow)"/>
+    <path d="M448 240 H496" marker-end="url(#arrow)"/>
+    <path d="M706 240 H754" marker-end="url(#arrow)"/>
+    <path d="M954 240 H1002" marker-end="url(#arrow)"/>
+    <path d="M1172 240 H1220" marker-end="url(#arrow)"/>
+    <path d="M1410 240 H1458" marker-end="url(#arrow)"/>
+    <!-- safety valve and blow-down valve to the separator vessel, venting upwards -->
+    <path d="M855 150 V120"/>
+    <path d="M855 40 V8" marker-end="url(#arrow)"/>
+    <path d="M935 150 V135 H1075 V120"/>
+    <path d="M1075 40 V8" marker-end="url(#arrow)"/>
+    <!-- cyclonic separator: condensate branch and discharge to the dryer -->
+    <path d="M1500 330 V375 H1310"/>
+    <path d="M1140 375 H1085" marker-end="url(#arrow)"/>
+    <path d="M1600 330 V420" marker-end="url(#arrow)"/>
+    <!-- dryer: changeover valves, towers and purge line -->
+    <path d="M1287 500 V560"/>
+    <path d="M1552 500 V560"/>
+    <path d="M1287 780 V840 H1552 V780"/>
+    <path d="M1375 840 V925"/>
+    <path d="M1326 890 H1375"/>
+    <path d="M1375 890 H1519"/>
+    <path d="M1375 1000 V1015"/>
+    <path d="M1450 1050 H1510" marker-end="url(#arrow)"/>
+    <!-- dried air to the reservoir row -->
+    <path d="M1180 460 H1150 V855" marker-end="url(#arrow)"/>
+    <!-- reservoir row, right to left -->
+    <path d="M1090 915 H1030" marker-end="url(#arrow)"/>
+    <path d="M890 915 H850"/>
+    <path d="M710 915 H660" marker-end="url(#arrow)"/>
+    <path d="M490 915 H458" marker-end="url(#arrow)"/>
+    <path d="M402 915 H380" marker-end="url(#arrow)"/>
+    <path d="M200 915 H120" marker-end="url(#arrow)"/>
+    <!-- cooling air through the fan into the oil cooler -->
+    <path d="M180 835 V808"/>
+    <path d="M180 752 V710" marker-end="url(#arrow)"/>
+    <path d="M230 600 V528" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- ==================== oil lines (dashed) ==================== -->
+  <g fill="none" stroke="#1f2933" stroke-width="4" stroke-linecap="butt" stroke-linejoin="round"
+     stroke-dasharray="18 12">
+    <path d="M900 330 V410" marker-end="url(#arrow)"/>
+    <path d="M830 330 V410"/>
+    <path d="M980 520 V570 H170 V520" marker-end="url(#arrow)"/>
+    <path d="M280 465 H360" marker-end="url(#arrow)"/>
+    <path d="M450 410 V365 H560 V295" marker-end="url(#arrow)"/>
+    <path d="M780 330 V355 H620 V295" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- ==================== signal lines (dotted) ==================== -->
+  <g fill="none" stroke="#1f2933" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9">
+    <path d="M400 80 H430"/>
+    <path d="M490 80 H520"/>
+    <path d="M330 120 V126"/>
+    <path d="M330 178 V185"/>
+    <path d="M420 126 V110 H400"/>
+    <path d="M420 178 V185"/>
+    <path d="M60 90 H30 V880 H112"/>
+    <path d="M168 880 H200"/>
+    <path d="M623 465 H640"/>
+    <path d="M1375 665 H1392"/>
+    <path d="M1448 665 H1465"/>
+    <path d="M250 850 V818"/>
+    <path d="M340 850 V818"/>
+    <path d="M1175 975 V1002"/>
+  </g>
+
+  <!-- ==================== components ==================== -->
+  <g fill="none" stroke="#1f2933" stroke-width="3">
+    <g data-component="controller">
+      <rect x="60" y="30" width="340" height="90" rx="10" fill="#ffffff"/>
+      <text x="230" y="70" fill="#1f2933" stroke="none" font-size="34" font-weight="600">CTRL-7</text>
+      <text x="230" y="104" fill="#1f2933" stroke="none">controller</text>
+    </g>
+    <g data-component="motor">
+      <rect x="520" y="40" width="160" height="80" rx="10" fill="#ffffff"/>
+      <text x="600" y="90" fill="#1f2933" stroke="none">Motor</text>
+    </g>
+    <g data-component="coupling">
+      <rect x="575" y="120" width="50" height="65" rx="6" fill="#ffffff"/>
+      <text x="635" y="165" fill="#1f2933" stroke="none" text-anchor="start">Coupling</text>
+    </g>
+    <g data-component="safety_valve">
+      <rect x="770" y="40" width="170" height="80" rx="10" fill="#ffffff"/>
+      <text x="855" y="76" fill="#1f2933" stroke="none">Safety</text>
+      <text x="855" y="108" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="blowdown_valve">
+      <rect x="990" y="40" width="170" height="80" rx="10" fill="#ffffff"/>
+      <text x="1075" y="76" fill="#1f2933" stroke="none">Blow-down</text>
+      <text x="1075" y="108" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="intake_filter">
+      <rect x="60" y="185" width="170" height="110" rx="10" fill="#ffffff"/>
+      <text x="145" y="232" fill="#1f2933" stroke="none">Intake</text>
+      <text x="145" y="264" fill="#1f2933" stroke="none">filter</text>
+    </g>
+    <g data-component="intake_valve">
+      <rect x="278" y="185" width="170" height="110" rx="10" fill="#ffffff"/>
+      <text x="363" y="218" fill="#1f2933" stroke="none">Intake and</text>
+      <text x="363" y="250" fill="#1f2933" stroke="none">unloading</text>
+      <text x="363" y="282" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="airend">
+      <rect x="496" y="185" width="210" height="110" rx="10" fill="#ffffff"/>
+      <text x="601" y="232" fill="#1f2933" stroke="none">Airend</text>
+      <text x="601" y="264" fill="#1f2933" stroke="none">screw element</text>
+    </g>
+    <g data-component="separator_vessel">
+      <rect x="754" y="150" width="200" height="180" rx="34" fill="#ffffff"/>
+      <text x="854" y="280" fill="#1f2933" stroke="none">Separator</text>
+      <text x="854" y="312" fill="#1f2933" stroke="none">vessel</text>
+    </g>
+    <g data-component="minimum_pressure_valve">
+      <rect x="1002" y="185" width="170" height="110" rx="10" fill="#ffffff"/>
+      <text x="1087" y="218" fill="#1f2933" stroke="none">Minimum</text>
+      <text x="1087" y="250" fill="#1f2933" stroke="none">pressure</text>
+      <text x="1087" y="282" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="aftercooler">
+      <rect x="1220" y="185" width="190" height="110" rx="10" fill="#ffffff"/>
+      <text x="1315" y="248" fill="#1f2933" stroke="none">Aftercooler</text>
+    </g>
+    <g data-component="cyclonic_separator">
+      <rect x="1458" y="150" width="190" height="180" rx="34" fill="#ffffff"/>
+      <text x="1553" y="280" fill="#1f2933" stroke="none">Cyclonic</text>
+      <text x="1553" y="312" fill="#1f2933" stroke="none">separator</text>
+    </g>
+    <g data-component="condensate_drain">
+      <rect x="1140" y="335" width="170" height="80" rx="10" fill="#ffffff"/>
+      <text x="1225" y="368" fill="#1f2933" stroke="none">Condensate</text>
+      <text x="1225" y="400" fill="#1f2933" stroke="none">drain</text>
+    </g>
+    <g data-component="changeover_valves">
+      <rect x="1180" y="420" width="480" height="80" rx="10" fill="#ffffff"/>
+      <text x="1420" y="470" fill="#1f2933" stroke="none">Changeover valves</text>
+    </g>
+    <g data-component="dryer_tower_1">
+      <rect x="1200" y="560" width="175" height="220" rx="34" fill="#ffffff"/>
+      <text x="1287" y="655" fill="#1f2933" stroke="none">Dryer</text>
+      <text x="1287" y="687" fill="#1f2933" stroke="none">tower 1</text>
+    </g>
+    <g data-component="dryer_tower_2">
+      <rect x="1465" y="560" width="175" height="220" rx="34" fill="#ffffff"/>
+      <text x="1552" y="655" fill="#1f2933" stroke="none">Dryer</text>
+      <text x="1552" y="687" fill="#1f2933" stroke="none">tower 2</text>
+    </g>
+    <g data-component="purge_valve">
+      <rect x="1300" y="925" width="150" height="75" rx="10" fill="#ffffff"/>
+      <text x="1375" y="972" fill="#1f2933" stroke="none">Purge valve</text>
+    </g>
+    <g data-component="purge_silencer">
+      <rect x="1300" y="1015" width="150" height="70" rx="10" fill="#ffffff"/>
+      <text x="1375" y="1043" fill="#1f2933" stroke="none">Purge</text>
+      <text x="1375" y="1073" fill="#1f2933" stroke="none">silencer</text>
+    </g>
+    <g data-component="thermostatic_valve">
+      <rect x="880" y="410" width="200" height="110" rx="10" fill="#ffffff"/>
+      <text x="980" y="457" fill="#1f2933" stroke="none">Thermostatic</text>
+      <text x="980" y="489" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="oil_level_switch">
+      <rect x="640" y="410" width="200" height="110" rx="10" fill="#ffffff"/>
+      <text x="740" y="457" fill="#1f2933" stroke="none">Oil level</text>
+      <text x="740" y="489" fill="#1f2933" stroke="none">switch</text>
+    </g>
+    <g data-component="oil_filter">
+      <rect x="360" y="410" width="180" height="110" rx="10" fill="#ffffff"/>
+      <text x="450" y="473" fill="#1f2933" stroke="none">Oil filter</text>
+    </g>
+    <g data-component="oil_cooler">
+      <rect x="100" y="410" width="180" height="110" rx="10" fill="#ffffff"/>
+      <text x="190" y="473" fill="#1f2933" stroke="none">Oil cooler</text>
+    </g>
+    <g data-component="cooling_fan">
+      <rect x="100" y="600" width="180" height="110" rx="10" fill="#ffffff"/>
+      <text x="190" y="663" fill="#1f2933" stroke="none">Cooling fan</text>
+    </g>
+    <g data-component="pneumatic_panel">
+      <rect x="200" y="850" width="180" height="130" rx="10" fill="#ffffff"/>
+      <text x="290" y="900" fill="#1f2933" stroke="none">Pneumatic</text>
+      <text x="290" y="936" fill="#1f2933" stroke="none">panel</text>
+    </g>
+    <g data-component="reservoir_isolation_valve">
+      <rect x="490" y="855" width="170" height="120" rx="10" fill="#ffffff"/>
+      <text x="575" y="905" fill="#1f2933" stroke="none">Isolation</text>
+      <text x="575" y="941" fill="#1f2933" stroke="none">valve</text>
+    </g>
+    <g data-component="reservoirs">
+      <rect x="710" y="845" width="140" height="140" rx="34" fill="#ffffff"/>
+      <rect x="890" y="845" width="140" height="140" rx="34" fill="#ffffff"/>
+      <text x="870" y="815" fill="#1f2933" stroke="none">Reservoirs</text>
+    </g>
+    <g data-component="flow_sensor">
+      <rect x="1090" y="855" width="170" height="120" rx="10" fill="#ffffff"/>
+      <text x="1175" y="905" fill="#1f2933" stroke="none">Flow</text>
+      <text x="1175" y="941" fill="#1f2933" stroke="none">sensor</text>
+    </g>
+  </g>
+
+  <!-- ==================== sensors (panel labels) ==================== -->
+  <g fill="#eef2f7" stroke="#1f2933" stroke-width="3" font-weight="600">
+    <g data-signal="discharge_pressure">
+      <circle cx="900" cy="200" r="28"/>
+      <text x="900" y="210" fill="#1f2933" stroke="none">P1</text>
+    </g>
+    <g data-signal="line_pressure">
+      <circle cx="250" cy="790" r="28"/>
+      <text x="250" y="800" fill="#1f2933" stroke="none">P2</text>
+    </g>
+    <g data-signal="separator_discharge_pressure">
+      <circle cx="1600" cy="375" r="28"/>
+      <text x="1600" y="385" fill="#1f2933" stroke="none">P3</text>
+    </g>
+    <g data-signal="dryer_purge_pressure">
+      <circle cx="1298" cy="890" r="28"/>
+      <text x="1298" y="900" fill="#1f2933" stroke="none">P4</text>
+    </g>
+    <g data-signal="reservoir_pressure">
+      <circle cx="430" cy="915" r="28"/>
+      <text x="430" y="925" fill="#1f2933" stroke="none">P5</text>
+    </g>
+    <g data-signal="oil_temperature">
+      <circle cx="900" cy="370" r="28"/>
+      <text x="900" y="380" fill="#1f2933" stroke="none">T1</text>
+    </g>
+    <g data-signal="ambient_temperature">
+      <circle cx="180" cy="780" r="28"/>
+      <text x="180" y="790" fill="#1f2933" stroke="none">T2</text>
+    </g>
+    <g data-signal="motor_current">
+      <circle cx="460" cy="80" r="30"/>
+      <text x="460" y="90" fill="#1f2933" stroke="none">I1</text>
+    </g>
+    <g data-signal="intake_closed">
+      <circle cx="330" cy="152" r="26"/>
+      <text x="330" y="162" fill="#1f2933" stroke="none">D1</text>
+    </g>
+    <g data-signal="load_valve">
+      <circle cx="420" cy="152" r="26"/>
+      <text x="420" y="162" fill="#1f2933" stroke="none">D2</text>
+    </g>
+    <g data-signal="dryer_tower">
+      <circle cx="1420" cy="665" r="28"/>
+      <text x="1420" y="675" fill="#1f2933" stroke="none">D3</text>
+    </g>
+    <g data-signal="regulator_contact">
+      <circle cx="140" cy="880" r="28"/>
+      <text x="140" y="890" fill="#1f2933" stroke="none">D4</text>
+    </g>
+    <g data-signal="low_pressure_switch">
+      <circle cx="340" cy="790" r="28"/>
+      <text x="340" y="800" fill="#1f2933" stroke="none">D5</text>
+    </g>
+    <g data-signal="purge_switch">
+      <circle cx="1547" cy="890" r="28"/>
+      <text x="1547" y="900" fill="#1f2933" stroke="none">D6</text>
+    </g>
+    <g data-signal="oil_level_ok">
+      <circle cx="595" cy="465" r="28"/>
+      <text x="595" y="475" fill="#1f2933" stroke="none">D7</text>
+    </g>
+    <g data-signal="flow_pulse">
+      <circle cx="1175" cy="1030" r="28"/>
+      <text x="1175" y="1040" fill="#1f2933" stroke="none">D8</text>
+    </g>
+  </g>
+
+  <!-- ==================== free-standing captions ==================== -->
+  <g fill="#1f2933" stroke="none">
+    <text x="1185" y="95" text-anchor="start">To atmosphere</text>
+    <text x="1075" y="385" text-anchor="end">To drain</text>
+    <text x="705" y="385">Scavenge</text>
+    <text x="300" y="670" text-anchor="start">Cooling air</text>
+    <text x="150" y="1005">To consumers</text>
+    <text x="1520" y="1043" text-anchor="start">To</text>
+    <text x="1520" y="1073" text-anchor="start">atmosphere</text>
+  </g>
+
+  <!-- ==================== legend ==================== -->
+  <g stroke="#1f2933" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M80 1050 H170" marker-end="url(#arrow)"/>
+    <path d="M360 1050 H450" stroke-dasharray="18 12"/>
+    <path d="M640 1050 H730" stroke-dasharray="1 9" stroke-width="3"/>
+    <text x="185" y="1060" fill="#1f2933" stroke="none" text-anchor="start">Air line</text>
+    <text x="465" y="1060" fill="#1f2933" stroke="none" text-anchor="start">Oil line</text>
+    <text x="745" y="1060" fill="#1f2933" stroke="none" text-anchor="start">Signal line</text>
+  </g>
+</svg>

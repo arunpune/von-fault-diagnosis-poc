@@ -1,0 +1,627 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional CTRL-7 message registry: W101-W117, X201-X204 and S301-S306 carry bits 0-26 and
+# are evaluated by the simulator; S307, S308 and M401-M406 have no bit. Only the fields the
+# generator reads are kept.
+schema_version: 1
+alarms:
+  - code: W101
+    type: warning
+    bit: 0
+    evaluation: sim
+    title: Line pressure low
+    display: LINE PRESS LOW
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: low_pressure_switch
+        op: eq
+        threshold:
+          value: 1
+          unit: bool
+      for_s:
+        setting: low_pressure_alarm_delay
+    reset:
+      mode: auto
+  - code: W102
+    type: warning
+    bit: 1
+    evaluation: sim
+    title: Continuous load time exceeded
+    display: CONT LOAD TIME
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: continuous_load_time
+        op: gt
+        threshold:
+          setting: max_continuous_load_time
+      for_s: 0
+    reset:
+      mode: auto
+  - code: W103
+    type: warning
+    bit: 2
+    evaluation: sim
+    title: Dryer purge pressure high
+    display: PURGE PRESS HIGH
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: dryer_purge_pressure
+        op: gt
+        threshold:
+          setting: purge_pressure_warning
+      for_s: 60
+    reset:
+      mode: auto_hysteresis
+      hysteresis:
+        value: 0.1
+        unit: bar
+  - code: W104
+    type: warning
+    bit: 3
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 1
+    title: Oil temperature high
+    display: OIL TEMP HIGH
+    trigger:
+      kind: signal
+      state: running
+      condition:
+        signal: oil_temperature
+        op: gt
+        threshold:
+          setting: oil_temperature_warning
+      for_s: 300
+    reset:
+      mode: auto_hysteresis
+      hysteresis:
+        value: 5
+        unit: degC
+  - code: W105
+    type: warning
+    bit: 4
+    evaluation: sim
+    title: Oil temperature low
+    display: OIL TEMP LOW
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: oil_temperature
+        op: lt
+        threshold:
+          value: 5
+          unit: degC
+      for_s: 60
+    reset:
+      mode: auto
+  - code: W106
+    type: warning
+    bit: 5
+    evaluation: sim
+    family: motor_current_high
+    rank: 1
+    title: Motor current high
+    display: MOTOR CURR HIGH
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s:
+        setting: motor_start_mask_time
+      condition:
+        signal: motor_current
+        op: gt
+        threshold:
+          setting: motor_current_warning
+      for_s: 60
+    reset:
+      mode: auto
+  - code: W107
+    type: warning
+    bit: 6
+    evaluation: sim
+    title: Motor current low under load
+    display: MOTOR CURR LOW
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s:
+        setting: motor_start_mask_time
+      condition:
+        signal: motor_current
+        op: lt
+        threshold:
+          setting: motor_current_low_warning
+      for_s: 60
+    reset:
+      mode: auto
+  - code: W108
+    type: warning
+    bit: 7
+    evaluation: sim
+    title: Motor starts per hour exceeded
+    display: TOO MANY STARTS
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: motor_starts_per_hour
+        op: gt
+        threshold:
+          setting: max_starts_per_hour
+      for_s: 0
+    reset:
+      mode: auto
+  - code: W109
+    type: warning
+    bit: 8
+    evaluation: sim
+    title: Ambient temperature high
+    display: AMBIENT T HIGH
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: ambient_temperature
+        op: gt
+        threshold:
+          setting: ambient_temperature_high_warning
+      for_s: 600
+    reset:
+      mode: auto
+  - code: W110
+    type: warning
+    bit: 9
+    evaluation: sim
+    title: Ambient temperature low
+    display: AMBIENT T LOW
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: ambient_temperature
+        op: lt
+        threshold:
+          setting: ambient_temperature_low_warning
+      for_s: 600
+    reset:
+      mode: auto
+  - code: W111
+    type: warning
+    bit: 10
+    evaluation: sim
+    title: Dryer changeover not detected
+    display: NO TOWER CHANGE
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: seconds_since_tower_change
+        op: gt
+        threshold:
+          setting: dryer_changeover_timeout
+      for_s: 0
+    reset:
+      mode: auto
+  - code: W112
+    type: warning
+    bit: 11
+    evaluation: sim
+    title: Separator discharge pressure high under load
+    display: SEP PRESS HIGH
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: separator_discharge_pressure
+        op: gt
+        threshold:
+          setting: separator_pressure_warning
+      for_s: 60
+    reset:
+      mode: auto
+  - code: W113
+    type: warning
+    bit: 12
+    evaluation: sim
+    title: Reservoir pressure deviation
+    display: RESERVOIR DEV
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: reservoir_line_delta
+        op: gt
+        threshold:
+          setting: reservoir_deviation_warning
+      for_s: 60
+    reset:
+      mode: auto
+  - code: W114
+    type: warning
+    bit: 13
+    evaluation: sim
+    title: Flow signal lost
+    display: NO FLOW SIGNAL
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: flow_pulse
+        op: eq
+        threshold:
+          value: 0
+          unit: bool
+      for_s: 120
+    reset:
+      mode: auto
+  - code: W115
+    type: warning
+    bit: 14
+    evaluation: sim
+    title: Purge switch not detected
+    display: NO PURGE SIGNAL
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: purge_switch
+        op: eq
+        threshold:
+          value: 0
+          unit: bool
+      for_s: 120
+    reset:
+      mode: auto
+  - code: W116
+    type: warning
+    bit: 15
+    evaluation: sim
+    title: Oil level low
+    display: OIL LEVEL LOW
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: oil_level_ok
+        op: eq
+        threshold:
+          value: 0
+          unit: bool
+      for_s: 300
+    reset:
+      mode: auto
+  - code: W117
+    type: warning
+    bit: 16
+    evaluation: sim
+    title: Separator element pressure drop high
+    display: SEP ELEMENT DP
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: discharge_line_delta
+        op: gt
+        threshold:
+          setting: separator_element_dp_warning
+      for_s: 60
+    reset:
+      mode: auto
+  - code: X201
+    type: shutdown_warning
+    bit: 17
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 2
+    title: Oil temperature very high
+    display: OIL TEMP V HIGH
+    trigger:
+      kind: signal
+      state: running
+      condition:
+        signal: oil_temperature
+        op: gt
+        threshold:
+          setting: oil_temperature_shutdown_warning
+      for_s: 30
+    reset:
+      mode: auto
+  - code: X202
+    type: shutdown_warning
+    bit: 18
+    evaluation: sim
+    family: discharge_pressure_high
+    rank: 1
+    title: Discharge pressure high
+    display: DISCH PRESS HIGH
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: discharge_pressure
+        op: gt
+        threshold:
+          setting: discharge_pressure_shutdown_warning
+      for_s: 10
+    reset:
+      mode: auto
+  - code: X203
+    type: shutdown_warning
+    bit: 19
+    evaluation: sim
+    family: motor_current_high
+    rank: 2
+    title: Motor current very high
+    display: MOTOR CURR V HI
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s:
+        setting: motor_start_mask_time
+      condition:
+        signal: motor_current
+        op: gt
+        threshold:
+          setting: motor_current_shutdown_warning
+      for_s: 30
+    reset:
+      mode: auto
+  - code: X204
+    type: shutdown_warning
+    bit: 20
+    evaluation: sim
+    title: Compressor not unloading
+    display: NO UNLOAD
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        signal: line_pressure
+        op: gt
+        threshold:
+          setting: cut_out_pressure
+          offset: 0.5
+      for_s: 30
+    reset:
+      mode: auto
+  - code: S301
+    type: shutdown
+    bit: 21
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 3
+    title: Oil temperature shutdown
+    display: OIL TEMP SHUTDN
+    trigger:
+      kind: signal
+      state: running
+      condition:
+        signal: oil_temperature
+        op: gt
+        threshold:
+          setting: oil_temperature_shutdown
+      for_s: 5
+    reset:
+      mode: manual
+  - code: S302
+    type: shutdown
+    bit: 22
+    evaluation: sim
+    family: discharge_pressure_high
+    rank: 2
+    title: Discharge pressure shutdown
+    display: DISCH P SHUTDN
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        signal: discharge_pressure
+        op: gt
+        threshold:
+          setting: discharge_pressure_shutdown
+      for_s: 5
+    reset:
+      mode: manual
+  - code: S303
+    type: shutdown
+    bit: 23
+    evaluation: sim
+    family: motor_current_high
+    rank: 3
+    title: Motor overload
+    display: MOTOR OVERLOAD
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s:
+        setting: motor_start_mask_time
+      condition:
+        signal: motor_current
+        op: gt
+        threshold:
+          setting: motor_current_shutdown
+      for_s: 5
+    reset:
+      mode: manual
+  - code: S304
+    type: shutdown
+    bit: 24
+    evaluation: sim
+    title: Motor start failure
+    display: START FAILURE
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        all:
+          - signal: load_valve
+            op: eq
+            threshold:
+              value: 1
+              unit: bool
+          - signal: motor_current
+            op: lt
+            threshold:
+              value: 1
+              unit: A
+      for_s: 20
+    reset:
+      mode: manual
+  - code: S305
+    type: shutdown
+    bit: 25
+    evaluation: sim
+    title: Line pressure sensor fault
+    display: LINE P SENSOR
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        any:
+          - signal: line_pressure
+            op: lt
+            threshold:
+              value: -0.5
+              unit: bar
+          - signal: line_pressure
+            op: gt
+            threshold:
+              value: 15.5
+              unit: bar
+      for_s: 10
+    reset:
+      mode: manual
+  - code: S306
+    type: shutdown
+    bit: 26
+    evaluation: sim
+    title: Oil temperature sensor fault
+    display: OIL T SENSOR
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        any:
+          - signal: oil_temperature
+            op: lt
+            threshold:
+              value: -15
+              unit: degC
+          - signal: oil_temperature
+            op: gt
+            threshold:
+              value: 115
+              unit: degC
+      for_s: 10
+    reset:
+      mode: manual
+  - code: S307
+    type: shutdown
+    bit: null
+    evaluation: none
+    title: Emergency stop activated
+    display: EMERGENCY STOP
+    trigger:
+      kind: external
+      input: Emergency-stop contact on the control panel
+    reset:
+      mode: manual
+  - code: S308
+    type: shutdown
+    bit: null
+    evaluation: none
+    title: Motor protection relay tripped
+    display: MOTOR PROTECTION
+    trigger:
+      kind: external
+      input: Auxiliary contact of the motor protection relay in the control cabinet
+    reset:
+      mode: manual
+  - code: M401
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil change due
+    display: OIL CHANGE DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        task: oil_change
+    reset:
+      mode: manual_service
+  - code: M402
+    type: service
+    bit: null
+    evaluation: none
+    title: Air intake filter service due
+    display: AIR FILTER DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        task: air_filter_service
+    reset:
+      mode: manual_service
+  - code: M403
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil filter and separator element due
+    display: OIL FLT SEP DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        tasks:
+          - oil_filter_change
+          - separator_element_change
+    reset:
+      mode: manual_service
+  - code: M404
+    type: service
+    bit: null
+    evaluation: none
+    title: Dryer desiccant inspection due
+    display: DESICCANT DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        task: dryer_desiccant_inspection
+    reset:
+      mode: manual_service
+  - code: M405
+    type: service
+    bit: null
+    evaluation: none
+    title: Condensate drain service due
+    display: DRAIN SERV DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        task: condensate_drain_service
+    reset:
+      mode: manual_service
+  - code: M406
+    type: service
+    bit: null
+    evaluation: none
+    title: Annual inspection due
+    display: ANNUAL INSP DUE
+    trigger:
+      kind: counter
+      counter:
+        derived: run_hours
+        task: annual_inspection
+    reset:
+      mode: manual_service

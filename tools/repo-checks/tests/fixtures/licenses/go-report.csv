@@ -1,0 +1,5 @@
+example.invalid/golicprobe,Unknown,Unknown
+github.com/eclipse/paho.golang,https://github.com/eclipse/paho.golang/blob/v0.23.0/LICENSE,EPL-2.0
+github.com/goburrow/serial,https://github.com/goburrow/serial/blob/v0.1.0/LICENSE,MIT
+github.com/google/uuid,https://github.com/google/uuid/blob/v1.6.0/LICENSE,BSD-3-Clause
+github.com/simonvetter/modbus,https://github.com/simonvetter/modbus/blob/v1.6.4/LICENSE.txt,MIT

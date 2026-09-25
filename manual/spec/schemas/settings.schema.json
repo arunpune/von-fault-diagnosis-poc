@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:settings:v1",
+  "title": "manual/spec/settings.yaml",
+  "description": "Programmable CTRL-7 parameters with min/default/max and constraints evaluated on the defaults. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "settings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/setting" }
+    }
+  },
+  "required": ["schema_version", "settings"],
+  "additionalProperties": false,
+  "$defs": {
+    "setting": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "param_no": { "$ref": "common.schema.json#/$defs/param_no" },
+        "name": { "$ref": "common.schema.json#/$defs/text" },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" },
+        "type": { "type": "string", "enum": ["number", "integer"] },
+        "min": { "type": "number" },
+        "default": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number", "exclusiveMinimum": 0 },
+        "access": { "type": "string", "enum": ["operator", "service"] },
+        "signal": { "$ref": "common.schema.json#/$defs/identifier" },
+        "description": { "$ref": "common.schema.json#/$defs/text" },
+        "used_by": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["regulation", "alarm_evaluation", "dryer", "maintenance", "display"]
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraint" }
+        }
+      },
+      "required": [
+        "id",
+        "param_no",
+        "name",
+        "unit",
+        "type",
+        "min",
+        "default",
+        "max",
+        "step",
+        "access",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "description": "Asserts `default <relation> (other + margin)` on the resolved defaults (rule P3).",
+      "properties": {
+        "relation": { "type": "string", "enum": ["gte", "lte", "gt", "lt", "eq"] },
+        "other": {
+          "type": "string",
+          "description": "A setting id, or a dotted machine path such as machine.ratings.max_working_pressure.",
+          "pattern": "^([a-z][a-z0-9_]{1,39}|machine(\\.[a-z][a-z0-9_]*)+)$"
+        },
+        "margin": { "type": "number" },
+        "text": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["relation", "other", "text"],
+      "additionalProperties": false
+    }
+  }
+}

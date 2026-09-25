@@ -1,0 +1,151 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# golangci-lint v2 configuration for the Modbus emulator and the MQTT gateway.
+# The depguard rules below mirror the import boundary of
+# docs/architecture.md#import-boundaries for per-file feedback; the
+# authoritative, transitive check is internal/arch/imports_test.go.
+#
+# Install the binary, never `go get`: `brew install golangci-lint` locally, the
+# official action pinned to v2.13.2 in CI.
+version: "2"
+run:
+  timeout: 5m
+  build-tags: [integration]
+linters:
+  default: standard
+  enable:
+    - depguard
+    - errorlint
+    - forbidigo
+    - gocritic
+    - gosec
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - prealloc
+    - nolintlint
+  settings:
+    depguard:
+      rules:
+        # Ground-truth isolation: the connector stamps and forwards. It may not
+        # reach the replay engine, the injector, the CSV source, the controller
+        # emulation or the load-state rule, so it cannot grow a second opinion
+        # about the machine.
+        gateway-never-sees-ground-truth:
+          list-mode: lax
+          files:
+            - "**/cmd/gateway/**"
+            - "**/internal/gateway/**"
+          deny:
+            - pkg: fault-diagnosis-poc/services/modbus/internal/sim
+              desc: the gateway stamps and forwards; it never sees replay code (ground-truth isolation)
+            - pkg: fault-diagnosis-poc/services/modbus/internal/injection
+              desc: the gateway never sees injection code (ground-truth isolation)
+            - pkg: fault-diagnosis-poc/services/modbus/internal/replay
+              desc: the gateway never reads the recording (ground-truth isolation)
+            - pkg: fault-diagnosis-poc/services/modbus/internal/ctrl7
+              desc: the gateway forwards the alarm word; it never evaluates alarms
+            - pkg: fault-diagnosis-poc/services/modbus/internal/machine
+              desc: the gateway forwards the state register; it never classifies
+        # The leaf packages are shared by both binaries, so neither of the two
+        # top-level packages may be pulled back into them: a cycle through
+        # internal/sim would put replay code into the gateway's image, and one
+        # through internal/gateway would give the machine its own connector.
+        leaves-never-reach-a-top-level-package:
+          list-mode: lax
+          files:
+            - "**/internal/regmap/**"
+            - "**/internal/machine/**"
+            - "**/internal/replay/**"
+            - "**/internal/injection/**"
+            - "**/internal/ctrl7/**"
+            - "**/internal/mqttio/**"
+          deny:
+            - pkg: fault-diagnosis-poc/services/modbus/internal/sim
+              desc: a leaf package never imports the simulator it is used by
+            - pkg: fault-diagnosis-poc/services/modbus/internal/gateway
+              desc: a leaf package never imports the gateway it is used by
+    forbidigo:
+      # Mirrors the read-only client rule for per-file feedback; the
+      # authoritative check is the go/ast scan in
+      # internal/arch/isolation_test.go. The gateway holds a read-only Modbus
+      # client: FC05, FC06, FC0F and FC10 never leave it.
+      analyze-types: false
+      forbid:
+        - pattern: '\.Write(Registers?|Coils?|MultipleRegisters)$'
+          msg: the gateway is a read-only Modbus client; it never writes to the machine
+    misspell:
+      locale: UK
+      # "mosquitto" is the broker's name, not a misspelt insect.
+      ignore-rules:
+        - mosquitto
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+  exclusions:
+    rules:
+      # forbidigo carries the gateway's read-only rule, so it only applies
+      # there; internal/sim's server test proves the simulator refuses the same
+      # four function codes and therefore has to name them.
+      - linters: [forbidigo]
+        path-except: (^|/)(cmd|internal)/gateway/
+      # The gosec rules below are switched off for the whole module, each for
+      # a reason that holds everywhere in it. Everything gosec else reports —
+      # weak hashes and ciphers, unhandled errors, directory permissions,
+      # unsafe pointers, SSRF — stays on and must be fixed at the site.
+      #
+      # G115 (integer overflow conversion): this module speaks a 16-bit
+      # register protocol, so nearly every conversion deliberately narrows a
+      # counter into a register word, splits head_seq or widens a duration the
+      # caller has already bounded. The clamping happens before the conversion,
+      # which is exactly what the linter cannot see, and the codec's own
+      # round-trip tests are what prove the arithmetic.
+      - linters: [gosec]
+        text: "G115"
+      # G304 (file inclusion via a variable): the recording, the injection
+      # catalog, the ground-truth files and the broker configuration are all
+      # opened from the paths the operator configures. The process reads what
+      # it was pointed at and has no other input; there is no request whose
+      # parameter could reach os.Open here.
+      - linters: [gosec]
+        text: "G304"
+      # G404 (weak random number generator): every math/rand use in this module
+      # must be reproducible from its seed — the injector's noise primitive,
+      # the synthetic CSV generator and the gateway's reconnect jitter. A
+      # cryptographic source would make the same injection produce a different
+      # waveform on every run. None of them is a secret.
+      - linters: [gosec]
+        text: "G404"
+      # G204 (subprocess launched with a variable), G702 (command injection)
+      # and G703 (path traversal): the three sites are the architecture test's
+      # `go list`, the schema helper process and the fixture helper process,
+      # all of which run the test binary itself or the toolchain on a path
+      # built in the same file. All three rules are taint-based and report a
+      # different subset of those sites on every run, which a CI gate cannot
+      # live with.
+      - linters: [gosec]
+        text: "G204"
+      - linters: [gosec]
+        text: "G702"
+      - linters: [gosec]
+        text: "G703"
+      # G101 (hardcoded credentials): the constants it matches hold the *name*
+      # of the environment variable a password is read from, never a password.
+      - linters: [gosec]
+        text: "G101"
+      # G306 (WriteFile permissions): the only writes are golden files a test
+      # regenerates under -update, which a reviewer has to be able to read.
+      - linters: [gosec]
+        text: "G306"
+        path: _test\.go$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - fault-diagnosis-poc/services/modbus

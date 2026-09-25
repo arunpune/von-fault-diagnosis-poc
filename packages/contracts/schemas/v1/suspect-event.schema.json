@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:suspect-event:v1",
+  "title": "Suspect event",
+  "description": "What detection saw, in words, published on plant/{unit_id}/events/suspect when a symptom starts firing and again on every re-decision while it keeps firing. Numbers become level, trend and duration buckets before they leave detection, so the decision backend never reads a raw time series.",
+  "type": "object",
+  "$defs": {
+    "evidence_item": {
+      "title": "Evidence item",
+      "description": "One plain sentence a technician can read, built from a rule hit or from a non-normal observation. The ticket carries the same items verbatim.",
+      "type": "object",
+      "properties": {
+        "metric": {
+          "description": "What was measured: a signal tag, a derived behaviour id or a cycle metric name.",
+          "type": "string",
+          "minLength": 1
+        },
+        "observation": {
+          "description": "The sentence shown on the ticket, in words and without a verdict.",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": { "description": "The measured value behind the sentence.", "type": "number" },
+        "unit": { "description": "Unit of value and baseline.", "type": "string" },
+        "baseline": {
+          "description": "The first-month or rolling baseline value compared against.",
+          "type": "number"
+        },
+        "duration": {
+          "description": "How long the situation has lasted, in duration words.",
+          "type": "string"
+        }
+      },
+      "required": ["metric", "observation"],
+      "additionalProperties": false
+    },
+    "observation": {
+      "title": "Observation",
+      "description": "One signal or derived behaviour as the decision backend reads it: where it sits relative to its normal band, how it is moving and for how long.",
+      "type": "object",
+      "properties": {
+        "signal": {
+          "description": "A signal registry tag id, or a derived behaviour id such as load_cycle_rate.",
+          "type": "string",
+          "minLength": 1
+        },
+        "level": { "$ref": "urn:fdp:schema:common:v1#/$defs/level_bucket" },
+        "trend": { "$ref": "urn:fdp:schema:common:v1#/$defs/trend_bucket" },
+        "since": {
+          "description": "How long the level and trend have held, in duration words.",
+          "type": "string"
+        },
+        "value": { "description": "The value the buckets were derived from.", "type": "number" },
+        "unit": { "description": "Unit of value.", "type": "string" },
+        "by_hours": {
+          "title": "By hours of the day",
+          "description": "Optional, on a derived behaviour measured once per load cycle (today unloaded_pressure_decay only): the same behaviour over the last day, read apart in the unit's quiet hours (the hours of the day in which it loaded least in its first month, when its consumers draw least air) and in the other, busy hours, each against the same first-month band as level. When the behaviour went above that band within the day, only the cycles since then count. unknown means too few cycles of that kind to read.",
+          "type": "object",
+          "properties": {
+            "quiet": { "$ref": "urn:fdp:schema:common:v1#/$defs/level_bucket" },
+            "busy": { "$ref": "urn:fdp:schema:common:v1#/$defs/level_bucket" }
+          },
+          "required": ["quiet", "busy"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["signal", "level", "trend"],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:suspect-event:v1" },
+    "event_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+    "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "symptom_key": {
+      "description": "The condition id of the highest-severity rule hit; retrieval joins on it.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/symptom_key"
+    },
+    "rule_ids": {
+      "description": "Every rule firing under symptom_key, in registry order.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/rule_id" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "machine_state": {
+      "description": "Operating state when the event was raised.",
+      "type": "object",
+      "properties": {
+        "mode": { "$ref": "urn:fdp:schema:common:v1#/$defs/machine_mode" },
+        "since_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "dryer_tower": {
+          "description": "Which desiccant tower is in service, or null when it is unknown.",
+          "type": ["integer", "null"],
+          "enum": [1, 2, null]
+        }
+      },
+      "required": ["mode", "since_sim_ts"],
+      "additionalProperties": false
+    },
+    "window": {
+      "description": "The observation window the buckets were computed over.",
+      "type": "object",
+      "properties": {
+        "from_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "to_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "samples": { "description": "Samples in the window.", "type": "integer", "minimum": 1 }
+      },
+      "required": ["from_sim_ts", "to_sim_ts"],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "description": "Sentences for the technician; the ticket repeats them.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence_item" },
+      "minItems": 1
+    },
+    "observations": {
+      "description": "What the decision backend reads: every signal role and every derived behaviour detection could compute, at most 24, including the signals whose level and trend are both normal, so an expectation that a signal stays put can be judged. The derived behaviours and the signals that moved come first. Detection does not know the candidates; the decision state narrows the set to the signals that moved and the ones a candidate names.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/observation" },
+      "minItems": 1
+    },
+    "active_alarms": {
+      "description": "Controller alarm codes active at sim_ts.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+      "uniqueItems": true
+    },
+    "co_symptoms": {
+      "description": "Condition ids of the other symptoms firing at the same time.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:common:v1#/$defs/symptom_key" },
+      "uniqueItems": true
+    },
+    "ambient": { "$ref": "urn:fdp:schema:common:v1#/$defs/ambient_bucket" }
+  },
+  "required": [
+    "schema",
+    "event_id",
+    "sim_ts",
+    "symptom_key",
+    "rule_ids",
+    "machine_state",
+    "window",
+    "evidence",
+    "observations",
+    "active_alarms",
+    "co_symptoms",
+    "ambient"
+  ],
+  "additionalProperties": true
+}

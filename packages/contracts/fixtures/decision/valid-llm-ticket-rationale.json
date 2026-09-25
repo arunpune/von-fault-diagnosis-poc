@@ -1,0 +1,88 @@
+{
+  "schema": "urn:fdp:schema:decision:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-05-22T04:15:04.870Z",
+  "decision_id": "d90f3b58-1e47-4c26-a83b-9f0e1d2c3b40",
+  "episode_id": "5c8a2e64-0b37-4f91-8d25-6a7b8c9d0e11",
+  "event_id": "9b2e7c41-8d05-4a6f-b312-7e5d90a4c618",
+  "sim_ts": "2020-05-22T04:15:00.000Z",
+  "backend": "llm",
+  "model": "llm-structured-1",
+  "status": "ok",
+  "choice": "downstream_air_leak",
+  "probabilities": {
+    "downstream_air_leak": 0.91,
+    "high_air_demand": 0.04,
+    "dryer_purge_leak": 0.03,
+    "none_of_these": 0.02
+  },
+  "confidence": 0.87,
+  "support": {
+    "downstream_air_leak": 0.92,
+    "high_air_demand": 0.35,
+    "dryer_purge_leak": 0.21
+  },
+  "candidates": [
+    {
+      "fault_id": "downstream_air_leak",
+      "condition_id": "frequent_cycling",
+      "name": "Leak in the distribution network",
+      "probability": 0.91,
+      "benign": false,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:downstream_air_leak",
+        "title": "Compressor starts and loads too often"
+      }
+    },
+    {
+      "fault_id": "high_air_demand",
+      "condition_id": "frequent_cycling",
+      "name": "Air demand above the rated delivery",
+      "probability": 0.04,
+      "benign": true,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:high_air_demand",
+        "title": "Compressor starts and loads too often"
+      }
+    },
+    {
+      "fault_id": "dryer_purge_leak",
+      "condition_id": "frequent_cycling",
+      "name": "Dryer purge valve not seating",
+      "probability": 0.03,
+      "benign": false,
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:dryer_purge_leak",
+        "title": "Line pressure below setpoint"
+      }
+    }
+  ],
+  "severity": {
+    "level": "medium",
+    "score": 1,
+    "probabilities": { "0": 0.09, "1": 0.63, "2": 0.24, "3": 0.04 },
+    "confidence": 0.63
+  },
+  "gate": {
+    "outcome": "ticket",
+    "abstained": false,
+    "reason": "A named cause at or above the ticket threshold opens a ticket.",
+    "ticket_min_confidence": 0.85,
+    "review_min_confidence": 0.6
+  },
+  "usage": { "input_tokens": 2140, "output_tokens": 412 },
+  "cost": {
+    "usd": 0.0126,
+    "price_input_per_mtok": 3,
+    "price_output_per_mtok": 15,
+    "prices_as_of": "2026-09-19"
+  },
+  "latency_ms": 4870,
+  "request_id": "req-4c8d2b6f1e05",
+  "rationale": "The idle pressure decay is far above its reference at night as well as by day, which separates a loss in the pipework from a busy shift.",
+  "state_digest": "beaeadca62c349c6253dee73efa8e3fe4268f63d2f6287faefe7d00a5f02a0d4",
+  "error": null
+}

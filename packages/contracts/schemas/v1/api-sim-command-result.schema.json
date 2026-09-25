@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-sim-command-result:v1",
+  "title": "Api sim command result",
+  "description": "The answer of POST /api/sim/{cmd}. The backend publishes the command on the ops topic and waits a short while for the simulator's control-ack: `accepted` says the command was published, `ack` carries the acknowledgement once it arrives and stays null when it did not within the wait. A rejected command is an api-error instead.",
+  "type": "object",
+  "properties": {
+    "cmd_id": {
+      "description": "Identifier the backend gave the published command; the same value appears in the acknowledgement.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/uuid"
+    },
+    "accepted": {
+      "description": "True when the command was published on the ops topic.",
+      "type": "boolean"
+    },
+    "ack": {
+      "description": "The simulator's acknowledgement, null while none has arrived.",
+      "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:control-ack:v1" }]
+    }
+  },
+  "required": ["cmd_id", "accepted", "ack"],
+  "additionalProperties": true
+}

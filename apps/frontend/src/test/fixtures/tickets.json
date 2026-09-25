@@ -1,0 +1,232 @@
+{
+  "items": [
+    {
+      "schema": "urn:fdp:schema:ticket:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-07-18T16:05:00.310Z",
+      "ticket_id": "e13c9b40-7d28-4a65-b091-2c3d4e5f6a70",
+      "episode_id": "4f7c9a13-6b08-4d52-a9e4-1c2b3a4d5e60",
+      "action": "resolved",
+      "status": "resolved",
+      "fault_id": "oil_cooler_fouled",
+      "condition_id": "oil_temperature_high",
+      "title": "Oil cooler fouled — Oil temperature high",
+      "cause": "Dust and oil film on the cooler matrix keep the cooling air from carrying the heat away, so the oil leaves the cooler warmer than it should on every cycle.",
+      "checks": [
+        "Look through the cooler matrix against the light and check how much of it is blocked.",
+        "Compare the oil temperature of a cool night with the same duty on a warm afternoon.",
+        "Confirm that the cooling fan runs whenever the oil is above its switching temperature."
+      ],
+      "remedy": "Clean the cooler matrix from the fan side with low-pressure air, straighten bent fins and repeat the cleaning at the interval of the maintenance plan rather than only when the temperature rises.",
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:oil_cooler_fouled",
+        "title": "Oil temperature high"
+      },
+      "evidence": [
+        {
+          "metric": "oil_temperature",
+          "observation": "Oil temperature ran above its normal band for two hours and rose steadily through the shift.",
+          "value": 84.6,
+          "unit": "degC",
+          "baseline": 71.4,
+          "duration": "several hours"
+        }
+      ],
+      "confidence": 0.71,
+      "probabilities": {
+        "oil_cooler_fouled": 0.68,
+        "high_ambient_temperature": 0.19,
+        "cooling_fan_failure": 0.08,
+        "none_of_these": 0.05
+      },
+      "severity": "medium",
+      "backend": "jev",
+      "model": "jev-1.13.0",
+      "latest_decision_id": "a52d6c80-3f19-4e47-b2a8-7c9d0e1f2a30",
+      "opened_sim_ts": "2020-07-18T11:52:00.000Z",
+      "updated_sim_ts": "2020-07-18T13:22:00.000Z",
+      "resolved_sim_ts": "2020-07-18T16:05:00.000Z",
+      "close_reason": "silence",
+      "update_count": 2,
+      "closure": null
+    },
+    {
+      "schema": "urn:fdp:schema:ticket:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-06-05T09:41:13.700Z",
+      "ticket_id": "2c7f8a15-4b90-4d63-8e27-1a0b9c8d7e60",
+      "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+      "action": "opened",
+      "status": "open",
+      "fault_id": "dryer_purge_leak",
+      "condition_id": "continuous_load",
+      "title": "Dryer purge valve not seating — Compressor stays loaded and does not reach cut-out",
+      "cause": "The purge valve of the desiccant dryer does not close between changeovers, so part of the delivered air escapes at the purge silencer instead of reaching the plant.",
+      "checks": [
+        "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+        "Watch dryer purge pressure through a complete changeover and check whether it falls back to its resting value.",
+        "Isolate the dryer and see whether the unit reaches its cut-out pressure again."
+      ],
+      "remedy": "Overhaul or replace the purge valve and its pilot line, then repeat the changeover test and confirm that the purge pressure returns to its resting value between towers.",
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:dryer_purge_leak",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      "evidence": [
+        {
+          "metric": "loaded_run_duration",
+          "observation": "The unit has been loaded without reaching cut-out for about an hour.",
+          "value": 5322,
+          "unit": "s",
+          "baseline": 186,
+          "duration": "about an hour"
+        },
+        {
+          "metric": "dryer_purge_pressure",
+          "observation": "Dryer purge pressure has stayed far above its resting value between changeovers.",
+          "value": 1.12,
+          "unit": "bar",
+          "baseline": 0.02,
+          "duration": "several hours"
+        }
+      ],
+      "confidence": 0.91,
+      "probabilities": {
+        "dryer_purge_leak": 0.71,
+        "downstream_air_leak": 0.14,
+        "high_air_demand": 0.07,
+        "minimum_pressure_valve_fault": 0.05,
+        "none_of_these": 0.03
+      },
+      "severity": "high",
+      "backend": "jev",
+      "model": "jev-1.13.0",
+      "latest_decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+      "opened_sim_ts": "2020-06-05T09:41:12.000Z",
+      "updated_sim_ts": "2020-06-05T09:41:12.000Z",
+      "resolved_sim_ts": null,
+      "close_reason": null,
+      "update_count": 0,
+      "closure": null
+    },
+    {
+      "schema": "urn:fdp:schema:ticket:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-05-31T07:12:05.000Z",
+      "ticket_id": "6d0e4b92-8a13-4f57-b2c6-9e1a3d5f7b28",
+      "episode_id": "0a9c3e61-5b27-4d84-9f13-7c2e4a6b8d95",
+      "action": "closed",
+      "status": "closed",
+      "fault_id": "dryer_purge_leak",
+      "condition_id": "continuous_load",
+      "title": "Dryer purge valve not seating — Compressor stays loaded and does not reach cut-out",
+      "cause": "The purge valve of the desiccant dryer does not close between changeovers, so part of the delivered air escapes at the purge silencer instead of reaching the plant.",
+      "checks": [
+        "Listen at the purge silencer while the unit is loaded; a steady discharge between tower changeovers points at the valve.",
+        "Watch dryer purge pressure through a complete changeover and check whether it falls back to its resting value.",
+        "Isolate the dryer and see whether the unit reaches its cut-out pressure again."
+      ],
+      "remedy": "Overhaul or replace the purge valve and its pilot line, then repeat the changeover test and confirm that the purge pressure returns to its resting value between towers.",
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:dryer_purge_leak",
+        "title": "Compressor stays loaded and does not reach cut-out"
+      },
+      "evidence": [
+        {
+          "metric": "dryer_purge_pressure",
+          "observation": "Dryer purge pressure has stayed far above its resting value between changeovers.",
+          "value": 1.18,
+          "unit": "bar",
+          "baseline": 0.02,
+          "duration": "several hours"
+        }
+      ],
+      "confidence": 0.94,
+      "probabilities": {
+        "dryer_purge_leak": 0.83,
+        "downstream_air_leak": 0.09,
+        "high_air_demand": 0.04,
+        "minimum_pressure_valve_fault": 0.02,
+        "none_of_these": 0.02
+      },
+      "severity": "critical",
+      "backend": "jev",
+      "model": "jev-1.13.0",
+      "latest_decision_id": "3b7e1d54-9c28-4a6f-8e03-5d1a2c4b6e97",
+      "opened_sim_ts": "2020-05-29T23:41:12.000Z",
+      "updated_sim_ts": "2020-05-30T01:11:12.000Z",
+      "resolved_sim_ts": "2020-05-30T06:00:00.000Z",
+      "close_reason": "technician",
+      "update_count": 3,
+      "closure": {
+        "verdict": "correct",
+        "note": "Purge valve seat worn through; replaced the valve kit and the silencer. Cut-out reached on the first cycle after the repair.",
+        "closed_by": "shift-fitter-2",
+        "wall_ts": "2026-05-31T07:12:05.000Z"
+      }
+    },
+    {
+      "schema": "urn:fdp:schema:ticket:v1",
+      "unit_id": "cau-7",
+      "wall_ts": "2026-06-05T09:41:12.060Z",
+      "ticket_id": "8f3b6d27-0a41-4e59-9c83-5b6a7c8d9e01",
+      "episode_id": "5c8a2e64-0b37-4f91-8d25-6a7b8c9d0e11",
+      "action": "opened",
+      "status": "review",
+      "fault_id": "downstream_air_leak",
+      "condition_id": "frequent_cycling",
+      "title": "Leak in the distribution network — Compressor starts and loads too often",
+      "cause": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit has to replace what the plant loses. The loss runs day and night, which is what separates it from a busy shift.",
+      "checks": [
+        "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+        "Walk the distribution network and listen at joints, couplings and hose ends.",
+        "Compare the pressure decay of a quiet night with the reference cycle."
+      ],
+      "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated. Record the decay you measure so the next comparison starts from a known figure.",
+      "manual_ref": {
+        "section": "8.3",
+        "anchor": "fault:downstream_air_leak",
+        "title": "Compressor starts and loads too often"
+      },
+      "evidence": [
+        {
+          "metric": "load_cycle_rate",
+          "observation": "The compressor loaded nine times in the last hour against a reference of four.",
+          "value": 9,
+          "unit": "1/h",
+          "baseline": 4.1,
+          "duration": "several hours"
+        },
+        {
+          "metric": "unloaded_pressure_decay",
+          "observation": "Line pressure falls faster while the unit is idle than the reference cycle allows, at night as well as by day.",
+          "value": 0.41,
+          "unit": "bar/min",
+          "baseline": 0.12,
+          "duration": "about a day"
+        }
+      ],
+      "confidence": 0.648,
+      "probabilities": {
+        "downstream_air_leak": 0.4417,
+        "high_air_demand": 0.2761,
+        "dryer_purge_leak": 0.1104,
+        "none_of_these": 0.1718
+      },
+      "severity": "medium",
+      "backend": "rules",
+      "model": "rules-v1",
+      "latest_decision_id": "0e5f7a21-9c34-4b6d-81a7-2f3e4d5c6b70",
+      "opened_sim_ts": "2020-05-22T04:15:00.000Z",
+      "updated_sim_ts": "2020-05-22T04:15:00.000Z",
+      "resolved_sim_ts": null,
+      "close_reason": null,
+      "update_count": 0,
+      "closure": null
+    }
+  ],
+  "next_cursor": null
+}

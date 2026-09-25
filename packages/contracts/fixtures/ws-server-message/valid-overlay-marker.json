@@ -1,0 +1,15 @@
+{
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "type": "overlay.marker",
+  "payload": {
+    "schema": "urn:fdp:schema:gt-marker:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-06-05T09:41:12.000Z",
+    "kind": "jump",
+    "preset_id": "f3_air_leak_jun05",
+    "sim_ts_from": "2020-02-01T02:14:10.000Z",
+    "sim_ts_to": "2020-06-05T06:00:00.000Z"
+  }
+}

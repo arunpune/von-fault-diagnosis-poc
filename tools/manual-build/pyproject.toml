@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+[project]
+name = "fdp-manual-build"
+version = "0.1.0"
+description = "Builds the fictional machine manual from manual/spec YAML into PDF"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+# Exact pins, verified before pinning. This package is developer
+# tooling: it is never installed into a Compose image, so the
+# heavy renderer stays a plain runtime dependency of the tool itself.
+# `referencing` arrives with jsonschema and is used by manual/tools/load.py.
+dependencies = [
+  "weasyprint==70.0",
+  "jinja2==3.1.6",
+  "markdown-it-py==4.2.0",
+  "mdit-py-plugins==0.6.1",
+  "pyyaml==6.0.3",
+  "jsonschema==4.26.0",
+  "pdfplumber==0.11.10",
+  "pillow==12.3.0",
+]
+
+[project.scripts]
+fdp-manual-build = "fdp_manual_build.cli:main"
+# The acceptance runner, also reachable as `fdp-manual-build check`.
+fdp-manual-check = "fdp_manual_build.checks.runner:main"
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"

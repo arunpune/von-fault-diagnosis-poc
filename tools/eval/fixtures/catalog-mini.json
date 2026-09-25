@@ -1,0 +1,248 @@
+{
+  "schema": "urn:fdp:fixture:catalog:v1",
+  "generated_from": {
+    "inputs_tree_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "manual_revision": "mini"
+  },
+  "machine": { "name": "CAU-7 Compressed-Air Unit", "short_name": "CAU-7", "controller": "CTRL-7" },
+  "conditions": [
+    {
+      "id": "low_line_pressure",
+      "title": "Line pressure below setpoint",
+      "symptoms": ["The line never reaches the cut-out pressure.", "Tools downstream run slowly."],
+      "alarms": ["W101"],
+      "causes": ["downstream_air_leak", "high_air_demand"],
+      "section": "8.3"
+    },
+    {
+      "id": "continuous_load",
+      "title": "Compressor stays loaded and does not reach cut-out",
+      "symptoms": ["The unit runs loaded without unloading for hours."],
+      "alarms": ["W102"],
+      "causes": ["downstream_air_leak", "dryer_purge_leak", "high_air_demand"],
+      "section": "8.4"
+    },
+    {
+      "id": "purge_pressure_high",
+      "title": "Dryer purge pressure high, air escaping at the purge silencer",
+      "symptoms": ["Air is heard leaving the purge silencer between changeovers."],
+      "alarms": ["W103"],
+      "causes": ["dryer_purge_leak"],
+      "section": "8.5"
+    },
+    {
+      "id": "oil_temperature_high",
+      "title": "Oil temperature high",
+      "symptoms": ["The oil temperature reading sits above the normal band while loaded."],
+      "alarms": ["W104"],
+      "causes": ["oil_cooler_fouled", "high_ambient_temperature", "oil_temperature_sensor_fault"],
+      "section": "8.6"
+    }
+  ],
+  "causes": [
+    {
+      "fault_id": "downstream_air_leak",
+      "title": "Leak in the distribution network",
+      "subsystem": "distribution",
+      "benign": false,
+      "summary": "Air escapes from the pipework, hoses or couplings behind the reservoirs, so the unit replaces what the plant loses. The loss runs day and night, which is what separates it from a busy shift.",
+      "signal_moves": [
+        {
+          "behaviour": "unloaded_pressure_decay",
+          "direction": "faster",
+          "onset": "gradual",
+          "note": "The earliest sign, visible in the idle phase of every cycle."
+        },
+        { "behaviour": "load_cycle_rate", "direction": "higher", "onset": "gradual" },
+        {
+          "behaviour": "loaded_run_duration",
+          "direction": "longer",
+          "onset": "gradual",
+          "phase": "loaded"
+        },
+        { "behaviour": "cut_out_reached", "direction": "not_reached" },
+        {
+          "signal": "line_pressure",
+          "direction": "falls",
+          "onset": "sustained",
+          "phase": "loaded"
+        },
+        {
+          "signal": "low_pressure_switch",
+          "direction": "on",
+          "onset": "sustained",
+          "phase": "loaded"
+        }
+      ],
+      "checks": [
+        "Stop the unit, close the isolation valve at the pneumatic panel and watch whether the reservoir pressure still falls.",
+        "Walk the distribution network and listen at joints, couplings and hose ends."
+      ],
+      "remedy": "Seal or replace the leaking joints, hoses and couplings, then repeat the pressure-hold test with the unit stopped and the plant isolated.",
+      "related_alarms": ["W101", "W102"],
+      "maintenance_refs": ["weekly_checks"],
+      "conditions": ["low_line_pressure", "continuous_load"],
+      "section": "8.3",
+      "pages": { "clean": [26], "realistic": [27, 29] }
+    },
+    {
+      "fault_id": "dryer_purge_leak",
+      "title": "Purge valve not seating",
+      "subsystem": "dryer",
+      "benign": false,
+      "summary": "The purge valve of the drying tower does not close fully, so dried air keeps escaping at the silencer. The unit loads more often and finally stays loaded, while the purge pressure reading stays high between changeovers.",
+      "signal_moves": [
+        { "signal": "purge_pressure", "direction": "high", "onset": "sustained" },
+        { "behaviour": "unloaded_pressure_decay", "direction": "faster", "onset": "gradual" },
+        { "behaviour": "cut_out_reached", "direction": "not_reached" },
+        { "signal": "line_pressure", "direction": "low", "onset": "sustained", "phase": "loaded" }
+      ],
+      "checks": [
+        "Listen at the purge silencer between two changeovers; a continuous hiss is the sign.",
+        "Compare the purge pressure reading with the reference figure of section 9.4."
+      ],
+      "remedy": "Overhaul or replace the purge valve of the affected tower and repeat the changeover test.",
+      "related_alarms": ["W102", "W103"],
+      "maintenance_refs": ["dryer_inspection"],
+      "conditions": ["continuous_load", "purge_pressure_high"],
+      "section": "8.5",
+      "pages": { "clean": [31], "realistic": [33] }
+    },
+    {
+      "fault_id": "oil_cooler_fouled",
+      "title": "Oil cooler fouled",
+      "subsystem": "cooling",
+      "benign": false,
+      "summary": "Dust and oil mist have closed the cooler matrix, so the oil leaves the cooler warmer than it should. The temperature climbs slowly over days and is highest at the end of a long loaded run.",
+      "signal_moves": [
+        {
+          "signal": "oil_temperature",
+          "direction": "rises",
+          "onset": "gradual",
+          "phase": "loaded"
+        },
+        { "signal": "cooling_air_temperature", "direction": "rises", "onset": "gradual" },
+        { "behaviour": "cooling_recovery_time", "direction": "longer", "onset": "gradual" }
+      ],
+      "checks": [
+        "Inspect the cooler matrix against the light and look for a closed face.",
+        "Measure the air temperature difference across the cooler while the unit is loaded."
+      ],
+      "remedy": "Clean the cooler matrix with low-pressure air from the clean side and record the temperature difference afterwards.",
+      "related_alarms": ["W104"],
+      "maintenance_refs": ["cooler_cleaning"],
+      "conditions": ["oil_temperature_high"],
+      "section": "8.6",
+      "pages": { "clean": [35], "realistic": [37] }
+    },
+    {
+      "fault_id": "high_ambient_temperature",
+      "title": "Ambient temperature above the design figure",
+      "subsystem": "cooling",
+      "benign": true,
+      "summary": "The machine room is warmer than the unit is rated for, so every cooled quantity settles higher. Nothing is faulty: the whole temperature band moves up together and returns when the room cools.",
+      "signal_moves": [
+        { "signal": "oil_temperature", "direction": "high", "onset": "sustained" },
+        { "signal": "cooling_air_temperature", "direction": "high", "onset": "sustained" },
+        { "behaviour": "load_cycle_rate", "direction": "unchanged" }
+      ],
+      "checks": [
+        "Read the machine-room temperature and compare it with the figure of section 9.1.",
+        "Check that the ventilation opening is clear and that no warm exhaust is drawn back in."
+      ],
+      "remedy": "Improve the ventilation of the machine room; no part of the unit needs work.",
+      "related_alarms": ["W104", "W109"],
+      "maintenance_refs": ["room_ventilation_check"],
+      "conditions": ["oil_temperature_high"],
+      "section": "8.6",
+      "pages": { "clean": [36], "realistic": [38] }
+    },
+    {
+      "fault_id": "high_air_demand",
+      "title": "Air demand above the delivery of the unit",
+      "subsystem": "distribution",
+      "benign": true,
+      "summary": "The plant is drawing more air than the unit can deliver, so the line pressure sags and the unit stays loaded. The pattern follows the shift and stops with it, which is what separates it from a leak.",
+      "signal_moves": [
+        {
+          "behaviour": "loaded_run_duration",
+          "direction": "longer",
+          "onset": "intermittent",
+          "phase": "loaded"
+        },
+        {
+          "signal": "line_pressure",
+          "direction": "low",
+          "onset": "intermittent",
+          "phase": "loaded"
+        },
+        { "behaviour": "unloaded_pressure_decay", "direction": "unchanged" }
+      ],
+      "checks": [
+        "Compare the pressure during a shift with the pressure of a quiet night.",
+        "List the consumers started recently and add up their rated demand."
+      ],
+      "remedy": "Schedule the large consumers apart, or plan additional delivery; the unit itself is sound.",
+      "related_alarms": ["W101", "W102"],
+      "maintenance_refs": [],
+      "conditions": ["low_line_pressure", "continuous_load"],
+      "section": "8.3",
+      "pages": { "clean": [27], "realistic": [29] }
+    },
+    {
+      "fault_id": "oil_temperature_sensor_fault",
+      "title": "Oil temperature sensor faulty",
+      "subsystem": "control",
+      "benign": false,
+      "summary": "The oil temperature transmitter reports a value the machine is not at. The reading jumps or sticks while every other cooled quantity stays in its band, which is what marks it as instrumentation rather than a cooling fault.",
+      "signal_moves": [
+        { "signal": "oil_temperature", "direction": "fluctuates", "onset": "sudden" },
+        { "signal": "cooling_air_temperature", "direction": "unchanged" },
+        { "behaviour": "load_cycle_rate", "direction": "unchanged" }
+      ],
+      "checks": [
+        "Compare the transmitter reading with a hand measurement at the oil filter housing.",
+        "Check the sensor wiring and its terminal for a loose contact."
+      ],
+      "remedy": "Replace the oil temperature transmitter and repeat the comparison measurement.",
+      "related_alarms": ["W104", "S306"],
+      "maintenance_refs": ["annual_inspection"],
+      "conditions": ["oil_temperature_high"],
+      "section": "8.6",
+      "pages": { "clean": [38], "realistic": [40] }
+    }
+  ],
+  "maintenance": [
+    {
+      "id": "weekly_checks",
+      "title": "Weekly walk-round checks",
+      "interval": "weekly",
+      "section": "7.3"
+    },
+    {
+      "id": "dryer_inspection",
+      "title": "Dryer changeover and purge inspection",
+      "interval": "quarterly",
+      "section": "7.4"
+    },
+    {
+      "id": "cooler_cleaning",
+      "title": "Clean the oil cooler matrix",
+      "interval": "half-yearly",
+      "section": "7.5"
+    },
+    {
+      "id": "room_ventilation_check",
+      "title": "Check the machine-room ventilation",
+      "interval": "half-yearly",
+      "section": "7.6"
+    },
+    {
+      "id": "annual_inspection",
+      "title": "Annual inspection",
+      "interval": "yearly",
+      "section": "7.7"
+    }
+  ],
+  "parameters": []
+}

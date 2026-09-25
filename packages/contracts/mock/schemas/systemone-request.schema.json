@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:mock:systemone-request:v1",
+  "title": "POST /v1/systemone request body",
+  "description": "What the mock TypeSafe server accepts. The urn:fdp:mock: namespace is neither a message (urn:fdp:schema:) nor a configuration file (urn:fdp:meta:): these two schemas describe a third-party wire shape, not one of this repository's own documents. The body is left open at the top level because the SDK forwards unknown request fields; the questions are closed, so a renamed or invented question field is a 422 here instead of a surprise on the first live call.",
+  "type": "object",
+  "required": ["state", "questions"],
+  "properties": {
+    "state": { "$ref": "#/$defs/entry" },
+    "model": { "type": "string", "minLength": 1 },
+    "questions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/question" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "description": "The SDK's EntryType: text, a JSON object or array, or null.",
+      "type": ["string", "object", "array", "null"]
+    },
+    "question": {
+      "description": "One question. The shared shape is checked first so that a wrong criteria type reports the criteria, not the whole question.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["noul", "choice", "score"] },
+        "instructions": { "$ref": "#/$defs/entry" },
+        "criteria": true
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": { "type": { "const": "choice" } },
+            "required": ["type"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "criteria": {
+                "type": "object",
+                "minProperties": 2,
+                "additionalProperties": { "$ref": "#/$defs/entry" }
+              }
+            },
+            "required": ["criteria"]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": { "type": { "const": "score" } },
+            "required": ["type"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "criteria": {
+                "type": "array",
+                "minItems": 2,
+                "items": { "$ref": "#/$defs/entry" }
+              }
+            },
+            "required": ["criteria"]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": { "type": { "const": "noul" } },
+            "required": ["type"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "criteria": {
+                "type": ["object", "null"],
+                "properties": {
+                  "true": { "$ref": "#/$defs/entry" },
+                  "false": { "$ref": "#/$defs/entry" }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-events:v1",
+  "title": "Api events",
+  "description": "The body of GET /api/events/suspect (alias GET /api/events): one page of suspect events, newest first. The items are the suspect-event messages the detection stage publishes on the broker, so the feed a technician scrolls and the live frames carry the same document. `next_cursor` is the opaque token of the next page and is null on the last one.",
+  "type": "object",
+  "properties": {
+    "items": {
+      "description": "The suspect events of this page, newest first.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:suspect-event:v1" }
+    },
+    "next_cursor": {
+      "description": "Opaque token of the next page, null on the last one.",
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["items", "next_cursor"],
+  "additionalProperties": true
+}

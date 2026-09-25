@@ -1,0 +1,80 @@
+{
+  "Apache-2.0": [
+    {
+      "author": "Nicholas C. Zakas",
+      "description": "General purpose glob-based configuration matching.",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/config-array#readme",
+      "license": "Apache-2.0",
+      "name": "@eslint/config-array",
+      "versions": ["0.23.5"]
+    }
+  ],
+  "BSD-2-Clause": [
+    {
+      "description": "ECMAScript scope analyzer for ESLint",
+      "homepage": "https://github.com/eslint/js/blob/main/packages/eslint-scope/README.md",
+      "license": "BSD-2-Clause",
+      "name": "eslint-scope",
+      "versions": ["9.1.2"]
+    }
+  ],
+  "BSD-3-Clause": [
+    {
+      "author": "Joel Feenstra",
+      "description": "A query library for ECMAScript AST using a CSS selector like query language.",
+      "homepage": "https://github.com/estools/esquery/",
+      "license": "BSD-3-Clause",
+      "name": "esquery",
+      "versions": ["1.7.0"]
+    }
+  ],
+  "BlueOak-1.0.0": [
+    {
+      "author": "Isaac Z. Schlueter",
+      "description": "a glob matcher in javascript",
+      "homepage": "https://github.com/isaacs/minimatch#readme",
+      "license": "BlueOak-1.0.0",
+      "name": "minimatch",
+      "versions": ["10.2.6"]
+    }
+  ],
+  "CC-BY-4.0": [
+    {
+      "author": "Ben Briggs",
+      "description": "A smaller version of caniuse-db, with only the essentials!",
+      "homepage": "https://github.com/browserslist/caniuse-lite#readme",
+      "license": "CC-BY-4.0",
+      "name": "caniuse-lite",
+      "versions": ["1.0.30001810"]
+    }
+  ],
+  "ISC": [
+    {
+      "author": "GitHub Inc.",
+      "description": "The semantic version parser used by npm.",
+      "homepage": "https://github.com/npm/node-semver#readme",
+      "license": "ISC",
+      "name": "semver",
+      "versions": ["6.3.1", "7.8.5"]
+    }
+  ],
+  "MIT": [
+    {
+      "author": "The Babel Team",
+      "description": "Generate errors that contain a code frame that point to source locations.",
+      "homepage": "https://babel.dev/docs/en/next/babel-code-frame",
+      "license": "MIT",
+      "name": "@babel/code-frame",
+      "versions": ["7.29.7"]
+    }
+  ],
+  "MPL-2.0": [
+    {
+      "description": "A CSS parser, transformer, and minifier written in Rust",
+      "homepage": "https://github.com/parcel-bundler/lightningcss#readme",
+      "license": "MPL-2.0",
+      "name": "lightningcss",
+      "versions": ["1.33.0"]
+    }
+  ]
+}

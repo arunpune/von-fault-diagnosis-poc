@@ -1,0 +1,5 @@
+{
+  "$expect_error": "/next_cursor must be string,null",
+  "items": [],
+  "next_cursor": 42
+}

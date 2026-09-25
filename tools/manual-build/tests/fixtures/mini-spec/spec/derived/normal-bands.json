@@ -1,0 +1,168 @@
+{
+  "_credit": "Derived from the MetroPT-3 dataset (Davari, Veloso, Ribeiro, Gama; UCI Machine Learning Repository, doi:10.24432/C5VW3R), CC BY 4.0.",
+  "_license": "CC-BY-4.0",
+  "cycle": {
+    "cut_in_pressure_observed": 8.05,
+    "cut_out_pressure_observed": 10.03,
+    "discharge_minus_line_loaded": 0.32,
+    "load_cycles_per_hour": 1.97,
+    "loaded_run_band": {
+      "max": 129,
+      "min": 99
+    },
+    "loaded_run_typical": 109,
+    "off_phase_typical": 1329,
+    "pressure_decay_unloaded_band": {
+      "max": 0.15,
+      "min": 0.05
+    },
+    "pressure_decay_unloaded_typical": 0.07,
+    "pressure_rise_loaded": 1.1,
+    "tower_pulse_after_cut_in": 60,
+    "unloaded_run_on_typical": 407
+  },
+  "provenance": {
+    "generated_by": "manual/tools/derive_bands.py",
+    "pandas_version": "3.0.6",
+    "range": [
+      "2020-02-01T00:00:00",
+      "2020-03-01T00:00:00"
+    ],
+    "range_override": false,
+    "rows_dropped_frozen": 0,
+    "rows_dropped_gap": 37,
+    "rows_dropped_settle": 4623,
+    "rows_total": 1516948,
+    "rows_used": 210190,
+    "script_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_bytes": 218300507,
+    "source_file": "data/metropt3/MetroPT3(AirCompressor).csv",
+    "source_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24"
+  },
+  "signals": {
+    "ambient_temperature": {
+      "loaded": {
+        "high": 28,
+        "low": 15,
+        "source": "authored",
+        "typical": 20
+      },
+      "off": {
+        "high": 28,
+        "low": 15,
+        "source": "authored",
+        "typical": 20
+      },
+      "unloaded": {
+        "high": 28,
+        "low": 15,
+        "source": "authored",
+        "typical": 20
+      }
+    },
+    "intake_closed": {
+      "loaded": {
+        "duty": 0.0,
+        "expected": 0,
+        "n": 13031
+      },
+      "off": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 153102
+      },
+      "unloaded": {
+        "duty": 1.0,
+        "expected": 1,
+        "n": 48717
+      }
+    },
+    "line_pressure": {
+      "loaded": {
+        "high": 10.1,
+        "low": 8.0,
+        "max": 10.164,
+        "min": 7.324,
+        "n": 13031,
+        "p1": 7.962,
+        "p5": 8.048,
+        "p50": 9.106,
+        "p95": 10.028,
+        "p99": 10.1074,
+        "typical": 9.1
+      },
+      "off": {
+        "high": 9.5,
+        "low": 8.1,
+        "max": 9.94,
+        "min": 8.038,
+        "n": 153102,
+        "p1": 8.072,
+        "p5": 8.124,
+        "p50": 8.72,
+        "p95": 9.424,
+        "p99": 9.534,
+        "typical": 8.7
+      },
+      "unloaded": {
+        "high": 10.1,
+        "low": 9.0,
+        "max": 10.158,
+        "min": 8.042,
+        "n": 48717,
+        "p1": 8.56,
+        "p5": 9.054,
+        "p50": 9.674,
+        "p95": 10.022,
+        "p99": 10.104,
+        "typical": 9.7
+      }
+    },
+    "oil_temperature": {
+      "loaded": {
+        "high": 61,
+        "low": 48,
+        "max": 66.325,
+        "min": 31.975,
+        "n": 13031,
+        "p1": 46.4,
+        "p5": 48.725,
+        "p50": 55.175,
+        "p95": 60.4125,
+        "p99": 63.25,
+        "typical": 55
+      },
+      "off": {
+        "high": 61,
+        "low": 50,
+        "max": 65.85,
+        "min": 40.95,
+        "n": 153102,
+        "p1": 47.625,
+        "p5": 50.05,
+        "p50": 56.325,
+        "p95": 60.2,
+        "p99": 62.175,
+        "typical": 56
+      },
+      "unloaded": {
+        "high": 64,
+        "low": 51,
+        "max": 69.15,
+        "min": 33.925,
+        "n": 48717,
+        "p1": 47.25,
+        "p5": 51.575,
+        "p50": 58.4,
+        "p95": 63.625,
+        "p99": 65.725,
+        "typical": 58
+      }
+    }
+  },
+  "start_current_peak": {
+    "n": 1412,
+    "p50": 11.4,
+    "p95": 13.2
+  }
+}

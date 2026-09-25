@@ -1,0 +1,92 @@
+{
+  "schema": "urn:fdp:schema:gt-catalog:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "dataset": {
+    "first_ts": "2020-02-01T00:00:00.000Z",
+    "last_ts": "2020-09-01T03:59:50.000Z",
+    "rows": 1516948,
+    "gaps": 331
+  },
+  "presets": {
+    "schema": "urn:fdp:schema:gt-presets:v1",
+    "presets": [
+      {
+        "preset_id": "baseline_feb",
+        "label": "Normal operation – 1 Feb 2020",
+        "kind": "baseline",
+        "sim_ts": "2020-02-01T00:00:00.000Z",
+        "lead_in_min": 0,
+        "failure_id": null,
+        "note": "Start of the recording; nothing to find here."
+      },
+      {
+        "preset_id": "f3_air_leak_jun05",
+        "label": "Air leak – 5 Jun 2020",
+        "kind": "failure",
+        "sim_ts": "2020-06-05T10:00:00.000Z",
+        "lead_in_min": 240,
+        "failure_id": "F3",
+        "note": "The tour preset of the README; the replay starts at 06:00."
+      }
+    ]
+  },
+  "injections": [
+    {
+      "injection_id": "oil_cooler_fouling",
+      "fault_id": "oil_cooler_fouled",
+      "label": "Oil cooler fouling",
+      "benign": false,
+      "description": "Oil temperature drifts up over hours while cycling stays normal and ambient stays normal.",
+      "default_duration_sim_min": 600,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    }
+  ],
+  "failures": {
+    "schema": "urn:fdp:schema:gt-failure-table:v1",
+    "source": {
+      "dataset": "MetroPT-3 (UCI 791)",
+      "doi": "10.24432/C5VW3R",
+      "license": "CC-BY-4.0",
+      "csv_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+      "resolved_from": "docs/dataset.md#how-the-windows-were-resolved"
+    },
+    "clock": "utc-assumed",
+    "failures": [
+      {
+        "id": "F2",
+        "uci_nr": "#1 (duplicate, read as #2)",
+        "start": "2020-05-29T23:30:00.000Z",
+        "end": "2020-05-30T06:00:00.000Z",
+        "uci_start": "2020-05-29T23:30:00.000Z",
+        "uci_end": "2020-05-30T06:00:00.000Z",
+        "data_onset": "2020-05-29T23:14:56.000Z",
+        "data_recovery": "2020-05-30T05:56:46.000Z",
+        "onset_known": true,
+        "precursor_from": null,
+        "report_local": "2020-05-30 01:10",
+        "maintenance": "2020-05-30T12:00:00.000Z",
+        "maintenance_verified": false,
+        "fault_id": "dryer_purge_leak",
+        "accepted_fault_ids": ["dryer_purge_leak", "downstream_air_leak"],
+        "signature": "A",
+        "component": "pneumatic panel (dryer/drain side)",
+        "native_alarm_first": null,
+        "in_headline": true,
+        "notes": "The published month of the maintenance note is a typo; the data puts it on 30 May."
+      }
+    ],
+    "unlabelled_episodes": [],
+    "excluded_windows": [],
+    "frozen_blocks": [],
+    "gaps_over_1h": []
+  },
+  "source_sha256": "9f2c1b0d4e5a6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8"
+}

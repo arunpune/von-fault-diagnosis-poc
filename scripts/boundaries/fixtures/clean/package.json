@@ -1,0 +1,7 @@
+{
+  "name": "fdp-boundary-fixture-clean",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Miniature workspace holding only the import edges the architecture allows"
+}

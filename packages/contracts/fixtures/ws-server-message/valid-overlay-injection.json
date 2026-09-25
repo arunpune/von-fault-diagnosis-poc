@@ -1,0 +1,21 @@
+{
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "type": "overlay.injection",
+  "payload": {
+    "schema": "urn:fdp:schema:gt-injection:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-06-05T09:41:12.000Z",
+    "sim_ts": "2020-02-01T04:00:00.000Z",
+    "event": "start",
+    "instance_id": "inj-7f3a-1",
+    "injection_id": "oil_cooler_fouling",
+    "fault_id": "oil_cooler_fouled",
+    "params": {
+      "magnitude": 1,
+      "duration_sim_min": 600
+    },
+    "ends_sim_ts": "2020-02-01T14:00:00.000Z"
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:common:v1",
+  "title": "Shared definitions for the CAU-7 manual source of truth",
+  "description": "Referenced from the other schemas as common.schema.json#/$defs/<name>. See manual/README.md.",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,39}$"
+    },
+    "identifier_list": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/identifier" },
+      "uniqueItems": true
+    },
+    "alarm_code": {
+      "type": "string",
+      "pattern": "^[WXSM][0-9]{3}$"
+    },
+    "alarm_code_list": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/alarm_code" },
+      "uniqueItems": true
+    },
+    "param_no": {
+      "type": "string",
+      "pattern": "^P[0-9]{2}$"
+    },
+    "panel_label": {
+      "type": "string",
+      "pattern": "^[PTID][0-9]$"
+    },
+    "part_code": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)+$"
+    },
+    "iso_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "bar",
+        "degC",
+        "A",
+        "V",
+        "kW",
+        "Hz",
+        "s",
+        "min",
+        "h",
+        "months",
+        "L",
+        "m3_per_min",
+        "mm",
+        "m",
+        "kg",
+        "dBA",
+        "rpm",
+        "percent",
+        "count",
+        "per_hour",
+        "bar_per_min",
+        "bool"
+      ]
+    },
+    "quantity": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" }
+      },
+      "required": ["value", "unit"],
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "description": "An inclusive min/max pair with an explicit unit.",
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "unit": { "$ref": "common.schema.json#/$defs/unit" }
+      },
+      "required": ["min", "max", "unit"],
+      "additionalProperties": false
+    },
+    "range": {
+      "type": "object",
+      "description": "An inclusive min/max pair whose unit is the owning signal's unit.",
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" }
+      },
+      "required": ["min", "max"],
+      "additionalProperties": false
+    },
+    "setting_ref": {
+      "type": "object",
+      "properties": {
+        "setting": { "$ref": "common.schema.json#/$defs/identifier" },
+        "offset": { "type": "number" }
+      },
+      "required": ["setting"],
+      "additionalProperties": false
+    },
+    "threshold": {
+      "oneOf": [
+        { "$ref": "common.schema.json#/$defs/quantity" },
+        { "$ref": "common.schema.json#/$defs/setting_ref" }
+      ]
+    },
+    "duration_s": {
+      "description": "Seconds as an integer, or a reference to a setting whose default is used.",
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "$ref": "common.schema.json#/$defs/setting_ref" }
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text_list": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/text" }
+    },
+    "state": {
+      "type": "string",
+      "enum": ["any", "loaded", "unloaded", "off", "running"]
+    },
+    "band_state": {
+      "type": "string",
+      "enum": ["loaded", "unloaded", "off"]
+    },
+    "subsystem": {
+      "type": "string",
+      "enum": [
+        "compressor",
+        "intake_unloading",
+        "oil",
+        "cooling",
+        "separator_drain",
+        "dryer",
+        "reservoirs",
+        "distribution",
+        "electrical",
+        "control"
+      ]
+    },
+    "signal_group": {
+      "type": "string",
+      "enum": ["analog", "digital", "extra"]
+    },
+    "signal_kind": {
+      "type": "string",
+      "enum": ["pressure", "temperature", "current", "switch", "command", "status"]
+    },
+    "band": {
+      "type": "object",
+      "properties": {
+        "step": { "type": "number", "exclusiveMinimum": 0 },
+        "source": { "type": "string", "enum": ["derived", "authored"] }
+      },
+      "required": ["step", "source"],
+      "additionalProperties": false
+    },
+    "modbus": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["int16", "uint16"] },
+        "scale": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["type", "scale"],
+      "additionalProperties": false
+    },
+    "comparison_op": {
+      "type": "string",
+      "enum": ["gt", "lt", "gte", "lte", "eq", "ne"]
+    },
+    "direction_analog": {
+      "type": "string",
+      "enum": [
+        "rises",
+        "falls",
+        "high",
+        "low",
+        "unchanged",
+        "fluctuates",
+        "near_zero",
+        "not_venting"
+      ]
+    },
+    "direction_digital": {
+      "type": "string",
+      "enum": ["on", "off", "stays_on", "stays_off", "toggles", "no_pulse"]
+    },
+    "direction_behaviour": {
+      "type": "string",
+      "enum": [
+        "higher",
+        "lower",
+        "longer",
+        "shorter",
+        "faster",
+        "slower",
+        "not_reached",
+        "unchanged"
+      ]
+    },
+    "direction": {
+      "description": "Union of the three direction vocabularies; rule A5 narrows it to the target kind.",
+      "anyOf": [
+        { "$ref": "common.schema.json#/$defs/direction_analog" },
+        { "$ref": "common.schema.json#/$defs/direction_digital" },
+        { "$ref": "common.schema.json#/$defs/direction_behaviour" }
+      ]
+    },
+    "move_phase": {
+      "type": "string",
+      "enum": ["loaded", "unloaded", "off", "any", "start"]
+    },
+    "move_onset": {
+      "type": "string",
+      "enum": ["sudden", "gradual", "intermittent", "sustained"]
+    },
+    "likelihood": {
+      "type": "string",
+      "enum": ["common", "occasional", "rare"]
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Keeps the repository's dependency pins current.
+#
+# Two of those pins can only be refreshed this way: the commit SHAs of the
+# actions in `.github/workflows/ci.yml` and the composite actions beside it,
+# and the image tags and digests in the Dockerfiles — both are point-in-time
+# facts that nothing in the repository can re-derive. Every Dependabot pull
+# request runs the whole workflow, so an image bump that breaks the stack is
+# caught by the `stack` job before a human reads the diff.
+#
+# Each ecosystem is grouped into one pull request per week with a limit of
+# three open at a time, and the commit subjects follow the Conventional
+# Commits rule (CONTRIBUTING.md) so `fdp-checks commits` stays green.
+
+version: 2
+
+updates:
+  # The workflow and the two composite actions beside it. An action directory
+  # is not scanned unless it is listed, so a new one under .github/actions
+  # belongs here too.
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      - "/.github/actions/setup-toolchain"
+      - "/.github/actions/setup-dataset"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # One entry per directory that holds a Dockerfile.
+  - package-ecosystem: docker
+    directories:
+      - "/apps/backend"
+      - "/apps/frontend"
+      - "/services/modbus"
+      - "/tools/init"
+      - "/tools/manual-build"
+      - "/packages/contracts/mock"
+      - "/infra/mosquitto"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      images:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      npm:
+        patterns: ["*"]
+
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: gomod
+    directory: "/services/modbus"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      go:
+        patterns: ["*"]

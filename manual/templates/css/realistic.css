@@ -1,0 +1,222 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/*
+ * The `realistic` variant (docs/spec.md §4, phase1-pdf-build.md §8).
+ *
+ * Where clean.css is an absence, this file is the presence: the document a
+ * real manufacturer would ship. Every rule below answers one row of the §8
+ * knob table, and every one of them makes the extraction job harder in the
+ * way a field manual does:
+ *
+ *   layout          chapters 2, 6 and 7 are set in two columns, so a line of
+ *                   prose is short and a wide table has to break out of the
+ *                   column flow;
+ *   tables          the troubleshooting and message tables run over page
+ *                   breaks with their header repeated, so a row of a table is
+ *                   not on the page its caption is;
+ *   page furniture  a running header, a revision stamp and "Page N of M" sit
+ *                   on every page but the cover, so extracted text carries
+ *                   boilerplate between the chapters;
+ *   footnotes       a cross-reference leaves a marker in the sentence and its
+ *                   text at the foot of the page, far from the reference;
+ *   body size       9.5 pt against the 10 pt of base.css, so the two variants
+ *                   paginate differently and a page number from one is never
+ *                   the page number of the other.
+ *
+ * Everything the two variants agree on — the page box, the empty `@page
+ * :first` of the cover, headings, tables, figures, admonitions and the table
+ * of contents — is in base.css and is not repeated here.
+ *
+ * Verified against WeasyPrint 70.0 (docs/plan/phase1-pdf-build.md §1):
+ * `columns`, `column-span: all` on a block-level direct child of the
+ * multi-column box, `string-set` from an attribute, `float: footnote` with
+ * `@footnote`, `counter(pages)` and the repeated `<thead>` all behave as used
+ * below.
+ */
+
+/* --- named strings ------------------------------------------------------ */
+
+/*
+ * The four document strings come off the empty <span class="running-strings">
+ * that partials/cover.html.j2 emits for this variant only: reading them from
+ * attributes rather than from text keeps them out of the extracted text, so
+ * the running header is the only place they appear.
+ */
+.running-strings {
+  string-set:
+    doc-title attr(data-doc-title),
+    short-name attr(data-short-name),
+    rev-id attr(data-rev-id),
+    rev-date attr(data-rev-date);
+}
+
+/*
+ * `chapter` is the running header on the right. base.css sets it on the
+ * <section>, whose `content()` is the whole chapter; the heading carries the
+ * same number and title in one line, which is what a running header wants.
+ */
+.chapter {
+  string-set: none;
+}
+
+h1.chapter-title {
+  string-set: chapter content();
+}
+
+/* --- page furniture ----------------------------------------------------- */
+
+@page {
+  @top-left {
+    content: string(doc-title);
+    font-size: 8pt;
+    color: #333333;
+  }
+
+  @top-right {
+    content: string(chapter);
+    font-size: 8pt;
+    color: #333333;
+  }
+
+  @bottom-left {
+    content: "Rev. " string(rev-id) " · " string(rev-date);
+    font-size: 7.5pt;
+    color: #333333;
+  }
+
+  @bottom-center {
+    content: string(short-name);
+    font-size: 7.5pt;
+    color: #333333;
+  }
+
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-size: 7.5pt;
+    color: #333333;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * The footnote area: a rule the width of the text block, then the bodies
+   * that `float: footnote` moved down here from the sentences above.
+   */
+  @footnote {
+    border-top: 0.3pt solid #444444;
+    margin-top: 3mm;
+    padding-top: 1mm;
+  }
+}
+
+/*
+ * base.css already empties the six margin boxes of `@page :first`, and
+ * `:first` outranks the plain `@page` above, so the cover stays bare.
+ */
+
+/* --- body ---------------------------------------------------------------- */
+
+html {
+  /* Smaller than the 9.5 pt of base.css, so the variants never paginate alike. */
+  font-size: 9pt;
+}
+
+/* --- two columns --------------------------------------------------------- */
+
+/*
+ * build.yaml's `two_column_chapters` reaches the stylesheet as
+ * `data-columns="2"` on the chapter (fdp_manual_build.build). The heading sits
+ * outside `.body`, so it spans the page on its own.
+ */
+.chapter[data-columns="2"] > .body {
+  columns: 2;
+  column-gap: 7mm;
+  column-fill: auto;
+}
+
+/*
+ * WeasyPrint honours `column-span` on a direct child of the multi-column box
+ * only, and the table macros and `figure()` both emit a block-level element
+ * that CommonMark keeps as a raw HTML block, so each lands as a child of
+ * `.body` and never inside a paragraph.
+ *
+ * `<figure>` spans as written. A `<table>` does not, although the rule below
+ * says so: WeasyPrint puts every table in an anonymous table-wrapper box and
+ * that box's style resets the non-inherited properties it does not forward,
+ * `column-span` among them, so the property never reaches a child of the
+ * column box. The generated table that lands in a two-column chapter is
+ * therefore wrapped in a `.wide` block by its partial and the block spans
+ * instead. The `> table` rule stays as the declared intent, and `.wide` is
+ * also the opt-in for anything else — an admonition, say — that a partial
+ * wants across both columns.
+ */
+.chapter[data-columns="2"] > .body > figure,
+.chapter[data-columns="2"] > .body > table,
+.chapter[data-columns="2"] > .body > .wide {
+  column-span: all;
+}
+
+/* --- tables that span pages ---------------------------------------------- */
+
+/*
+ * base.css already repeats `<thead>` on every page a table reaches and keeps
+ * single rows together; this variant simply never adds clean.css's
+ * `break-inside: avoid`, so the one troubleshooting table and the one message
+ * table of `tables: span_pages_repeat_header` run on for as many pages as they
+ * need. A caption is kept with the first rows of its table.
+ */
+caption {
+  break-after: avoid;
+}
+
+/*
+ * The group row that opens a condition inside the spanning troubleshooting
+ * table. It carries the id of the section heading the clean variant prints,
+ * so `ref('cond:C-03')` and the table of contents still land on it.
+ */
+tr.group td {
+  background: #dddddd;
+  font-weight: 700;
+  font-size: 9pt;
+  padding-top: 1.8mm;
+  padding-bottom: 1.8mm;
+}
+
+tr.group {
+  /* Never leave a condition heading alone at the foot of a page. */
+  break-after: avoid;
+}
+
+tr.group .symptom {
+  font-weight: 400;
+}
+
+tr.group .num {
+  font-variant-numeric: tabular-nums;
+  margin-right: 1.5mm;
+}
+
+/* --- footnotes ----------------------------------------------------------- */
+
+/*
+ * fdp_manual_build.markdown emits `<span class="fn">…</span>` for this variant
+ * (phase1-pdf-build.md §6.3) where the clean variant folds the same text into
+ * the sentence in parentheses. Floating it puts the body at the foot of the
+ * page the reference landed on and numbers both ends with `counter(footnote)`.
+ */
+.fn {
+  float: footnote;
+  font-size: 8pt;
+}
+
+::footnote-call {
+  content: counter(footnote);
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 1;
+}
+
+::footnote-marker {
+  content: counter(footnote) ". ";
+  font-weight: 700;
+}

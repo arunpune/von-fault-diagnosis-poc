@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{ts,tsx,js,mjs,cjs,json,jsonc,yaml,yml,css,scss,html,svg,sql}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+indent_style = space
+indent_size = 2
+# Two trailing spaces are a Markdown line break; never strip them.
+trim_trailing_whitespace = false
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.go]
+indent_style = tab
+indent_size = 4
+
+[{Makefile,Makefile.*,*.mk}]
+indent_style = tab
+indent_size = 4
+
+[LICENSES/*.txt]
+# Committed verbatim from https://spdx.org/licenses/<id>.txt; never reformatted.
+insert_final_newline = false
+trim_trailing_whitespace = false

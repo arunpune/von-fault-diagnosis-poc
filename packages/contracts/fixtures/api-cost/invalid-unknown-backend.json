@@ -1,0 +1,26 @@
+{
+  "$expect_error": "/by_backend must be equal to one of the allowed values",
+  "totals": {
+    "usd": 0,
+    "calls": 0,
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "by_backend": {
+    "oracle": {
+      "usd": 0,
+      "calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "model": "rules-v1"
+    }
+  },
+  "by_day": [],
+  "prices": {
+    "jev_input_per_mtok": 0.042,
+    "llm_input_per_mtok": null,
+    "llm_output_per_mtok": null,
+    "as_of": "2026-09-19"
+  },
+  "recent": []
+}

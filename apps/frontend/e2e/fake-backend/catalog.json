@@ -1,0 +1,697 @@
+{
+  "schema": "urn:fdp:schema:gt-catalog:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-23T00:00:00.000Z",
+  "dataset": {
+    "first_ts": "2020-02-01T00:00:00.000Z",
+    "last_ts": "2020-09-01T03:59:50.000Z",
+    "rows": 1841760,
+    "gaps": 0
+  },
+  "presets": {
+    "schema": "urn:fdp:schema:gt-presets:v1",
+    "presets": [
+      {
+        "preset_id": "baseline_feb",
+        "label": "Normal operation – 1 Feb 2020",
+        "kind": "baseline",
+        "sim_ts": "2020-02-01T00:00:00.000Z",
+        "lead_in_min": 0,
+        "failure_id": null,
+        "note": "Start of the recording; the Play button of the README starts here."
+      },
+      {
+        "preset_id": "f1_air_leak_apr18",
+        "label": "Air leak – 18 Apr 2020",
+        "kind": "failure",
+        "sim_ts": "2020-04-18T00:00:00.000Z",
+        "lead_in_min": 120,
+        "failure_id": "F1",
+        "note": "The lead-in lands in the frozen block, which the replay collapses into a discontinuity."
+      },
+      {
+        "preset_id": "f2_air_leak_may30",
+        "label": "Air leak – 30 May 2020",
+        "kind": "failure",
+        "sim_ts": "2020-05-29T23:30:00.000Z",
+        "lead_in_min": 330,
+        "failure_id": "F2",
+        "note": "Starts at 18:00 on 29 May."
+      },
+      {
+        "preset_id": "f3_air_leak_jun05",
+        "label": "Air leak – 5 Jun 2020",
+        "kind": "failure",
+        "sim_ts": "2020-06-05T10:00:00.000Z",
+        "lead_in_min": 240,
+        "failure_id": "F3",
+        "note": "The tour preset of the README; starts at 06:00."
+      },
+      {
+        "preset_id": "f4_precursor_jul14",
+        "label": "Air leak precursor – 14 Jul 2020",
+        "kind": "precursor",
+        "sim_ts": "2020-07-14T21:30:00.000Z",
+        "lead_in_min": 0,
+        "failure_id": "F4",
+        "note": "The fast decay is visible at least seventeen hours ahead of the acute phase."
+      },
+      {
+        "preset_id": "f4_air_leak_jul15",
+        "label": "Air leak – 15 Jul 2020",
+        "kind": "failure",
+        "sim_ts": "2020-07-15T14:30:00.000Z",
+        "lead_in_min": 90,
+        "failure_id": "F4",
+        "note": "The acute phase; starts at 13:00."
+      },
+      {
+        "preset_id": "unlabelled_leak_may19",
+        "label": "Unlabelled leak – 19 May 2020",
+        "kind": "diagnostic",
+        "sim_ts": "2020-05-19T22:22:00.000Z",
+        "lead_in_min": 142,
+        "failure_id": null,
+        "note": "Starts at 20:00; an episode that looks like a labelled failure and is not scored."
+      },
+      {
+        "preset_id": "frozen_logger_jun22",
+        "label": "Frozen logger – 22 Jun 2020",
+        "kind": "diagnostic",
+        "sim_ts": "2020-06-22T15:06:00.000Z",
+        "lead_in_min": 66,
+        "failure_id": null,
+        "note": "Starts at 14:00; exercises the frozen guard."
+      },
+      {
+        "preset_id": "depot_lps_jul31",
+        "label": "Depot depressurisation – 31 Jul 2020",
+        "kind": "diagnostic",
+        "sim_ts": "2020-07-31T01:35:00.000Z",
+        "lead_in_min": 30,
+        "failure_id": null,
+        "note": "The controller alarm fires without a leak: the abstention case."
+      }
+    ]
+  },
+  "injections": [
+    {
+      "injection_id": "oil_cooler_fouling",
+      "fault_id": "oil_cooler_fouled",
+      "label": "Oil cooler fouling",
+      "benign": false,
+      "description": "The oil temperature drifts up over hours while the cycling stays normal and the room stays cool, so the rise cannot be blamed on the weather or on demand.",
+      "default_duration_sim_min": 600,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "high_ambient_temperature",
+      "fault_id": "high_ambient_temperature",
+      "label": "High ambient temperature",
+      "benign": true,
+      "description": "The room around the unit is much warmer than usual and the oil follows it up, so the oil reading alarms while the difference between oil and cooling air stays what it always was.",
+      "default_duration_sim_min": 720,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "heavy_air_demand",
+      "fault_id": "high_air_demand",
+      "label": "Heavy air demand",
+      "benign": true,
+      "description": "The plant draws far more air than usual, so the pressures fall faster between loaded runs and the motor works a little harder; nothing on the unit is defective. The recording's cycle timing is kept, so the longer loaded runs heavy demand brings, and the warmer oil that follows them, are not simulated.",
+      "default_duration_sim_min": 240,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "air_leak_downstream",
+      "fault_id": "downstream_air_leak",
+      "label": "Air leak downstream",
+      "benign": false,
+      "description": "Air escapes in the distribution network, so the pressures decay much faster than usual whenever the unit is not compressing, the earliest sign of a leak. The recording's cycle timing is kept, so the longer loaded runs a leak later forces, and the warmer oil they bring, are not simulated.",
+      "default_duration_sim_min": 240,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "intake_valve_sticking",
+      "fault_id": "intake_valve_not_opening",
+      "label": "Intake valve sticking",
+      "benign": false,
+      "description": "The intake valve only opens part of the way, so a loaded run delivers less than it should: the discharge pressure sits below the line it feeds and the motor draws less current than a healthy load.",
+      "default_duration_sim_min": 180,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "dryer_tower_switching_failure",
+      "fault_id": "tower_changeover_valve_fault",
+      "label": "Dryer tower switching failure",
+      "benign": false,
+      "description": "The dryer no longer changes over: the short purge phase after each cut-in disappears, the purge contact never opens and the purge line stays slightly pressurised.",
+      "default_duration_sim_min": 300,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "separator_drain_blocked",
+      "fault_id": "condensate_drain_blocked",
+      "label": "Separator drain blocked",
+      "benign": false,
+      "description": "The condensate drain at the separator no longer clears, so the vessel no longer settles to the line pressure once the unit stops compressing and the oil runs a little warmer.",
+      "default_duration_sim_min": 300,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "motor_overload",
+      "fault_id": "airend_bearing_wear",
+      "label": "Motor overload",
+      "benign": false,
+      "description": "The compression element turns harder than it should, so a loaded run draws a clearly raised and unsteady current and the oil warms with it.",
+      "default_duration_sim_min": 240,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    },
+    {
+      "injection_id": "oil_temperature_sensor_fault",
+      "fault_id": "oil_temperature_sensor_fault",
+      "label": "Oil temperature sensor fault",
+      "benign": true,
+      "description": "The oil temperature reading drops to an impossible value while the unit runs normally, so the instrument and not the cooling circuit is at fault.",
+      "default_duration_sim_min": 120,
+      "params": [
+        {
+          "name": "magnitude",
+          "default": 1.0,
+          "min": 0.25,
+          "max": 2.0
+        }
+      ]
+    }
+  ],
+  "failures": {
+    "schema": "urn:fdp:schema:gt-failure-table:v1",
+    "source": {
+      "dataset": "MetroPT-3 (UCI 791)",
+      "doi": "10.24432/C5VW3R",
+      "license": "CC-BY-4.0",
+      "csv_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+      "resolved_from": "docs/dataset.md#how-the-windows-were-resolved"
+    },
+    "clock": "utc-assumed",
+    "failures": [
+      {
+        "id": "F1",
+        "uci_nr": "#1",
+        "start": "2020-04-18T00:00:00.000Z",
+        "end": "2020-04-19T02:00:00.000Z",
+        "uci_start": "2020-04-18T00:00:00.000Z",
+        "uci_end": "2020-04-18T23:59:00.000Z",
+        "data_onset": "2020-04-18T00:23:59.000Z",
+        "data_recovery": "2020-04-19T01:55:36.000Z",
+        "onset_known": false,
+        "precursor_from": null,
+        "report_local": "2020-04-18 07:05",
+        "maintenance": null,
+        "maintenance_verified": false,
+        "fault_id": "dryer_purge_leak",
+        "accepted_fault_ids": ["dryer_purge_leak", "downstream_air_leak"],
+        "signature": "A",
+        "component": "pneumatic panel (dryer/drain side)",
+        "native_alarm_first": null,
+        "in_headline": true,
+        "notes": "The logger was frozen from 17 April 09:20 until 18 April 00:18, so the true onset is unknown and every lead time for this failure is a lower bound. The published end is a whole-day placeholder; the stuck-loaded run continues until 01:56 on 19 April and the repair venting follows from 02:13 to 02:47. No maintenance note exists for it."
+      },
+      {
+        "id": "F2",
+        "uci_nr": "#1 (duplicate, read as #2)",
+        "start": "2020-05-29T23:30:00.000Z",
+        "end": "2020-05-30T06:00:00.000Z",
+        "uci_start": "2020-05-29T23:30:00.000Z",
+        "uci_end": "2020-05-30T06:00:00.000Z",
+        "data_onset": "2020-05-29T23:14:56.000Z",
+        "data_recovery": "2020-05-30T05:56:46.000Z",
+        "onset_known": true,
+        "precursor_from": null,
+        "report_local": "2020-05-30 01:10",
+        "maintenance": "2020-05-30T12:00:00.000Z",
+        "maintenance_verified": false,
+        "fault_id": "dryer_purge_leak",
+        "accepted_fault_ids": ["dryer_purge_leak", "downstream_air_leak"],
+        "signature": "A",
+        "component": "pneumatic panel (dryer/drain side)",
+        "native_alarm_first": null,
+        "in_headline": true,
+        "notes": "The published table repeats the number of the first row; read it as the second. The maintenance note names April, which is a typed month for 30 May, and the data shows no intervention at the recorded hour, so the time is reported rather than verified."
+      },
+      {
+        "id": "F3",
+        "uci_nr": "#3",
+        "start": "2020-06-05T10:00:00.000Z",
+        "end": "2020-06-07T14:30:00.000Z",
+        "uci_start": "2020-06-05T10:00:00.000Z",
+        "uci_end": "2020-06-07T14:30:00.000Z",
+        "data_onset": "2020-06-05T09:48:30.000Z",
+        "data_recovery": "2020-06-08T13:54:18.000Z",
+        "onset_known": true,
+        "precursor_from": null,
+        "report_local": "2020-06-05 18:00",
+        "maintenance": "2020-06-08T16:00:00.000Z",
+        "maintenance_verified": false,
+        "fault_id": "dryer_purge_leak",
+        "accepted_fault_ids": ["dryer_purge_leak", "downstream_air_leak"],
+        "signature": "A",
+        "component": "pneumatic panel (dryer/drain side)",
+        "native_alarm_first": "2020-06-06T19:42:19.000Z",
+        "in_headline": true,
+        "notes": "The published end is when logging stopped, not when the leak ended. The unit was still loaded when logging resumed on 8 June and normal cycling returns at 13:54, before the maintenance note at 16:00, so that note is not verified; the repair period in between is an excluded window."
+      },
+      {
+        "id": "F4",
+        "uci_nr": "#4",
+        "start": "2020-07-15T14:30:00.000Z",
+        "end": "2020-07-15T19:00:00.000Z",
+        "uci_start": "2020-07-15T14:30:00.000Z",
+        "uci_end": "2020-07-15T19:00:00.000Z",
+        "data_onset": "2020-07-15T14:25:23.000Z",
+        "data_recovery": "2020-07-15T18:52:54.000Z",
+        "onset_known": true,
+        "precursor_from": "2020-07-14T21:28:00.000Z",
+        "report_local": "2020-07-15 18:25",
+        "maintenance": "2020-07-16T00:00:00.000Z",
+        "maintenance_verified": true,
+        "fault_id": "downstream_air_leak",
+        "accepted_fault_ids": ["downstream_air_leak"],
+        "signature": "B",
+        "component": "pneumatic panel (downstream/clients side)",
+        "native_alarm_first": "2020-07-15T17:20:11.000Z",
+        "in_headline": true,
+        "notes": "The window covers the acute phase only. The fast decay of this signature is measurable from 14 July 21:28, and the decay rate normalises at exactly the maintenance hour, which is what verifies the note."
+      },
+      {
+        "id": "F4b",
+        "uci_nr": null,
+        "start": "2020-07-16T20:00:00.000Z",
+        "end": "2020-07-17T06:00:00.000Z",
+        "uci_start": null,
+        "uci_end": null,
+        "data_onset": "2020-07-17T00:54:00.000Z",
+        "data_recovery": "2020-07-17T05:35:00.000Z",
+        "onset_known": true,
+        "precursor_from": null,
+        "report_local": "2020-07-17 05:46",
+        "maintenance": null,
+        "maintenance_verified": false,
+        "fault_id": "downstream_air_leak",
+        "accepted_fault_ids": ["downstream_air_leak"],
+        "signature": "B",
+        "component": "pneumatic panel (downstream/clients side)",
+        "native_alarm_first": "2020-07-17T00:56:00.000Z",
+        "in_headline": false,
+        "notes": "A recurrence the thesis reports and the published table does not carry, twenty hours after the maintenance of the preceding failure. It counts as a secondary positive or as an excluded window, never as a false positive."
+      }
+    ],
+    "unlabelled_episodes": [
+      {
+        "start": "2020-03-06T21:42:25.000Z",
+        "end": "2020-03-06T22:59:53.000Z",
+        "hours": 1.29,
+        "tp3_median": 9.326,
+        "dv_pressure_median": 0.614,
+        "oil_max": 76.65,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      },
+      {
+        "start": "2020-03-11T05:15:20.000Z",
+        "end": "2020-03-11T06:10:11.000Z",
+        "hours": 0.92,
+        "tp3_median": 8.71,
+        "dv_pressure_median": 0.872,
+        "oil_max": 75.6,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      },
+      {
+        "start": "2020-03-12T00:16:06.000Z",
+        "end": "2020-03-12T11:49:50.000Z",
+        "hours": 11.56,
+        "tp3_median": 9.542,
+        "dv_pressure_median": 0.776,
+        "oil_max": 78.03,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "The thesis records a strange-noise report at 08:25 on the same day."
+      },
+      {
+        "start": "2020-03-26T04:00:30.000Z",
+        "end": "2020-03-26T04:52:52.000Z",
+        "hours": 0.88,
+        "tp3_median": 9.111,
+        "dv_pressure_median": 0.712,
+        "oil_max": 74.75,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      },
+      {
+        "start": "2020-03-27T07:12:10.000Z",
+        "end": "2020-03-27T11:38:11.000Z",
+        "hours": 4.44,
+        "tp3_median": 9.198,
+        "dv_pressure_median": 0.642,
+        "oil_max": 77.83,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "The thesis lists a report on this day without any detail."
+      },
+      {
+        "start": "2020-03-28T07:22:24.000Z",
+        "end": "2020-03-30T07:41:06.000Z",
+        "hours": 48.31,
+        "tp3_median": 8.634,
+        "dv_pressure_median": 0.704,
+        "oil_max": 83.12,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A vent from 23:05 to 23:28 on 28 March; never reported."
+      },
+      {
+        "start": "2020-04-12T11:50:31.000Z",
+        "end": "2020-04-12T23:36:00.000Z",
+        "hours": 11.76,
+        "tp3_median": 9.44,
+        "dv_pressure_median": 1.804,
+        "oil_max": 76.3,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "Six days before the first labelled failure."
+      },
+      {
+        "start": "2020-05-13T13:44:04.000Z",
+        "end": "2020-05-14T04:36:21.000Z",
+        "hours": 14.87,
+        "tp3_median": 7.55,
+        "dv_pressure_median": 2.426,
+        "oil_max": 71.12,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "Sixteen days before the second labelled failure."
+      },
+      {
+        "start": "2020-05-19T10:05:50.000Z",
+        "end": "2020-05-19T10:51:45.000Z",
+        "hours": 0.77,
+        "tp3_median": 9.624,
+        "dv_pressure_median": 1.476,
+        "oil_max": 78.03,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      },
+      {
+        "start": "2020-05-19T22:22:17.000Z",
+        "end": "2020-05-20T23:02:33.000Z",
+        "hours": 24.67,
+        "tp3_median": 7.898,
+        "dv_pressure_median": 2.062,
+        "oil_max": 76.1,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "Ten days before the second labelled failure."
+      },
+      {
+        "start": "2020-06-01T14:49:54.000Z",
+        "end": "2020-06-01T15:39:08.000Z",
+        "hours": 0.82,
+        "tp3_median": 9.864,
+        "dv_pressure_median": 1.504,
+        "oil_max": 79.7,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      },
+      {
+        "start": "2020-06-03T10:06:00.000Z",
+        "end": "2020-06-03T11:08:49.000Z",
+        "hours": 1.05,
+        "tp3_median": 9.152,
+        "dv_pressure_median": 1.78,
+        "oil_max": 78.35,
+        "fault_id_hint": "dryer_purge_leak",
+        "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+      }
+    ],
+    "excluded_windows": [
+      {
+        "from": "2020-03-06T21:42:25.000Z",
+        "to": "2020-03-06T22:59:53.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-03-11T05:15:20.000Z",
+        "to": "2020-03-11T06:10:11.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-03-11T18:29:54.000Z",
+        "to": "2020-03-11T18:59:14.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-03-12T00:16:06.000Z",
+        "to": "2020-03-12T11:49:50.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-03-26T04:00:30.000Z",
+        "to": "2020-03-26T04:52:52.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-03-27T07:12:10.000Z",
+        "to": "2020-03-27T11:38:11.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-03-28T07:22:24.000Z",
+        "to": "2020-03-30T07:41:06.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-04-12T11:50:31.000Z",
+        "to": "2020-04-12T23:36:00.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-04-13T18:29:20.000Z",
+        "to": "2020-04-13T19:27:16.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-04-17T09:20:43.000Z",
+        "to": "2020-04-18T00:18:07.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-04-19T02:00:00.000Z",
+        "to": "2020-04-19T03:30:00.000Z",
+        "reason": "repair"
+      },
+      {
+        "from": "2020-04-20T04:49:17.000Z",
+        "to": "2020-04-21T01:16:52.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-05-13T13:44:04.000Z",
+        "to": "2020-05-14T04:36:21.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-05-19T02:00:15.000Z",
+        "to": "2020-05-19T06:02:59.000Z",
+        "reason": "depot_depressurisation"
+      },
+      {
+        "from": "2020-05-19T10:05:50.000Z",
+        "to": "2020-05-19T10:51:45.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-05-19T22:22:17.000Z",
+        "to": "2020-05-20T23:02:33.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-05-26T09:19:36.000Z",
+        "to": "2020-05-28T03:16:28.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-06-01T14:49:54.000Z",
+        "to": "2020-06-01T15:39:08.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-06-02T19:23:21.000Z",
+        "to": "2020-06-02T20:52:53.000Z",
+        "reason": "depot_depressurisation"
+      },
+      {
+        "from": "2020-06-03T10:06:00.000Z",
+        "to": "2020-06-03T11:08:49.000Z",
+        "reason": "unlabelled_positive"
+      },
+      {
+        "from": "2020-06-07T14:30:00.000Z",
+        "to": "2020-06-08T16:00:00.000Z",
+        "reason": "repair"
+      },
+      {
+        "from": "2020-06-08T11:48:04.000Z",
+        "to": "2020-06-08T12:28:12.000Z",
+        "reason": "depot_depressurisation"
+      },
+      {
+        "from": "2020-06-12T02:01:56.000Z",
+        "to": "2020-06-12T17:06:06.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-06-22T15:06:21.000Z",
+        "to": "2020-06-25T05:08:35.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-07-14T02:16:26.000Z",
+        "to": "2020-07-14T02:52:16.000Z",
+        "reason": "depot_depressurisation"
+      },
+      {
+        "from": "2020-07-15T19:00:00.000Z",
+        "to": "2020-07-16T01:00:00.000Z",
+        "reason": "repair"
+      },
+      {
+        "from": "2020-07-16T20:00:00.000Z",
+        "to": "2020-07-17T06:00:00.000Z",
+        "reason": "secondary_positive"
+      },
+      {
+        "from": "2020-07-21T13:45:12.000Z",
+        "to": "2020-07-21T22:03:16.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-07-22T06:43:44.000Z",
+        "to": "2020-07-22T13:04:24.000Z",
+        "reason": "frozen_logger"
+      },
+      {
+        "from": "2020-07-31T01:35:33.000Z",
+        "to": "2020-07-31T06:04:16.000Z",
+        "reason": "depot_depressurisation"
+      }
+    ],
+    "frozen_blocks": [
+      {
+        "start": "2020-03-11T18:29:54.000Z",
+        "end": "2020-03-11T18:59:14.000Z",
+        "rows": 147,
+        "hours": 0.49
+      },
+      {
+        "start": "2020-04-13T18:29:20.000Z",
+        "end": "2020-04-13T19:27:16.000Z",
+        "rows": 290,
+        "hours": 0.97
+      },
+      {
+        "start": "2020-04-17T09:20:43.000Z",
+        "end": "2020-04-18T00:18:07.000Z",
+        "rows": 4469,
+        "hours": 14.96
+      },
+      {
+        "start": "2020-04-20T04:49:17.000Z",
+        "end": "2020-04-21T01:16:52.000Z",
+        "rows": 6109,
+        "hours": 20.46
+      },
+      {
+        "start": "2020-05-26T09:19:36.000Z",
+        "end": "2020-05-28T03:16:28.000Z",
+        "rows": 12448,
+        "hours": 41.95
+      },
+      {
+        "start": "2020-06-12T02:01:56.000Z",
+        "end": "2020-06-12T17:06:06.000Z",
+        "rows": 4501,
+        "hours": 15.07
+      },
+      {
+        "start": "2020-06-22T15:06:21.000Z",
+        "end": "2020-06-25T05:08:35.000Z",
+        "rows": 18514,
+        "hours": 62.04
+      },
+      {
+        "start": "2020-07-21T13:45:12.000Z",
+        "end": "2020-07-21T22:03:16.000Z",
+        "rows": 2480,
+        "hours": 8.3
+      },
+      {
+        "start": "2020-07-22T06:43:44.000Z",
+        "end": "2020-07-22T13:04:24.000Z",
+        "rows": 1897,
+        "hours": 6.35
+      }
+    ],
+    "gaps_over_1h": []
+  }
+}

@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  // Only the root-level TypeScript: every workspace package type-checks itself
+  // through `pnpm -r run typecheck`.
+  "include": [
+    "vitest.config.ts",
+    "vitest.base.ts",
+    "scripts/boundaries/**/*.ts",
+    "scripts/data/**/*.ts"
+  ],
+  // The boundary fixtures are miniature workspaces with deliberate errors.
+  "exclude": ["scripts/boundaries/fixtures"]
+}

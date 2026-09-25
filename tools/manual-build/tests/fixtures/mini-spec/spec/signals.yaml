@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: three tags that map to real MetroPT-3 columns (TP3,
+# Oil_temperature, COMP) plus one synthetic extra with an authored band. The
+# band figures are the first-month statistics of
+# data/metropt3-first-month-stats.json rounded to the display step.
+schema_version: 1
+signals:
+  - id: line_pressure
+    panel_label: P2
+    name: Line pressure
+    metropt_column: TP3
+    group: analog
+    kind: pressure
+    unit: bar
+    subsystem: reservoirs
+    description: Line pressure at the pneumatic panel; the regulation signal.
+    sample_rate_s: 10
+    range: {min: -1.0, max: 16.0}
+    display: {decimals: 2}
+    band: {step: 0.1, source: derived}
+    modbus: {type: int16, scale: 1000}
+    normal_bands:
+      loaded: {low: 8.0, typical: 9.1, high: 10.1}
+      unloaded: {low: 9.0, typical: 9.7, high: 10.1}
+      "off": {low: 8.1, typical: 8.7, high: 9.5}
+    shown_in_schematic: true
+  - id: oil_temperature
+    panel_label: T1
+    name: Oil temperature
+    metropt_column: Oil_temperature
+    group: analog
+    kind: temperature
+    unit: degC
+    subsystem: oil
+    description: Compressor oil temperature at the airend outlet.
+    sample_rate_s: 10
+    range: {min: -20, max: 120}
+    display: {decimals: 1}
+    band: {step: 1, source: derived}
+    modbus: {type: int16, scale: 100}
+    normal_bands:
+      loaded: {low: 48, typical: 55, high: 61}
+      unloaded: {low: 51, typical: 58, high: 64}
+      "off": {low: 50, typical: 56, high: 61}
+    shown_in_schematic: true
+  - id: intake_closed
+    panel_label: D1
+    name: Intake valve closed
+    metropt_column: COMP
+    group: digital
+    kind: status
+    unit: bool
+    subsystem: intake_unloading
+    description: Intake valve closed, so the unit takes in no air.
+    sample_rate_s: 10
+    band: {step: 1, source: derived}
+    modbus: {type: uint16, scale: 1}
+    normal_bands:
+      loaded: {expected: 0}
+      unloaded: {expected: 1}
+      "off": {expected: 1}
+    shown_in_schematic: true
+  - id: ambient_temperature
+    panel_label: T2
+    name: Ambient temperature
+    metropt_column: null
+    group: extra
+    kind: temperature
+    unit: degC
+    subsystem: cooling
+    description: Ambient temperature at the cooling-air inlet.
+    source_note: Synthetic extra; the dataset has no ambient channel, so the band is authored.
+    sample_rate_s: 10
+    range: {min: -20, max: 60}
+    display: {decimals: 1}
+    band: {step: 1, source: authored}
+    modbus: {type: int16, scale: 100}
+    normal_bands:
+      loaded: {low: 15, typical: 20, high: 28}
+      unloaded: {low: 15, typical: 20, high: 28}
+      "off": {low: 15, typical: 20, high: 28}
+    shown_in_schematic: true
+machine_states:
+  order: ["off", unloaded, loaded]
+  running_threshold: {value: 0.5, unit: bar}
+  rules:
+    loaded: intake_closed == 0
+    unloaded: intake_closed == 1 and line_pressure >= running_threshold
+    "off": intake_closed == 1 and line_pressure < running_threshold
+  aliases: {running: [unloaded, loaded]}
+  start_event: transition from off to unloaded or loaded
+derived:
+  - {id: run_hours, kind: time_in_states_total, states: [unloaded, loaded], unit: h}
+  - {id: continuous_load_time, kind: time_in_state, state: loaded, unit: min}
+behaviours:
+  - {id: load_cycle_rate, description: how often the compressor loads per hour}
+  - {id: loaded_run_duration, description: how long each loaded run lasts}
+  - {id: unloaded_pressure_decay, description: how fast line pressure falls while the unit is not delivering}

@@ -1,0 +1,34 @@
+{
+  "schema": "urn:fdp:schema:telemetry-samples:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-03-20T10:00:00.123Z",
+  "samples": [
+    {
+      "seq": 1201,
+      "sim_ts": "2020-02-01T03:20:10.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "ambient_temperature": 9.4,
+        "discharge_pressure": -0.012,
+        "dryer_purge_pressure": -0.024,
+        "dryer_tower": true,
+        "flow_pulse": true,
+        "intake_closed": true,
+        "line_pressure": 9.358,
+        "load_valve": false,
+        "low_pressure_switch": false,
+        "motor_current": 0.04,
+        "oil_level_ok": true,
+        "oil_temperature": 53.6,
+        "purge_switch": true,
+        "regulator_contact": true,
+        "reservoir_pressure": 9.358,
+        "separator_discharge_pressure": 9.34
+      },
+      "alarms": []
+    }
+  ]
+}

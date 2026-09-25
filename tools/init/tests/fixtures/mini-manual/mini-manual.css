@@ -1,0 +1,382 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: CC-BY-4.0 */
+
+/*
+ * Paged-media stylesheet of the mini manual fixture (docs/plan/init.md §15.1).
+ *
+ * One file, two variants. CSS cannot scope an `@page` rule with a selector, so
+ * the two page furnitures are two *named* pages — `clean` and `realistic` —
+ * and the class on <html> picks one with the `page` property. Everything else
+ * that differs (the column count of 8.1, which troubleshooting markup is
+ * printed, whether a footnote floats, whether imperial units are shown) is an
+ * ordinary descendant rule under `html.clean` / `html.realistic`.
+ *
+ * The typography is the manual's own (IBM Plex, OFL-1.1, committed under
+ * manual/fonts by PDF-02) so that the fixture paginates the same way on every
+ * machine; a system font would move the page breaks the expectations pin.
+ * The URLs are relative to this stylesheet, and build.sh renders the generated
+ * variant HTML with `--base-url` pointing back at this directory, so they
+ * resolve from the temporary working directory too.
+ */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-weight: 400;
+  src: url("../../../../../manual/fonts/IBMPlexSans-Regular.ttf");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-weight: 700;
+  src: url("../../../../../manual/fonts/IBMPlexSans-Bold.ttf");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-weight: 400;
+  src: url("../../../../../manual/fonts/IBMPlexMono-Regular.ttf");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-weight: 700;
+  src: url("../../../../../manual/fonts/IBMPlexMono-Bold.ttf");
+}
+
+/* --- page boxes --------------------------------------------------------- */
+
+@page {
+  size: A4;
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+/* clean: page numbers and nothing else (phase1-pdf-build.md §8). */
+@page clean {
+  @bottom-center {
+    content: counter(page);
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 8.5pt;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* realistic: the four running items of §15.1, on every page. */
+@page realistic {
+  @top-left {
+    content: string(doc-title);
+    font-size: 8pt;
+    color: #333333;
+  }
+
+  @top-right {
+    content: string(chapter);
+    font-size: 8pt;
+    color: #333333;
+  }
+
+  @bottom-left {
+    content: "Rev. A · 2026-09-19";
+    font-size: 7.5pt;
+    color: #333333;
+  }
+
+  @bottom-right {
+    content: "page " counter(page) " of " counter(pages);
+    font-size: 7.5pt;
+    color: #333333;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @footnote {
+    border-top: 0.3pt solid #444444;
+    margin-top: 3mm;
+    padding-top: 1mm;
+  }
+}
+
+html.clean {
+  page: clean;
+  font-size: 11.5pt;
+}
+
+html.realistic {
+  page: realistic;
+  /* Half a point smaller, so the two variants never paginate alike and a page
+     number of one is never a page number of the other. */
+  font-size: 11pt;
+}
+
+/* --- body --------------------------------------------------------------- */
+
+html {
+  font-family: "IBM Plex Sans", sans-serif;
+  line-height: 1.22;
+  /* No Pyphen dictionary is loaded, so line breaking is identical everywhere. */
+  hyphens: manual;
+}
+
+/*
+ * No `background` on <body>. WeasyPrint paints an element background as a
+ * filled rectangle the size of the box, and a white rectangle over the whole
+ * content area is four ruled edges to pdfplumber: `find_tables` with the
+ * `lines` strategy then returns one page-sized table that swallows every real
+ * table and every paragraph on the page. The page is white anyway.
+ */
+body {
+  margin: 0;
+  color: #111111;
+}
+
+.running-strings {
+  string-set: doc-title attr(data-doc-title);
+}
+
+h1 {
+  font-size: 17pt;
+  line-height: 1.2;
+  margin: 0 0 4mm 0;
+  padding-bottom: 1.6mm;
+  border-bottom: 1pt solid #111111;
+  break-after: avoid;
+}
+
+/* The running chapter of the realistic variant is the chapter heading itself. */
+h1 {
+  string-set: chapter content();
+}
+
+h2 {
+  font-size: 12pt;
+  margin: 4mm 0 1.6mm 0;
+  break-after: avoid;
+}
+
+h3 {
+  font-size: 10.5pt;
+  margin: 3mm 0 1.2mm 0;
+  break-after: avoid;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  margin-right: 1.8mm;
+}
+
+p {
+  margin: 0 0 1.6mm 0;
+  orphans: 2;
+  widows: 2;
+}
+
+ul,
+ol {
+  margin: 0 0 1.6mm 0;
+  padding-left: 5mm;
+}
+
+li {
+  margin-bottom: 0.6mm;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9em;
+}
+
+/* --- chapters ----------------------------------------------------------- */
+
+#ch-4,
+#ch-8,
+#ch-9 {
+  break-before: page;
+}
+
+/*
+ * The fault tables start on a page of their own, so chapter 8 covers three of
+ * the six pages: the realistic troubleshooting table then has two full pages
+ * to span, and the running chapter of the realistic variant appears on enough
+ * pages to be recognised as page furniture (docs/plan/init.md §8.2 drops a
+ * margin line that repeats on at least three pages and on 40 % of them).
+ */
+.fault-tables {
+  break-before: page;
+}
+
+/* 8.1 is the two-column prose of the realistic variant; the heading stays
+   outside the multi-column box so it spans the text block on its own. */
+html.realistic .prose {
+  columns: 2;
+  column-gap: 7mm;
+}
+
+/* --- tables ------------------------------------------------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.2mm 0 2.6mm 0;
+  font-size: 0.87em;
+}
+
+th,
+td {
+  border: 0.5pt solid #666666;
+  padding: 0.6mm 1.1mm;
+  text-align: left;
+  vertical-align: top;
+}
+
+thead {
+  /* Repeated on every page the table reaches; the spanning troubleshooting
+     table of the realistic variant is the reason this fixture exists. */
+  display: table-header-group;
+}
+
+thead th {
+  background: #eeeeee;
+  font-weight: 700;
+}
+
+tr {
+  break-inside: avoid;
+}
+
+table.troubleshooting,
+table.signals {
+  table-layout: fixed;
+  font-size: 0.8em;
+}
+
+/*
+ * The identifiers are set at an absolute size, the same in both variants, and
+ * the columns that carry them are wide enough for the longest one
+ * (`reservoir_isolation_valve_closed`, 32 characters of IBM Plex Mono at
+ * 0.6 em each). An identifier broken over two lines is lost to the extracted
+ * text: pdfplumber reads a page line by line, so the halves come back with the
+ * neighbouring columns' words between them.
+ */
+table.troubleshooting .mono,
+table.signals .mono {
+  font-size: 6pt;
+}
+
+table.troubleshooting ol.checks {
+  margin: 0;
+  padding-left: 4.2mm;
+}
+
+table.troubleshooting ol.checks li {
+  margin-bottom: 0.3mm;
+}
+
+/* Fixed widths: an identifier that wraps is lost to the extracted text,
+   because pdfplumber reads a page line by line. */
+.troubleshooting col.c-fault {
+  width: 25%;
+}
+
+.troubleshooting col.c-cause {
+  width: 16%;
+}
+
+.troubleshooting col.c-subsystem {
+  width: 12%;
+}
+
+.troubleshooting col.c-signals {
+  width: 16%;
+}
+
+.troubleshooting col.c-checks {
+  width: 17%;
+}
+
+.troubleshooting col.c-remedy {
+  width: 14%;
+}
+
+/*
+ * Spec §4 gives the clean variant a table that fits one page: with three small
+ * tables under their own 8.2.k heading, keeping each whole costs no blank page
+ * and leaves the clean variant the easy document the pipeline must score well
+ * on. The realistic variant deliberately does the opposite.
+ */
+html.clean table.troubleshooting {
+  break-inside: avoid;
+}
+
+/* The group row that opens a condition inside the spanning table. */
+tr.group td {
+  background: #dddddd;
+  font-weight: 700;
+  padding-top: 1.4mm;
+  padding-bottom: 1.4mm;
+}
+
+tr.group {
+  break-after: avoid;
+}
+
+/*
+ * The one row that is allowed to break across the page break: §15.1 asks the
+ * realistic variant for a data row split over two pages, which is what makes
+ * the row-continuation path of docs/plan/init.md §8.4 testable.
+ */
+html.realistic table.spanning tr.cause {
+  break-inside: auto;
+}
+
+/*
+ * A background is repainted on every fragment of a box, a border is not: the
+ * fragment of the split row that stays on the first page therefore has side
+ * borders that run to the foot of the text block and no bottom rule, and
+ * pdfplumber, which builds cells from intersecting ruled edges, drops it. The
+ * near-white cell background closes both fragments, so `find_tables` returns
+ * the head of the split row on one page and its tail on the next — the row
+ * continuation of docs/plan/init.md §8.4.
+ */
+html.realistic table.spanning tr.cause td {
+  background: #fcfcfc;
+}
+
+/* --- variant switches ---------------------------------------------------- */
+
+html.clean .only-realistic,
+html.realistic .only-clean {
+  display: none;
+}
+
+/* Imperial units in parentheses: realistic only (spec §4). */
+html.clean .imp {
+  display: none;
+}
+
+/*
+ * The footnote. The realistic variant floats the body to the foot of the page
+ * and numbers both ends; the clean variant folds the same sentence into the
+ * paragraph in parentheses, so no limit lives in one variant alone.
+ */
+html.realistic .fn {
+  float: footnote;
+  font-size: 8pt;
+}
+
+html.realistic ::footnote-call {
+  content: counter(footnote);
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 1;
+}
+
+html.realistic ::footnote-marker {
+  content: counter(footnote) ". ";
+  font-weight: 700;
+}
+
+html.clean .fn::before {
+  content: " (";
+}
+
+html.clean .fn::after {
+  content: ")";
+}

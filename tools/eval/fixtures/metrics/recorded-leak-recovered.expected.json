@@ -1,0 +1,150 @@
+{
+  "schema": "urn:fdp:eval:metrics-expected:v1",
+  "id": "recorded_leak_recovered",
+  "scored_tickets": 6,
+  "warmup_tickets": 1,
+  "open_at_end": 6,
+  "match": {
+    "ticket": {
+      "tp": ["t-002"],
+      "fp": ["t-001"],
+      "misdiagnosed": ["t-001"],
+      "recovered": ["t-002"],
+      "duplicates": ["t-003"],
+      "ignored": ["t-004"],
+      "benign": ["t-005"],
+      "fn": []
+    },
+    "review": {
+      "tp": ["t-002"],
+      "fp": ["t-007", "t-001"],
+      "misdiagnosed": ["t-001"],
+      "recovered": ["t-002"],
+      "duplicates": ["t-003"],
+      "ignored": ["t-004"],
+      "benign": ["t-005"],
+      "fn": []
+    }
+  },
+  "precision_recall": {
+    "ticket": {
+      "micro": { "tp": 1, "fp": 1, "fn": 0, "windows": 1, "precision": 0.5, "recall": 1 },
+      "macro": { "precision": 0.5, "recall": 1 },
+      "per_fault": {
+        "air_leak_downstream": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "windows": 1,
+          "precision": 1,
+          "recall": 1
+        },
+        "air_leak_dryer_purge": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "windows": 1,
+          "precision": null,
+          "recall": 1
+        },
+        "oil_cooler_fouling": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "windows": 0,
+          "precision": 0,
+          "recall": null
+        }
+      }
+    },
+    "review": {
+      "micro": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 0,
+        "windows": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1
+      },
+      "macro": { "precision": 0.3333333333333333, "recall": 1 },
+      "per_fault": {
+        "air_leak_downstream": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "windows": 1,
+          "precision": 1,
+          "recall": 1
+        },
+        "air_leak_dryer_purge": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "windows": 1,
+          "precision": null,
+          "recall": 1
+        },
+        "oil_cooler_fouling": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "windows": 0,
+          "precision": 0,
+          "recall": null
+        },
+        "separator_drain_blocked": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "windows": 0,
+          "precision": 0,
+          "recall": null
+        }
+      }
+    }
+  },
+  "lead_times": [
+    {
+      "window_id": "F3",
+      "fault": "air_leak_downstream",
+      "first_correct_ticket": "2020-06-05T10:40:00.000Z",
+      "native_code": "W102",
+      "native_first": "2020-06-05T10:55:00.000Z",
+      "lead_minutes": 15,
+      "latency_minutes": 51,
+      "qualifier": ""
+    }
+  ],
+  "rates": {
+    "tickets": 6,
+    "false_tickets": 2,
+    "covered_machine_days": 0.9583333333333334,
+    "negative_machine_days": 0.20069444444444445,
+    "tickets_per_machine_day": 6.260869565217391,
+    "false_tickets_per_machine_day": 9.965397923875433
+  },
+  "abstention": null,
+  "cost": {
+    "usd": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "calls": 2,
+    "per_decision": 0,
+    "per_ticket": 0
+  },
+  "detection": {
+    "suspects": 4,
+    "warmup_suspects": 1,
+    "outside_windows": 1,
+    "windows": [
+      {
+        "window_id": "F3",
+        "headline": true,
+        "first_suspect": "s-004",
+        "deadline": "2020-06-05T11:49:00.000Z",
+        "detected": true
+      }
+    ]
+  },
+  "pass": { "detection": true, "review_diagnosis": true, "diagnosis": false }
+}

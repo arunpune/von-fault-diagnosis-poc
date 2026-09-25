@@ -1,0 +1,29 @@
+{
+  "$expect_error": "/transforms/0 must match exactly one schema in oneOf",
+  "injection_id": "oil_cooler_fouling",
+  "fault_id": "oil_cooler_fouled",
+  "label": "Oil cooler fouling",
+  "benign": false,
+  "description": "Oil temperature drifts up over hours while cycling stays normal and ambient stays normal.",
+  "default_duration_sim_min": 600,
+  "envelope": {
+    "ramp_in_min": 180,
+    "ramp_out_min": 60
+  },
+  "params": [
+    {
+      "name": "magnitude",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 2.0
+    }
+  ],
+  "transforms": [
+    {
+      "tag": "oil_temperature",
+      "op": "multiply",
+      "value": 14.0,
+      "when": "any"
+    }
+  ]
+}

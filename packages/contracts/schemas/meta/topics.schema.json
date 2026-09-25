@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:meta:topics:v1",
+  "title": "Topic table",
+  "description": "Shape of packages/contracts/topics.json, the single description of the MQTT topic tree. Meta schemas describe configuration files rather than messages, so their $id lives in the urn:fdp:meta namespace and never appears in a message's schema field.",
+  "type": "object",
+  "properties": {
+    "roots": {
+      "description": "The two top-level roots. Every topic template starts with one of them.",
+      "type": "object",
+      "properties": {
+        "plant": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "gt": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      },
+      "required": ["plant", "gt"],
+      "additionalProperties": false
+    },
+    "default_unit_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/unit_id" },
+    "topics": {
+      "description": "One entry per topic, keyed by the snake_case name the generated builders are derived from.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/$defs/topic" },
+      "minProperties": 1
+    },
+    "acl": {
+      "description": "Read and write filters per broker credential, rendered into infra/mosquitto/acl.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/acl_entry" },
+      "minProperties": 1
+    }
+  },
+  "required": ["roots", "default_unit_id", "topics", "acl"],
+  "additionalProperties": false,
+  "$defs": {
+    "topic": {
+      "title": "Topic entry",
+      "description": "One topic: its template, the v1 schema its payload validates against, and how it is published.",
+      "type": "object",
+      "properties": {
+        "template": { "type": "string", "pattern": "^[a-z][a-z0-9/{}_-]*$" },
+        "schema": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "qos": { "type": "integer", "enum": [0, 1, 2] },
+        "retain": { "type": "boolean" },
+        "publisher": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      },
+      "required": ["template", "schema", "qos", "retain", "publisher"],
+      "additionalProperties": false
+    },
+    "acl_entry": {
+      "title": "ACL entry",
+      "description": "The topic filters one credential may subscribe to and publish on. Both lists are required; an empty list means no access.",
+      "type": "object",
+      "properties": {
+        "read": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "write": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      },
+      "required": ["read", "write"],
+      "additionalProperties": false
+    }
+  }
+}

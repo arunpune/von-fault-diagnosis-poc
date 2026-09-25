@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The toolchain every job of `ci.yml` starts from.
+# Each language is a separate input so a Python-only job (`reuse`,
+# `manual-spec`, `check-manual`) does not pay for Node and Go, and `install`
+# is separate again because `make install` needs all three.
+#
+# Versions come from the files in the repository, never from this action:
+# Node from `.nvmrc`, pnpm from `packageManager` in `package.json`, Python from
+# `pyproject.toml`, Go from `services/modbus/go.mod`. Only uv has no such file,
+# so its version is an input whose default is the pinned uv release; `ci.yml`
+# keeps the same value in `UV_VERSION` and `scripts/ops/ci-workflow.test.ts`
+# fails when the two drift apart.
+#
+# Every third-party action is pinned to the commit its release tag points at,
+# so a moved tag cannot change what runs (dependencies are verified before they
+# are pinned); the trailing comment is the tag, and the commit body of the
+# change that introduced the pin records the verification date.
+
+name: Set up the toolchain
+description: Install Node and pnpm, uv and Python, and Go with their caches, then run `make install`.
+
+inputs:
+  node:
+    description: Install Node and pnpm and enable the pnpm store cache.
+    default: "true"
+  python:
+    description: Install uv and the pinned Python, with the uv cache.
+    default: "true"
+  go:
+    description: Install Go with the module and build caches.
+    default: "true"
+  install:
+    description: Run `make install` (needs every language, so it implies the three above).
+    default: "true"
+  uv-version:
+    description: The uv release to install.
+    default: "0.12.17"
+
+runs:
+  using: composite
+  steps:
+    # pnpm first: `actions/setup-node`'s `cache: pnpm` needs the binary to
+    # resolve the store directory.
+    - name: Install pnpm from the packageManager pin
+      if: inputs.node == 'true'
+      uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+    - name: Install Node from .nvmrc
+      if: inputs.node == 'true'
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - name: Install uv and Python
+      if: inputs.python == 'true'
+      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      with:
+        version: ${{ inputs.uv-version }}
+        enable-cache: true
+        cache-dependency-glob: uv.lock
+        python-version-file: pyproject.toml
+
+    - name: Install Go
+      if: inputs.go == 'true'
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: services/modbus/go.mod
+        cache-dependency-path: services/modbus/go.sum
+
+    - name: Install every language's dependencies from the lock files
+      if: inputs.install == 'true'
+      shell: bash
+      run: make install

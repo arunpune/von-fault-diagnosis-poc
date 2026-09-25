@@ -1,0 +1,86 @@
+{
+  "schema": "urn:fdp:schema:gt-presets:v1",
+  "presets": [
+    {
+      "preset_id": "baseline_feb",
+      "label": "Normal operation – 1 Feb 2020",
+      "kind": "baseline",
+      "sim_ts": "2020-02-01T00:00:00.000Z",
+      "lead_in_min": 0,
+      "failure_id": null,
+      "note": "Start of the recording; the Play button of the README starts here."
+    },
+    {
+      "preset_id": "f1_air_leak_apr18",
+      "label": "Air leak – 18 Apr 2020",
+      "kind": "failure",
+      "sim_ts": "2020-04-18T00:00:00.000Z",
+      "lead_in_min": 120,
+      "failure_id": "F1",
+      "note": "The lead-in lands in the frozen block, which the replay collapses into a discontinuity."
+    },
+    {
+      "preset_id": "f2_air_leak_may30",
+      "label": "Air leak – 30 May 2020",
+      "kind": "failure",
+      "sim_ts": "2020-05-29T23:30:00.000Z",
+      "lead_in_min": 330,
+      "failure_id": "F2",
+      "note": "Starts at 18:00 on 29 May."
+    },
+    {
+      "preset_id": "f3_air_leak_jun05",
+      "label": "Air leak – 5 Jun 2020",
+      "kind": "failure",
+      "sim_ts": "2020-06-05T10:00:00.000Z",
+      "lead_in_min": 240,
+      "failure_id": "F3",
+      "note": "The tour preset of the README; starts at 06:00."
+    },
+    {
+      "preset_id": "f4_precursor_jul14",
+      "label": "Air leak precursor – 14 Jul 2020",
+      "kind": "precursor",
+      "sim_ts": "2020-07-14T21:30:00.000Z",
+      "lead_in_min": 0,
+      "failure_id": "F4",
+      "note": "The fast decay is visible at least seventeen hours ahead of the acute phase."
+    },
+    {
+      "preset_id": "f4_air_leak_jul15",
+      "label": "Air leak – 15 Jul 2020",
+      "kind": "failure",
+      "sim_ts": "2020-07-15T14:30:00.000Z",
+      "lead_in_min": 90,
+      "failure_id": "F4",
+      "note": "The acute phase; starts at 13:00."
+    },
+    {
+      "preset_id": "unlabelled_leak_may19",
+      "label": "Unlabelled leak – 19 May 2020",
+      "kind": "diagnostic",
+      "sim_ts": "2020-05-19T22:22:00.000Z",
+      "lead_in_min": 142,
+      "failure_id": null,
+      "note": "Starts at 20:00; an episode that looks like a labelled failure and is not scored."
+    },
+    {
+      "preset_id": "frozen_logger_jun22",
+      "label": "Frozen logger – 22 Jun 2020",
+      "kind": "diagnostic",
+      "sim_ts": "2020-06-22T15:06:00.000Z",
+      "lead_in_min": 66,
+      "failure_id": null,
+      "note": "Starts at 14:00; exercises the frozen guard."
+    },
+    {
+      "preset_id": "depot_lps_jul31",
+      "label": "Depot depressurisation – 31 Jul 2020",
+      "kind": "diagnostic",
+      "sim_ts": "2020-07-31T01:35:00.000Z",
+      "lead_in_min": 30,
+      "failure_id": null,
+      "note": "The controller alarm fires without a leak: the abstention case."
+    }
+  ]
+}

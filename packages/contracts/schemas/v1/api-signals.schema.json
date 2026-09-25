@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-signals:v1",
+  "title": "Api signals",
+  "description": "The body of GET /api/signals: the signal registry the recorder resolves its lanes with. The backend serves the generated register map and folds in the catalog's normal bands once the manual has been ingested. The frontend needs no register map of its own, so it keeps importing types only from the contracts package.",
+  "type": "object",
+  "$defs": {
+    "signal_def": {
+      "title": "Signal def",
+      "description": "One tag of the signal registry as the user interface needs it.",
+      "type": "object",
+      "properties": {
+        "signal_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+        "label": {
+          "description": "English name of the signal, as the manual writes it.",
+          "type": "string"
+        },
+        "panel_label": {
+          "description": "Shorter name for a chart lane, when the full label does not fit.",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit of the values; the empty string for a digital state.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Whether the tag is an analog measurement or a digital state.",
+          "type": "string",
+          "enum": ["analog", "digital"]
+        },
+        "metropt_column": {
+          "description": "Column of the replayed recording this tag comes from, null for a synthetic tag.",
+          "type": ["string", "null"]
+        },
+        "source": {
+          "description": "recorded for a tag read from the recording, synthetic for one the simulator computes.",
+          "type": "string",
+          "enum": ["recorded", "synthetic"]
+        },
+        "scale": {
+          "description": "Factor the register map encodes the value with; 1 for a digital state.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "normal_bands": {
+          "description": "The band the signal sits in during normal operation, when the catalog declares one. An analog band is an interval, a digital band is a level, so the shape stays free.",
+          "type": "object"
+        }
+      },
+      "required": ["signal_id", "label", "unit", "kind", "metropt_column", "source", "scale"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "signals": {
+      "description": "Every tag of the registry, in register order.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/signal_def" }
+    }
+  },
+  "required": ["signals"],
+  "additionalProperties": true
+}

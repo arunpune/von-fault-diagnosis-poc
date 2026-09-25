@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:meta:embedding-config:v1",
+  "title": "Embedding pin",
+  "description": "Shape of packages/contracts/embedding.json, the one place that says which model init and the backend embed with. Meta schemas describe configuration files rather than messages, so their $id lives in the urn:fdp:meta namespace and never appears in a message's schema field. Two invariants JSON Schema cannot state are asserted by test/embedding.test.ts: every files[].url must equal https://huggingface.co/{model_id}/resolve/{revision}/{path} for its own entry, and dimension must equal the single vector(N) of db/migrations/0003_manual_chunks.sql and the length of every fixture vector.",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "description": "Hugging Face repository id, `<owner>/<name>`, of the model both languages load.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "revision": {
+      "description": "The repository commit the pin freezes; a tag or a branch would let the files move.",
+      "$ref": "#/$defs/commit_sha"
+    },
+    "license": {
+      "description": "SPDX identifier of the model weights. Only a permissive licence is allowed, as for every runtime dependency (ground rule 9, CONTRIBUTING.md).",
+      "type": "string",
+      "minLength": 1
+    },
+    "dimension": {
+      "description": "Vector length, and therefore the N of `vector(N)` in the manual-chunk migration.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "pooling": {
+      "description": "How token vectors become one sentence vector: masked mean, or the CLS position.",
+      "type": "string",
+      "enum": ["mean", "cls"]
+    },
+    "normalize": {
+      "description": "Whether the pooled vector is L2-normalised, which makes cosine a plain dot product.",
+      "type": "boolean"
+    },
+    "max_tokens": {
+      "description": "Truncation length in tokens; the chunker enforces it with the model's own tokenizer.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "query_prefix": {
+      "description": "Text prepended to a retrieval query. Empty for a model that was not trained with one.",
+      "type": "string"
+    },
+    "passage_prefix": {
+      "description": "Text prepended to an indexed passage. Empty for a model that was not trained with one.",
+      "type": "string"
+    },
+    "onnx": {
+      "description": "The input and output names read off the real graph by scripts/embed_fixture.py pin.",
+      "type": "object",
+      "properties": {
+        "inputs": {
+          "description": "Graph input names, in the order the runtimes build their feed.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "output": {
+          "description": "The token-level output that pooling reduces, `(batch, sequence, dimension)`.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["inputs", "output"],
+      "additionalProperties": false
+    },
+    "runtime": {
+      "description": "The four runtime pins, one per side of the parity test.",
+      "type": "object",
+      "properties": {
+        "onnxruntime": { "$ref": "#/$defs/version" },
+        "onnxruntime_node": { "$ref": "#/$defs/version" },
+        "tokenizers": { "$ref": "#/$defs/version" },
+        "huggingface_tokenizers": { "$ref": "#/$defs/version" }
+      },
+      "required": ["onnxruntime", "onnxruntime_node", "tokenizers", "huggingface_tokenizers"],
+      "additionalProperties": false
+    },
+    "files": {
+      "description": "Every file both languages load, with the hash init verifies the download against.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/model_file" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "fixture": {
+      "description": "The reference fixture, relative to this package: the contract the parity tests read.",
+      "type": "string",
+      "pattern": "^fixtures/embeddings/[a-z0-9][a-z0-9-]*\\.json$"
+    }
+  },
+  "required": [
+    "model_id",
+    "revision",
+    "license",
+    "dimension",
+    "pooling",
+    "normalize",
+    "max_tokens",
+    "query_prefix",
+    "passage_prefix",
+    "onnx",
+    "runtime",
+    "files",
+    "fixture"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "commit_sha": {
+      "title": "Commit SHA",
+      "description": "A full 40-character lowercase Git commit hash.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "title": "SHA-256",
+      "description": "A lowercase hexadecimal SHA-256 digest.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "version": {
+      "title": "Runtime version",
+      "description": "An exact version, never a range: both sides must run the same graph the same way.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "model_file": {
+      "title": "Model file",
+      "description": "One downloadable file of the pinned revision. Model files are never committed: init fetches them into the shared model-cache volume and verifies them against `sha256` and `bytes`.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Path inside the model repository, for example `onnx/model.onnx`.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+        },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": {
+          "description": "Exact size in bytes; a short download fails before it is hashed.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "url": {
+          "description": "Derived download URL, https://huggingface.co/{model_id}/resolve/{revision}/{path}. The derivation itself is asserted by test/embedding.test.ts.",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://huggingface\\.co/[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*/resolve/[0-9a-f]{40}/[A-Za-z0-9][A-Za-z0-9._/-]*$"
+        }
+      },
+      "required": ["path", "sha256", "bytes", "url"],
+      "additionalProperties": false
+    }
+  }
+}

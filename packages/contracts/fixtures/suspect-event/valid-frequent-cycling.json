@@ -1,0 +1,80 @@
+{
+  "schema": "urn:fdp:schema:suspect-event:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-05-22T04:15:00.000Z",
+  "event_id": "9b2e7c41-8d05-4a6f-b312-7e5d90a4c618",
+  "sim_ts": "2020-05-22T04:15:00.000Z",
+  "symptom_key": "frequent_cycling",
+  "rule_ids": ["frequent_cycling", "long_loaded_runs", "fast_decay"],
+  "machine_state": {
+    "mode": "unloaded",
+    "since_sim_ts": "2020-05-22T04:13:48.000Z",
+    "dryer_tower": null
+  },
+  "window": {
+    "from_sim_ts": "2020-05-22T02:15:00.000Z",
+    "to_sim_ts": "2020-05-22T04:15:00.000Z",
+    "samples": 7200
+  },
+  "evidence": [
+    {
+      "metric": "load_cycle_rate",
+      "observation": "The compressor loaded nine times in the last hour against a reference of four.",
+      "value": 9,
+      "unit": "1/h",
+      "baseline": 4.1,
+      "duration": "several hours"
+    },
+    {
+      "metric": "unloaded_pressure_decay",
+      "observation": "Line pressure falls faster while the unit is idle than the reference cycle allows, at night as well as by day.",
+      "value": 0.41,
+      "unit": "bar/min",
+      "baseline": 0.12,
+      "duration": "about a day"
+    }
+  ],
+  "observations": [
+    {
+      "signal": "load_cycle_rate",
+      "level": "far_above",
+      "trend": "rising",
+      "since": "several hours",
+      "value": 9,
+      "unit": "1/h"
+    },
+    {
+      "signal": "unloaded_pressure_decay",
+      "level": "far_above",
+      "trend": "rising",
+      "since": "about a day",
+      "value": 0.41,
+      "unit": "bar/min"
+    },
+    {
+      "signal": "loaded_run_duration",
+      "level": "above",
+      "trend": "rising",
+      "since": "several hours",
+      "value": 284,
+      "unit": "s"
+    },
+    {
+      "signal": "line_pressure",
+      "level": "normal",
+      "trend": "erratic",
+      "since": "several hours",
+      "value": 9.12,
+      "unit": "bar"
+    },
+    {
+      "signal": "low_pressure_switch",
+      "level": "normal",
+      "trend": "flat",
+      "since": "days"
+    }
+  ],
+  "active_alarms": ["W108"],
+  "co_symptoms": ["low_line_pressure"],
+  "ambient": "mild"
+}

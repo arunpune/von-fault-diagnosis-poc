@@ -1,0 +1,34 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "unlabelled_leak_may19",
+  "title": "Unlabelled continuous-load episode, 19 May 2020",
+  "group": "diagnostic",
+  "profiles": ["dev"],
+  "split": "dev",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "unlabelled-may19"
+  },
+  "replay": {
+    "from": "2020-05-19T20:00:00.000Z",
+    "to": "2020-05-21T00:00:00.000Z"
+  },
+  "ground_truth": {
+    "kind": "diagnostic",
+    "note": "a 24-hour stuck-loaded episode with the purge signature of the labelled failures, never reported and therefore never labelled; what the run should show is whether the pipeline finds it"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "any",
+    "max_false_tickets": 0,
+    "pass_level": "detection"
+  },
+  "design_target": {
+    "accepted": ["dryer_purge_leak", "downstream_air_leak"],
+    "provenance": "inferred from the signature-A analysis, unverified (a design case since 2026-09-24): the episode shows the stuck-loaded, raised-purge-pressure signature of F1-F3, whose accepted causes these are, but nobody reported or labelled it, so this is a design aid for the tuning list and never ground truth"
+  },
+  "warmup_min": 60,
+  "seed": 41,
+  "notes": "One of the twelve unlabelled episodes of the failure table, from 22:22:17 on 19 May to 23:02:33 on 20 May. The failure table excludes it rather than counting it either way, so this scenario is reported and never gated: finding it is evidence the detector generalises, missing it proves nothing. Since 2026-09-24 it is a design case: the tuning readout and the threshold sweep report its tickets and decisions inside the episode against design_target, which no gate, exit eval or threshold selection reads."
+}

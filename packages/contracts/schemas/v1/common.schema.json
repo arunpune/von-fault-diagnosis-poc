@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:common:v1",
+  "title": "Common definitions",
+  "description": "Shared envelope and primitive definitions referenced by every v1 message schema with \"$ref\": \"urn:fdp:schema:common:v1#/$defs/<name>\". This file is never a message on its own; it holds only $defs.",
+  "$defs": {
+    "iso_ts": {
+      "title": "ISO timestamp",
+      "description": "UTC instant with millisecond precision and a literal Z, as written by src/time.ts toIsoMs, Go's 2006-01-02T15:04:05.000Z and Python's strftime equivalent. Epoch milliseconds exist only inside Modbus registers.",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "unit_id": {
+      "title": "Unit id",
+      "description": "Identifier of a machine in the topic tree. The only unit of this proof of concept is cau-7.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,31}$"
+    },
+    "uuid": {
+      "title": "UUID",
+      "description": "Canonical lowercase UUID.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "schema_id": {
+      "title": "Schema id",
+      "description": "The $id of a contract schema, repeated in the schema field of every message so a consumer can reject an unknown major.",
+      "type": "string",
+      "pattern": "^urn:fdp:schema:[a-z0-9-]+:v[0-9]+$"
+    },
+    "envelope": {
+      "title": "Envelope",
+      "description": "The three fields every MQTT message and WebSocket frame carries. Messages allOf-extend this definition and pin schema with const. Top-level additionalProperties stays true: consumers ignore unknown top-level fields so that a minor version can add one. Nested objects are closed unless a schema says otherwise.",
+      "type": "object",
+      "properties": {
+        "schema": { "$ref": "#/$defs/schema_id" },
+        "unit_id": { "$ref": "#/$defs/unit_id" },
+        "wall_ts": { "$ref": "#/$defs/iso_ts" }
+      },
+      "required": ["schema", "unit_id", "wall_ts"],
+      "additionalProperties": true
+    },
+    "identifier": {
+      "title": "Identifier",
+      "description": "The manual's identifier grammar: lowercase ASCII, digits and underscores, 2 to 40 characters, starting with a letter.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,39}$"
+    },
+    "fault_id": {
+      "title": "Fault id",
+      "description": "Identifier of a cause in the fault catalog.",
+      "$ref": "#/$defs/identifier"
+    },
+    "condition_id": {
+      "title": "Condition id",
+      "description": "Identifier of a symptom condition in the fault catalog.",
+      "$ref": "#/$defs/identifier"
+    },
+    "signal_id": {
+      "title": "Signal id",
+      "description": "Tag id of a signal declared in the manual's signal registry.",
+      "$ref": "#/$defs/identifier"
+    },
+    "behaviour_id": {
+      "title": "Behaviour id",
+      "description": "Identifier of a behaviour declared under behaviours in the manual's signal registry.",
+      "$ref": "#/$defs/identifier"
+    },
+    "injection_id": {
+      "title": "Injection id",
+      "description": "Identifier of a fault injection offered by the simulator.",
+      "$ref": "#/$defs/identifier"
+    },
+    "symptom_key": {
+      "title": "Symptom key",
+      "description": "Identifier of the detection rule family that opened an episode.",
+      "$ref": "#/$defs/identifier"
+    },
+    "rule_id": {
+      "title": "Rule id",
+      "description": "Identifier of a single detection rule.",
+      "$ref": "#/$defs/identifier"
+    },
+    "setting_id": {
+      "title": "Setting id",
+      "description": "Identifier of a controller setting declared in the manual's settings registry.",
+      "$ref": "#/$defs/identifier"
+    },
+    "preset_id": {
+      "title": "Preset id",
+      "description": "Identifier of a ground-truth replay preset; kebab-case is accepted alongside snake_case.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{1,63}$"
+    },
+    "instance_id": {
+      "title": "Instance id",
+      "description": "Identifier of one running fault injection, for example inj-3.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{1,63}$"
+    },
+    "alarm_code": {
+      "title": "Alarm code",
+      "description": "Controller alarm code: W warning, X shutdown warning, S shutdown, M service.",
+      "type": "string",
+      "pattern": "^[WXSM][0-9]{3}$"
+    },
+    "alarm_type": {
+      "title": "Alarm type",
+      "description": "Class of a controller message.",
+      "type": "string",
+      "enum": ["warning", "shutdown_warning", "shutdown", "service"]
+    },
+    "machine_mode": {
+      "title": "Machine mode",
+      "description": "Operating state derived from the load valve and the motor current.",
+      "type": "string",
+      "enum": ["loaded", "unloaded", "off", "unknown"]
+    },
+    "sim_state": {
+      "title": "Simulator state",
+      "description": "Replay state of the simulator.",
+      "type": "string",
+      "enum": ["stopped", "playing", "paused"]
+    },
+    "severity_level": {
+      "title": "Severity level",
+      "description": "Severity bucket assigned to a decision or a ticket.",
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "decision_backend": {
+      "title": "Decision backend",
+      "description": "Which decision backend produced an answer.",
+      "type": "string",
+      "enum": ["jev", "llm", "rules"]
+    },
+    "subsystem": {
+      "title": "Subsystem",
+      "description": "The ten subsystems of the manual's component list.",
+      "type": "string",
+      "enum": [
+        "compressor",
+        "intake_unloading",
+        "oil",
+        "cooling",
+        "separator_drain",
+        "dryer",
+        "reservoirs",
+        "distribution",
+        "control",
+        "electrical"
+      ]
+    },
+    "probability": {
+      "title": "Probability",
+      "description": "A probability mass between 0 and 1 inclusive.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence": {
+      "title": "Confidence",
+      "description": "A confidence between 0 and 1 inclusive.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "probabilities": {
+      "title": "Probabilities",
+      "description": "A non-empty map from candidate key to probability. The keys are fault ids plus none_of_these, or severity levels, depending on the message.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/probability" },
+      "minProperties": 1
+    },
+    "choice": {
+      "title": "Choice",
+      "description": "The chosen fault id, or the literal none_of_these when no candidate applies.",
+      "anyOf": [{ "$ref": "#/$defs/identifier" }, { "type": "string", "const": "none_of_these" }]
+    },
+    "manual_ref": {
+      "title": "Manual reference",
+      "description": "Where a statement comes from in the operator manual.",
+      "type": "object",
+      "properties": {
+        "section": { "type": "string" },
+        "anchor": { "type": "string" },
+        "title": { "type": "string" },
+        "page": { "type": "integer", "minimum": 1 },
+        "page_start": { "type": "integer", "minimum": 1 },
+        "page_end": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["section"],
+      "additionalProperties": false
+    },
+    "signal_move": {
+      "title": "Signal move",
+      "description": "One expected movement of a signal or of a derived behaviour, in the manual's vocabulary. Exactly one of signal or behaviour is present. Which directions are valid for which target kind is a referential test, not a schema rule.",
+      "type": "object",
+      "properties": {
+        "signal": { "$ref": "#/$defs/signal_id" },
+        "behaviour": { "$ref": "#/$defs/behaviour_id" },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "rises",
+            "falls",
+            "high",
+            "low",
+            "unchanged",
+            "fluctuates",
+            "near_zero",
+            "not_venting",
+            "on",
+            "off",
+            "stays_on",
+            "stays_off",
+            "toggles",
+            "no_pulse",
+            "higher",
+            "lower",
+            "longer",
+            "shorter",
+            "faster",
+            "slower",
+            "not_reached"
+          ]
+        },
+        "phase": { "type": "string", "enum": ["loaded", "unloaded", "off", "any", "start"] },
+        "onset": { "type": "string", "enum": ["sudden", "gradual", "intermittent", "sustained"] },
+        "note": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "required": ["direction"],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": { "signal": { "$ref": "#/$defs/signal_id" } },
+          "required": ["signal"]
+        },
+        {
+          "properties": { "behaviour": { "$ref": "#/$defs/behaviour_id" } },
+          "required": ["behaviour"]
+        }
+      ]
+    },
+    "sample_value": {
+      "title": "Sample value",
+      "description": "One decoded telemetry value: a number for an analog tag, a boolean for a digital tag.",
+      "type": ["number", "boolean"]
+    },
+    "level_bucket": {
+      "title": "Level bucket",
+      "description": "Where a signal sits relative to its normal band.",
+      "type": "string",
+      "enum": ["far_below", "below", "normal", "above", "far_above", "unknown"]
+    },
+    "trend_bucket": {
+      "title": "Trend bucket",
+      "description": "How a signal is moving over the observation window.",
+      "type": "string",
+      "enum": ["falling", "flat", "rising", "erratic", "stuck", "unknown"]
+    },
+    "ambient_bucket": {
+      "title": "Ambient bucket",
+      "description": "Ambient temperature bucket at the time of an observation.",
+      "type": "string",
+      "enum": ["cold", "mild", "warm", "hot", "unknown"]
+    }
+  }
+}

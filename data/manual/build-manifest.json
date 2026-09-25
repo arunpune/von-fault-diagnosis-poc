@@ -1,0 +1,101 @@
+{
+  "schema": "urn:fdp:manifest:manual-build:v1",
+  "built_in": "container",
+  "image": {
+    "ref": "python:3.13.15-slim-trixie",
+    "digest": "sha256:8d9d0b8bcf6506481eae4907c18f5e3e7902e629f5f6d684f9e7c32e85e3ddf0",
+    "system_packages": [
+      "fontconfig=2.15.0-2.3",
+      "libharfbuzz-subset0=10.2.0-1+deb13u1",
+      "libharfbuzz0b=10.2.0-1+deb13u1",
+      "libpango-1.0-0=1.56.3-1",
+      "libpangoft2-1.0-0=1.56.3-1"
+    ]
+  },
+  "tool_versions": {
+    "weasyprint": "70.0",
+    "pydyf": "0.12.1",
+    "fonttools": "4.65.0",
+    "markdown-it-py": "4.2.0",
+    "jinja2": "3.1.6",
+    "python": "3.13.15",
+    "fdp-manual-build": "0.1.0"
+  },
+  "source_date_epoch": 1768435200,
+  "inputs": {
+    "manual/build.yaml": "f08b3abb82146709792948ae3db644ea9729ce15fa7b65dcf5e653a7bd2c4101",
+    "manual/content/01-safety.md": "8eadf43be861c63b321d3de6625c1ae32be245301884ef8e30750d59db4053cb",
+    "manual/content/02-description.md": "4dcefaf91ae27ae6cc814297d166c2d3f3384c73f83db8bd3a1e8d3ce2513afd",
+    "manual/content/03-controller.md": "de6214230040d0af80d5250bec29084b873cd2c136f8650b7b69a148fd1cb152",
+    "manual/content/04-settings.md": "d409a4f8566391a488fb068b4ca8bb3eed5564e4624ba9226e742421fb2b453e",
+    "manual/content/05-installation.md": "844b157b5a6e96741924505e429ca2d58e00a982d1103380cd0d0fa8b4c43bcf",
+    "manual/content/06-operation.md": "c9f71aafacdf5551673df327f3560fafa1036f9c25ea797cae73f9a5808d7e71",
+    "manual/content/07-maintenance.md": "072dc671fb784035c3a4f80d37aa381e92cd97f019ce1e0157a7cc0ee8999f28",
+    "manual/content/08-troubleshooting.md": "be7c3a199203cd3d8027b132277de121c44bcefee6eec09bb3dcdeee247678f0",
+    "manual/content/09-technical-data.md": "8c528914816f3446552d7f09050f1a1f3ea8aa95320aeedf9e2fa0cbcdfae71c",
+    "manual/content/10-appendix.md": "4a5814a90d8d6c79e87c74d5ffff7ab3148ab9c7b99fd49b26a3f5d414323418",
+    "manual/figures/control-panel.svg": "9cf5c1a66627b5e19e852bc6d83f2549d8766c2eb782b10a58c44382ab919434",
+    "manual/figures/system-schematic.svg": "1ad7998ae1453fde386701a2cde6992c3546f29c33c0fb908afc426b9f9a975c",
+    "manual/fonts/IBMPlexMono-Bold.ttf": "74e5eedcfa4596497d34e19023cabdabd3a8c852b903007a5654a59591a72ffb",
+    "manual/fonts/IBMPlexMono-Regular.ttf": "7c6fbddca4b700be918f5f6183d9bd4464fa427fe435f0b480d77fe2bb8c5a43",
+    "manual/fonts/IBMPlexSans-Bold.ttf": "9e6c74a889a700d707613d24548fe4ffa6bc59559a0689d2cf9e133bdcdafb2f",
+    "manual/fonts/IBMPlexSans-BoldItalic.ttf": "0e3142ba2ef31fe5c02f0c6c36424f251609cd6b73880076e21c2e81931ba2b9",
+    "manual/fonts/IBMPlexSans-Italic.ttf": "a9c6ef9942c49e49d11e11a6dacc0b3a087978757e9b22a06b8ac22a6400fb15",
+    "manual/fonts/IBMPlexSans-Regular.ttf": "975dcda37d80f038dcd143c22e33ca2d97a0cc5a929aace1c749153b0fe1afa5",
+    "manual/fonts/fonts.json": "50027f684e9f71a8f5630274262e219472dee1b9e892d1d2ea7da2af635167b1",
+    "manual/spec/alarms.yaml": "fd650b019dcb3c9655987268fd094a2310a2845e64157a888bd134ec659809d4",
+    "manual/spec/derived/normal-bands.json": "b43b66ab91ae29ff331ac4a2432b5295f59fc14b98f8acd11c65d21aecf6c9d4",
+    "manual/spec/faults.yaml": "2c026e06acd6ce216f17494450cfe5343aeb932aba8c81e7d054a0e7ef537b03",
+    "manual/spec/machine.yaml": "07227e0a18f3a329fa98a4d8ea13afb21e040fa12e47a3c1a3ff848e2e012a0c",
+    "manual/spec/maintenance.yaml": "d8c8aeb29656fcca6e9c6eefa19c7bc96c7ecda524a468b5e3486def8f94b1b2",
+    "manual/spec/settings.yaml": "d00532b81d4e74c7931e6828557efb2357e72bc4ddbd0dabdaed95750b6aa20f",
+    "manual/spec/signals.yaml": "031393028087df1d747c71208997916fd5c14553976176d31770a418822e64c0",
+    "manual/templates/base.html.j2": "c0261bff64bd070f45d774de36e4bd9fb62e7ddc37c846037f4a49f952b7b446",
+    "manual/templates/chapters/01-safety.html.j2": "4859e511b9c3223357f400ca672675ea9e77d7119579312ed9a851d9b446c83e",
+    "manual/templates/chapters/02-description.html.j2": "3036f9329d41dbb5820be6d655c78491e1c99d39ea3b402d04b098f9232b43c6",
+    "manual/templates/chapters/03-controller.html.j2": "0b85cf9c81f52ae0687b03cee9006f7345506d63ac829d318192661a11786264",
+    "manual/templates/chapters/04-settings.html.j2": "09d2a5b680abd69a8f970040740064fca01a3387ba7053b6e01fee4079d74474",
+    "manual/templates/chapters/05-installation.html.j2": "95c953e332fa0936ff5abb00d1207971f411620f4074c8279db542d26c591f29",
+    "manual/templates/chapters/06-operation.html.j2": "b2548be99f4539261fb5da0ea1d230c3fbc6cde559e82c25a2d26ecefea2b8df",
+    "manual/templates/chapters/07-maintenance.html.j2": "dffc1fe0fa877f4c06f60da80569b1cabfb1b081faf9358ffd0a047f25d15cf5",
+    "manual/templates/chapters/08-problem-solving.html.j2": "a468c18df0573bcd3684e2d967c3eafe23fcbdf9d8b624c93d034ecc1913fb28",
+    "manual/templates/chapters/09-technical-data.html.j2": "e7196f9cc6508c6d16af95e36f67b330f1ab1f1f3961e9c955416f209a5c9a1f",
+    "manual/templates/chapters/10-appendix.html.j2": "e098d538eef5be263bd695e3a458416c5551826177c27719ff1db0a8b51c3a24",
+    "manual/templates/css/base.css": "94b63fae417195c5b144079f17c1648dde1318cf8060d3ec7ed2f4192c926278",
+    "manual/templates/css/clean.css": "6b16deae4dcc98446f533459515cd7a84fa8167bec6a55fef700034f619647ab",
+    "manual/templates/css/fonts.css": "d82283f876e21344bacedeca7874131f720ac9a38315a7f6b35f3e487edd0ae9",
+    "manual/templates/css/realistic.css": "25b9226371db15b151adeeb7dc4b1543dc4416a25d9f0cb3c6658c0a2ac80842",
+    "manual/templates/partials/admonition.html.j2": "4cf0bbfe73cfcc2fb78794f65ec17a521e0dd51c4dba02274f4f4a0fb4262309",
+    "manual/templates/partials/cover.html.j2": "5bad7a0150bf1e3a0860e7f8e055969da0bccbe8493d9c74217a899f77c3631a",
+    "manual/templates/partials/figure.html.j2": "635836fdded8b818599f5b530b327e7bb9552807d0e13783ee74bc1ed1327afe",
+    "manual/templates/partials/table-alarms.html.j2": "4e884a6d2ca4591ffb4723deb71e15abfde59eb56b6e552ed2a4def93cb3973e",
+    "manual/templates/partials/table-maintenance.html.j2": "1ee192256923399e08185588dbd729004bc7e64b15eb206b257c7225c049e08e",
+    "manual/templates/partials/table-parameters.html.j2": "bc676ca1cb75b85109d3861b090c7ac84b860f34d3a3e2be96e49f1a128e53ff",
+    "manual/templates/partials/table-signals.html.j2": "cf8dbab186673388531890860b85b350ef082de5e675220c1579ebcab25d75b3",
+    "manual/templates/partials/table-technical-data.html.j2": "91aadac50d08fe25fa6de025b74979c2ee2cd6665cdb03f5728cef71990efe5d",
+    "manual/templates/partials/table-troubleshooting.html.j2": "cde35f2722a1d4436f9cd5428534c64b273cbbdaa7adea0e6772d8dd6363d70d",
+    "manual/templates/toc.html.j2": "550ddcb43627b0da68c7970d8a36a71015c7e605146a275120af14e3d8cb15af"
+  },
+  "inputs_tree_sha256": "e671759be284c33487434a39f3986a37c4b2ca12c7af427d4824ceef4d88e2c7",
+  "outputs": {
+    "clean": {
+      "path": "data/manual/cau-7-clean.pdf",
+      "pdf_sha256": "1da4df2d5b6c9c2a90b4f5d86e5b40f82f3ae000aa6ced6f4adc51dfc4549065",
+      "text_sha256": "c66ac9c02e674fce4ef5d6a9367bcf9420385496aadcff51a5081d35147aa82f",
+      "pages": 50,
+      "bytes": 422406
+    },
+    "realistic": {
+      "path": "data/manual/cau-7-realistic.pdf",
+      "pdf_sha256": "a8ce7d6013d39ac894b58a9e0bebc05f8cbc94c1effd9fce2cc52eb451a13f07",
+      "text_sha256": "21e461ea1cbf683394e43f8dbbeb390fa75c6d5580c6fd867c967ccf8fdb6dc8",
+      "pages": 47,
+      "bytes": 424889
+    },
+    "catalog": {
+      "path": "tools/eval/fixtures/catalog.json",
+      "sha256": "80c308eeb72a1ca6ceac3db02aabe253c9312652f4ae3356677154e00207aafb"
+    }
+  },
+  "wall_time": "2026-09-24T19:27:21.118674Z"
+}

@@ -1,0 +1,96 @@
+{# SPDX-FileCopyrightText: 2026 Meddle S.r.l. #}
+{# SPDX-License-Identifier: Apache-2.0 #}
+{# MAN's tables.alarms() macro for print (phase1-pdf-build.md §8, decision
+   R-04): the controller message list of chapter 3. Every row carries
+   id="alarm-<code>", the target of MAN's ref('alarm:<code>') (§8.3), and the
+   code itself in an .alarm-code span so INI finds it in the extracted text
+   (decision R-09).
+
+   clean splits the list by message type so each table fits one page;
+   realistic prints one table that spans pages with its <thead> repeated. The
+   threshold and the delay go through MAN's thr()/delay(), which resolve a
+   trigger that points at a programmable setting and apply the variant's
+   imperial conversion; the typed model decides which branch is taken.
+
+   The reset hysteresis is printed in SI even in the realistic variant: it is a
+   difference, not a reading, and the degC → °F conversion of §7.3 is the one
+   for absolute temperatures, so converting it would state a wrong number. #}
+{%- set type_labels = {
+     'warning': 'Warnings',
+     'shutdown_warning': 'Shutdown warnings',
+     'shutdown': 'Shutdowns',
+     'service': 'Service messages',
+   } -%}
+{%- set comparisons = {
+     'gt': 'above', 'gte': 'at or above', 'lt': 'below', 'lte': 'at or below',
+     'eq': 'equal to', 'ne': 'other than',
+   } -%}
+{%- set resets = {
+     'auto': 'automatic',
+     'auto_hysteresis': 'automatic, with hysteresis',
+     'manual': 'manual, at the controller',
+     'manual_service': 'manual, after the service',
+   } -%}
+{%- set states = {
+     'running': 'while the unit runs',
+     'loaded': 'while loaded',
+     'unloaded': 'while unloaded',
+     'off': 'while the unit is off',
+   } -%}
+
+{%- macro leaf_text(leaf) -%}
+{{ man.sig(leaf.signal) }} {{ comparisons[leaf.op] }} the limit
+{%- endmacro -%}
+
+{%- macro trigger_text(alarm) -%}
+{%- set trigger = alarm.trigger -%}
+{%- if trigger.kind == 'counter' -%}
+Service counter {{ trigger.counter_derived | e }} reaches the interval of
+{{ trigger.counter_tasks | map('e') | join(', ') }}
+{%- elif trigger.kind == 'external' -%}
+External contact {{ trigger.input | e }} opens
+{%- elif trigger.condition -%}
+{%- set joiner = ' and ' if trigger.condition.mode == 'all' else ' or ' -%}
+{%- for leaf in trigger.condition.leaves -%}
+{{ leaf_text(leaf) }}{{ joiner if not loop.last }}
+{%- endfor -%}
+{%- if trigger.state %} {{ states.get(trigger.state, 'in state ' ~ trigger.state) }}{% endif -%}
+{%- if trigger.exclude_start_s is not none %}, outside the start mask{% endif -%}
+{%- else -%}
+Set by the controller
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro alarm_row(alarm) -%}
+<tr id="alarm-{{ alarm.code | e }}" data-alarm-type="{{ alarm.type | e }}">
+<td><span class="alarm-code">{{ alarm.code | e }}</span></td>
+<td>{{ alarm.title | e }} <br><span class="mono">{{ alarm.display | e }}</span></td>
+<td>{{ trigger_text(alarm) }}</td>
+<td>{% if alarm.trigger.condition %}{{ man.thr(alarm.code) }}{% else %}&mdash;{% endif %}</td>
+<td>{% if alarm.trigger.for_s is not none %}{{ man.delay(alarm.code) }}{% else %}&mdash;{% endif %}</td>
+<td>{{ resets[alarm.reset.mode] }}{% if alarm.reset.hysteresis %} ({{ qty(alarm.reset.hysteresis.value, alarm.reset.hysteresis.unit) }}){% endif %}</td>
+<td>{% if alarm.operator_action_html %}{{ alarm.operator_action_html }}{% elif alarm.cause_hint_html %}{{ alarm.cause_hint_html }}{% else %}&mdash;{% endif %}</td>
+</tr>
+{%- endmacro -%}
+
+{%- macro alarm_table(caption, rows) -%}
+<table class="alarms">
+<caption>{{ caption | e }}</caption>
+<thead><tr><th>Code</th><th>Message</th><th>Trigger</th><th>Threshold</th><th>Delay</th><th>Reset</th><th>Action</th></tr></thead>
+<tbody>
+{% for alarm in rows %}{{ alarm_row(alarm) }}
+{% endfor %}
+</tbody>
+</table>
+{%- endmacro -%}
+
+{%- macro alarms() -%}
+{%- if variant.tables == 'span_pages_repeat_header' -%}
+{{ alarm_table('Controller messages', manual.alarms) }}
+{%- else -%}
+{%- for type, label in type_labels.items() -%}
+{%- set rows = manual.alarms | selectattr('type', 'equalto', type) | list -%}
+{%- if rows %}{{ alarm_table(label, rows) }}{% endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro -%}

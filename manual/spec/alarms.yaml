@@ -1,0 +1,832 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# CTRL-7 controller messages (chapter 3). Registry and trigger grammar:
+# docs/plan/phase1-manual-content.md section 6.2 and docs/adr/0012-machine-evaluable-alarm-triggers.md.
+# Thresholds and delays reference settings.yaml so that chapter 3 and chapter 4 cannot disagree;
+# no text field carries a hand-typed number with a unit (rule N1).
+schema_version: 1
+alarms:
+  - code: W101
+    type: warning
+    bit: 0
+    evaluation: sim
+    title: Line pressure low
+    display: LINE PRESS LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: low_pressure_switch, op: eq, threshold: {value: 1, unit: bool}}
+      for_s: {setting: low_pressure_alarm_delay}
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the low-pressure switch releases again.
+    cause_hint: >-
+      The line pressure has stayed below the hardware switch setting for longer than the alarm
+      delay. Air demand above what the unit can deliver, a leak in the distribution system or a
+      compressor that no longer loads are the usual reasons; see
+      {{ ref('cond:low_line_pressure') }}.
+    operator_action: >-
+      Switch off the consumers you can spare and watch whether {{ sig('line_pressure') }}
+      recovers. If it does not, work through {{ ref('cond:low_line_pressure') }}.
+    related_conditions: [low_line_pressure]
+  - code: W102
+    type: warning
+    bit: 1
+    evaluation: sim
+    title: Continuous load time exceeded
+    display: CONT LOAD TIME
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: continuous_load_time, op: gt, threshold: {setting: max_continuous_load_time}}
+      for_s: 0
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the unit unloads or stops.
+    cause_hint: >-
+      The unit has been compressing without interruption for longer than the permitted continuous
+      load time, so it never reaches the cut-out pressure. Sustained demand, a leak downstream of
+      the dryer or a compression element that no longer delivers its rated flow are the usual
+      reasons; see {{ ref('cond:continuous_load') }}.
+    operator_action: >-
+      Check whether the demand is genuine. If no consumer explains it, look for escaping air at
+      the purge silencer and in the distribution system, then follow
+      {{ ref('cond:continuous_load') }}.
+    related_conditions: [continuous_load]
+  - code: W103
+    type: warning
+    bit: 2
+    evaluation: sim
+    title: Dryer purge pressure high
+    display: PURGE PRESS HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: dryer_purge_pressure, op: gt, threshold: {setting: purge_pressure_warning}}
+      for_s: 60
+    reset:
+      mode: auto_hysteresis
+      hysteresis: {value: 0.1, unit: bar}
+      note: >-
+        The message clears by itself once the purge pressure has fallen back below the limit by
+        the hysteresis band.
+    cause_hint: >-
+      The purge line carries pressure while the unit is delivering, so compressed air is escaping
+      through the regeneration path instead of reaching the consumers. A purge valve that no
+      longer seats, a damaged silencer or a changeover valve that stays open are the usual
+      reasons; see {{ ref('cond:purge_pressure_high') }}.
+    operator_action: >-
+      Listen at the purge silencer for a permanent discharge and, if you hear one, arrange
+      {{ ref('task:dryer_purge_valve_service') }}.
+    related_conditions: [purge_pressure_high]
+  - code: W104
+    type: warning
+    bit: 3
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 1
+    title: Oil temperature high
+    display: OIL TEMP HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_warning}}
+      for_s: 300
+    reset:
+      mode: auto_hysteresis
+      hysteresis: {value: 5, unit: degC}
+      note: >-
+        The message clears by itself once the oil temperature has fallen back below the limit by
+        the hysteresis band.
+    cause_hint: >-
+      Cooling no longer removes the heat the compression element produces. A fouled oil cooler, a
+      cooling fan that has stopped, a low oil level, a clogged oil filter or simply a hot machine
+      room are the usual reasons; see {{ ref('cond:oil_temperature_high') }}.
+    operator_action: >-
+      Check that the cooling air path is free and that the fan runs, then read the oil level while
+      the unit is stopped. The unit keeps running, but the shutdown limit is not far above this
+      warning.
+    related_conditions: [oil_temperature_high]
+  - code: W105
+    type: warning
+    bit: 4
+    evaluation: sim
+    title: Oil temperature low
+    display: OIL TEMP LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: oil_temperature, op: lt, threshold: {value: 5, unit: degC}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the oil temperature rises above the limit.
+    cause_hint: >-
+      The oil is colder than the unit should ever see in service. A cold machine room, a
+      thermostatic valve stuck towards the cooler or a faulty temperature sensor are the usual
+      reasons; see {{ ref('cond:oil_temperature_low') }}.
+    operator_action: >-
+      Heat the machine room before starting the unit, and have the thermostatic valve and the
+      temperature sensor checked if the reading stays low once the unit is warm.
+    related_conditions: [oil_temperature_low]
+  - code: W106
+    type: warning
+    bit: 5
+    evaluation: sim
+    family: motor_current_high
+    rank: 1
+    title: Motor current high
+    display: MOTOR CURR HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s: {setting: motor_start_mask_time}
+      condition: {signal: motor_current, op: gt, threshold: {setting: motor_current_warning}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the current falls back below the limit.
+    cause_hint: >-
+      The motor draws more current under load than it should. A separator element that has
+      clogged, an intake valve that does not close at unload, worn airend bearings, the wrong oil
+      grade or a weak supply are the usual reasons; see {{ ref('cond:motor_current_high') }}.
+    operator_action: >-
+      Note the pressure at which the current rises and compare it with the values in
+      {{ ref('sec:normal-bands') }}, then follow {{ ref('cond:motor_current_high') }}.
+    related_conditions: [motor_current_high]
+  - code: W107
+    type: warning
+    bit: 6
+    evaluation: sim
+    title: Motor current low under load
+    display: MOTOR CURR LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s: {setting: motor_start_mask_time}
+      condition: {signal: motor_current, op: lt, threshold: {setting: motor_current_low_warning}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the current rises back above the limit.
+    cause_hint: >-
+      The unit reports that it is compressing, but the motor is barely loaded, so little or no air
+      is being delivered. A clogged intake filter, an intake valve that does not open or a worn
+      compression element are the usual reasons; see {{ ref('cond:motor_current_low') }}.
+    operator_action: >-
+      Inspect the intake filter and arrange {{ ref('task:air_filter_service') }} if it is dirty,
+      then follow {{ ref('cond:motor_current_low') }}.
+    related_conditions: [motor_current_low]
+  - code: W108
+    type: warning
+    bit: 7
+    evaluation: sim
+    title: Motor starts per hour exceeded
+    display: TOO MANY STARTS
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: motor_starts_per_hour, op: gt, threshold: {setting: max_starts_per_hour}}
+      for_s: 0
+    reset:
+      mode: auto
+      note: >-
+        The message clears by itself once the number of starts in the last hour falls back below
+        the limit.
+    cause_hint: >-
+      The unit starts more often than the motor tolerates, which shortens its life. A leak that
+      drains the reservoirs between cycles, a closed reservoir isolation valve or a very uneven
+      demand pattern are the usual reasons; see {{ ref('cond:frequent_cycling') }}.
+    operator_action: >-
+      Check that both reservoirs are in service and look for escaping air in the distribution
+      system, then follow {{ ref('cond:frequent_cycling') }}.
+    related_conditions: [frequent_cycling]
+  - code: W109
+    type: warning
+    bit: 8
+    evaluation: sim
+    title: Ambient temperature high
+    display: AMBIENT T HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: ambient_temperature, op: gt, threshold: {setting: ambient_temperature_high_warning}}
+      for_s: 600
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the cooling air is cool enough again.
+    cause_hint: >-
+      The cooling air drawn into the unit is hotter than the installation limit, so the oil and
+      the delivered air will run hot as well. Blocked ventilation openings, warm exhaust air
+      recirculating into the intake or a hot machine room are the usual reasons.
+    operator_action: >-
+      Clear the ventilation openings and check that the extraction works, keeping the site
+      requirements of {{ ref('sec:installation-site') }} in mind.
+    related_conditions: [oil_temperature_high]
+  - code: W110
+    type: warning
+    bit: 9
+    evaluation: sim
+    title: Ambient temperature low
+    display: AMBIENT T LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: ambient_temperature, op: lt, threshold: {setting: ambient_temperature_low_warning}}
+      for_s: 600
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the cooling air is warm enough again.
+    cause_hint: >-
+      The machine room is colder than the installation limit. Cold oil is thick, condensate can
+      freeze in the drain and the unit may refuse to start.
+    operator_action: >-
+      Heat the machine room to the range given in {{ ref('sec:installation-site') }} before
+      starting the unit, and check that the condensate drain is not frozen.
+    related_conditions: [oil_temperature_low, no_start]
+  - code: W111
+    type: warning
+    bit: 10
+    evaluation: sim
+    title: Dryer changeover not detected
+    display: NO TOWER CHANGE
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: seconds_since_tower_change, op: gt, threshold: {setting: dryer_changeover_timeout}}
+      for_s: 0
+    reset:
+      mode: auto
+      note: The message clears by itself at the next detected tower changeover.
+    cause_hint: >-
+      The dryer has not switched from one tower to the other within the permitted time, so one
+      tower is drying continuously and is no longer being regenerated. A changeover valve that
+      does not move, a dryer control fault or a failed purge switch are the usual reasons; see
+      {{ ref('cond:dryer_changeover_fault') }}.
+    operator_action: >-
+      Watch the dryer through a full cycle and listen for the regeneration discharge, then follow
+      {{ ref('cond:dryer_changeover_fault') }}.
+    related_conditions: [dryer_changeover_fault]
+  - code: W112
+    type: warning
+    bit: 11
+    evaluation: sim
+    title: Separator discharge pressure high under load
+    display: SEP PRESS HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: separator_discharge_pressure, op: gt, threshold: {setting: separator_pressure_warning}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the separator discharge vents again.
+    cause_hint: >-
+      The cyclonic separator discharge stays under pressure while the unit is delivering, so the
+      condensate drain is not doing its work. A drain valve stuck open or a blocked drain line are
+      the usual reasons; see {{ ref('cond:separator_pressure_abnormal') }}.
+    operator_action: >-
+      Watch the drain over a few cycles to see whether it opens and closes, and arrange
+      {{ ref('task:condensate_drain_service') }} if it does not.
+    related_conditions: [separator_pressure_abnormal]
+  - code: W113
+    type: warning
+    bit: 12
+    evaluation: sim
+    title: Reservoir pressure deviation
+    display: RESERVOIR DEV
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: reservoir_line_delta, op: gt, threshold: {setting: reservoir_deviation_warning}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself once the two pressure readings agree again.
+    cause_hint: >-
+      The pressure downstream of the reservoirs differs from the line pressure at the pneumatic
+      panel. A closed reservoir isolation valve or a faulty pressure transducer are the usual
+      reasons; see {{ ref('cond:reservoir_deviation') }}.
+    operator_action: >-
+      Check that the reservoir isolation valve is fully open, then compare both readings on the
+      controller as described in {{ ref('cond:reservoir_deviation') }}.
+    related_conditions: [reservoir_deviation]
+  - code: W114
+    type: warning
+    bit: 13
+    evaluation: sim
+    title: Flow signal lost
+    display: NO FLOW SIGNAL
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: flow_pulse, op: eq, threshold: {value: 0, unit: bool}}
+      for_s: 120
+    reset:
+      mode: auto
+      note: The message clears by itself at the next pulse from the flow sensor.
+    cause_hint: >-
+      The flow sensor at the reservoir inlet reports no pulses although the unit is delivering. A
+      failed sensor, a broken signal wire or a closed isolation valve upstream of the sensor are
+      the usual reasons; see {{ ref('cond:no_flow_signal') }}.
+    operator_action: >-
+      Confirm that air actually reaches the consumers, then have the flow sensor and its wiring
+      checked; see {{ ref('cond:no_flow_signal') }}.
+    related_conditions: [no_flow_signal]
+  - code: W115
+    type: warning
+    bit: 14
+    evaluation: sim
+    title: Purge switch not detected
+    display: NO PURGE SIGNAL
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: purge_switch, op: eq, threshold: {value: 0, unit: bool}}
+      for_s: 120
+    reset:
+      mode: auto
+      note: The message clears by itself at the next detected tower discharge.
+    cause_hint: >-
+      The purge pressure switch never reports a tower discharge, so the controller cannot confirm
+      that regeneration takes place. A failed switch, a blocked purge line or a changeover valve
+      that does not move are the usual reasons; see {{ ref('cond:dryer_changeover_fault') }}.
+    operator_action: >-
+      Listen for the regeneration discharge at the silencer during a full dryer cycle and report
+      what you hear with the message; see {{ ref('cond:dryer_changeover_fault') }}.
+    related_conditions: [dryer_changeover_fault]
+  - code: W116
+    type: warning
+    bit: 15
+    evaluation: sim
+    title: Oil level low
+    display: OIL LEVEL LOW
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: oil_level_ok, op: eq, threshold: {value: 0, unit: bool}}
+      for_s: 300
+    reset:
+      mode: auto
+      note: The message clears by itself once the level switch reports oil above the minimum again.
+    cause_hint: >-
+      The oil level switch reports that the level in the separator vessel has fallen below the
+      minimum. Oil carry-over into the delivered air, a leak in the oil circuit or a faulty level
+      switch are the usual reasons.
+    operator_action: >-
+      Stop the unit, let the oil settle and read the sight glass. Top up with the specified grade
+      and look for oil traces around the unit; the procedure is part of
+      {{ ref('task:oil_change') }}.
+    related_conditions: [oil_temperature_high]
+  - code: W117
+    type: warning
+    bit: 16
+    evaluation: sim
+    title: Separator element pressure drop high
+    display: SEP ELEMENT DP
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: discharge_line_delta, op: gt, threshold: {setting: separator_element_dp_warning}}
+      for_s: 60
+    reset:
+      mode: auto
+      note: The message clears by itself once the pressure drop falls back below the limit.
+    cause_hint: >-
+      The pressure drop across the separator element has grown well beyond what a clean element
+      shows, which costs energy and raises the motor current. A clogged separator element is the
+      usual reason; see {{ ref('cond:discharge_pressure_high') }}.
+    operator_action: >-
+      Plan {{ ref('task:separator_element_change') }} at the next opportunity and keep an eye on
+      the motor current until then.
+    related_conditions: [discharge_pressure_high]
+  - code: X201
+    type: shutdown_warning
+    bit: 17
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 2
+    title: Oil temperature very high
+    display: OIL TEMP V HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_shutdown_warning}}
+      for_s: 30
+    reset:
+      mode: auto
+      note: The message clears by itself once the oil temperature falls back below the limit.
+    cause_hint: >-
+      The oil temperature is close to the shutdown limit, so the cause behind the earlier high
+      temperature warning has not been removed; see {{ ref('cond:oil_temperature_high') }}.
+    operator_action: >-
+      Prepare to stop the unit. Reduce the demand, check the cooling air path and the fan, and
+      clear the cause before the controller shuts the unit down.
+    related_conditions: [oil_temperature_high]
+  - code: X202
+    type: shutdown_warning
+    bit: 18
+    evaluation: sim
+    family: discharge_pressure_high
+    rank: 1
+    title: Discharge pressure high
+    display: DISCH PRESS HIGH
+    effect: none
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: discharge_pressure, op: gt, threshold: {setting: discharge_pressure_shutdown_warning}}
+      for_s: 10
+    reset:
+      mode: auto
+      note: The message clears by itself once the discharge pressure falls back below the limit.
+    cause_hint: >-
+      The pressure in the separator vessel is close to the shutdown limit and to the setting of
+      the safety valve. A clogged separator element, a minimum pressure valve that does not open
+      or an intake valve that does not close are the usual reasons; see
+      {{ ref('cond:discharge_pressure_high') }}.
+    operator_action: >-
+      Open a consumer to lower the pressure and be ready to stop the unit, then follow
+      {{ ref('cond:discharge_pressure_high') }}.
+    related_conditions: [discharge_pressure_high]
+  - code: X203
+    type: shutdown_warning
+    bit: 19
+    evaluation: sim
+    family: motor_current_high
+    rank: 2
+    title: Motor current very high
+    display: MOTOR CURR V HI
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s: {setting: motor_start_mask_time}
+      condition: {signal: motor_current, op: gt, threshold: {setting: motor_current_shutdown_warning}}
+      for_s: 30
+    reset:
+      mode: auto
+      note: The message clears by itself once the current falls back below the limit.
+    cause_hint: >-
+      The motor current is close to the overload shutdown limit, so the cause behind the earlier
+      high current warning has not been removed; see {{ ref('cond:motor_current_high') }}.
+    operator_action: >-
+      Prepare to stop the unit and have the separator element, the intake valve and the supply
+      voltage checked before the controller trips.
+    related_conditions: [motor_current_high]
+  - code: X204
+    type: shutdown_warning
+    bit: 20
+    evaluation: sim
+    title: Compressor not unloading
+    display: NO UNLOAD
+    effect: none
+    trigger:
+      kind: signal
+      state: loaded
+      condition: {signal: line_pressure, op: gt, threshold: {setting: cut_out_pressure, offset: 0.5}}
+      for_s: 30
+    reset:
+      mode: auto
+      note: The message clears by itself as soon as the unit unloads.
+    cause_hint: >-
+      The line pressure has risen above the cut-out setting and the unit is still compressing. An
+      intake valve that does not close, a faulty unloader solenoid, a stuck regulator contact or a
+      pressure transducer that reads low are the usual reasons; see {{ ref('cond:no_unload') }}.
+    operator_action: >-
+      Stop the unit with the stop key and keep it stopped until the cause has been found; see
+      {{ ref('cond:no_unload') }}.
+    related_conditions: [no_unload]
+  - code: S301
+    type: shutdown
+    bit: 21
+    evaluation: sim
+    family: oil_temperature_high
+    rank: 3
+    title: Oil temperature shutdown
+    display: OIL TEMP SHUTDN
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: running
+      condition: {signal: oil_temperature, op: gt, threshold: {setting: oil_temperature_shutdown}}
+      for_s: 5
+    reset:
+      mode: manual
+      note: >-
+        Start is inhibited until the oil has cooled and the message has been reset at the
+        controller.
+    cause_hint: >-
+      The controller stopped the unit because the oil reached the shutdown limit. The cause is the
+      same as for the earlier temperature messages; see {{ ref('cond:oil_temperature_high') }}.
+    operator_action: >-
+      Let the unit cool down, remove the cause and only then reset the message as described in
+      {{ ref('sec:acknowledging') }}.
+    related_conditions: [oil_temperature_high]
+  - code: S302
+    type: shutdown
+    bit: 22
+    evaluation: sim
+    family: discharge_pressure_high
+    rank: 2
+    title: Discharge pressure shutdown
+    display: DISCH P SHUTDN
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: any
+      condition: {signal: discharge_pressure, op: gt, threshold: {setting: discharge_pressure_shutdown}}
+      for_s: 5
+    reset:
+      mode: manual
+      note: Start is inhibited until the message has been reset at the controller.
+    cause_hint: >-
+      The controller stopped the unit because the separator vessel reached the shutdown pressure,
+      just below the setting of the safety valve; see {{ ref('cond:discharge_pressure_high') }}.
+    operator_action: >-
+      Check whether the safety valve has blown, find the cause with
+      {{ ref('cond:discharge_pressure_high') }} and reset the message as described in
+      {{ ref('sec:acknowledging') }}.
+    related_conditions: [discharge_pressure_high]
+  - code: S303
+    type: shutdown
+    bit: 23
+    evaluation: sim
+    family: motor_current_high
+    rank: 3
+    title: Motor overload
+    display: MOTOR OVERLOAD
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s: {setting: motor_start_mask_time}
+      condition: {signal: motor_current, op: gt, threshold: {setting: motor_current_shutdown}}
+      for_s: 5
+    reset:
+      mode: manual
+      note: Start is inhibited until the message has been reset at the controller.
+    cause_hint: >-
+      The controller stopped the unit because the motor current reached the overload limit. A
+      mechanically blocked compression element, a clogged separator element or a supply fault are
+      the usual reasons; see {{ ref('cond:motor_current_high') }}.
+    operator_action: >-
+      Do not restart the unit repeatedly. Have the drive, the separator element and the supply
+      checked, then reset the message as described in {{ ref('sec:acknowledging') }}.
+    related_conditions: [motor_current_high]
+  - code: S304
+    type: shutdown
+    bit: 24
+    evaluation: sim
+    title: Motor start failure
+    display: START FAILURE
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        all:
+          - {signal: load_valve, op: eq, threshold: {value: 1, unit: bool}}
+          - {signal: motor_current, op: lt, threshold: {value: 1.0, unit: A}}
+      for_s: 20
+    reset:
+      mode: manual
+      note: Start is inhibited until the message has been reset at the controller.
+    cause_hint: >-
+      The controller asked the unit to compress but the motor draws no current, so the drive never
+      started. A tripped protection relay, a missing supply phase, an active emergency stop or a
+      mechanically blocked compression element are the usual reasons; see
+      {{ ref('cond:no_start') }}.
+    operator_action: >-
+      Check the emergency stop and the protection relay in the cabinet, then follow
+      {{ ref('cond:no_start') }} before resetting the message.
+    related_conditions: [no_start]
+  - code: S305
+    type: shutdown
+    bit: 25
+    evaluation: sim
+    title: Line pressure sensor fault
+    display: LINE P SENSOR
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        any:
+          - {signal: line_pressure, op: lt, threshold: {value: -0.5, unit: bar}}
+          - {signal: line_pressure, op: gt, threshold: {value: 15.5, unit: bar}}
+      for_s: 10
+    reset:
+      mode: manual
+      note: Start is inhibited until the message has been reset at the controller.
+    cause_hint: >-
+      The line pressure reading has left the plausible range of the transducer, so the controller
+      can no longer regulate on it. A failed transducer, a broken signal wire or a short circuit
+      in the wiring are the usual reasons.
+    operator_action: >-
+      Do not bridge the input. Have the transducer and its wiring checked, then reset the message
+      as described in {{ ref('sec:acknowledging') }}.
+    related_conditions: [low_line_pressure, no_unload, reservoir_deviation]
+  - code: S306
+    type: shutdown
+    bit: 26
+    evaluation: sim
+    title: Oil temperature sensor fault
+    display: OIL T SENSOR
+    effect: stop_inhibit_start
+    trigger:
+      kind: signal
+      state: any
+      condition:
+        any:
+          - {signal: oil_temperature, op: lt, threshold: {value: -15, unit: degC}}
+          - {signal: oil_temperature, op: gt, threshold: {value: 115, unit: degC}}
+      for_s: 10
+    reset:
+      mode: manual
+      note: Start is inhibited until the message has been reset at the controller.
+    cause_hint: >-
+      The oil temperature reading has left the plausible range of the resistance thermometer, so
+      the controller can no longer protect the compression element. A failed sensor, a broken
+      signal wire or a loose terminal are the usual reasons.
+    operator_action: >-
+      Have the sensor and its wiring checked before restarting, then reset the message as
+      described in {{ ref('sec:acknowledging') }}.
+    related_conditions: [oil_temperature_high, oil_temperature_low]
+  - code: S307
+    type: shutdown
+    bit: null
+    evaluation: none
+    title: Emergency stop activated
+    display: EMERGENCY STOP
+    effect: stop_inhibit_start
+    trigger:
+      kind: external
+      input: Emergency-stop contact on the control panel
+    reset:
+      mode: manual
+      note: >-
+        Start stays inhibited until the emergency-stop button has been released and the message
+        has been reset at the controller.
+    cause_hint: >-
+      Somebody has pressed the emergency-stop button, or its contact has opened because of a
+      wiring fault; see {{ ref('cond:no_start') }}.
+    operator_action: >-
+      Find out why the unit was stopped and make sure that nobody is working on it. Release the
+      button by turning it, then reset the message as described in {{ ref('sec:acknowledging') }}.
+    related_conditions: [no_start]
+  - code: S308
+    type: shutdown
+    bit: null
+    evaluation: none
+    title: Motor protection relay tripped
+    display: MOTOR PROTECTION
+    effect: stop_inhibit_start
+    trigger:
+      kind: external
+      input: Auxiliary contact of the motor protection relay in the control cabinet
+    reset:
+      mode: manual
+      note: >-
+        Start stays inhibited until the protection relay has been reset in the cabinet and the
+        message has been reset at the controller.
+    cause_hint: >-
+      The motor protection relay has cut the supply to the motor. A sustained overload, a missing
+      or unbalanced supply phase or a relay set too tightly are the usual reasons; see
+      {{ ref('cond:no_start') }}.
+    operator_action: >-
+      Leave the relay tripped and call a qualified electrician. Repeated resetting without finding
+      the cause damages the motor.
+    related_conditions: [no_start]
+  - code: M401
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil change due
+    display: OIL CHANGE DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: oil_change}
+    reset:
+      mode: manual_service
+      note: The counter is reset at the controller after the service has been carried out.
+    cause_hint: >-
+      The run-hour counter or the calendar interval for the oil change has expired. Old oil loses
+      its cooling and lubricating properties and carries over into the delivered air.
+    operator_action: Arrange {{ ref('task:oil_change') }} and reset the service counter afterwards.
+  - code: M402
+    type: service
+    bit: null
+    evaluation: none
+    title: Air intake filter service due
+    display: AIR FILTER DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: air_filter_service}
+    reset:
+      mode: manual_service
+      note: The counter is reset at the controller after the service has been carried out.
+    cause_hint: >-
+      The run-hour counter or the calendar interval for the air intake filter has expired. A
+      clogged filter throttles the intake and lowers the delivered flow.
+    operator_action: >-
+      Arrange {{ ref('task:air_filter_service') }} and reset the service counter afterwards.
+  - code: M403
+    type: service
+    bit: null
+    evaluation: none
+    title: Oil filter and separator element due
+    display: OIL FLT SEP DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, tasks: [oil_filter_change, separator_element_change]}
+    reset:
+      mode: manual_service
+      note: >-
+        The counter is reset at the controller after both services have been carried out; the
+        separator element is due less often than the oil filter.
+    cause_hint: >-
+      The run-hour counter for the oil filter, for the separator element, or for both has expired.
+      A clogged oil filter raises the oil temperature and a clogged separator element raises the
+      pressure drop and the motor current.
+    operator_action: >-
+      Arrange {{ ref('task:oil_filter_change') }} and, when it is due,
+      {{ ref('task:separator_element_change') }}, then reset the service counter.
+  - code: M404
+    type: service
+    bit: null
+    evaluation: none
+    title: Dryer desiccant inspection due
+    display: DESICCANT DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: dryer_desiccant_inspection}
+    reset:
+      mode: manual_service
+      note: The counter is reset at the controller after the inspection has been carried out.
+    cause_hint: >-
+      The run-hour counter for the desiccant inspection has expired. Exhausted desiccant lets
+      moisture through to the consumers long before anything else shows on the controller.
+    operator_action: >-
+      Arrange {{ ref('task:dryer_desiccant_inspection') }} and reset the service counter
+      afterwards.
+  - code: M405
+    type: service
+    bit: null
+    evaluation: none
+    title: Condensate drain service due
+    display: DRAIN SERV DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: condensate_drain_service}
+    reset:
+      mode: manual_service
+      note: The counter is reset at the controller after the service has been carried out.
+    cause_hint: >-
+      The run-hour counter for the condensate drain has expired. A drain that no longer closes
+      wastes air, and one that no longer opens sends water downstream.
+    operator_action: >-
+      Arrange {{ ref('task:condensate_drain_service') }} and reset the service counter afterwards.
+  - code: M406
+    type: service
+    bit: null
+    evaluation: none
+    title: Annual inspection due
+    display: ANNUAL INSP DUE
+    effect: none
+    trigger:
+      kind: counter
+      counter: {derived: run_hours, task: annual_inspection}
+    reset:
+      mode: manual_service
+      note: The counter is reset at the controller after the inspection has been carried out.
+    cause_hint: >-
+      The calendar interval for the annual inspection has expired. It is the yearly check of the
+      safety devices, the electrical installation and the pressure equipment.
+    operator_action: >-
+      Arrange {{ ref('task:annual_inspection') }} with a qualified service technician and reset
+      the service counter afterwards.

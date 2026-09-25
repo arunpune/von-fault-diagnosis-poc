@@ -1,0 +1,386 @@
+{
+  "schema": "urn:fdp:fixture:metropt3-slices:v1",
+  "credit": "Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021). MetroPT-3 Dataset. UCI Machine Learning Repository. https://doi.org/10.24432/C5VW3R. Licensed CC BY 4.0. A cut slice is an excerpt (modified: rows selected) and is never committed (ground rule 5, CONTRIBUTING.md).",
+  "generated_by": "scripts/data/cut-metropt-slices.py",
+  "source": {
+    "file": "MetroPT3(AirCompressor).csv",
+    "sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+    "bytes": 218300507,
+    "doi": "10.24432/C5VW3R"
+  },
+  "slices": [
+    {
+      "name": "ci-slice",
+      "segments": [
+        {
+          "from": "2020-02-01T00:00:00Z",
+          "to": "2020-02-01T06:00:00Z",
+          "rows": 2180
+        },
+        {
+          "from": "2020-06-05T06:00:00Z",
+          "to": "2020-06-05T14:00:00Z",
+          "rows": 2906
+        },
+        {
+          "from": "2020-07-31T01:00:00Z",
+          "to": "2020-07-31T07:00:00Z",
+          "rows": 796
+        }
+      ],
+      "rows": 5882,
+      "sha256": "897222b0aaee03895281c34338ce8f6e935573583b168b3f17c89386ebfd6b22",
+      "used_by": [
+        "scripts/ops",
+        "services/modbus",
+        "tools/eval",
+        "tools/init"
+      ]
+    },
+    {
+      "name": "sim-day-2020-02-01",
+      "segments": [
+        {
+          "from": "2020-02-01T00:00:00Z",
+          "to": "2020-02-02T00:00:00Z",
+          "rows": 7144
+        }
+      ],
+      "rows": 7144,
+      "sha256": "1cbeed591960aeffc986f01ac7cc50f3a9409f2befb929f6f5462a0cfd919d59",
+      "used_by": [
+        "services/modbus"
+      ]
+    },
+    {
+      "name": "parity-feb01",
+      "segments": [
+        {
+          "from": "2020-02-01T00:00:00Z",
+          "to": "2020-02-01T02:00:00Z",
+          "rows": 727
+        }
+      ],
+      "rows": 727,
+      "sha256": "68a91f51a98f796f961e8439b58eb09a3d69610d46d265efc76a4509022dec0b",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "baseline-feb03",
+      "segments": [
+        {
+          "from": "2020-02-03T00:00:00Z",
+          "to": "2020-02-04T00:00:00Z",
+          "rows": 8716
+        }
+      ],
+      "rows": 8716,
+      "sha256": "5b3c5e5b94a87e0eae6483eafdddb30667bdd0685eb45b3452a290c03ed29fdd",
+      "used_by": [
+        "apps/backend",
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "f1-apr18",
+      "segments": [
+        {
+          "from": "2020-04-17T20:00:00Z",
+          "to": "2020-04-19T04:00:00Z",
+          "rows": 11148
+        }
+      ],
+      "rows": 11148,
+      "sha256": "0cb0b31cb313b5de4a1dc44fd95681736d788f485d4b05a981a5d2243fb71f00",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "f2-may30",
+      "segments": [
+        {
+          "from": "2020-05-29T18:00:00Z",
+          "to": "2020-05-30T12:00:00Z",
+          "rows": 6438
+        }
+      ],
+      "rows": 6438,
+      "sha256": "7f67b9418e83e1e7ba0900f4b0ae4eac761c7e490d49ecbeebd5e8ebfe679d68",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "f3-jun05",
+      "segments": [
+        {
+          "from": "2020-06-05T04:00:00Z",
+          "to": "2020-06-06T04:00:00Z",
+          "rows": 8716
+        }
+      ],
+      "rows": 8716,
+      "sha256": "932c3e3eacad6fae6b57089cc2a3436a38b2c3f9c624eca1f7e0cdf5af4244c5",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "f4-jul15",
+      "segments": [
+        {
+          "from": "2020-07-14T06:00:00Z",
+          "to": "2020-07-16T02:00:00Z",
+          "rows": 10771
+        }
+      ],
+      "rows": 10771,
+      "sha256": "d95138af19ca91a81062aabd086ac92cb8ded5ad58fa1eb73ca274b1e2c37949",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "f4b-jul17",
+      "segments": [
+        {
+          "from": "2020-07-16T18:00:00Z",
+          "to": "2020-07-17T08:00:00Z",
+          "rows": 3706
+        }
+      ],
+      "rows": 3706,
+      "sha256": "53ab07161d3c49d74faad8eabd0f8a06dfac5d6fe8fc86ac34248196ad73f01d",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "summer-jul05",
+      "segments": [
+        {
+          "from": "2020-07-05T00:00:00Z",
+          "to": "2020-07-06T00:00:00Z",
+          "rows": 8716
+        }
+      ],
+      "rows": 8716,
+      "sha256": "a40fa9fb07f5a7642dd906df673f30917f3c82dd86af4949f209a91f0c61b3a2",
+      "used_by": [
+        "apps/backend",
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "depot-jul31",
+      "segments": [
+        {
+          "from": "2020-07-31T00:00:00Z",
+          "to": "2020-07-31T08:00:00Z",
+          "rows": 1309
+        }
+      ],
+      "rows": 1309,
+      "sha256": "db0cf7119de9dae5458a10ec541704768628213233243fac2f620d440b66a883",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "depot-apr30",
+      "segments": [
+        {
+          "from": "2020-04-30T23:00:00Z",
+          "to": "2020-05-01T13:00:00Z",
+          "rows": 59
+        }
+      ],
+      "rows": 59,
+      "sha256": "4430fa39f22217614179a7969823b95af39cdb8424934aa87e93208e90938c2e",
+      "used_by": [
+        "apps/backend"
+      ]
+    },
+    {
+      "name": "frozen-jun22",
+      "segments": [
+        {
+          "from": "2020-06-22T12:00:00Z",
+          "to": "2020-06-23T00:00:00Z",
+          "rows": 3786
+        }
+      ],
+      "rows": 3786,
+      "sha256": "beb1fdd8c66aa2f827c66d4be684a7a3b87d2b214eb2ce0b10b919368c623c66",
+      "used_by": [
+        "apps/backend",
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "unlabelled-may19",
+      "segments": [
+        {
+          "from": "2020-05-19T20:00:00Z",
+          "to": "2020-05-21T00:00:00Z",
+          "rows": 8915
+        }
+      ],
+      "rows": 8915,
+      "sha256": "28a2a0ddd37b00d25293b6263b61756a87fa269dcaa9f4f1ed50a897805c2089",
+      "used_by": [
+        "apps/backend",
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "august-aug10",
+      "segments": [
+        {
+          "from": "2020-08-10T00:00:00Z",
+          "to": "2020-08-11T00:00:00Z",
+          "rows": 8716
+        }
+      ],
+      "rows": 8716,
+      "sha256": "2418b10e1629d82b73fa70ce43856c20dc99159a8747b8a69964c44cd463fc01",
+      "used_by": [
+        "tools/eval"
+      ]
+    },
+    {
+      "name": "sim-gate",
+      "segments": [
+        {
+          "from": "2020-02-03T00:00:00Z",
+          "to": "2020-02-03T06:00:00Z",
+          "rows": 2179
+        },
+        {
+          "from": "2020-04-17T22:00:00Z",
+          "to": "2020-04-18T06:00:00Z",
+          "rows": 2722
+        },
+        {
+          "from": "2020-05-29T18:00:00Z",
+          "to": "2020-05-30T03:00:00Z",
+          "rows": 3269
+        },
+        {
+          "from": "2020-06-05T06:00:00Z",
+          "to": "2020-06-05T12:00:00Z",
+          "rows": 2179
+        },
+        {
+          "from": "2020-07-15T13:00:00Z",
+          "to": "2020-07-15T19:00:00Z",
+          "rows": 2165
+        }
+      ],
+      "rows": 12514,
+      "sha256": "42b3c5e79ad7643057fd244646642c4b1832a7b1785e6e8965407971bf00e1fe",
+      "used_by": [
+        "services/modbus"
+      ]
+    },
+    {
+      "name": "heldout-mar17",
+      "segments": [
+        {
+          "from": "2020-03-17T00:00:00Z",
+          "to": "2020-03-18T00:00:00Z",
+          "rows": 8551
+        }
+      ],
+      "rows": 8551,
+      "sha256": "8f22e6a5dd98f52388a1cbc9d3127bf9a08e9fb9ba715551ad0a114e1ac55805",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    },
+    {
+      "name": "heldout-mar22",
+      "segments": [
+        {
+          "from": "2020-03-22T00:00:00Z",
+          "to": "2020-03-23T00:00:00Z",
+          "rows": 8717
+        }
+      ],
+      "rows": 8717,
+      "sha256": "8e3ce7abe23161a1509a8a6c3c0cd0dd72b99e6f921bcdf060a81b4c42899085",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    },
+    {
+      "name": "heldout-apr05",
+      "segments": [
+        {
+          "from": "2020-04-05T00:00:00Z",
+          "to": "2020-04-06T00:00:00Z",
+          "rows": 8716
+        }
+      ],
+      "rows": 8716,
+      "sha256": "207888d1a09d0b67aa4b96f489ea8a680c520a1f8412f544dae06bd78c7bdfe1",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    },
+    {
+      "name": "heldout-jun26",
+      "segments": [
+        {
+          "from": "2020-06-26T00:00:00Z",
+          "to": "2020-06-27T00:00:00Z",
+          "rows": 8678
+        }
+      ],
+      "rows": 8678,
+      "sha256": "f2df6e427e65fc729d87a252279b1bae2dcf7b1ed26251de6f201ef8ec797593",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    },
+    {
+      "name": "heldout-jun29",
+      "segments": [
+        {
+          "from": "2020-06-29T00:00:00Z",
+          "to": "2020-06-30T00:00:00Z",
+          "rows": 8677
+        }
+      ],
+      "rows": 8677,
+      "sha256": "e68d3fe258a540a4c5e5fa57d6a976dfaee27f119aa64105cfd5356a7bb0f8df",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    },
+    {
+      "name": "heldout-aug01",
+      "segments": [
+        {
+          "from": "2020-08-01T00:00:00Z",
+          "to": "2020-08-02T00:00:00Z",
+          "rows": 8684
+        }
+      ],
+      "rows": 8684,
+      "sha256": "49e62ccbc97ff4e235ce1242ea5e245be4a551ef2d4adf349ec6aa03b9f74561",
+      "used_by": [
+        "EVL-05",
+        "INT-04"
+      ]
+    }
+  ]
+}

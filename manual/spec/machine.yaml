@@ -1,0 +1,204 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Machine definition of the CAU-7 Compressed-Air Unit: identity, document
+# metadata, ratings, limits, reference conditions, sensors, components, spare
+# parts and the observed reference operation. Numbers with a unit belong here
+# and in settings.yaml; prose in this repository refers to them through Jinja.
+# The reference_operation block is copied from spec/derived/normal-bands.json;
+# regenerate it with manual/tools/derive_bands.py rather than editing it.
+schema_version: 1
+identity:
+  model: CAU-7
+  name: CAU-7 Compressed-Air Unit
+  controller: CTRL-7
+  type: Compressed-air production unit, oil-injected screw compressor with twin-tower desiccant dryer
+  serial_format: CAU7-YYYY-NNNN
+document: {number: CAU7-IOM-EN, revision: "1.0", revision_date: 2026-01-15}
+ratings:
+  motor_power: {value: 4.0, unit: kW}
+  motor_rated_current: {value: 7.0, unit: A}
+  motor_speed: {value: 2950, unit: rpm}
+  supply_voltage: {value: 400, unit: V}
+  supply_frequency: {value: 50, unit: Hz}
+  supply_fuse: {value: 16, unit: A}
+  free_air_delivery: {value: 0.45, unit: m3_per_min}
+  max_working_pressure: {value: 11.0, unit: bar}
+  safety_valve_setting: {value: 12.0, unit: bar}
+  minimum_pressure_valve_opening: {value: 4.0, unit: bar}
+  oil_fill_volume: {value: 8.0, unit: L}
+  reservoir_volume_each: {value: 200, unit: L}
+  reservoir_count: {value: 2, unit: count}
+  reservoir_design_pressure: {value: 12.0, unit: bar}
+  dryer_dew_point: {value: -40, unit: degC}
+  dryer_purge_fraction: {value: 15, unit: percent}
+  desiccant_charge_each: {value: 3.5, unit: kg}
+  sound_pressure_level: {value: 68, unit: dBA}
+  length: {value: 1200, unit: mm}
+  width: {value: 800, unit: mm}
+  height: {value: 1350, unit: mm}
+  mass: {value: 320, unit: kg}
+limits:
+  ambient_operating: {min: 2, max: 40, unit: degC}
+  ambient_storage: {min: -20, max: 60, unit: degC}
+  max_altitude: {value: 1000, unit: m}
+  max_relative_humidity: {value: 90, unit: percent}
+  supply_voltage_tolerance: {value: 10, unit: percent}
+reference_conditions:
+  ambient_temperature: {value: 20, unit: degC}
+  inlet_pressure_absolute: {value: 1.0, unit: bar}
+  relative_humidity: {value: 0, unit: percent}
+  cooling_air_temperature: {value: 20, unit: degC}
+hardware_switches:
+  low_pressure_switch:
+    closes_below: {value: 7.0, unit: bar}
+    opens_above: {value: 7.7, unit: bar}
+    signal: low_pressure_switch
+sensors:
+  - {signal: discharge_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}, accuracy: {value: 0.5, unit: percent}}
+  - {signal: line_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}, accuracy: {value: 0.5, unit: percent}}
+  - {signal: separator_discharge_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}, accuracy: {value: 0.5, unit: percent}}
+  - {signal: dryer_purge_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}, accuracy: {value: 0.5, unit: percent}}
+  - {signal: reservoir_pressure, kind: pressure_transducer, range: {min: -1.0, max: 16.0, unit: bar}, accuracy: {value: 0.5, unit: percent}}
+  - {signal: oil_temperature, kind: resistance_thermometer, range: {min: -20, max: 120, unit: degC}, accuracy: {value: 1, unit: degC}}
+  - {signal: motor_current, kind: current_transformer, range: {min: 0, max: 20, unit: A}, accuracy: {value: 2, unit: percent}}
+  - {signal: ambient_temperature, kind: resistance_thermometer, range: {min: -20, max: 60, unit: degC}, accuracy: {value: 1, unit: degC}}
+components:
+  - id: intake_filter
+    name: Air intake filter
+    subsystem: intake_unloading
+    description: Dry panel filter that cleans the air the airend draws in.
+  - id: intake_valve
+    name: Intake and unloading valve
+    subsystem: intake_unloading
+    description: Combined intake and unloading valve that opens the air path when the controller loads the unit.
+  - id: airend
+    name: Screw compression element
+    subsystem: compressor
+    description: Oil-injected single-stage screw element that compresses the intake air.
+  - id: motor
+    name: Drive motor
+    subsystem: electrical
+    description: Fixed-speed three-phase motor that drives the compression element.
+  - id: coupling
+    name: Motor coupling
+    subsystem: compressor
+    description: Flexible coupling between the motor shaft and the compression element.
+  - id: separator_vessel
+    name: Oil separator vessel
+    subsystem: oil
+    description: Pressure vessel that holds the oil charge and carries the separator element that returns oil to the circuit.
+  - id: minimum_pressure_valve
+    name: Minimum-pressure valve
+    subsystem: compressor
+    description: Non-return valve that keeps a minimum pressure in the separator vessel so that oil keeps circulating.
+  - id: blowdown_valve
+    name: Blow-down valve
+    subsystem: intake_unloading
+    description: Solenoid valve that vents the separator vessel to the intake silencer whenever the unit unloads or stops.
+  - id: oil_cooler
+    name: Oil cooler
+    subsystem: cooling
+    description: Air-to-oil heat exchanger that removes the heat of compression from the oil charge.
+  - id: aftercooler
+    name: Aftercooler
+    subsystem: cooling
+    description: Air-to-air heat exchanger that cools the delivered air before it reaches the cyclonic separator.
+  - id: cooling_fan
+    name: Cooling fan
+    subsystem: cooling
+    description: Fan that draws cooling air through the enclosure and across both coolers.
+  - id: thermostatic_valve
+    name: Thermostatic valve
+    subsystem: oil
+    description: Valve that bypasses the oil cooler until the oil has reached its working temperature.
+  - id: oil_filter
+    name: Oil filter
+    subsystem: oil
+    description: Spin-on filter that removes wear particles from the oil before it re-enters the compression element.
+  - id: cyclonic_separator
+    name: Cyclonic separator
+    subsystem: separator_drain
+    description: Centrifugal separator that removes the condensate that forms in the aftercooler.
+  - id: condensate_drain
+    name: Automatic condensate drain
+    subsystem: separator_drain
+    description: Automatic drain valve that empties the cyclonic separator into the condensate connection.
+  - id: dryer_tower_1
+    name: Desiccant tower 1
+    subsystem: dryer
+    description: First of the two desiccant towers; it dries the air while the second one regenerates.
+  - id: dryer_tower_2
+    name: Desiccant tower 2
+    subsystem: dryer
+    description: Second of the two desiccant towers; it dries the air while the first one regenerates.
+  - id: changeover_valves
+    name: Dryer changeover valves
+    subsystem: dryer
+    description: Valve block that swaps the drying and the regenerating tower at the end of each tower period.
+  - id: purge_valve
+    name: Dryer purge valve
+    subsystem: dryer
+    description: Valve that releases the regeneration air of the off-line tower to the purge silencer.
+  - id: purge_silencer
+    name: Purge silencer
+    subsystem: dryer
+    description: Silencer that damps the noise of the purge air leaving the dryer.
+  - id: reservoirs
+    name: Air reservoirs
+    subsystem: reservoirs
+    description: Two pressure vessels that store dried air and damp the demand of the installation.
+  - id: reservoir_isolation_valve
+    name: Reservoir isolation valve
+    subsystem: reservoirs
+    description: Manual valve that separates the reservoirs from the distribution line for service work.
+  - id: pneumatic_panel
+    name: Pneumatic panel
+    subsystem: distribution
+    description: Panel that carries the line pressure transducer, the pressure regulator and the low-pressure switch.
+  - id: safety_valve
+    name: Safety valve
+    subsystem: compressor
+    description: Spring-loaded relief valve on the separator vessel that protects the unit against overpressure.
+  - id: controller
+    name: CTRL-7 controller
+    subsystem: control
+    description: Electronic controller that regulates the unit, evaluates the messages and drives the display.
+  - id: oil_level_switch
+    name: Oil level switch
+    subsystem: oil
+    description: Float switch in the separator vessel that reports whether the oil level is above the minimum mark.
+  - id: flow_sensor
+    name: Reservoir inlet flow sensor
+    subsystem: reservoirs
+    description: Pulse sensor at the reservoir inlet that reports the volume of air entering the reservoirs.
+parts:
+  - {id: air_filter_element, code: CAU7-AF-01, name: Air intake filter element, unit: count}
+  - {id: oil_filter_element, code: CAU7-OF-01, name: Oil filter element, unit: count}
+  - {id: separator_element, code: CAU7-SE-01, name: Oil separator element, unit: count}
+  - id: compressor_oil
+    code: CAU7-OIL-46
+    name: Synthetic screw compressor oil
+    description: Synthetic screw compressor oil of the viscosity grade ISO VG 46, ordered per litre.
+    unit: L
+  - {id: desiccant_charge, code: CAU7-DC-35, name: Desiccant charge for one tower, unit: kg}
+  - {id: purge_silencer, code: CAU7-PS-01, name: Purge silencer, unit: count}
+  - {id: drain_valve_kit, code: CAU7-DV-01, name: Condensate drain valve service kit, unit: count}
+  - {id: purge_valve_kit, code: CAU7-PV-01, name: Dryer purge valve service kit, unit: count}
+  - {id: coupling_element, code: CAU7-CE-01, name: Coupling element, unit: count}
+  - {id: cooler_cleaning_kit, code: CAU7-CK-01, name: Cooler cleaning kit, unit: count}
+  - {id: oil_level_switch, code: CAU7-LS-01, name: Oil level switch, unit: count}
+reference_operation:
+  cut_in_pressure_observed: {value: 8.05, unit: bar}
+  cut_out_pressure_observed: {value: 10.03, unit: bar}
+  loaded_run_typical: {value: 109, unit: s}
+  loaded_run_band: {min: 99, max: 129, unit: s}
+  unloaded_run_on_typical: {value: 407, unit: s}
+  off_phase_typical: {value: 1329, unit: s}
+  load_cycles_per_hour: {value: 1.97, unit: per_hour}
+  pressure_rise_loaded: {value: 1.1, unit: bar_per_min}
+  pressure_decay_unloaded_typical: {value: 0.07, unit: bar_per_min}
+  pressure_decay_unloaded_band: {min: 0.05, max: 0.15, unit: bar_per_min}
+  discharge_minus_line_loaded: {value: 0.33, unit: bar}
+  tower_pulse_after_cut_in: {value: 60, unit: s}
+subsystems: [compressor, intake_unloading, oil, cooling, separator_drain, dryer, reservoirs, distribution, electrical, control]

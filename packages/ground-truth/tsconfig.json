@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "types": ["node"]
+  },
+  // `vitest.config.ts` is deliberately absent: it imports `../../vitest.base.ts`,
+  // which sits outside `rootDir` and would break `tsc -b`.
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts"]
+}

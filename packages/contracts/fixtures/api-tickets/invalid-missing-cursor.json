@@ -1,0 +1,4 @@
+{
+  "$expect_error": "must have required property 'next_cursor'",
+  "items": []
+}

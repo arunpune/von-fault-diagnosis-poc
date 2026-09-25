@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-decisions:v1",
+  "title": "Api decisions",
+  "description": "The body of GET /api/decisions: one page of decision messages, newest first, optionally narrowed to one episode. The items are the decision messages the backend also publishes on the broker; the single-decision route adds the state the backend saw, which never travels over the broker. `next_cursor` is the opaque token of the next page and is null on the last one.",
+  "type": "object",
+  "properties": {
+    "items": {
+      "description": "The decisions of this page, newest first.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:decision:v1" }
+    },
+    "next_cursor": {
+      "description": "Opaque token of the next page, null on the last one.",
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["items", "next_cursor"],
+  "additionalProperties": true
+}

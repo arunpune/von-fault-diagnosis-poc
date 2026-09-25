@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "unit_id": "cau-7",
+      "instance_id": "inj-7f3a-0",
+      "injection_id": "heavy_air_demand",
+      "fault_id": "high_air_demand",
+      "start_sim_ts": "2020-06-04T10:00:00.000Z",
+      "end_sim_ts": "2020-06-04T14:00:00.000Z",
+      "reason": "expired",
+      "params": {
+        "magnitude": 1,
+        "duration_sim_min": 240
+      }
+    },
+    {
+      "unit_id": "cau-7",
+      "instance_id": "inj-7f3a-1",
+      "injection_id": "oil_cooler_fouling",
+      "fault_id": "oil_cooler_fouled",
+      "start_sim_ts": "2020-06-05T08:00:00.000Z",
+      "end_sim_ts": "2020-06-05T18:00:00.000Z",
+      "reason": null,
+      "params": {
+        "magnitude": 1,
+        "duration_sim_min": 600
+      }
+    }
+  ]
+}

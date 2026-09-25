@@ -1,0 +1,50 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/*
+ * The `clean` variant (docs/spec.md §4, phase1-pdf-build.md §8).
+ *
+ * Everything this variant does differently from the shared base is an
+ * absence: one column, page numbers and nothing else in the furniture, each
+ * table sized to fit one page, footnote bodies already folded into the
+ * sentence in parentheses by fdp_manual_build.markdown. That is the point of
+ * the variant — it is the easy document the pipeline must score well on, so
+ * this file stays this short.
+ */
+
+@page {
+  @bottom-center {
+    content: counter(page);
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 8.5pt;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Single column in every chapter, whatever `data-columns` says. */
+.chapter > .body {
+  columns: 1;
+}
+
+/*
+ * Spec §4's "each table fits one page" is implemented by the split, not by
+ * `break-inside: avoid`.
+ *
+ * Every generated table this variant prints is cut into small tables with
+ * their own headings — the messages by type, the signal list by group, the
+ * maintenance schedule and its procedures, one troubleshooting table per
+ * symptom condition — which is what gives the clean reader a table that
+ * starts and ends where its heading says. Some of those pieces are still
+ * taller than a page: `alarms.yaml` has 34 messages with a trigger and an
+ * action sentence each, and a symptom condition of `faults.yaml` carries up
+ * to six cause entries. CSS cannot shrink them, and asking it to keep them
+ * whole only moved the oversized piece to a fresh page and broke it there
+ * anyway, leaving the foot of the preceding page empty: 22 of the 78 pages
+ * the clean variant took were blank space below a pushed table, against a
+ * page budget of 28–56.
+ *
+ * So a table here breaks like any other block. `tr { break-inside: avoid }`
+ * and the repeated `<thead>` in base.css keep a row whole and name the
+ * columns again on every page a table reaches, which is what a reader needs
+ * from a table that did not fit.
+ */

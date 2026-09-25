@@ -1,0 +1,45 @@
+{
+  "schema": "urn:fdp:eval:metrics-sweep-expected:v1",
+  "id": "sweep_three_episodes",
+  "rows": [
+    {
+      "ticket_min": 0.6,
+      "review_min": 0.5,
+      "approximate": true,
+      "tickets": ["sweep-e-401", "sweep-e-402", "sweep-e-403"],
+      "abstained": 1,
+      "ticket": { "tp": 1, "fp": 1, "fn": 0, "precision": 0.5, "recall": 1 },
+      "review": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.3333333333333333,
+        "recall": 1
+      },
+      "tickets_per_machine_day": 3,
+      "false_tickets_per_machine_day": 2.6666666666666665
+    },
+    {
+      "ticket_min": 0.85,
+      "review_min": 0.6,
+      "approximate": true,
+      "tickets": ["sweep-e-401", "sweep-e-402"],
+      "abstained": 1,
+      "ticket": { "tp": 1, "fp": 1, "fn": 0, "precision": 0.5, "recall": 1 },
+      "review": { "tp": 1, "fp": 1, "fn": 0, "precision": 0.5, "recall": 1 },
+      "tickets_per_machine_day": 2,
+      "false_tickets_per_machine_day": 1.3333333333333333
+    },
+    {
+      "ticket_min": 0.9,
+      "review_min": 0.7,
+      "approximate": true,
+      "tickets": ["sweep-e-401", "sweep-e-402"],
+      "abstained": 1,
+      "ticket": { "tp": 0, "fp": 1, "fn": 1, "precision": 0, "recall": 0 },
+      "review": { "tp": 1, "fp": 1, "fn": 0, "precision": 0.5, "recall": 1 },
+      "tickets_per_machine_day": 2,
+      "false_tickets_per_machine_day": 1.3333333333333333
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "urn:fdp:schema:control-cmd:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:06.000Z",
+  "cmd_id": "4d5e6f7a-8b9c-4d0e-9f2a-3b4c5d6e7f80",
+  "cmd": "jump",
+  "args": { "preset_id": "f3-air-leak-2020-06-05" }
+}

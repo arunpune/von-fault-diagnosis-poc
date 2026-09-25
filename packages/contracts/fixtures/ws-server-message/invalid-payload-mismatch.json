@@ -1,0 +1,116 @@
+{
+  "$expect_error": "must match exactly one schema in oneOf",
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:13.640Z",
+  "type": "ticket",
+  "payload": {
+    "schema": "urn:fdp:schema:decision:v1",
+    "unit_id": "cau-7",
+    "wall_ts": "2026-06-05T09:41:13.640Z",
+    "decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+    "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
+    "event_id": "3d4a1f02-5c6b-4e71-9a83-0b1c2d3e4f50",
+    "sim_ts": "2020-06-05T09:41:12.000Z",
+    "backend": "jev",
+    "model": "jev-1.13.0",
+    "status": "ok",
+    "choice": "dryer_purge_leak",
+    "probabilities": {
+      "dryer_purge_leak": 0.71,
+      "downstream_air_leak": 0.14,
+      "high_air_demand": 0.07,
+      "minimum_pressure_valve_fault": 0.05,
+      "none_of_these": 0.03
+    },
+    "confidence": 0.91,
+    "support": {
+      "dryer_purge_leak": 0.88,
+      "downstream_air_leak": 0.42,
+      "high_air_demand": 0.23,
+      "minimum_pressure_valve_fault": 0.17
+    },
+    "candidates": [
+      {
+        "fault_id": "dryer_purge_leak",
+        "condition_id": "continuous_load",
+        "name": "Dryer purge valve not seating",
+        "probability": 0.71,
+        "benign": false,
+        "manual_ref": {
+          "section": "8.3",
+          "anchor": "fault:dryer_purge_leak",
+          "title": "Compressor stays loaded and does not reach cut-out"
+        }
+      },
+      {
+        "fault_id": "downstream_air_leak",
+        "condition_id": "continuous_load",
+        "name": "Leak in the distribution network",
+        "probability": 0.14,
+        "benign": false,
+        "manual_ref": {
+          "section": "8.3",
+          "anchor": "fault:downstream_air_leak",
+          "title": "Line pressure below setpoint"
+        }
+      },
+      {
+        "fault_id": "high_air_demand",
+        "condition_id": "continuous_load",
+        "name": "Air demand above the rated delivery",
+        "probability": 0.07,
+        "benign": true,
+        "manual_ref": {
+          "section": "8.3",
+          "anchor": "fault:high_air_demand",
+          "title": "Line pressure below setpoint"
+        }
+      },
+      {
+        "fault_id": "minimum_pressure_valve_fault",
+        "condition_id": "continuous_load",
+        "name": "Minimum-pressure valve fault",
+        "probability": 0.05,
+        "benign": false,
+        "manual_ref": {
+          "section": "8.3",
+          "anchor": "fault:minimum_pressure_valve_fault",
+          "title": "Compressor stays loaded and does not reach cut-out"
+        }
+      }
+    ],
+    "severity": {
+      "level": "high",
+      "score": 2,
+      "probabilities": {
+        "0": 0.02,
+        "1": 0.11,
+        "2": 0.74,
+        "3": 0.13
+      },
+      "confidence": 0.74
+    },
+    "gate": {
+      "outcome": "ticket",
+      "abstained": false,
+      "reason": "A named cause at or above the ticket threshold opens a ticket.",
+      "ticket_min_confidence": 0.85,
+      "review_min_confidence": 0.6
+    },
+    "usage": {
+      "input_tokens": 1834,
+      "output_tokens": 0
+    },
+    "cost": {
+      "usd": 0.000077028,
+      "price_input_per_mtok": 0.042,
+      "price_output_per_mtok": 0,
+      "prices_as_of": "2026-09-19"
+    },
+    "latency_ms": 1240,
+    "request_id": "req-2f5c1d8a94b0",
+    "state_digest": "1788d5ff4e5908d47c22632af729a0366cdb413932503dbda1effd48ebacfcb3",
+    "error": null
+  }
+}

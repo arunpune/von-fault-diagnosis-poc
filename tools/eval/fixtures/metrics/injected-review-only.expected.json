@@ -1,0 +1,103 @@
+{
+  "schema": "urn:fdp:eval:metrics-expected:v1",
+  "id": "injected_review_only",
+  "scored_tickets": 1,
+  "warmup_tickets": 0,
+  "open_at_end": 1,
+  "match": {
+    "ticket": {
+      "tp": [],
+      "fp": [],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": [],
+      "fn": ["inj-oil-cooler-0200"]
+    },
+    "review": {
+      "tp": ["t-101"],
+      "fp": [],
+      "misdiagnosed": [],
+      "recovered": [],
+      "duplicates": [],
+      "ignored": [],
+      "benign": [],
+      "fn": []
+    }
+  },
+  "precision_recall": {
+    "ticket": {
+      "micro": { "tp": 0, "fp": 0, "fn": 1, "windows": 1, "precision": null, "recall": 0 },
+      "macro": { "precision": null, "recall": 0 },
+      "per_fault": {
+        "oil_cooler_fouling": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "windows": 1,
+          "precision": null,
+          "recall": 0
+        }
+      }
+    },
+    "review": {
+      "micro": { "tp": 1, "fp": 0, "fn": 0, "windows": 1, "precision": 1, "recall": 1 },
+      "macro": { "precision": 1, "recall": 1 },
+      "per_fault": {
+        "oil_cooler_fouling": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "windows": 1,
+          "precision": 1,
+          "recall": 1
+        }
+      }
+    }
+  },
+  "lead_times": [
+    {
+      "window_id": "inj-oil-cooler-0200",
+      "fault": "oil_cooler_fouling",
+      "first_correct_ticket": "2020-02-03T05:00:00.000Z",
+      "native_code": "W104",
+      "native_first": "2020-02-03T06:20:00.000Z",
+      "lead_minutes": 80,
+      "latency_minutes": 180,
+      "qualifier": ""
+    }
+  ],
+  "rates": {
+    "tickets": 1,
+    "false_tickets": 0,
+    "covered_machine_days": 1,
+    "negative_machine_days": 0.75,
+    "tickets_per_machine_day": 1,
+    "false_tickets_per_machine_day": 0
+  },
+  "abstention": null,
+  "cost": {
+    "usd": 0.000103656,
+    "input_tokens": 2468,
+    "output_tokens": 0,
+    "calls": 2,
+    "per_decision": 0.000051828,
+    "per_ticket": 0.000103656
+  },
+  "detection": {
+    "suspects": 1,
+    "warmup_suspects": 0,
+    "outside_windows": 0,
+    "windows": [
+      {
+        "window_id": "inj-oil-cooler-0200",
+        "headline": false,
+        "first_suspect": "s-101",
+        "deadline": "2020-02-03T08:00:00.000Z",
+        "detected": true
+      }
+    ]
+  },
+  "pass": { "detection": true, "review_diagnosis": true, "diagnosis": false }
+}

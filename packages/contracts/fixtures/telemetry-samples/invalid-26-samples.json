@@ -1,0 +1,714 @@
+{
+  "$expect_error": "/samples must NOT have more than 25 items",
+  "schema": "urn:fdp:schema:telemetry-samples:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:00.123Z",
+  "samples": [
+    {
+      "seq": 1201,
+      "sim_ts": "2020-02-01T03:20:10.000Z",
+      "flags": {
+        "discontinuity": true,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.43,
+        "line_pressure": 9.11,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.11,
+        "oil_temperature": 55.2,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1202,
+      "sim_ts": "2020-02-01T03:20:20.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.44,
+        "line_pressure": 9.12,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.12,
+        "oil_temperature": 55.25,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1203,
+      "sim_ts": "2020-02-01T03:20:30.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.45,
+        "line_pressure": 9.13,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.13,
+        "oil_temperature": 55.3,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1204,
+      "sim_ts": "2020-02-01T03:20:40.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.46,
+        "line_pressure": 9.14,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.14,
+        "oil_temperature": 55.35,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1205,
+      "sim_ts": "2020-02-01T03:20:50.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.47,
+        "line_pressure": 9.15,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.15,
+        "oil_temperature": 55.4,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1206,
+      "sim_ts": "2020-02-01T03:21:00.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.48,
+        "line_pressure": 9.16,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.16,
+        "oil_temperature": 55.45,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1207,
+      "sim_ts": "2020-02-01T03:21:10.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.49,
+        "line_pressure": 9.17,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.17,
+        "oil_temperature": 55.5,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1208,
+      "sim_ts": "2020-02-01T03:21:20.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.5,
+        "line_pressure": 9.18,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.18,
+        "oil_temperature": 55.55,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1209,
+      "sim_ts": "2020-02-01T03:21:30.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.51,
+        "line_pressure": 9.19,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.19,
+        "oil_temperature": 55.6,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1210,
+      "sim_ts": "2020-02-01T03:21:40.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.52,
+        "line_pressure": 9.2,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.2,
+        "oil_temperature": 55.65,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1211,
+      "sim_ts": "2020-02-01T03:21:50.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.53,
+        "line_pressure": 9.21,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.21,
+        "oil_temperature": 55.7,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1212,
+      "sim_ts": "2020-02-01T03:22:00.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.54,
+        "line_pressure": 9.22,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.22,
+        "oil_temperature": 55.75,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1213,
+      "sim_ts": "2020-02-01T03:22:10.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": true
+      },
+      "values": {
+        "discharge_pressure": 9.55,
+        "line_pressure": 9.23,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.23,
+        "oil_temperature": 55.8,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1214,
+      "sim_ts": "2020-02-01T03:22:20.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.56,
+        "line_pressure": 9.24,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.24,
+        "oil_temperature": 55.85,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1215,
+      "sim_ts": "2020-02-01T03:22:30.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.57,
+        "line_pressure": 9.25,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.25,
+        "oil_temperature": 55.9,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1216,
+      "sim_ts": "2020-02-01T03:22:40.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.58,
+        "line_pressure": 9.26,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.26,
+        "oil_temperature": 55.95,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1217,
+      "sim_ts": "2020-02-01T03:22:50.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.59,
+        "line_pressure": 9.27,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.27,
+        "oil_temperature": 56,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1218,
+      "sim_ts": "2020-02-01T03:23:00.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.6,
+        "line_pressure": 9.28,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.28,
+        "oil_temperature": 56.05,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1219,
+      "sim_ts": "2020-02-01T03:23:10.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.61,
+        "line_pressure": 9.29,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.29,
+        "oil_temperature": 56.1,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1220,
+      "sim_ts": "2020-02-01T03:23:20.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.62,
+        "line_pressure": 9.3,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.3,
+        "oil_temperature": 56.15,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1221,
+      "sim_ts": "2020-02-01T03:23:30.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.63,
+        "line_pressure": 9.31,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.31,
+        "oil_temperature": 56.2,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": ["W102"]
+    },
+    {
+      "seq": 1222,
+      "sim_ts": "2020-02-01T03:23:40.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.64,
+        "line_pressure": 9.32,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.32,
+        "oil_temperature": 56.25,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1223,
+      "sim_ts": "2020-02-01T03:23:50.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.65,
+        "line_pressure": 9.33,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.33,
+        "oil_temperature": 56.3,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1224,
+      "sim_ts": "2020-02-01T03:24:00.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.66,
+        "line_pressure": 9.34,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.34,
+        "oil_temperature": 56.35,
+        "motor_current": 6.02,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1225,
+      "sim_ts": "2020-02-01T03:24:10.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.67,
+        "line_pressure": 9.35,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.35,
+        "oil_temperature": 56.4,
+        "motor_current": 5.98,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    },
+    {
+      "seq": 1226,
+      "sim_ts": "2020-02-01T03:24:20.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "discharge_pressure": 9.68,
+        "line_pressure": 9.36,
+        "separator_discharge_pressure": -0.014,
+        "dryer_purge_pressure": -0.018,
+        "reservoir_pressure": 9.36,
+        "oil_temperature": 56.45,
+        "motor_current": 6,
+        "intake_closed": false,
+        "load_valve": true,
+        "dryer_tower": true,
+        "regulator_contact": false,
+        "low_pressure_switch": false,
+        "purge_switch": true,
+        "oil_level_ok": true,
+        "flow_pulse": true,
+        "ambient_temperature": 9.4
+      },
+      "alarms": []
+    }
+  ],
+  "poll": {
+    "poll_seq": 48,
+    "read_ms": 12
+  }
+}

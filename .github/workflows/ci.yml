@@ -1,0 +1,884 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The single workflow of the repository, so branch protection has one list of
+# required checks and every CI job lives in this file.
+#
+# Three rules hold for every job:
+#
+#   * it calls a Make target or a package verb and adds no logic of its own
+#     beyond caching, artefacts, ordering and reading back what those wrote,
+#     so a failure reproduces locally with the same command;
+#   * it runs on `ubuntu-24.04` and carries a `timeout-minutes` of twice its
+#     time budget;
+#   * it uses no repository secret. The decision backend in CI is the mock
+#     TypeSafe server; the live smoke runs only on a developer machine.
+#
+# Required status checks. Branch protection is configured from this list, so
+# it names every check as GitHub shows it: the test-integration matrix is two
+# checks. scripts/ops/ci-workflow.test.ts keeps the list equal to the jobs.
+#
+#   - lint
+#   - test
+#   - test-integration (node)
+#   - test-integration (python)
+#   - reuse
+#   - licenses
+#   - contract-drift
+#   - manual-spec
+#   - check-manual
+#   - go
+#   - frontend
+#   - foundation-smoke
+#   - stack
+#   - quickstart
+#   - eval-smoke
+#
+# Advisory, never required: `mosquitto-next` (manual, input mosquitto_next)
+# and `quickstart-download` (weekly, or manual with input full_dataset). They
+# are the only jobs with a condition; every other job runs on every event.
+#
+# One required check is known to fail, and its log says why: `quickstart`
+# (smoke.sh's ticket MUST with the rules backend exits 3). It is not weakened
+# to pass.
+#
+# Third-party actions are pinned to the commit their release tag points at,
+# with the tag in the trailing comment: a dependency is verified before it is
+# pinned, and a moved tag cannot change what runs. Dependabot refreshes them
+# (.github/dependabot.yml). `scripts/ops/ci-workflow.test.ts` fails on an
+# unpinned `uses:`, a missing timeout, a `secrets.` reference or a job
+# condition other than the two advisory triggers.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The weekly run of `quickstart-download`, on the default branch; every
+  # other job runs in it too. Off the hour, when scheduled runs queue up.
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      full_dataset:
+        type: boolean
+        default: false
+        description: "Run the download path of the quick start (the quickstart-download job)"
+      mosquitto_next:
+        type: boolean
+        default: false
+        description: "Run the smoke test on eclipse-mosquitto:2.1.2-alpine (the mosquitto-next job)"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: "true"
+  # A missing contract or schema fails the test that needs it instead of
+  # skipping (the simulator's schema test, the broker ACL test, the contract
+  # fixtures).
+  FDP_REQUIRE_SCHEMAS: "1"
+  FDP_REQUIRE_CONTRACTS: "1"
+  # Every runner has a daemon, so a Docker-dependent test may not skip either.
+  FDP_REQUIRE_DOCKER: "1"
+  DOCKER_BUILDKIT: "1"
+  # Wall-clock bounds are multiplied by this on a shared runner.
+  FDP_TIMING_SLACK: "3"
+  # The embedding model files, restored from the cache by the jobs that embed;
+  # `compose.ci.yaml` binds the same directory into init.
+  MODEL_CACHE_DIR: ${{ github.workspace }}/.cache/models
+  # The pinned uv release; kept equal to the default of
+  # .github/actions/setup-toolchain by scripts/ops/ci-workflow.test.ts.
+  UV_VERSION: "0.12.17"
+  # The pinned golangci-lint release; installed as a binary, never with `go get`.
+  GOLANGCI_LINT_VERSION: "v2.13.2"
+  # The workflow linter's image, pinned by digest; `make lint` runs the same one.
+  ACTIONLINT_IMAGE: "rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667"
+
+jobs:
+  # Every linter of `make lint`, the workflow linter, and, on a pull request,
+  # the Conventional Commits check over the branch.
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # `origin/<base>` and the merge base must exist for the commit check.
+          fetch-depth: 0
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Put golangci-lint on the PATH
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          install-mode: binary
+          # `make lint-go` runs it; the action only installs the binary.
+          install-only: true
+      # `make lint` = spdx, gt-paths, env-check, reuse-order, blocklist,
+      # compose-check, lint-ts, lint-py, lint-go, boundaries and actionlint.
+      # `make compose-check` is a prerequisite of it and needs no second step.
+      - name: Lint every language and the repository itself
+        run: make lint
+      - name: Check the commit messages of this pull request
+        if: github.event_name == 'pull_request'
+        # The base branch reaches the shell as data, never as command text.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: uv run fdp-checks commits --range "origin/$BASE_REF..HEAD"
+      - name: Upload the reports of a failed run
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lint-reports
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The unit and contract tests of all three languages.
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      # The parity tests read the model files offline; the key changes with the
+      # pin in packages/contracts/embedding.json.
+      - name: Restore the embedding model cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/models
+          key: models-${{ hashFiles('packages/contracts/embedding.json') }}
+      - name: Run the unit and contract tests
+        run: make test
+      - name: Upload the coverage summaries
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: |
+            **/coverage/coverage-summary.json
+            coverage.xml
+            reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The integration layers. Go is deliberately absent: its integration tests
+  # run once, in the `go` job. The node leg's
+  # `make test-integration-node` runs every workspace's `test:integration`,
+  # `pnpm --filter @fdp/eval test:integration` among them: the Docker parity
+  # run, stack-mode scoring and the ingested catalog against a migrated
+  # Postgres, and the smoke E2E.
+  test-integration:
+    name: test-integration (${{ matrix.lang }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: node
+            target: test-integration-node
+          - lang: python
+            target: test-integration-py
+    env:
+      # A cold model cache downloads the hash-verified files instead of
+      # skipping the parity tests, and a skip becomes a failure.
+      EMBEDDER_ALLOW_DOWNLOAD: "true"
+      FDP_REQUIRE_MODEL: "1"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      - name: Restore the embedding model cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/models
+          key: models-${{ hashFiles('packages/contracts/embedding.json') }}
+      - name: Run the integration tests
+        run: make ${{ matrix.target }}
+      # The embedding parity test that reaches the network lives behind the
+      # `network` marker and runs next to the Python layer.
+      # Until that test exists pytest collects nothing and exits 5, which is
+      # not a failure — the same rule `make test-integration-py` applies.
+      - name: Run the Python embedding parity test over the network
+        if: matrix.lang == 'python'
+        run: |
+          status=0
+          uv run pytest -m network || status=$?
+          if [ "$status" -eq 5 ]; then status=0; fi
+          exit "$status"
+      - name: Upload the reports of a failed run
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-integration-${{ matrix.lang }}-reports
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # REUSE/SPDX compliance of the whole tree.
+  reuse:
+    name: reuse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # `make reuse` runs reuse through `uvx`, so it needs no workspace install.
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          node: "false"
+          go: "false"
+          install: "false"
+      - name: Check the SPDX headers of every file
+        run: make reuse
+
+  # The dependency licence audit. A copyleft runtime dependency fails the
+  # build, so this job never continues on error.
+  licenses:
+    name: licenses
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Audit the licences of every dependency
+        run: make licenses
+      - name: Upload the licence report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: licenses
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The generated artefacts still match their sources.
+  contract-drift:
+    name: contract-drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Regenerate the contract artefacts
+        run: pnpm --filter @fdp/contracts generate
+      - name: Check the generated contract artefacts for drift
+        run: bash packages/contracts/scripts/check-drift.sh
+      - name: Render the broker ACL from the topic table
+        run: make mosquitto-acl
+      - name: Check the broker ACL for drift
+        run: git diff --exit-code -- infra/mosquitto/acl
+      - name: Print the drift, if any
+        if: failure()
+        run: git diff -- packages/contracts/src/generated packages/contracts/generated services/modbus/internal/regmap/register_map_gen.go infra/mosquitto/acl
+
+  # The manual sources. Python only: `manual/tools` runs through
+  # `uv run --no-project`, so it needs neither Node nor Go.
+  manual-spec:
+    name: manual-spec
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          node: "false"
+          go: "false"
+          install: "false"
+      # `make install` is too much, but the Python workspace is needed:
+      # content_checks rule N3 shells out to `uv run fdp-blocklist`.
+      - name: Install the Python workspace
+        run: uv sync --all-packages --frozen
+      - name: Validate the manual sources
+        run: make check-manual-spec
+      - name: Run the manual tooling's own tests
+        run: >-
+          uv run --no-project --with-requirements manual/tools/requirements.txt
+          pytest manual/tools/tests -q
+      - name: Upload the validation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: manual-validate
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The manual acceptance checks (docs/manual.md#acceptance-checks) against
+  # the committed PDFs. The rebuild happens in the pinned manual image, so the
+  # PDFs are reproducible and the runner itself needs no Pango; the checks
+  # only need pdfplumber.
+  check-manual:
+    name: check-manual
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          node: "false"
+          go: "false"
+          install: "false"
+      - name: Build the pinned manual image
+        run: make manual-image MANUAL_IMAGE=fdp-manual-build:ci
+      - name: Rebuild the manual in the pinned container
+        run: >-
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work
+          fdp-manual-build:ci build --out-dir /work/.rebuild --no-catalog
+      # Check #6 shells out to `uv run fdp-blocklist`, so the workspace is
+      # needed here exactly as in `manual-spec`.
+      - name: Install the Python workspace
+        run: uv sync --all-packages --frozen
+      - name: Run the acceptance checks
+        run: uv run --package fdp-manual-build fdp-manual-check --rebuilt-dir .rebuild --report-dir reports
+      - name: Upload the acceptance report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: manual-check
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The Go module. Every Go integration test runs here and nowhere else.
+  go:
+    name: go
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          node: "false"
+          install: "false"
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      - name: Put golangci-lint on the PATH
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          install-mode: binary
+          install-only: true
+      - name: Vet the module
+        run: go -C services/modbus vet ./...
+      - name: Run the unit tests under the race detector
+        run: make -C services/modbus test-race
+      - name: Run the integration tests under the race detector
+        run: make -C services/modbus test-integration
+      # The only step without `-race`, so the `//go:build !race` timing file
+      # runs once, here, with the CI slack of the workflow env.
+      - name: Run the timing assertions once, without the race detector
+        run: make -C services/modbus test
+      - name: Lint the module
+        run: make -C services/modbus lint
+      - name: Build the simulator image
+        run: docker build --target sim -t fdp-modbus-sim:ci -f services/modbus/Dockerfile .
+      - name: Build the gateway image
+        run: docker build --target gateway -t fdp-modbus-gateway:ci -f services/modbus/Dockerfile .
+      - name: Smoke-test both images
+        run: bash services/modbus/scripts/image-smoke.sh
+      # The day comes from a slice cut from MetroPT-3, not from a committed
+      # file; `setup-dataset` put it there.
+      - name: Index a day of the dataset
+        run: go -C services/modbus run ./cmd/modbus-sim index --csv "$GITHUB_WORKSPACE/data/fixtures/metropt3/sim-day-2020-02-01.csv"
+      - name: Upload the reports of a failed run
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: go-reports
+          path: reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The frontend in mock mode. The perf project's strict budget is report-only
+  # here, but a loose CI ceiling on the longest long task still fails the job.
+  frontend:
+    name: frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      PERF_REPORT_ONLY: "1"
+      # Well clear of the strict 100 ms local budget, so runner noise does not
+      # trip it, while a lost `isAnimationActive={false}`, a lane that is not
+      # memoised or a ring without its cap does. The perf spec never
+      # scales `measured.longest_long_task_ms` by FDP_TIMING_SLACK.
+      PERF_CI_LONG_TASK_CEILING_MS: "250"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          go: "false"
+      # The browsers are cached by the version that will drive them, so a
+      # Playwright bump re-installs and nothing else does.
+      - name: Read the @playwright/test version from the lockfile
+        id: playwright
+        run: |
+          version=$(sed -n "s/.*'@playwright\/test@\([0-9][^']*\)'.*/\1/p" pnpm-lock.yaml | head -n 1)
+          if [ -z "$version" ]; then
+            echo "frontend: pnpm-lock.yaml has no @playwright/test entry" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Restore the Playwright browsers
+        id: browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install Chromium
+        if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --filter @fdp/frontend exec playwright install --with-deps chromium
+      # One `pnpm --filter @fdp/frontend typecheck lint test build` would run
+      # one script and pass the rest to it as arguments, so they are four
+      # commands.
+      - name: Type-check, lint, test and build the frontend
+        run: |
+          pnpm --filter @fdp/frontend run typecheck
+          pnpm --filter @fdp/frontend run lint
+          pnpm --filter @fdp/frontend run test
+          pnpm --filter @fdp/frontend run build
+      - name: Run the browser tests against the fake backend
+        run: pnpm --filter @fdp/frontend e2e:mock
+      # A missing report fails too: then nobody read the numbers.
+      - name: Hold the longest long task under the CI ceiling
+        env:
+          PERF_REPORT: reports/frontend-perf.json
+        run: |
+          # The single quotes hold JavaScript, whose ${...} the shell must not expand.
+          # shellcheck disable=SC2016
+          node -e '
+            const fs = require("node:fs");
+            const file = process.env.PERF_REPORT;
+            const ceiling = Number(process.env.PERF_CI_LONG_TASK_CEILING_MS);
+            if (!fs.existsSync(file)) {
+              console.log(`::error::${file} is missing, so the perf project reported nothing`);
+              process.exit(1);
+            }
+            const longest = JSON.parse(fs.readFileSync(file, "utf8")).measured?.longest_long_task_ms;
+            if (typeof longest !== "number") {
+              console.log(`::error::${file} has no measured.longest_long_task_ms`);
+              process.exit(1);
+            }
+            if (longest > ceiling) {
+              console.log(`::error::a long task took ${longest} ms, above the ${ceiling} ms CI ceiling`);
+              process.exit(1);
+            }
+            console.log(`frontend: the longest long task took ${longest} ms, within the ${ceiling} ms CI ceiling`);
+          '
+      - name: Upload the performance metrics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-perf
+          path: reports/frontend-perf.json
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Upload the Playwright report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-playwright-report
+          path: |
+            apps/frontend/playwright-report
+            reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # A fresh clone reaches green with nothing but the documented toolchain.
+  foundation-smoke:
+    name: foundation-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The script clones this repository; a shallow source cannot be cloned.
+          fetch-depth: 0
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Reach green in a fresh clone
+        run: scripts/foundation-smoke.sh
+
+  # The Compose stack of compose.ci.yaml (mock decision service, the CI
+  # slice), proved three ways on one stack: through the API by the smoke
+  # test, through the browser by the README tour and from its
+  # database by the evaluation tool. `--keep` leaves the stack running and
+  # writes reports/smoke/{ui-url,project,db-url-eval}, which `make e2e` and
+  # `make eval-stack` read; the last step removes it whatever happened.
+  stack:
+    name: stack
+    needs: [lint, test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      # smoke.sh refuses to start without data/fixtures/metropt3/ci-slice.csv.
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      # compose.ci.yaml binds this directory into init and the backend, so a
+      # warm cache spares init the model download.
+      - name: Restore the embedding model cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/models
+          key: models-${{ hashFiles('packages/contracts/embedding.json') }}
+      - name: Read the @playwright/test version from the lockfile
+        id: playwright
+        run: |
+          version=$(sed -n "s/.*'@playwright\/test@\([0-9][^']*\)'.*/\1/p" pnpm-lock.yaml | head -n 1)
+          if [ -z "$version" ]; then
+            echo "stack: pnpm-lock.yaml has no @playwright/test entry" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Restore the Playwright browsers
+        id: browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install Chromium
+        if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --filter @fdp/frontend exec playwright install --with-deps chromium
+      - name: Bring the stack up and walk the README tour through the API
+        run: scripts/smoke.sh --mode ci --keep --report reports/smoke
+      - name: Walk the README tour in the browser
+        run: make e2e
+      - name: Score the stack from its database
+        run: make eval-stack
+      # smoke.sh writes the project name once the stack is up; without it the
+      # script has already removed whatever it started.
+      - name: Collect the logs and tear the stack down
+        if: always()
+        run: |
+          if [ ! -s reports/smoke/project ]; then
+            echo "stack: no kept project, nothing to tear down"
+            exit 0
+          fi
+          project=$(cat reports/smoke/project)
+          docker compose -p "$project" logs --no-color > reports/smoke/logs.txt 2>&1 || true
+          docker compose -p "$project" down -v --remove-orphans
+      # The images must stay well inside the runner's disk.
+      - name: Summarise the Docker disk usage
+        if: always()
+        run: |
+          {
+            echo '### Docker disk usage'
+            echo '```'
+            docker system df
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the smoke report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stack-smoke
+          path: reports/smoke/**
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Upload the stack score
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stack-eval
+          path: reports/eval/**
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Upload the Playwright report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stack-playwright-report
+          path: apps/frontend/playwright-report
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The README quick start on a clean clone. The clone holds what
+  # `git clone` gives a reader: no node_modules, no .venv, no .cache and no
+  # MetroPT-3 row. So the workspace cuts the CI slice and the job copies it
+  # into the clone before `make up`, which keeps the one documented deviation
+  # from the README: a .env line that selects the slice instead of the
+  # 218 MB download, so the job neither downloads nor waits on the archive.
+  # The README asks for Docker and git only, so no toolchain is set up;
+  # smoke.sh needs the runner's python3.
+  #
+  # Known failure: with the rules backend on the manual's catalog the F3
+  # decision stays at gate `log`, so smoke.sh's ticket MUST exits 3 and its
+  # FAIL line names the reason. No threshold or step here is relaxed to pass.
+  quickstart:
+    name: quickstart
+    needs: [lint, test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Fills the workspace, never the clone.
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      - name: Clone the repository as a reader would
+        id: clone
+        run: git clone --depth 1 "file://$GITHUB_WORKSPACE" "$RUNNER_TEMP/clone"
+      # data/SHA256SUMS is tracked, so the clone already holds the line init
+      # verifies the slice against.
+      - name: Copy the CI slice into the clone
+        run: |
+          mkdir -p "$RUNNER_TEMP/clone/data/fixtures/metropt3"
+          cp data/fixtures/metropt3/ci-slice.csv "$RUNNER_TEMP/clone/data/fixtures/metropt3/"
+      - name: Create .env and select the CI slice
+        working-directory: ${{ runner.temp }}/clone
+        run: |
+          cp .env.example .env
+          printf 'METROPT_CSV=/data/fixtures/metropt3/ci-slice.csv\n' >> .env
+      - name: Start the stack
+        working-directory: ${{ runner.temp }}/clone
+        run: make up
+      - name: Open the UI's health endpoint
+        run: curl -fsS http://localhost:8080/healthz
+      - name: Walk the README tour with the rules backend
+        working-directory: ${{ runner.temp }}/clone
+        run: scripts/smoke.sh --mode quickstart --report "$GITHUB_WORKSPACE/reports/smoke-quickstart"
+      - name: Stop the stack
+        if: always() && steps.clone.outcome == 'success'
+        working-directory: ${{ runner.temp }}/clone
+        run: make down
+      - name: Delete the stack's volumes
+        if: always() && steps.clone.outcome == 'success'
+        working-directory: ${{ runner.temp }}/clone
+        run: make reset
+      - name: Upload the smoke report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quickstart-smoke
+          path: reports/smoke-quickstart/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The smoke test on the Mosquitto 2.1 line, run by hand with the
+  # mosquitto_next input; advisory.
+  # infra/mosquitto/Dockerfile takes its base as `ARG MQTT_IMAGE`, so the
+  # upgrade is a build argument: the broker is built first, under the project
+  # name the smoke test then runs, and `--no-build` has Compose build only the
+  # images still missing. No compose file and no .env row learns the variable.
+  mosquitto-next:
+    name: mosquitto-next
+    needs: [lint]
+    if: github.event.inputs.mosquitto_next == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      MQTT_IMAGE: eclipse-mosquitto:2.1.2-alpine
+      SMOKE_PROJECT: mosquitto-next
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # smoke.sh refuses to start without data/fixtures/metropt3/ci-slice.csv.
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      - name: Restore the embedding model cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/models
+          key: models-${{ hashFiles('packages/contracts/embedding.json') }}
+      - name: Build the broker on the Mosquitto 2.1 line
+        run: >-
+          docker compose -p "$SMOKE_PROJECT" --env-file /dev/null
+          -f compose.yaml -f compose.ci.yaml
+          build --build-arg "MQTT_IMAGE=$MQTT_IMAGE" mqtt
+      # Proves the build argument took effect: a broker still on 2.0 would
+      # pass the smoke test and prove nothing about the upgrade.
+      - name: Check the broker's version
+        run: |
+          banner=$(docker run --rm --entrypoint mosquitto "$SMOKE_PROJECT-mqtt" -h | head -n 1 || true)
+          echo "mosquitto-next: $banner"
+          case "$banner" in
+          "mosquitto version 2.1."*) ;;
+          *) echo "::error::the broker image is not on the 2.1 line"; exit 1 ;;
+          esac
+      - name: Run the smoke test on it
+        run: scripts/smoke.sh --mode ci --project "$SMOKE_PROJECT" --no-build --report reports/smoke-mosquitto-next
+      - name: Upload the smoke report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mosquitto-next-smoke
+          path: reports/smoke-mosquitto-next/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The download path of the quick start (MetroPT-3 is obtained by download
+  # only), exercised weekly. The opposite of `quickstart` on purpose: no
+  # setup-dataset, no slice copy and no METROPT_CSV line, so init downloads
+  # MetroPT-3 from vars.METROPT_URL, else the UCI archive, verifies it against
+  # the clone's data/SHA256SUMS and writes it into the clone. It is the only job allowed
+  # to download the dataset, and it is advisory, never a required check.
+  #
+  # The README stack is stopped before the smoke test builds its own, so the
+  # runner never holds two stacks; `make fixtures` cuts the smoke test's
+  # slice from the file init downloaded and checks it against the committed
+  # definitions, so the smoke also proves what arrived.
+  quickstart-download:
+    name: quickstart-download
+    if: github.event_name == 'schedule' || github.event.inputs.full_dataset == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The URL reaches the shell as data and is never printed.
+      - name: Say which source init downloads from
+        env:
+          METROPT_URL: ${{ vars.METROPT_URL }}
+        run: |
+          if [ -z "$METROPT_URL" ]; then
+            echo "::notice title=quickstart-download::vars.METROPT_URL is empty, so init downloads the UCI archive"
+          else
+            echo "quickstart-download: init downloads the project mirror named by vars.METROPT_URL"
+          fi
+      - name: Clone the repository as a reader would
+        id: clone
+        run: git clone --depth 1 "file://$GITHUB_WORKSPACE" "$RUNNER_TEMP/clone"
+      - name: Create .env from the example, unchanged
+        working-directory: ${{ runner.temp }}/clone
+        run: cp .env.example .env
+      # Compose reads METROPT_URL from the environment before .env; empty
+      # falls back to the UCI archive of compose.yaml.
+      - name: Start the stack, downloading the dataset
+        working-directory: ${{ runner.temp }}/clone
+        env:
+          METROPT_URL: ${{ vars.METROPT_URL }}
+        run: make up
+      - name: Open the UI's health endpoint
+        run: curl -fsS http://localhost:8080/healthz
+      - name: Keep init's log beside its report
+        if: always() && steps.clone.outcome == 'success'
+        working-directory: ${{ runner.temp }}/clone
+        run: docker compose logs --no-color init > reports/init.log 2>&1 || true
+      - name: Stop the stack
+        if: always() && steps.clone.outcome == 'success'
+        working-directory: ${{ runner.temp }}/clone
+        run: make down
+      - name: Cut the CI slice from the downloaded dataset
+        working-directory: ${{ runner.temp }}/clone
+        env:
+          FDP_REQUIRE_DATASET: "1"
+        run: make fixtures
+      - name: Run the smoke test on the cut slice
+        working-directory: ${{ runner.temp }}/clone
+        run: scripts/smoke.sh --mode ci --report "$GITHUB_WORKSPACE/reports/quickstart-download/smoke"
+      - name: Delete the stack's volumes
+        if: always() && steps.clone.outcome == 'success'
+        working-directory: ${{ runner.temp }}/clone
+        run: make reset
+      - name: Upload the smoke report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quickstart-download-smoke
+          path: reports/quickstart-download/**
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Upload init's report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quickstart-download-init
+          path: ${{ runner.temp }}/clone/reports/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # The evaluation harness runs in CI (tools/eval/README.md).
+  #
+  # With Jev against the mock, the gate `--fail-on-gate` reads is the rules
+  # baseline's, counted at detection level (a suspect event in each positive's
+  # credited span): the smoke scenarios leave the core-10 gate attainable, so
+  # the job exits 0, and it exits 2 once they put the gate out of reach. The
+  # gate is not relaxed to pass.
+  eval-smoke:
+    name: eval-smoke
+    needs: [test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # The rules baseline and Jev against the contracts' mock server: no key, no
+    # cassette, and every Jev figure of the run marked "mock — not informative".
+    env:
+      EVAL_PROFILE: smoke
+      EVAL_JEV_MODE: mock
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up the toolchain
+        uses: ./.github/actions/setup-toolchain
+      - name: Set up the MetroPT-3 dataset
+        uses: ./.github/actions/setup-dataset
+        with:
+          metropt-url: ${{ vars.METROPT_URL }}
+      - name: Restore the embedding model cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/models
+          key: models-${{ hashFiles('packages/contracts/embedding.json') }}
+      # `make eval` passes no flag, so the gate is reached through the package
+      # verb it wraps. Exit 2 when the smoke scenarios already put the core-10
+      # gate out of reach.
+      - name: Run the smoke scenarios against the core-10 gate
+        run: pnpm --filter @fdp/eval run eval -- --fail-on-gate
+      - name: Upload the evaluation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: eval-smoke
+          path: reports/eval/**
+          retention-days: 14
+          if-no-files-found: ignore

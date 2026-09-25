@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+[project]
+name = "fdp-init"
+version = "0.1.0"
+description = "One-shot initialisation: dataset download, manual ingestion and embeddings"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+# Exact pins, verified before pinning. Every one is permissive, because init
+# ships in an image: pdfplumber instead of PyMuPDF, pg8000 instead of psycopg.
+dependencies = [
+  "pdfplumber==0.11.10",
+  "pg8000==1.31.5",
+  "pgvector==0.5.0",
+  "onnxruntime==1.30.0",
+  "tokenizers==0.23.2",
+  "numpy==2.5.3",
+  "jsonschema==4.26.0",
+  "referencing==0.37.0",
+  "tenacity==9.1.4",
+]
+
+[project.optional-dependencies]
+# Optional catalog structuring. Installed in the image so the path works as
+# soon as LLM_API_KEY is set; never required to run init.
+llm = ["anthropic==1.7.0"]
+
+[project.scripts]
+fdp-init = "fdp_init.cli:main"
+
+[dependency-groups]
+# Member-level, not in the root dev group: only init's integration and E2E
+# tests start containers.
+dev = ["testcontainers==4.15.0"]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"

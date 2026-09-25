@@ -1,0 +1,22 @@
+{
+  "$expect_error": "/samples/0/values/line_pressure must be number,boolean",
+  "schema": "urn:fdp:schema:telemetry-samples:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:01.004Z",
+  "samples": [
+    {
+      "seq": 1,
+      "sim_ts": "2020-02-01T00:00:00.000Z",
+      "flags": {
+        "discontinuity": false,
+        "missing": false
+      },
+      "values": {
+        "line_pressure": "9.67",
+        "motor_current": 3.77,
+        "oil_level_ok": true
+      },
+      "alarms": []
+    }
+  ]
+}

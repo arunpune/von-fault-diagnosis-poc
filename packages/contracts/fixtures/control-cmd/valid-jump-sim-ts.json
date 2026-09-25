@@ -1,0 +1,8 @@
+{
+  "schema": "urn:fdp:schema:control-cmd:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:08.000Z",
+  "cmd_id": "5e6f7a8b-9c0d-4e1f-8a3b-4c5d6e7f8091",
+  "cmd": "jump",
+  "args": { "sim_ts": "2020-06-05T06:00:00.000Z" }
+}

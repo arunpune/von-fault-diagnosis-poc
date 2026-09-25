@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:gt-injection-active:v1",
+  "title": "Active fault injections",
+  "description": "The retained list of running injection instances on gt/{unit_id}/injection/active. An empty list clears the overlay.",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:gt-injection-active:v1" },
+    "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+    "active": {
+      "description": "Every instance running at sim_ts, in start order.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/active_instance" }
+    }
+  },
+  "required": ["schema", "sim_ts", "active"],
+  "additionalProperties": true,
+  "$defs": {
+    "active_instance": {
+      "title": "Running instance",
+      "description": "One fault injection instance the simulator is applying.",
+      "type": "object",
+      "properties": {
+        "instance_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/instance_id" },
+        "injection_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/injection_id" },
+        "fault_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/fault_id" },
+        "started_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "ends_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "params": { "$ref": "urn:fdp:schema:gt-injection:v1#/$defs/instance_params" }
+      },
+      "required": [
+        "instance_id",
+        "injection_id",
+        "fault_id",
+        "started_sim_ts",
+        "ends_sim_ts",
+        "params"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "urn:fdp:schema:status-sim:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-09-19T10:00:00.500Z",
+  "sim_ts": "2020-06-05T09:48:20.000Z",
+  "state": "playing",
+  "speed": 600,
+  "head_seq": 128394,
+  "dataset": {
+    "first_ts": "2020-02-01T00:00:00.000Z",
+    "last_ts": "2020-09-01T03:59:50.000Z",
+    "rows": 1516948,
+    "sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+    "source": "MetroPT3(AirCompressor).csv"
+  },
+  "loop": false,
+  "uptime_s": 3720
+}

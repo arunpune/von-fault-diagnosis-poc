@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-cost:v1",
+  "title": "Api cost",
+  "description": "The body of GET /api/cost: the cost ledger rolled up for the cost panel. It has five blocks — running totals, a breakdown per decision backend, a daily series, the prices the numbers were computed with, and the newest ledger rows. Only successful decisions are billed, so a failed call appears in no block.",
+  "type": "object",
+  "$defs": {
+    "usage_totals": {
+      "title": "Usage totals",
+      "description": "Money and tokens over a set of billed decisions.",
+      "type": "object",
+      "properties": {
+        "usd": {
+          "description": "Cost in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "calls": {
+          "description": "Number of billed decision calls.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "description": "Input tokens the backend reported.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_tokens": {
+          "description": "Output tokens the backend reported.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["usd", "calls", "input_tokens", "output_tokens"],
+      "additionalProperties": false
+    },
+    "backend_totals": {
+      "title": "Backend totals",
+      "description": "The totals of one decision backend, with the model they were billed against.",
+      "type": "object",
+      "properties": {
+        "usd": {
+          "description": "Cost in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "calls": {
+          "description": "Number of billed decision calls.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "description": "Input tokens the backend reported.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_tokens": {
+          "description": "Output tokens the backend reported.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "model": {
+          "description": "Model identifier the rows were billed against.",
+          "type": "string"
+        }
+      },
+      "required": ["usd", "calls", "input_tokens", "output_tokens", "model"],
+      "additionalProperties": false
+    },
+    "ledger_row": {
+      "title": "Ledger row",
+      "description": "One billed decision, as app.cost_ledger stores it.",
+      "type": "object",
+      "properties": {
+        "decision_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+        "backend": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+        "model": {
+          "description": "Model identifier the row was billed against.",
+          "type": "string"
+        },
+        "input_tokens": {
+          "description": "Input tokens the backend reported for this call.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_tokens": {
+          "description": "Output tokens the backend reported for this call.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost_usd": {
+          "description": "Cost of this call in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "wall_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+      },
+      "required": [
+        "decision_id",
+        "backend",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "cost_usd",
+        "wall_ts",
+        "sim_ts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "totals": { "$ref": "#/$defs/usage_totals" },
+    "by_backend": {
+      "description": "One entry per decision backend that has billed rows.",
+      "type": "object",
+      "propertyNames": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+      "additionalProperties": { "$ref": "#/$defs/backend_totals" }
+    },
+    "by_day": {
+      "description": "Cost per wall-clock day, oldest first.",
+      "type": "array",
+      "items": {
+        "title": "Cost day",
+        "description": "What one wall-clock day cost.",
+        "type": "object",
+        "properties": {
+          "day_wall": {
+            "description": "The wall-clock day in UTC, as a calendar date.",
+            "type": "string",
+            "format": "date"
+          },
+          "usd": {
+            "description": "Cost of that day in US dollars.",
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": ["day_wall", "usd"],
+        "additionalProperties": false
+      }
+    },
+    "prices": {
+      "description": "The prices the numbers above were computed with. A backend that bills nothing has null prices.",
+      "type": "object",
+      "properties": {
+        "jev_input_per_mtok": {
+          "description": "Price of a million input tokens of the decision model, in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "llm_input_per_mtok": {
+          "description": "Price of a million input tokens of the language-model backend, null while it is not configured.",
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "llm_output_per_mtok": {
+          "description": "Price of a million output tokens of the language-model backend, null while it is not configured.",
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "as_of": {
+          "description": "The day the prices were last checked.",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": ["jev_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
+      "additionalProperties": false
+    },
+    "recent": {
+      "description": "The newest billed decisions, newest first, at most fifty.",
+      "type": "array",
+      "maxItems": 50,
+      "items": { "$ref": "#/$defs/ledger_row" }
+    }
+  },
+  "required": ["totals", "by_backend", "by_day", "prices", "recent"],
+  "additionalProperties": true
+}

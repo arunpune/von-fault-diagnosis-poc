@@ -1,0 +1,7 @@
+{
+  "name": "fdp-boundary-fixture-violations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Miniature workspace whose every import breaks exactly one named boundary rule"
+}

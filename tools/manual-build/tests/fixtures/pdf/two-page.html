@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!--
+  The source of tests/fixtures/pdf/two-page.pdf, the committed PDF the
+  pdfplumber-based checks are unit-tested against.
+  It is a two-page A4 document whose single ruled table spans the page break
+  with its header repeated, in the two-row shape chapter 8 of the manual
+  prints: an identification band row with the condition id, the fault id and the
+  subsystem, and a detail row with the prose columns. Sixty entries, so check #4
+  can be measured against a real spanning table without WeasyPrint on the host.
+
+  It carries its own stylesheet and is rendered on its own, never through
+  `fdp-manual-build render`, whose stylesheets would win the cascade and change
+  the pagination. Regenerate it with (macOS needs the library path):
+
+      DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib \
+      uv run --package fdp-manual-build python -c "from weasyprint import HTML; \
+      HTML(filename='tools/manual-build/tests/fixtures/pdf/two-page.html').write_pdf( \
+      'tools/manual-build/tests/fixtures/pdf/two-page.pdf', pdf_version='1.7', \
+      full_fonts=False, hinting=False, optimize_images=False, uncompressed_pdf=False, \
+      custom_metadata=False, pdf_identifier=b'fdp-two-page-fixture')"
+
+  The three faces come from manual/fonts by relative URL, so the document
+  embeds the same IBM Plex subsets on every host and regenerating it changes
+  no font. `dcterms.created` is the mini fixture's `source_date_epoch`, so the
+  PDF carries the one CreationDate check #9 allows and nothing else. Every
+  name in it is invented; the ids have the manual's `snake_case` shape.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Two-page table fixture</title>
+<meta name="dcterms.created" content="2026-01-15T00:00:00+00:00">
+<style>
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-style: normal;
+  src: url("../../../../../manual/fonts/IBMPlexSans-Regular.ttf") format("truetype"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 700; font-style: normal;
+  src: url("../../../../../manual/fonts/IBMPlexSans-Bold.ttf") format("truetype"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal;
+  src: url("../../../../../manual/fonts/IBMPlexMono-Regular.ttf") format("truetype"); }
+@page { size: A4; margin: 9mm; }
+body { font-family: "IBM Plex Sans", sans-serif; font-size: 5pt; line-height: 1.02; margin: 0; }
+h1 { font-size: 7pt; margin: 0 0 1.5mm 0; }
+p { margin: 0 0 1.5mm 0; }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+th, td { border: 0.2mm solid #000; padding: 0.2mm 0.5mm; vertical-align: top; }
+th { background: #eee; text-align: left; }
+tr { break-inside: avoid; }
+.mono { font-family: "IBM Plex Mono", monospace; }
+</style>
+</head>
+<body>
+<h1>8 Problem solving</h1>
+<p>Start from the symptom the unit shows, then work down the causes in the order
+in which they are listed.</p>
+<table>
+<colgroup><col style="width:26%"><col style="width:26%"><col style="width:26%"><col style="width:22%"></colgroup>
+<thead>
+<tr><th>Condition</th><th colspan="2">Fault id</th><th>Subsystem</th></tr>
+<tr><th>Possible cause</th><th>What to check</th><th>Remedy</th><th>See also</th></tr>
+</thead>
+<tbody>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_01</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 1.</td><td>Fit a new element 1 and log the service.</td><td>Task 1</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_02</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 2.</td><td>Fit a new element 2 and log the service.</td><td>Task 2</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_03</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 3.</td><td>Fit a new element 3 and log the service.</td><td>Task 3</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_04</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 4.</td><td>Fit a new element 4 and log the service.</td><td>Task 4</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_05</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 5.</td><td>Fit a new element 5 and log the service.</td><td>Task 5</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_06</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 6.</td><td>Fit a new element 6 and log the service.</td><td>Task 6</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_07</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 7.</td><td>Fit a new element 7 and log the service.</td><td>Task 7</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_08</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 8.</td><td>Fit a new element 8 and log the service.</td><td>Task 8</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_09</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 9.</td><td>Fit a new element 9 and log the service.</td><td>Task 9</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_10</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 10.</td><td>Fit a new element 10 and log the service.</td><td>Task 10</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_11</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 11.</td><td>Fit a new element 11 and log the service.</td><td>Task 11</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_12</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 12.</td><td>Fit a new element 12 and log the service.</td><td>Task 12</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_13</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 13.</td><td>Fit a new element 13 and log the service.</td><td>Task 13</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_14</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 14.</td><td>Fit a new element 14 and log the service.</td><td>Task 14</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_15</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 15.</td><td>Fit a new element 15 and log the service.</td><td>Task 15</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_16</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 16.</td><td>Fit a new element 16 and log the service.</td><td>Task 16</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_17</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 17.</td><td>Fit a new element 17 and log the service.</td><td>Task 17</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_18</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 18.</td><td>Fit a new element 18 and log the service.</td><td>Task 18</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_19</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 19.</td><td>Fit a new element 19 and log the service.</td><td>Task 19</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_20</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 20.</td><td>Fit a new element 20 and log the service.</td><td>Task 20</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_21</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 21.</td><td>Fit a new element 21 and log the service.</td><td>Task 21</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_22</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 22.</td><td>Fit a new element 22 and log the service.</td><td>Task 22</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_23</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 23.</td><td>Fit a new element 23 and log the service.</td><td>Task 23</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_24</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 24.</td><td>Fit a new element 24 and log the service.</td><td>Task 24</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_25</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 25.</td><td>Fit a new element 25 and log the service.</td><td>Task 25</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_26</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 26.</td><td>Fit a new element 26 and log the service.</td><td>Task 26</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_27</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 27.</td><td>Fit a new element 27 and log the service.</td><td>Task 27</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_28</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 28.</td><td>Fit a new element 28 and log the service.</td><td>Task 28</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_29</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 29.</td><td>Fit a new element 29 and log the service.</td><td>Task 29</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_30</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 30.</td><td>Fit a new element 30 and log the service.</td><td>Task 30</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_31</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 31.</td><td>Fit a new element 31 and log the service.</td><td>Task 31</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_32</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 32.</td><td>Fit a new element 32 and log the service.</td><td>Task 32</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_33</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 33.</td><td>Fit a new element 33 and log the service.</td><td>Task 33</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_34</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 34.</td><td>Fit a new element 34 and log the service.</td><td>Task 34</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_35</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 35.</td><td>Fit a new element 35 and log the service.</td><td>Task 35</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_36</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 36.</td><td>Fit a new element 36 and log the service.</td><td>Task 36</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_37</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 37.</td><td>Fit a new element 37 and log the service.</td><td>Task 37</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_38</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 38.</td><td>Fit a new element 38 and log the service.</td><td>Task 38</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_39</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 39.</td><td>Fit a new element 39 and log the service.</td><td>Task 39</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_40</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 40.</td><td>Fit a new element 40 and log the service.</td><td>Task 40</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_41</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 41.</td><td>Fit a new element 41 and log the service.</td><td>Task 41</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_42</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 42.</td><td>Fit a new element 42 and log the service.</td><td>Task 42</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_43</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 43.</td><td>Fit a new element 43 and log the service.</td><td>Task 43</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_44</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 44.</td><td>Fit a new element 44 and log the service.</td><td>Task 44</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_45</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 45.</td><td>Fit a new element 45 and log the service.</td><td>Task 45</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_46</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 46.</td><td>Fit a new element 46 and log the service.</td><td>Task 46</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_47</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 47.</td><td>Fit a new element 47 and log the service.</td><td>Task 47</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_48</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 48.</td><td>Fit a new element 48 and log the service.</td><td>Task 48</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_49</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 49.</td><td>Fit a new element 49 and log the service.</td><td>Task 49</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_50</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 50.</td><td>Fit a new element 50 and log the service.</td><td>Task 50</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_51</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 51.</td><td>Fit a new element 51 and log the service.</td><td>Task 51</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_52</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 52.</td><td>Fit a new element 52 and log the service.</td><td>Task 52</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_53</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 53.</td><td>Fit a new element 53 and log the service.</td><td>Task 53</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_54</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 54.</td><td>Fit a new element 54 and log the service.</td><td>Task 54</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_01</td><td class="mono" colspan="2">fixture_fault_55</td><td>cooling</td></tr>
+<tr class="detail"><td>Wear on the cooling side (common)</td><td>Read the service hours since entry 55.</td><td>Fit a new element 55 and log the service.</td><td>Task 55</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_02</td><td class="mono" colspan="2">fixture_fault_56</td><td>oil</td></tr>
+<tr class="detail"><td>Wear on the oil side (common)</td><td>Read the service hours since entry 56.</td><td>Fit a new element 56 and log the service.</td><td>Task 56</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_03</td><td class="mono" colspan="2">fixture_fault_57</td><td>intake unloading</td></tr>
+<tr class="detail"><td>Wear on the intake unloading side (common)</td><td>Read the service hours since entry 57.</td><td>Fit a new element 57 and log the service.</td><td>Task 57</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_04</td><td class="mono" colspan="2">fixture_fault_58</td><td>distribution</td></tr>
+<tr class="detail"><td>Wear on the distribution side (common)</td><td>Read the service hours since entry 58.</td><td>Fit a new element 58 and log the service.</td><td>Task 58</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_05</td><td class="mono" colspan="2">fixture_fault_59</td><td>dryer</td></tr>
+<tr class="detail"><td>Wear on the dryer side (common)</td><td>Read the service hours since entry 59.</td><td>Fit a new element 59 and log the service.</td><td>Task 59</td></tr>
+<tr class="cause"><td class="mono">fixture_condition_06</td><td class="mono" colspan="2">fixture_fault_60</td><td>reservoirs</td></tr>
+<tr class="detail"><td>Wear on the reservoirs side (common)</td><td>Read the service hours since entry 60.</td><td>Fit a new element 60 and log the service.</td><td>Task 60</td></tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,1268 @@
+{
+  "schema": "urn:fdp:schema:gt-failure-table:v1",
+  "source": {
+    "dataset": "MetroPT-3 (UCI 791)",
+    "doi": "10.24432/C5VW3R",
+    "license": "CC-BY-4.0",
+    "csv_sha256": "db30ccb4ea402e3c8bf2c99db06e288d4f2a772f6928f9dbe26a920d69793e24",
+    "resolved_from": "docs/dataset.md#how-the-windows-were-resolved"
+  },
+  "clock": "utc-assumed",
+  "failures": [
+    {
+      "id": "F1",
+      "uci_nr": "#1",
+      "start": "2020-04-18T00:00:00.000Z",
+      "end": "2020-04-19T02:00:00.000Z",
+      "uci_start": "2020-04-18T00:00:00.000Z",
+      "uci_end": "2020-04-18T23:59:00.000Z",
+      "data_onset": "2020-04-18T00:23:59.000Z",
+      "data_recovery": "2020-04-19T01:55:36.000Z",
+      "onset_known": false,
+      "precursor_from": null,
+      "report_local": "2020-04-18 07:05",
+      "maintenance": null,
+      "maintenance_verified": false,
+      "fault_id": "dryer_purge_leak",
+      "accepted_fault_ids": [
+        "dryer_purge_leak",
+        "downstream_air_leak"
+      ],
+      "signature": "A",
+      "component": "pneumatic panel (dryer/drain side)",
+      "native_alarm_first": null,
+      "in_headline": true,
+      "notes": "The logger was frozen from 17 April 09:20 until 18 April 00:18, so the true onset is unknown and every lead time for this failure is a lower bound. The published end is a whole-day placeholder; the stuck-loaded run continues until 01:56 on 19 April and the repair venting follows from 02:13 to 02:47. No maintenance note exists for it."
+    },
+    {
+      "id": "F2",
+      "uci_nr": "#1 (duplicate, read as #2)",
+      "start": "2020-05-29T23:30:00.000Z",
+      "end": "2020-05-30T06:00:00.000Z",
+      "uci_start": "2020-05-29T23:30:00.000Z",
+      "uci_end": "2020-05-30T06:00:00.000Z",
+      "data_onset": "2020-05-29T23:14:56.000Z",
+      "data_recovery": "2020-05-30T05:56:46.000Z",
+      "onset_known": true,
+      "precursor_from": null,
+      "report_local": "2020-05-30 01:10",
+      "maintenance": "2020-05-30T12:00:00.000Z",
+      "maintenance_verified": false,
+      "fault_id": "dryer_purge_leak",
+      "accepted_fault_ids": [
+        "dryer_purge_leak",
+        "downstream_air_leak"
+      ],
+      "signature": "A",
+      "component": "pneumatic panel (dryer/drain side)",
+      "native_alarm_first": null,
+      "in_headline": true,
+      "notes": "The published table repeats the number of the first row; read it as the second. The maintenance note names April, which is a typed month for 30 May, and the data shows no intervention at the recorded hour, so the time is reported rather than verified."
+    },
+    {
+      "id": "F3",
+      "uci_nr": "#3",
+      "start": "2020-06-05T10:00:00.000Z",
+      "end": "2020-06-07T14:30:00.000Z",
+      "uci_start": "2020-06-05T10:00:00.000Z",
+      "uci_end": "2020-06-07T14:30:00.000Z",
+      "data_onset": "2020-06-05T09:48:30.000Z",
+      "data_recovery": "2020-06-08T13:54:18.000Z",
+      "onset_known": true,
+      "precursor_from": null,
+      "report_local": "2020-06-05 18:00",
+      "maintenance": "2020-06-08T16:00:00.000Z",
+      "maintenance_verified": false,
+      "fault_id": "dryer_purge_leak",
+      "accepted_fault_ids": [
+        "dryer_purge_leak",
+        "downstream_air_leak"
+      ],
+      "signature": "A",
+      "component": "pneumatic panel (dryer/drain side)",
+      "native_alarm_first": "2020-06-06T19:42:19.000Z",
+      "in_headline": true,
+      "notes": "The published end is when logging stopped, not when the leak ended. The unit was still loaded when logging resumed on 8 June and normal cycling returns at 13:54, before the maintenance note at 16:00, so that note is not verified; the repair period in between is an excluded window."
+    },
+    {
+      "id": "F4",
+      "uci_nr": "#4",
+      "start": "2020-07-15T14:30:00.000Z",
+      "end": "2020-07-15T19:00:00.000Z",
+      "uci_start": "2020-07-15T14:30:00.000Z",
+      "uci_end": "2020-07-15T19:00:00.000Z",
+      "data_onset": "2020-07-15T14:25:23.000Z",
+      "data_recovery": "2020-07-15T18:52:54.000Z",
+      "onset_known": true,
+      "precursor_from": "2020-07-14T21:28:00.000Z",
+      "report_local": "2020-07-15 18:25",
+      "maintenance": "2020-07-16T00:00:00.000Z",
+      "maintenance_verified": true,
+      "fault_id": "downstream_air_leak",
+      "accepted_fault_ids": [
+        "downstream_air_leak"
+      ],
+      "signature": "B",
+      "component": "pneumatic panel (downstream/clients side)",
+      "native_alarm_first": "2020-07-15T17:20:11.000Z",
+      "in_headline": true,
+      "notes": "The window covers the acute phase only. The fast decay of this signature is measurable from 14 July 21:28, and the decay rate normalises at exactly the maintenance hour, which is what verifies the note."
+    },
+    {
+      "id": "F4b",
+      "uci_nr": null,
+      "start": "2020-07-16T20:00:00.000Z",
+      "end": "2020-07-17T06:00:00.000Z",
+      "uci_start": null,
+      "uci_end": null,
+      "data_onset": "2020-07-17T00:54:00.000Z",
+      "data_recovery": "2020-07-17T05:35:00.000Z",
+      "onset_known": true,
+      "precursor_from": null,
+      "report_local": "2020-07-17 05:46",
+      "maintenance": null,
+      "maintenance_verified": false,
+      "fault_id": "downstream_air_leak",
+      "accepted_fault_ids": [
+        "downstream_air_leak"
+      ],
+      "signature": "B",
+      "component": "pneumatic panel (downstream/clients side)",
+      "native_alarm_first": "2020-07-17T00:56:00.000Z",
+      "in_headline": false,
+      "notes": "A recurrence the thesis reports and the published table does not carry, twenty hours after the maintenance of the preceding failure. It counts as a secondary positive or as an excluded window, never as a false positive."
+    }
+  ],
+  "unlabelled_episodes": [
+    {
+      "start": "2020-03-06T21:42:25.000Z",
+      "end": "2020-03-06T22:59:53.000Z",
+      "hours": 1.29,
+      "tp3_median": 9.326,
+      "dv_pressure_median": 0.614,
+      "oil_max": 76.65,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    },
+    {
+      "start": "2020-03-11T05:15:20.000Z",
+      "end": "2020-03-11T06:10:11.000Z",
+      "hours": 0.92,
+      "tp3_median": 8.71,
+      "dv_pressure_median": 0.872,
+      "oil_max": 75.6,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    },
+    {
+      "start": "2020-03-12T00:16:06.000Z",
+      "end": "2020-03-12T11:49:50.000Z",
+      "hours": 11.56,
+      "tp3_median": 9.542,
+      "dv_pressure_median": 0.776,
+      "oil_max": 78.03,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "The thesis records a strange-noise report at 08:25 on the same day."
+    },
+    {
+      "start": "2020-03-26T04:00:30.000Z",
+      "end": "2020-03-26T04:52:52.000Z",
+      "hours": 0.88,
+      "tp3_median": 9.111,
+      "dv_pressure_median": 0.712,
+      "oil_max": 74.75,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    },
+    {
+      "start": "2020-03-27T07:12:10.000Z",
+      "end": "2020-03-27T11:38:11.000Z",
+      "hours": 4.44,
+      "tp3_median": 9.198,
+      "dv_pressure_median": 0.642,
+      "oil_max": 77.83,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "The thesis lists a report on this day without any detail."
+    },
+    {
+      "start": "2020-03-28T07:22:24.000Z",
+      "end": "2020-03-30T07:41:06.000Z",
+      "hours": 48.31,
+      "tp3_median": 8.634,
+      "dv_pressure_median": 0.704,
+      "oil_max": 83.12,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A vent from 23:05 to 23:28 on 28 March; never reported."
+    },
+    {
+      "start": "2020-04-12T11:50:31.000Z",
+      "end": "2020-04-12T23:36:00.000Z",
+      "hours": 11.76,
+      "tp3_median": 9.44,
+      "dv_pressure_median": 1.804,
+      "oil_max": 76.3,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "Six days before the first labelled failure."
+    },
+    {
+      "start": "2020-05-13T13:44:04.000Z",
+      "end": "2020-05-14T04:36:21.000Z",
+      "hours": 14.87,
+      "tp3_median": 7.55,
+      "dv_pressure_median": 2.426,
+      "oil_max": 71.12,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "Sixteen days before the second labelled failure."
+    },
+    {
+      "start": "2020-05-19T10:05:50.000Z",
+      "end": "2020-05-19T10:51:45.000Z",
+      "hours": 0.77,
+      "tp3_median": 9.624,
+      "dv_pressure_median": 1.476,
+      "oil_max": 78.03,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    },
+    {
+      "start": "2020-05-19T22:22:17.000Z",
+      "end": "2020-05-20T23:02:33.000Z",
+      "hours": 24.67,
+      "tp3_median": 7.898,
+      "dv_pressure_median": 2.062,
+      "oil_max": 76.1,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "Ten days before the second labelled failure."
+    },
+    {
+      "start": "2020-06-01T14:49:54.000Z",
+      "end": "2020-06-01T15:39:08.000Z",
+      "hours": 0.82,
+      "tp3_median": 9.864,
+      "dv_pressure_median": 1.504,
+      "oil_max": 79.7,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    },
+    {
+      "start": "2020-06-03T10:06:00.000Z",
+      "end": "2020-06-03T11:08:49.000Z",
+      "hours": 1.05,
+      "tp3_median": 9.152,
+      "dv_pressure_median": 1.78,
+      "oil_max": 78.35,
+      "fault_id_hint": "dryer_purge_leak",
+      "note": "A short stuck-loaded episode with raised purge pressure, of the same kind as the labelled failures and never reported."
+    }
+  ],
+  "excluded_windows": [
+    {
+      "from": "2020-03-06T21:42:25.000Z",
+      "to": "2020-03-06T22:59:53.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-03-11T05:15:20.000Z",
+      "to": "2020-03-11T06:10:11.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-03-11T18:29:54.000Z",
+      "to": "2020-03-11T18:59:14.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-03-12T00:16:06.000Z",
+      "to": "2020-03-12T11:49:50.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-03-26T04:00:30.000Z",
+      "to": "2020-03-26T04:52:52.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-03-27T07:12:10.000Z",
+      "to": "2020-03-27T11:38:11.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-03-28T07:22:24.000Z",
+      "to": "2020-03-30T07:41:06.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-04-12T11:50:31.000Z",
+      "to": "2020-04-12T23:36:00.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-04-13T18:29:20.000Z",
+      "to": "2020-04-13T19:27:16.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-04-17T09:20:43.000Z",
+      "to": "2020-04-18T00:18:07.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-04-19T02:00:00.000Z",
+      "to": "2020-04-19T03:30:00.000Z",
+      "reason": "repair"
+    },
+    {
+      "from": "2020-04-20T04:49:17.000Z",
+      "to": "2020-04-21T01:16:52.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-05-13T13:44:04.000Z",
+      "to": "2020-05-14T04:36:21.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-05-19T02:00:15.000Z",
+      "to": "2020-05-19T06:02:59.000Z",
+      "reason": "depot_depressurisation"
+    },
+    {
+      "from": "2020-05-19T10:05:50.000Z",
+      "to": "2020-05-19T10:51:45.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-05-19T22:22:17.000Z",
+      "to": "2020-05-20T23:02:33.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-05-26T09:19:36.000Z",
+      "to": "2020-05-28T03:16:28.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-06-01T14:49:54.000Z",
+      "to": "2020-06-01T15:39:08.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-06-02T19:23:21.000Z",
+      "to": "2020-06-02T20:52:53.000Z",
+      "reason": "depot_depressurisation"
+    },
+    {
+      "from": "2020-06-03T10:06:00.000Z",
+      "to": "2020-06-03T11:08:49.000Z",
+      "reason": "unlabelled_positive"
+    },
+    {
+      "from": "2020-06-07T14:30:00.000Z",
+      "to": "2020-06-08T16:00:00.000Z",
+      "reason": "repair"
+    },
+    {
+      "from": "2020-06-08T11:48:04.000Z",
+      "to": "2020-06-08T12:28:12.000Z",
+      "reason": "depot_depressurisation"
+    },
+    {
+      "from": "2020-06-12T02:01:56.000Z",
+      "to": "2020-06-12T17:06:06.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-06-22T15:06:21.000Z",
+      "to": "2020-06-25T05:08:35.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-07-14T02:16:26.000Z",
+      "to": "2020-07-14T02:52:16.000Z",
+      "reason": "depot_depressurisation"
+    },
+    {
+      "from": "2020-07-15T19:00:00.000Z",
+      "to": "2020-07-16T01:00:00.000Z",
+      "reason": "repair"
+    },
+    {
+      "from": "2020-07-16T20:00:00.000Z",
+      "to": "2020-07-17T06:00:00.000Z",
+      "reason": "secondary_positive"
+    },
+    {
+      "from": "2020-07-21T13:45:12.000Z",
+      "to": "2020-07-21T22:03:16.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-07-22T06:43:44.000Z",
+      "to": "2020-07-22T13:04:24.000Z",
+      "reason": "frozen_logger"
+    },
+    {
+      "from": "2020-07-31T01:35:33.000Z",
+      "to": "2020-07-31T06:04:16.000Z",
+      "reason": "depot_depressurisation"
+    }
+  ],
+  "frozen_blocks": [
+    {
+      "start": "2020-03-11T18:29:54.000Z",
+      "end": "2020-03-11T18:59:14.000Z",
+      "rows": 147,
+      "hours": 0.49
+    },
+    {
+      "start": "2020-04-13T18:29:20.000Z",
+      "end": "2020-04-13T19:27:16.000Z",
+      "rows": 290,
+      "hours": 0.97
+    },
+    {
+      "start": "2020-04-17T09:20:43.000Z",
+      "end": "2020-04-18T00:18:07.000Z",
+      "rows": 4469,
+      "hours": 14.96
+    },
+    {
+      "start": "2020-04-20T04:49:17.000Z",
+      "end": "2020-04-21T01:16:52.000Z",
+      "rows": 6109,
+      "hours": 20.46
+    },
+    {
+      "start": "2020-05-26T09:19:36.000Z",
+      "end": "2020-05-28T03:16:28.000Z",
+      "rows": 12448,
+      "hours": 41.95
+    },
+    {
+      "start": "2020-06-12T02:01:56.000Z",
+      "end": "2020-06-12T17:06:06.000Z",
+      "rows": 4501,
+      "hours": 15.07
+    },
+    {
+      "start": "2020-06-22T15:06:21.000Z",
+      "end": "2020-06-25T05:08:35.000Z",
+      "rows": 18514,
+      "hours": 62.04
+    },
+    {
+      "start": "2020-07-21T13:45:12.000Z",
+      "end": "2020-07-21T22:03:16.000Z",
+      "rows": 2480,
+      "hours": 8.3
+    },
+    {
+      "start": "2020-07-22T06:43:44.000Z",
+      "end": "2020-07-22T13:04:24.000Z",
+      "rows": 1897,
+      "hours": 6.35
+    }
+  ],
+  "gaps_over_1h": [
+    {
+      "start": "2020-02-01T19:40:04.000Z",
+      "end": "2020-02-01T23:15:33.000Z",
+      "seconds": 12929
+    },
+    {
+      "start": "2020-02-01T23:20:21.000Z",
+      "end": "2020-02-02T04:34:27.000Z",
+      "seconds": 18846
+    },
+    {
+      "start": "2020-02-05T01:07:37.000Z",
+      "end": "2020-02-05T04:28:42.000Z",
+      "seconds": 12065
+    },
+    {
+      "start": "2020-02-06T02:07:01.000Z",
+      "end": "2020-02-06T07:52:21.000Z",
+      "seconds": 20720
+    },
+    {
+      "start": "2020-02-06T19:16:35.000Z",
+      "end": "2020-02-06T23:33:19.000Z",
+      "seconds": 15404
+    },
+    {
+      "start": "2020-02-06T23:48:02.000Z",
+      "end": "2020-02-07T04:28:13.000Z",
+      "seconds": 16811
+    },
+    {
+      "start": "2020-02-09T00:49:56.000Z",
+      "end": "2020-02-09T04:38:36.000Z",
+      "seconds": 13720
+    },
+    {
+      "start": "2020-02-10T01:17:01.000Z",
+      "end": "2020-02-10T04:39:03.000Z",
+      "seconds": 12122
+    },
+    {
+      "start": "2020-02-11T01:16:09.000Z",
+      "end": "2020-02-11T04:40:24.000Z",
+      "seconds": 12255
+    },
+    {
+      "start": "2020-02-12T01:09:35.000Z",
+      "end": "2020-02-12T04:29:44.000Z",
+      "seconds": 12009
+    },
+    {
+      "start": "2020-02-13T20:43:35.000Z",
+      "end": "2020-02-14T00:49:50.000Z",
+      "seconds": 14775
+    },
+    {
+      "start": "2020-02-14T00:54:38.000Z",
+      "end": "2020-02-14T04:59:53.000Z",
+      "seconds": 14715
+    },
+    {
+      "start": "2020-02-17T00:30:48.000Z",
+      "end": "2020-02-17T04:37:17.000Z",
+      "seconds": 14789
+    },
+    {
+      "start": "2020-02-19T20:10:50.000Z",
+      "end": "2020-02-20T01:24:21.000Z",
+      "seconds": 18811
+    },
+    {
+      "start": "2020-02-20T01:34:06.000Z",
+      "end": "2020-02-20T04:34:48.000Z",
+      "seconds": 10842
+    },
+    {
+      "start": "2020-02-23T00:33:49.000Z",
+      "end": "2020-02-23T01:34:03.000Z",
+      "seconds": 3614
+    },
+    {
+      "start": "2020-02-23T01:48:45.000Z",
+      "end": "2020-02-23T05:03:04.000Z",
+      "seconds": 11659
+    },
+    {
+      "start": "2020-02-23T23:47:57.000Z",
+      "end": "2020-02-24T07:46:31.000Z",
+      "seconds": 28714
+    },
+    {
+      "start": "2020-02-26T00:14:59.000Z",
+      "end": "2020-02-26T02:11:32.000Z",
+      "seconds": 6993
+    },
+    {
+      "start": "2020-02-26T02:16:19.000Z",
+      "end": "2020-02-26T04:23:21.000Z",
+      "seconds": 7622
+    },
+    {
+      "start": "2020-02-28T23:57:08.000Z",
+      "end": "2020-03-01T04:00:09.000Z",
+      "seconds": 100981
+    },
+    {
+      "start": "2020-03-02T20:50:37.000Z",
+      "end": "2020-03-03T02:51:45.000Z",
+      "seconds": 21668
+    },
+    {
+      "start": "2020-03-03T10:29:17.000Z",
+      "end": "2020-03-03T11:37:39.000Z",
+      "seconds": 4102
+    },
+    {
+      "start": "2020-03-06T01:01:32.000Z",
+      "end": "2020-03-06T02:22:22.000Z",
+      "seconds": 4850
+    },
+    {
+      "start": "2020-03-06T11:06:13.000Z",
+      "end": "2020-03-06T12:52:29.000Z",
+      "seconds": 6376
+    },
+    {
+      "start": "2020-03-07T02:28:25.000Z",
+      "end": "2020-03-07T10:39:40.000Z",
+      "seconds": 29475
+    },
+    {
+      "start": "2020-03-07T10:44:17.000Z",
+      "end": "2020-03-07T18:01:29.000Z",
+      "seconds": 26232
+    },
+    {
+      "start": "2020-03-09T20:44:02.000Z",
+      "end": "2020-03-10T00:36:31.000Z",
+      "seconds": 13949
+    },
+    {
+      "start": "2020-03-10T01:50:41.000Z",
+      "end": "2020-03-10T03:00:12.000Z",
+      "seconds": 4171
+    },
+    {
+      "start": "2020-03-11T11:57:28.000Z",
+      "end": "2020-03-11T17:58:43.000Z",
+      "seconds": 21675
+    },
+    {
+      "start": "2020-03-11T19:37:07.000Z",
+      "end": "2020-03-11T22:38:18.000Z",
+      "seconds": 10871
+    },
+    {
+      "start": "2020-03-14T01:33:56.000Z",
+      "end": "2020-03-14T02:56:01.000Z",
+      "seconds": 4925
+    },
+    {
+      "start": "2020-03-14T03:05:45.000Z",
+      "end": "2020-03-14T06:29:10.000Z",
+      "seconds": 12205
+    },
+    {
+      "start": "2020-03-15T01:09:00.000Z",
+      "end": "2020-03-15T08:28:45.000Z",
+      "seconds": 26385
+    },
+    {
+      "start": "2020-03-15T17:17:38.000Z",
+      "end": "2020-03-15T23:25:28.000Z",
+      "seconds": 22070
+    },
+    {
+      "start": "2020-03-15T23:49:56.000Z",
+      "end": "2020-03-16T04:31:47.000Z",
+      "seconds": 16911
+    },
+    {
+      "start": "2020-03-19T21:06:46.000Z",
+      "end": "2020-03-20T06:25:41.000Z",
+      "seconds": 33535
+    },
+    {
+      "start": "2020-03-21T01:03:59.000Z",
+      "end": "2020-03-21T02:18:38.000Z",
+      "seconds": 4479
+    },
+    {
+      "start": "2020-03-24T01:17:20.000Z",
+      "end": "2020-03-24T04:03:08.000Z",
+      "seconds": 9948
+    },
+    {
+      "start": "2020-03-28T08:49:39.000Z",
+      "end": "2020-03-28T23:05:32.000Z",
+      "seconds": 51353
+    },
+    {
+      "start": "2020-03-29T19:49:14.000Z",
+      "end": "2020-03-30T07:33:30.000Z",
+      "seconds": 42256
+    },
+    {
+      "start": "2020-04-01T13:15:40.000Z",
+      "end": "2020-04-02T09:59:17.000Z",
+      "seconds": 74617
+    },
+    {
+      "start": "2020-04-02T11:33:16.000Z",
+      "end": "2020-04-02T14:52:34.000Z",
+      "seconds": 11958
+    },
+    {
+      "start": "2020-04-03T20:02:02.000Z",
+      "end": "2020-04-04T02:32:23.000Z",
+      "seconds": 23421
+    },
+    {
+      "start": "2020-04-06T07:28:58.000Z",
+      "end": "2020-04-06T09:55:32.000Z",
+      "seconds": 8794
+    },
+    {
+      "start": "2020-04-06T11:59:15.000Z",
+      "end": "2020-04-06T14:09:04.000Z",
+      "seconds": 7789
+    },
+    {
+      "start": "2020-04-08T19:41:49.000Z",
+      "end": "2020-04-09T01:41:07.000Z",
+      "seconds": 21558
+    },
+    {
+      "start": "2020-04-09T01:45:55.000Z",
+      "end": "2020-04-09T04:52:48.000Z",
+      "seconds": 11213
+    },
+    {
+      "start": "2020-04-11T01:02:05.000Z",
+      "end": "2020-04-11T04:47:14.000Z",
+      "seconds": 13509
+    },
+    {
+      "start": "2020-04-12T01:10:17.000Z",
+      "end": "2020-04-12T04:44:35.000Z",
+      "seconds": 12858
+    },
+    {
+      "start": "2020-04-13T01:03:33.000Z",
+      "end": "2020-04-13T04:33:28.000Z",
+      "seconds": 12595
+    },
+    {
+      "start": "2020-04-13T10:30:13.000Z",
+      "end": "2020-04-13T16:39:08.000Z",
+      "seconds": 22135
+    },
+    {
+      "start": "2020-04-13T19:27:16.000Z",
+      "end": "2020-04-14T00:39:14.000Z",
+      "seconds": 18718
+    },
+    {
+      "start": "2020-04-14T00:48:58.000Z",
+      "end": "2020-04-14T02:32:26.000Z",
+      "seconds": 6208
+    },
+    {
+      "start": "2020-04-14T19:47:53.000Z",
+      "end": "2020-04-15T00:25:12.000Z",
+      "seconds": 16639
+    },
+    {
+      "start": "2020-04-16T00:56:05.000Z",
+      "end": "2020-04-16T02:27:49.000Z",
+      "seconds": 5504
+    },
+    {
+      "start": "2020-04-17T00:43:58.000Z",
+      "end": "2020-04-17T04:38:50.000Z",
+      "seconds": 14092
+    },
+    {
+      "start": "2020-04-21T19:41:35.000Z",
+      "end": "2020-04-22T00:15:40.000Z",
+      "seconds": 16445
+    },
+    {
+      "start": "2020-04-22T00:40:16.000Z",
+      "end": "2020-04-22T01:40:51.000Z",
+      "seconds": 3635
+    },
+    {
+      "start": "2020-04-23T00:38:20.000Z",
+      "end": "2020-04-23T04:21:10.000Z",
+      "seconds": 13370
+    },
+    {
+      "start": "2020-04-25T01:10:51.000Z",
+      "end": "2020-04-27T01:12:49.000Z",
+      "seconds": 172918
+    },
+    {
+      "start": "2020-04-27T19:32:23.000Z",
+      "end": "2020-04-27T22:52:55.000Z",
+      "seconds": 12032
+    },
+    {
+      "start": "2020-04-27T23:37:02.000Z",
+      "end": "2020-04-28T01:02:01.000Z",
+      "seconds": 5099
+    },
+    {
+      "start": "2020-04-28T19:46:46.000Z",
+      "end": "2020-04-29T00:25:12.000Z",
+      "seconds": 16706
+    },
+    {
+      "start": "2020-04-29T00:44:51.000Z",
+      "end": "2020-04-29T02:15:27.000Z",
+      "seconds": 5436
+    },
+    {
+      "start": "2020-04-30T10:35:24.000Z",
+      "end": "2020-04-30T13:51:48.000Z",
+      "seconds": 11784
+    },
+    {
+      "start": "2020-04-30T15:06:00.000Z",
+      "end": "2020-04-30T23:34:46.000Z",
+      "seconds": 30526
+    },
+    {
+      "start": "2020-04-30T23:39:23.000Z",
+      "end": "2020-05-01T12:33:38.000Z",
+      "seconds": 46455
+    },
+    {
+      "start": "2020-05-01T12:38:26.000Z",
+      "end": "2020-05-01T21:26:05.000Z",
+      "seconds": 31659
+    },
+    {
+      "start": "2020-05-04T01:45:36.000Z",
+      "end": "2020-05-04T04:27:07.000Z",
+      "seconds": 9691
+    },
+    {
+      "start": "2020-05-05T00:53:28.000Z",
+      "end": "2020-05-05T04:21:38.000Z",
+      "seconds": 12490
+    },
+    {
+      "start": "2020-05-06T00:55:24.000Z",
+      "end": "2020-05-06T02:48:35.000Z",
+      "seconds": 6791
+    },
+    {
+      "start": "2020-05-07T01:01:36.000Z",
+      "end": "2020-05-07T02:36:08.000Z",
+      "seconds": 5672
+    },
+    {
+      "start": "2020-05-08T00:51:10.000Z",
+      "end": "2020-05-08T02:18:00.000Z",
+      "seconds": 5210
+    },
+    {
+      "start": "2020-05-09T00:59:37.000Z",
+      "end": "2020-05-09T03:22:52.000Z",
+      "seconds": 8595
+    },
+    {
+      "start": "2020-05-10T00:31:17.000Z",
+      "end": "2020-05-10T22:48:58.000Z",
+      "seconds": 80261
+    },
+    {
+      "start": "2020-05-10T23:13:25.000Z",
+      "end": "2020-05-11T00:57:53.000Z",
+      "seconds": 6268
+    },
+    {
+      "start": "2020-05-11T19:52:37.000Z",
+      "end": "2020-05-11T22:55:37.000Z",
+      "seconds": 10980
+    },
+    {
+      "start": "2020-05-14T01:18:03.000Z",
+      "end": "2020-05-14T04:35:32.000Z",
+      "seconds": 11849
+    },
+    {
+      "start": "2020-05-14T20:02:10.000Z",
+      "end": "2020-05-14T22:51:58.000Z",
+      "seconds": 10188
+    },
+    {
+      "start": "2020-05-14T23:45:59.000Z",
+      "end": "2020-05-15T00:49:04.000Z",
+      "seconds": 3785
+    },
+    {
+      "start": "2020-05-16T23:43:25.000Z",
+      "end": "2020-05-17T01:31:51.000Z",
+      "seconds": 6506
+    },
+    {
+      "start": "2020-05-17T01:46:33.000Z",
+      "end": "2020-05-17T03:52:43.000Z",
+      "seconds": 7570
+    },
+    {
+      "start": "2020-05-17T11:03:36.000Z",
+      "end": "2020-05-17T23:10:01.000Z",
+      "seconds": 43585
+    },
+    {
+      "start": "2020-05-17T23:34:19.000Z",
+      "end": "2020-05-18T00:40:44.000Z",
+      "seconds": 3985
+    },
+    {
+      "start": "2020-05-19T02:40:33.000Z",
+      "end": "2020-05-19T05:58:41.000Z",
+      "seconds": 11888
+    },
+    {
+      "start": "2020-05-20T19:48:20.000Z",
+      "end": "2020-05-20T22:55:17.000Z",
+      "seconds": 11217
+    },
+    {
+      "start": "2020-05-20T23:39:33.000Z",
+      "end": "2020-05-21T05:55:44.000Z",
+      "seconds": 22571
+    },
+    {
+      "start": "2020-05-22T19:54:49.000Z",
+      "end": "2020-05-23T00:05:05.000Z",
+      "seconds": 15016
+    },
+    {
+      "start": "2020-05-24T00:39:23.000Z",
+      "end": "2020-05-25T01:14:14.000Z",
+      "seconds": 88491
+    },
+    {
+      "start": "2020-05-25T20:04:05.000Z",
+      "end": "2020-05-25T23:49:52.000Z",
+      "seconds": 13547
+    },
+    {
+      "start": "2020-05-26T00:04:24.000Z",
+      "end": "2020-05-26T06:01:00.000Z",
+      "seconds": 21396
+    },
+    {
+      "start": "2020-05-29T00:31:05.000Z",
+      "end": "2020-05-29T01:32:59.000Z",
+      "seconds": 3714
+    },
+    {
+      "start": "2020-05-29T02:07:31.000Z",
+      "end": "2020-05-29T04:23:59.000Z",
+      "seconds": 8188
+    },
+    {
+      "start": "2020-05-31T01:05:51.000Z",
+      "end": "2020-05-31T04:30:20.000Z",
+      "seconds": 12269
+    },
+    {
+      "start": "2020-06-02T10:00:05.000Z",
+      "end": "2020-06-02T18:47:39.000Z",
+      "seconds": 31654
+    },
+    {
+      "start": "2020-06-03T19:20:14.000Z",
+      "end": "2020-06-03T21:22:39.000Z",
+      "seconds": 7345
+    },
+    {
+      "start": "2020-06-06T15:55:17.000Z",
+      "end": "2020-06-06T19:42:19.000Z",
+      "seconds": 13622
+    },
+    {
+      "start": "2020-06-07T14:19:39.000Z",
+      "end": "2020-06-08T11:48:04.000Z",
+      "seconds": 77305
+    },
+    {
+      "start": "2020-06-09T20:03:34.000Z",
+      "end": "2020-06-10T01:02:17.000Z",
+      "seconds": 17923
+    },
+    {
+      "start": "2020-06-10T22:57:28.000Z",
+      "end": "2020-06-11T00:38:47.000Z",
+      "seconds": 6079
+    },
+    {
+      "start": "2020-06-11T23:51:10.000Z",
+      "end": "2020-06-12T00:55:02.000Z",
+      "seconds": 3832
+    },
+    {
+      "start": "2020-06-14T23:54:39.000Z",
+      "end": "2020-06-15T00:59:00.000Z",
+      "seconds": 3861
+    },
+    {
+      "start": "2020-06-16T19:45:57.000Z",
+      "end": "2020-06-16T21:05:43.000Z",
+      "seconds": 4786
+    },
+    {
+      "start": "2020-06-17T09:43:35.000Z",
+      "end": "2020-06-17T11:22:37.000Z",
+      "seconds": 5942
+    },
+    {
+      "start": "2020-06-17T15:35:10.000Z",
+      "end": "2020-06-17T21:15:02.000Z",
+      "seconds": 20392
+    },
+    {
+      "start": "2020-06-17T21:44:26.000Z",
+      "end": "2020-06-18T04:57:54.000Z",
+      "seconds": 26008
+    },
+    {
+      "start": "2020-06-21T00:31:44.000Z",
+      "end": "2020-06-21T01:32:53.000Z",
+      "seconds": 3669
+    },
+    {
+      "start": "2020-06-21T02:12:22.000Z",
+      "end": "2020-06-21T04:27:26.000Z",
+      "seconds": 8104
+    },
+    {
+      "start": "2020-06-22T00:34:50.000Z",
+      "end": "2020-06-22T02:43:01.000Z",
+      "seconds": 7691
+    },
+    {
+      "start": "2020-06-27T08:11:25.000Z",
+      "end": "2020-06-27T10:02:49.000Z",
+      "seconds": 6684
+    },
+    {
+      "start": "2020-06-27T10:53:07.000Z",
+      "end": "2020-06-28T23:07:43.000Z",
+      "seconds": 130476
+    },
+    {
+      "start": "2020-07-06T07:12:53.000Z",
+      "end": "2020-07-06T09:33:30.000Z",
+      "seconds": 8437
+    },
+    {
+      "start": "2020-07-06T10:03:04.000Z",
+      "end": "2020-07-06T15:26:55.000Z",
+      "seconds": 19431
+    },
+    {
+      "start": "2020-07-07T07:13:03.000Z",
+      "end": "2020-07-07T11:06:14.000Z",
+      "seconds": 13991
+    },
+    {
+      "start": "2020-07-07T15:24:51.000Z",
+      "end": "2020-07-08T15:20:51.000Z",
+      "seconds": 86160
+    },
+    {
+      "start": "2020-07-09T20:01:18.000Z",
+      "end": "2020-07-09T23:19:22.000Z",
+      "seconds": 11884
+    },
+    {
+      "start": "2020-07-10T20:02:29.000Z",
+      "end": "2020-07-10T23:41:16.000Z",
+      "seconds": 13127
+    },
+    {
+      "start": "2020-07-11T00:30:30.000Z",
+      "end": "2020-07-11T05:32:40.000Z",
+      "seconds": 18130
+    },
+    {
+      "start": "2020-07-11T19:34:34.000Z",
+      "end": "2020-07-12T01:02:40.000Z",
+      "seconds": 19686
+    },
+    {
+      "start": "2020-07-12T01:07:28.000Z",
+      "end": "2020-07-12T04:38:09.000Z",
+      "seconds": 12641
+    },
+    {
+      "start": "2020-07-12T19:59:38.000Z",
+      "end": "2020-07-13T01:35:36.000Z",
+      "seconds": 20158
+    },
+    {
+      "start": "2020-07-13T12:59:05.000Z",
+      "end": "2020-07-13T14:44:15.000Z",
+      "seconds": 6310
+    },
+    {
+      "start": "2020-07-14T07:16:37.000Z",
+      "end": "2020-07-14T21:28:05.000Z",
+      "seconds": 51088
+    },
+    {
+      "start": "2020-07-17T01:19:17.000Z",
+      "end": "2020-07-17T04:36:13.000Z",
+      "seconds": 11816
+    },
+    {
+      "start": "2020-07-23T20:02:56.000Z",
+      "end": "2020-07-24T01:00:31.000Z",
+      "seconds": 17855
+    },
+    {
+      "start": "2020-07-24T20:00:06.000Z",
+      "end": "2020-07-25T00:07:08.000Z",
+      "seconds": 14822
+    },
+    {
+      "start": "2020-07-25T00:11:55.000Z",
+      "end": "2020-07-25T02:45:19.000Z",
+      "seconds": 9204
+    },
+    {
+      "start": "2020-07-25T19:31:05.000Z",
+      "end": "2020-07-26T01:17:39.000Z",
+      "seconds": 20794
+    },
+    {
+      "start": "2020-07-26T01:27:24.000Z",
+      "end": "2020-07-26T04:40:01.000Z",
+      "seconds": 11557
+    },
+    {
+      "start": "2020-07-26T23:12:51.000Z",
+      "end": "2020-07-27T03:36:37.000Z",
+      "seconds": 15826
+    },
+    {
+      "start": "2020-07-28T01:11:40.000Z",
+      "end": "2020-07-28T03:16:14.000Z",
+      "seconds": 7474
+    },
+    {
+      "start": "2020-07-28T20:22:03.000Z",
+      "end": "2020-07-28T22:55:48.000Z",
+      "seconds": 9225
+    },
+    {
+      "start": "2020-07-29T02:32:27.000Z",
+      "end": "2020-07-29T05:03:41.000Z",
+      "seconds": 9074
+    },
+    {
+      "start": "2020-07-30T19:58:57.000Z",
+      "end": "2020-07-30T23:27:10.000Z",
+      "seconds": 12493
+    },
+    {
+      "start": "2020-07-31T02:09:04.000Z",
+      "end": "2020-07-31T05:57:50.000Z",
+      "seconds": 13726
+    },
+    {
+      "start": "2020-08-02T20:34:30.000Z",
+      "end": "2020-08-03T09:01:16.000Z",
+      "seconds": 44806
+    },
+    {
+      "start": "2020-08-03T10:25:10.000Z",
+      "end": "2020-08-03T13:39:10.000Z",
+      "seconds": 11640
+    },
+    {
+      "start": "2020-08-04T07:42:28.000Z",
+      "end": "2020-08-05T08:23:01.000Z",
+      "seconds": 88833
+    },
+    {
+      "start": "2020-08-08T07:46:13.000Z",
+      "end": "2020-08-08T09:59:41.000Z",
+      "seconds": 8008
+    },
+    {
+      "start": "2020-08-09T01:42:54.000Z",
+      "end": "2020-08-09T02:58:10.000Z",
+      "seconds": 4516
+    },
+    {
+      "start": "2020-08-09T03:02:58.000Z",
+      "end": "2020-08-09T04:37:52.000Z",
+      "seconds": 5694
+    },
+    {
+      "start": "2020-08-11T20:13:31.000Z",
+      "end": "2020-08-12T00:33:54.000Z",
+      "seconds": 15623
+    },
+    {
+      "start": "2020-08-14T19:51:06.000Z",
+      "end": "2020-08-15T00:24:14.000Z",
+      "seconds": 16388
+    },
+    {
+      "start": "2020-08-15T19:30:42.000Z",
+      "end": "2020-08-16T02:51:25.000Z",
+      "seconds": 26443
+    },
+    {
+      "start": "2020-08-16T19:57:00.000Z",
+      "end": "2020-08-17T01:35:15.000Z",
+      "seconds": 20295
+    },
+    {
+      "start": "2020-08-19T19:53:18.000Z",
+      "end": "2020-08-19T23:27:18.000Z",
+      "seconds": 12840
+    },
+    {
+      "start": "2020-08-20T00:06:48.000Z",
+      "end": "2020-08-20T05:44:43.000Z",
+      "seconds": 20275
+    },
+    {
+      "start": "2020-08-20T22:08:18.000Z",
+      "end": "2020-08-21T03:35:14.000Z",
+      "seconds": 19616
+    },
+    {
+      "start": "2020-08-22T19:11:44.000Z",
+      "end": "2020-08-23T18:51:01.000Z",
+      "seconds": 85157
+    },
+    {
+      "start": "2020-08-24T23:50:34.000Z",
+      "end": "2020-08-25T00:51:11.000Z",
+      "seconds": 3637
+    },
+    {
+      "start": "2020-08-25T19:48:24.000Z",
+      "end": "2020-08-26T00:57:44.000Z",
+      "seconds": 18560
+    },
+    {
+      "start": "2020-08-26T01:07:29.000Z",
+      "end": "2020-08-26T02:18:51.000Z",
+      "seconds": 4282
+    },
+    {
+      "start": "2020-08-27T20:01:47.000Z",
+      "end": "2020-08-27T23:11:29.000Z",
+      "seconds": 11382
+    },
+    {
+      "start": "2020-08-27T23:21:14.000Z",
+      "end": "2020-08-28T01:11:39.000Z",
+      "seconds": 6625
+    },
+    {
+      "start": "2020-08-29T01:08:17.000Z",
+      "end": "2020-08-29T04:55:08.000Z",
+      "seconds": 13611
+    },
+    {
+      "start": "2020-08-30T00:41:00.000Z",
+      "end": "2020-08-30T04:26:10.000Z",
+      "seconds": 13510
+    },
+    {
+      "start": "2020-08-31T00:30:23.000Z",
+      "end": "2020-08-31T01:49:32.000Z",
+      "seconds": 4749
+    },
+    {
+      "start": "2020-08-31T20:15:10.000Z",
+      "end": "2020-09-01T00:37:33.000Z",
+      "seconds": 15743
+    },
+    {
+      "start": "2020-09-01T00:42:20.000Z",
+      "end": "2020-09-01T02:37:24.000Z",
+      "seconds": 6904
+    }
+  ]
+}

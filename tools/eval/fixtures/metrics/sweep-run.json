@@ -1,0 +1,137 @@
+{
+  "schema": "urn:fdp:eval:metrics-sweep-fixture:v1",
+  "id": "sweep_three_episodes",
+  "note": "Six decisions across three episodes on the dev split, with the tickets the run itself opened at (0.85, 0.60). The sweep row at those thresholds must reproduce them exactly.",
+  "run": {
+    "split": "dev",
+    "thresholds": { "ticket_min": 0.85, "review_min": 0.6 },
+    "covered_machine_days": 1,
+    "negative_machine_days": 0.75,
+    "benign_fault_ids": [],
+    "excluded": [],
+    "windows": [
+      {
+        "id": "inj-oil-cooler-0200",
+        "from": "2020-02-03T02:00:00.000Z",
+        "to": "2020-02-03T08:00:00.000Z",
+        "lead_from": "2020-02-03T02:00:00.000Z",
+        "accepted": ["oil_cooler_fouling"],
+        "benign": false,
+        "onset": "2020-02-03T02:00:00.000Z",
+        "onset_known": true,
+        "headline": false
+      }
+    ],
+    "episodes": [
+      {
+        "episode_id": "e-401",
+        "decisions": [
+          {
+            "decision_id": "d-401",
+            "episode_id": "e-401",
+            "sim_ts": "2020-02-03T02:30:00.000Z",
+            "choice": "oil_cooler_fouling",
+            "confidence": 0.62,
+            "gate": "review",
+            "abstained": false,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          },
+          {
+            "decision_id": "d-402",
+            "episode_id": "e-401",
+            "sim_ts": "2020-02-03T03:00:00.000Z",
+            "choice": "oil_cooler_fouling",
+            "confidence": 0.88,
+            "gate": "ticket",
+            "abstained": false,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          }
+        ]
+      },
+      {
+        "episode_id": "e-402",
+        "decisions": [
+          {
+            "decision_id": "d-403",
+            "episode_id": "e-402",
+            "sim_ts": "2020-02-03T04:00:00.000Z",
+            "choice": "air_leak_downstream",
+            "confidence": 0.9,
+            "gate": "ticket",
+            "abstained": false,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          },
+          {
+            "decision_id": "d-404",
+            "episode_id": "e-402",
+            "sim_ts": "2020-02-03T04:30:00.000Z",
+            "choice": "air_leak_downstream",
+            "confidence": 0.91,
+            "gate": "ticket",
+            "abstained": false,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          }
+        ]
+      },
+      {
+        "episode_id": "e-403",
+        "decisions": [
+          {
+            "decision_id": "d-405",
+            "episode_id": "e-403",
+            "sim_ts": "2020-02-03T10:00:00.000Z",
+            "choice": "none_of_these",
+            "confidence": 0.7,
+            "gate": "log",
+            "abstained": true,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          },
+          {
+            "decision_id": "d-406",
+            "episode_id": "e-403",
+            "sim_ts": "2020-02-03T10:30:00.000Z",
+            "choice": "motor_overload",
+            "confidence": 0.55,
+            "gate": "log",
+            "abstained": false,
+            "usage": { "input_tokens": 1200, "output_tokens": 0 },
+            "backend": "jev",
+            "benign_choice": false
+          }
+        ]
+      }
+    ]
+  },
+  "run_tickets": [
+    {
+      "ticket_id": "sweep-e-401",
+      "episode_id": "e-401",
+      "opened_sim_ts": "2020-02-03T02:30:00.000Z",
+      "fault_at_open": "oil_cooler_fouling",
+      "fault_latest": "oil_cooler_fouling",
+      "max_level": "ticket"
+    },
+    {
+      "ticket_id": "sweep-e-402",
+      "episode_id": "e-402",
+      "opened_sim_ts": "2020-02-03T04:00:00.000Z",
+      "fault_at_open": "air_leak_downstream",
+      "fault_latest": "air_leak_downstream",
+      "max_level": "ticket"
+    }
+  ],
+  "grid": [
+    [0.9, 0.7],
+    [0.6, 0.5]
+  ]
+}

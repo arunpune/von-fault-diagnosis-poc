@@ -1,0 +1,299 @@
+/* SPDX-FileCopyrightText: 2026 Meddle S.r.l. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/*
+ * Design tokens of the CAU-7 dashboard.
+ *
+ * A chart recorder with a decision log beside it, in an industrial control-room register:
+ * blue-grey surfaces, one steel primary, amber for attention that is not an error, and the
+ * recorder's series and reference-window colours defined once here for both themes. Colours
+ * are custom properties on :root and .dark (the shadcn convention) mapped into Tailwind through
+ * `@theme inline`, so `bg-card`, `text-muted-foreground`, `stroke-series-oil` and the like
+ * follow the theme class that index.html sets before the first paint.
+ *
+ * Every hue role is fixed; lightness moves a few percent where a pair would miss the contrast
+ * targets (4.5:1 for text, 3:1 for chart lines and badges) on the surfaces it is drawn on. A
+ * check of every pair in both themes moved these:
+ *
+ *   light --primary, --ring  #1D5C9E → #1B5693  white on the 80 % hover fill, 4.34 → 4.64:1
+ *   light --accent-signal,
+ *         --severity-medium  #A65F09 → #9A5808  on the muted and secondary fills, 4.11 → 4.64:1
+ *   light --severity-high    #C9401E → #BE3C1C  on the secondary fill, 4.13 → 4.54:1
+ *   light --series-discharge #5AA7DE → #3493D6  line on the page, 2.40 → 3.05:1
+ *   light --series-ambient   #9AA5AE → #818E9A  line on the page, 2.30 → 3.06:1
+ *   dark  --destructive      #F0665A → #F37A6F  on its own 20 % fill (Reset replay), 4.17 → 4.63:1
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * IBM Plex, self-hosted (OFL-1.1, public/fonts/): the page makes no request outside its own
+ * origin. Sans for everything; Mono only for codes (fault, alarm, rule, ticket, decision and
+ * command ids). index.html preloads the two faces the first paint needs.
+ */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+/*
+ * Type scale, in Tailwind's names: text-xs 0.75rem (axis labels, badge text), text-meta
+ * 0.8125rem (table cells, feed meta), text-sm 0.875rem (body, controls), text-base 1rem (panel
+ * titles), text-xl 1.25rem (sim clock), text-2xl 1.5rem (sheet titles). Weights: 400 body, 500
+ * labels and titles, 600 only for the sim clock and the chosen fault title. Live readouts use
+ * Tailwind's own `tabular-nums` utility so digits do not jitter as values change.
+ */
+@theme inline {
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.25rem;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-accent-signal: var(--accent-signal);
+  --color-accent-signal-foreground: var(--accent-signal-foreground);
+
+  --color-series-line-pressure: var(--series-line-pressure);
+  --color-series-discharge: var(--series-discharge);
+  --color-series-separator: var(--series-separator);
+  --color-series-purge: var(--series-purge);
+  --color-series-oil: var(--series-oil);
+  --color-series-ambient: var(--series-ambient);
+  --color-series-current: var(--series-current);
+
+  --color-state-loaded: var(--state-loaded);
+  --color-state-unloaded: var(--state-unloaded);
+  --color-state-off: var(--state-off);
+
+  --color-overlay-failure: var(--overlay-failure);
+  --color-overlay-failure-line: var(--overlay-failure-line);
+  --color-overlay-excluded: var(--overlay-excluded);
+  --color-overlay-injection: var(--overlay-injection);
+  --color-overlay-injection-line: var(--overlay-injection-line);
+  --color-overlay-marker: var(--overlay-marker);
+
+  --color-severity-low: var(--severity-low);
+  --color-severity-medium: var(--severity-medium);
+  --color-severity-high: var(--severity-high);
+  --color-severity-critical: var(--severity-critical);
+
+  /* Controls get 6 px corners (rounded-lg); smaller radii follow the shadcn scale. */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --radius: 0.375rem;
+
+  --background: #f3f5f7;
+  --foreground: #17222b;
+  --card: #ffffff;
+  --card-foreground: #17222b;
+  --popover: #ffffff;
+  --popover-foreground: #17222b;
+  --primary: #1b5693;
+  --primary-foreground: #ffffff;
+  --secondary: #e6ebf0;
+  --secondary-foreground: #17222b;
+  --muted: #e9edf1;
+  --muted-foreground: #5a6b79;
+  --accent: #e6ebf0;
+  --accent-foreground: #17222b;
+  --destructive: #b42318;
+  --border: #d7dde3;
+  --input: #c3ccd5;
+  --ring: #1b5693;
+
+  --accent-signal: #9a5808;
+  --accent-signal-foreground: #ffffff;
+
+  --series-line-pressure: #1f5fa8;
+  --series-discharge: #3493d6;
+  --series-separator: #1b9e8a;
+  --series-purge: #7c4dbf;
+  --series-oil: #c9641b;
+  --series-ambient: #818e9a;
+  --series-current: #2e8b57;
+
+  --state-loaded: rgb(29 92 158 / 55%);
+  --state-unloaded: rgb(29 92 158 / 22%);
+  --state-off: rgb(140 157 172 / 12%);
+
+  --overlay-failure: rgb(139 58 47 / 14%);
+  --overlay-failure-line: rgb(139 58 47 / 45%);
+  --overlay-excluded: rgb(139 58 47 / 6%);
+  --overlay-injection: rgb(124 77 191 / 14%);
+  --overlay-injection-line: rgb(124 77 191 / 45%);
+  --overlay-marker: #5a6b79;
+
+  --severity-low: #5a6b79;
+  --severity-medium: #9a5808;
+  --severity-high: #be3c1c;
+  --severity-critical: #8f1d1d;
+
+  --chart-1: var(--series-line-pressure);
+  --chart-2: var(--series-discharge);
+  --chart-3: var(--series-separator);
+  --chart-4: var(--series-purge);
+  --chart-5: var(--series-oil);
+}
+
+.dark {
+  --background: #0e1418;
+  --foreground: #e4eaef;
+  --card: #151d24;
+  --card-foreground: #e4eaef;
+  --popover: #151d24;
+  --popover-foreground: #e4eaef;
+  --primary: #78b0ea;
+  --primary-foreground: #0e1418;
+  --secondary: #1e2831;
+  --secondary-foreground: #e4eaef;
+  --muted: #1b242c;
+  --muted-foreground: #8c9dac;
+  --accent: #1e2831;
+  --accent-foreground: #e4eaef;
+  --destructive: #f37a6f;
+  --border: #243039;
+  --input: #2e3b46;
+  --ring: #78b0ea;
+
+  --accent-signal: #e9a23b;
+  --accent-signal-foreground: #0e1418;
+
+  --series-line-pressure: #7cb3f0;
+  --series-discharge: #a9d3f5;
+  --series-separator: #5cd2bf;
+  --series-purge: #b896ec;
+  --series-oil: #f0955a;
+  --series-ambient: #6f7c87;
+  --series-current: #6ccb92;
+
+  --overlay-failure: rgb(224 122 102 / 16%);
+  --overlay-failure-line: rgb(224 122 102 / 50%);
+  --overlay-excluded: rgb(224 122 102 / 8%);
+  --overlay-injection: rgb(184 150 236 / 16%);
+  --overlay-injection-line: rgb(184 150 236 / 50%);
+  --overlay-marker: #8c9dac;
+
+  --severity-low: #8c9dac;
+  --severity-medium: #e9a23b;
+  --severity-high: #f07a5c;
+  --severity-critical: #f26d6d;
+}
+
+/*
+ * Hatched reference bands. The element's own background is the band fill (for example
+ * `bg-overlay-failure`); `hatch` lays 45° lines over it through an SVG pattern mask, in the
+ * colour a `hatch-<colour>` utility names (`hatch-overlay-failure-line`). The pattern is a 6 px
+ * tile with 1.25 px strokes; the recorder's SVG <pattern> in the first lane's <defs> uses the
+ * same geometry, so HTML legend swatches and chart bands look alike.
+ */
+@utility hatch {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: var(--hatch-color, currentColor);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 1l2-2M0 6l6-6M5 7l2-2' stroke='black' stroke-width='1.25'/%3E%3C/svg%3E");
+    mask-size: 6px 6px;
+    mask-repeat: repeat;
+  }
+}
+
+@utility hatch-* {
+  --hatch-color: --value(--color-*);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-sm text-foreground antialiased;
+  }
+}
+
+/*
+ * Motion: the only motion is the alerts feed's "N new" pill and the sheets opening and closing;
+ * people who ask for reduced motion get neither.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

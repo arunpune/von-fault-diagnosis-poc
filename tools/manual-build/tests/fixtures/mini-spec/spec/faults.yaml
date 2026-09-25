@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Mini fixture: three symptom conditions over five causes. Two causes are
+# shared between conditions and one of them is benign, so the troubleshooting
+# templates and the catalog export both see the interesting shapes.
+schema_version: 1
+conditions:
+  - id: oil_temperature_high
+    title: Oil temperature high
+    symptom: The controller shows a high oil temperature message and the unit runs hotter than usual.
+    alarms: [W104, S301]
+    signals: [oil_temperature]
+    causes:
+      - {fault_id: oil_cooler_fouled, likelihood: common}
+      - {fault_id: oil_filter_clogged, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: occasional, note: The unit runs loaded far longer than the reference duty.}
+  - id: low_line_pressure
+    title: Line pressure below setpoint
+    symptom: Line pressure stays below the setpoint even though the unit keeps delivering.
+    alarms: [W120]
+    signals: [line_pressure]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: common}
+      - {fault_id: intake_filter_clogged, likelihood: occasional}
+  - id: frequent_cycling
+    title: Compressor starts and loads too often
+    symptom: The unit loads and unloads far more often than the reference duty suggests.
+    alarms: []
+    signals: [line_pressure, intake_closed]
+    causes:
+      - {fault_id: downstream_air_leak, likelihood: common}
+      - {fault_id: high_air_demand, likelihood: occasional}
+causes:
+  - fault_id: oil_cooler_fouled
+    name: Oil cooler fouled
+    subsystem: cooling
+    benign: false
+    summary: Dust and oil mist on the cooler block stop the cooling air from carrying the heat away.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: any, onset: gradual}
+      - {behaviour: load_cycle_rate, direction: unchanged}
+    checks:
+      - Look at the cooler block and the fan guard for a dust or oil film.
+      - Compare the oil temperature with the ambient temperature over a full load cycle.
+    remedy: Clean the cooler block and the fan guard, then let the unit reach its reference temperature again.
+    parts: []
+    maintenance: []
+    components: [oil_cooler]
+  - fault_id: oil_filter_clogged
+    name: Oil filter clogged
+    subsystem: oil
+    benign: false
+    summary: The filter element restricts the oil flow, so less oil reaches the compression element.
+    signal_moves:
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+    checks:
+      - Read the service hours since the last oil filter change.
+      - Feel the filter housing for an unusual temperature difference.
+    remedy: Fit a new oil filter element and top the oil up to the mark.
+    parts: [oil_filter_element, compressor_oil]
+    maintenance: [oil_change]
+    components: []
+  - fault_id: high_air_demand
+    name: Air demand above the rated delivery
+    subsystem: distribution
+    benign: true
+    summary: The consumers simply ask for more air than the unit can deliver, so the machine itself is sound.
+    signal_moves:
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded}
+      - {behaviour: load_cycle_rate, direction: higher}
+      - {signal: line_pressure, direction: low, phase: loaded, onset: sustained}
+    checks:
+      - Ask the operators whether a new consumer went into service.
+      - Watch the line pressure over a shift and compare it with the reference duty.
+    remedy: Reduce the demand or plan additional compressed-air capacity; no repair is needed on the unit.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: downstream_air_leak
+    name: Leak in the distribution network
+    subsystem: distribution
+    benign: false
+    summary: Air escapes from the pipework behind the reservoirs, so the unit keeps replacing what is lost.
+    signal_moves:
+      - {behaviour: unloaded_pressure_decay, direction: faster}
+      - {behaviour: load_cycle_rate, direction: higher, onset: gradual}
+      - {signal: line_pressure, direction: falls, phase: unloaded, onset: sustained}
+    checks:
+      - Close the isolation valve at the panel and watch whether the pressure still falls.
+      - Walk the distribution network and listen at joints and couplings.
+    remedy: Find and seal the leaking joints, then repeat the pressure-hold check.
+    parts: []
+    maintenance: []
+    components: []
+  - fault_id: intake_filter_clogged
+    name: Air intake filter clogged
+    subsystem: intake_unloading
+    benign: false
+    summary: A blocked intake element throttles the suction side, so the unit delivers less air per loaded run.
+    signal_moves:
+      - {behaviour: loaded_run_duration, direction: longer, phase: loaded, onset: gradual}
+      - {signal: oil_temperature, direction: rises, phase: loaded, onset: gradual}
+    checks:
+      - Inspect the intake element against the light.
+      - Read the service hours since the last intake filter service.
+    remedy: Replace the intake filter element and record the service.
+    parts: [intake_filter_element]
+    maintenance: [daily_checks]
+    components: [intake_valve]

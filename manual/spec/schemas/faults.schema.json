@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:manual:faults:v1",
+  "title": "manual/spec/faults.yaml",
+  "description": "Symptom conditions referencing normalised causes with stable fault ids. See manual/README.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+    "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/condition" }
+    },
+    "causes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/cause" }
+    }
+  },
+  "required": ["schema_version", "conditions", "causes"],
+  "additionalProperties": false,
+  "$defs": {
+    "condition": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "title": { "$ref": "common.schema.json#/$defs/text" },
+        "symptom": { "$ref": "common.schema.json#/$defs/text" },
+        "alarms": { "$ref": "common.schema.json#/$defs/alarm_code_list" },
+        "signals": { "$ref": "common.schema.json#/$defs/identifier_list" },
+        "causes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "fault_id": { "$ref": "common.schema.json#/$defs/identifier" },
+              "likelihood": { "$ref": "common.schema.json#/$defs/likelihood" },
+              "note": { "$ref": "common.schema.json#/$defs/text" }
+            },
+            "required": ["fault_id", "likelihood"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["id", "title", "symptom", "alarms", "signals", "causes"],
+      "additionalProperties": false
+    },
+    "signal_move": {
+      "type": "object",
+      "properties": {
+        "signal": { "$ref": "common.schema.json#/$defs/identifier" },
+        "behaviour": { "$ref": "common.schema.json#/$defs/identifier" },
+        "direction": { "$ref": "common.schema.json#/$defs/direction" },
+        "phase": { "$ref": "common.schema.json#/$defs/move_phase" },
+        "onset": { "$ref": "common.schema.json#/$defs/move_onset" },
+        "note": { "$ref": "common.schema.json#/$defs/text" }
+      },
+      "required": ["direction"],
+      "additionalProperties": false,
+      "oneOf": [
+        { "required": ["signal"], "not": { "required": ["behaviour"] } },
+        { "required": ["behaviour"], "not": { "required": ["signal"] } }
+      ]
+    },
+    "cause": {
+      "type": "object",
+      "properties": {
+        "fault_id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "name": { "$ref": "common.schema.json#/$defs/text" },
+        "subsystem": { "$ref": "common.schema.json#/$defs/subsystem" },
+        "benign": { "type": "boolean" },
+        "summary": { "$ref": "common.schema.json#/$defs/text" },
+        "signal_moves": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/signal_move" }
+        },
+        "checks": { "$ref": "common.schema.json#/$defs/text_list" },
+        "remedy": { "$ref": "common.schema.json#/$defs/text" },
+        "parts": { "$ref": "common.schema.json#/$defs/identifier_list" },
+        "maintenance": { "$ref": "common.schema.json#/$defs/identifier_list" },
+        "components": { "$ref": "common.schema.json#/$defs/identifier_list" },
+        "deprecated": { "type": "boolean" },
+        "successor": { "$ref": "common.schema.json#/$defs/identifier" }
+      },
+      "required": [
+        "fault_id",
+        "name",
+        "subsystem",
+        "benign",
+        "summary",
+        "signal_moves",
+        "checks",
+        "remedy",
+        "parts",
+        "maintenance",
+        "components"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

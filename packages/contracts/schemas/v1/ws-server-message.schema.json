@@ -1,0 +1,378 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:ws-server-message:v1",
+  "title": "Ws server message",
+  "description": "One frame the backend pushes to a browser on GET /ws. The envelope carries the unit and the wall-clock time of the frame; `type` names the channel and `payload` holds the message of that channel. A consumer MUST keep a default branch for an unknown `type`: a minor version of this schema may add one (VERSIONING.md), and the server sends only the types a socket is subscribed to.",
+  "type": "object",
+  "$defs": {
+    "frame_type": {
+      "title": "Frame type",
+      "description": "The eighteen frame types. The same names are the channel names of ws-client-message.",
+      "type": "string",
+      "enum": [
+        "hello",
+        "snapshot",
+        "heartbeat",
+        "telemetry.samples",
+        "telemetry.series",
+        "status.sim",
+        "status.gateway",
+        "status.backend",
+        "event.suspect",
+        "decision",
+        "ticket",
+        "alert.system",
+        "alarm.native",
+        "overlay.catalog",
+        "overlay.injection",
+        "overlay.injection_active",
+        "overlay.marker",
+        "cost.update"
+      ]
+    },
+    "hello_payload": {
+      "title": "Hello payload",
+      "description": "The first frame of every socket. It tells the client which backend answers, which model it calls and which schema major the frames follow; the client rejects a major it does not know.",
+      "type": "object",
+      "properties": {
+        "server_version": {
+          "description": "Version of the backend package that serves this socket.",
+          "type": "string"
+        },
+        "schema_major": {
+          "description": "Major version of the contract the frames follow. Only 1 exists in this proof of concept.",
+          "const": 1
+        },
+        "decision_backend": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" },
+        "model": {
+          "description": "Model identifier of the selected decision backend.",
+          "type": "string"
+        },
+        "unit_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/unit_id" }
+      },
+      "required": ["server_version", "schema_major", "decision_backend", "model", "unit_id"],
+      "additionalProperties": false
+    },
+    "snapshot_payload": {
+      "title": "Snapshot payload",
+      "description": "Everything a freshly connected client needs before the live frames start: the three retained status messages, the newest telemetry sample, the open work and the ground-truth overlay. The client also reads GET /api/status and works without this frame.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "The three retained status messages, each null while none has been received.",
+          "type": "object",
+          "properties": {
+            "sim": {
+              "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:status-sim:v1" }]
+            },
+            "gateway": {
+              "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:status-gateway:v1" }]
+            },
+            "backend": {
+              "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:status-backend:v1" }]
+            }
+          },
+          "required": ["sim", "gateway", "backend"],
+          "additionalProperties": false
+        },
+        "latest_sample": {
+          "description": "The newest decoded sample, null before the first one arrives.",
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:fdp:schema:telemetry-samples:v1#/$defs/sample" }
+          ]
+        },
+        "episodes": {
+          "description": "The open episodes, newest first.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:api-episodes:v1#/$defs/episode" }
+        },
+        "tickets": {
+          "description": "The tickets in the review or open state, newest first.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:ticket:v1" }
+        },
+        "decisions": {
+          "description": "The most recent decisions, newest first.",
+          "type": "array",
+          "maxItems": 50,
+          "items": { "$ref": "urn:fdp:schema:decision:v1" }
+        },
+        "system_alerts": {
+          "description": "The system alerts that are raised right now.",
+          "type": "array",
+          "items": { "$ref": "urn:fdp:schema:alert-system:v1" }
+        },
+        "overlay": {
+          "description": "The retained ground-truth overlay: the catalog the simulator published and the injections running right now.",
+          "type": "object",
+          "properties": {
+            "catalog": {
+              "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:gt-catalog:v1" }]
+            },
+            "active": {
+              "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:gt-injection-active:v1" }]
+            }
+          },
+          "required": ["catalog", "active"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "latest_sample",
+        "episodes",
+        "tickets",
+        "decisions",
+        "system_alerts",
+        "overlay"
+      ],
+      "additionalProperties": false
+    },
+    "heartbeat_payload": {
+      "title": "Heartbeat payload",
+      "description": "The liveness frame the hub sends every ten seconds so a client can tell a quiet unit from a dead socket.",
+      "type": "object",
+      "properties": {
+        "wall_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "sim_ts": {
+          "description": "Data time of the newest sample, null while the replay has produced none.",
+          "oneOf": [{ "type": "null" }, { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }]
+        }
+      },
+      "required": ["wall_ts", "sim_ts"],
+      "additionalProperties": false
+    },
+    "telemetry_series_payload": {
+      "title": "Telemetry series payload",
+      "description": "The decimated chart feed: one frame per flush interval carrying, per tag, the minimum and the maximum of every bucket in time order (digitals carry their 0/1 transitions). The charts are fed from here; telemetry.samples stays a debug channel.",
+      "type": "object",
+      "properties": {
+        "from_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "to_sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" },
+        "bucket_ms": {
+          "description": "Width of one bucket in simulated milliseconds.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "series": {
+          "description": "One entry per tag the socket is charting.",
+          "type": "array",
+          "items": {
+            "title": "Series frame entry",
+            "description": "The points of one tag in this frame.",
+            "type": "object",
+            "properties": {
+              "tag": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+              "points": {
+                "description": "At most two points per bucket and at most sixty-four points per frame, in ascending time order. The tuple is the one api-telemetry-series defines, so the seeded history and the live feed cannot drift apart.",
+                "type": "array",
+                "maxItems": 64,
+                "items": { "$ref": "urn:fdp:schema:api-telemetry-series:v1#/$defs/series_point" }
+              }
+            },
+            "required": ["tag", "points"],
+            "additionalProperties": false
+          }
+        },
+        "last": {
+          "description": "The last value of every tag in this frame, for the numeric readouts beside the charts.",
+          "type": "object",
+          "propertyNames": { "$ref": "urn:fdp:schema:common:v1#/$defs/signal_id" },
+          "additionalProperties": { "$ref": "urn:fdp:schema:common:v1#/$defs/sample_value" }
+        },
+        "discontinuity": {
+          "description": "True when data time jumped inside this frame, so the client breaks its lines here.",
+          "type": "boolean"
+        }
+      },
+      "required": ["from_sim_ts", "to_sim_ts", "bucket_ms", "series", "last", "discontinuity"],
+      "additionalProperties": false
+    },
+    "alarm_native_payload": {
+      "title": "Alarm native payload",
+      "description": "One controller alarm changing state, diffed out of the sample stream by the backend.",
+      "type": "object",
+      "properties": {
+        "code": { "$ref": "urn:fdp:schema:common:v1#/$defs/alarm_code" },
+        "active": {
+          "description": "True when the alarm was raised, false when it cleared.",
+          "type": "boolean"
+        },
+        "sim_ts": { "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts" }
+      },
+      "required": ["code", "active", "sim_ts"],
+      "additionalProperties": false
+    },
+    "cost_update_payload": {
+      "title": "Cost update payload",
+      "description": "The cost ledger row written after a successful decision, with the running totals.",
+      "type": "object",
+      "properties": {
+        "decision_id": { "$ref": "urn:fdp:schema:common:v1#/$defs/uuid" },
+        "cost_usd": {
+          "description": "Cost of this decision in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "total_usd": {
+          "description": "Cost of every decision so far in US dollars.",
+          "type": "number",
+          "minimum": 0
+        },
+        "calls": {
+          "description": "Number of billed decision calls so far.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "backend": { "$ref": "urn:fdp:schema:common:v1#/$defs/decision_backend" }
+      },
+      "required": ["decision_id", "cost_usd", "total_usd", "calls", "backend"],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    { "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" },
+    {
+      "description": "The payload is the one the frame type declares; an unknown type is rejected by the enum above.",
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "hello" },
+            "payload": { "$ref": "#/$defs/hello_payload" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "snapshot" },
+            "payload": { "$ref": "#/$defs/snapshot_payload" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "heartbeat" },
+            "payload": { "$ref": "#/$defs/heartbeat_payload" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "telemetry.samples" },
+            "payload": { "$ref": "urn:fdp:schema:telemetry-samples:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "telemetry.series" },
+            "payload": { "$ref": "#/$defs/telemetry_series_payload" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "status.sim" },
+            "payload": { "$ref": "urn:fdp:schema:status-sim:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "status.gateway" },
+            "payload": { "$ref": "urn:fdp:schema:status-gateway:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "status.backend" },
+            "payload": { "$ref": "urn:fdp:schema:status-backend:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "event.suspect" },
+            "payload": { "$ref": "urn:fdp:schema:suspect-event:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "decision" },
+            "payload": { "$ref": "urn:fdp:schema:decision:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "ticket" },
+            "payload": { "$ref": "urn:fdp:schema:ticket:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "alert.system" },
+            "payload": { "$ref": "urn:fdp:schema:alert-system:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "alarm.native" },
+            "payload": { "$ref": "#/$defs/alarm_native_payload" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "overlay.catalog" },
+            "payload": { "$ref": "urn:fdp:schema:gt-catalog:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "overlay.injection" },
+            "payload": { "$ref": "urn:fdp:schema:gt-injection:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "overlay.injection_active" },
+            "payload": { "$ref": "urn:fdp:schema:gt-injection-active:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "overlay.marker" },
+            "payload": { "$ref": "urn:fdp:schema:gt-marker:v1" }
+          },
+          "required": ["type", "payload"]
+        },
+        {
+          "properties": {
+            "type": { "const": "cost.update" },
+            "payload": { "$ref": "#/$defs/cost_update_payload" }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:ws-server-message:v1" },
+    "type": { "$ref": "#/$defs/frame_type" },
+    "payload": {
+      "description": "The message of the named channel.",
+      "type": "object"
+    }
+  },
+  "required": ["schema", "type", "payload"],
+  "additionalProperties": true
+}

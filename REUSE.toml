@@ -1,0 +1,286 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+#
+# REUSE annotations (REUSE specification 3.3) for files that cannot carry a
+# comment header. Every other file declares its licence with an SPDX header in
+# the file itself; CONTRIBUTING.md states which licence applies to which path.
+#
+# ORDER IS LOAD-BEARING. REUSE resolves a path against the *last* matching
+# [[annotations]] table, so the broad tables must stay above the specific ones:
+#
+#   * a general table appended below the marker (say another "**/*.json" rule)
+#     silently relicenses every specific path above it — the CC-BY-4.0 manual,
+#     catalog, ground-truth and fixture data would become Apache-2.0;
+#   * a specific table inserted above the marker is silently swallowed by the
+#     general tables that follow it.
+#
+# `reuse lint` cannot see either mistake — it only checks that every file is
+# covered — so `fdp-checks reuse-order` guards the marker and a committed
+# expectation table instead. Append new tables below the marker only.
+
+version = 1
+
+# --- general annotations: comment-less project files default to the code licence ---
+
+[[annotations]]
+path = ["**/*.json", "**/*.snap", "**/*.tsbuildinfo", "**/*.csv"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# Lock files and trivial generated state.
+[[annotations]]
+path = ["pnpm-lock.yaml", "uv.lock", "**/go.sum", ".nvmrc", "**/.dockerignore"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC0-1.0"
+
+# Zero-byte directory placeholders.
+[[annotations]]
+path = ["**/.gitkeep"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC0-1.0"
+
+# NOTICE is plain text with no comment syntax; the Apache-2.0 mechanism forbids
+# decorating it. LICENSE and LICENSES/** are exempt by the REUSE specification.
+[[annotations]]
+path = ["NOTICE"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# --- specific annotations: append below this line, never above ---
+
+# Content and data: the manual, the fault catalog and synthetic data are CC BY 4.0 (ground rule 4, CONTRIBUTING.md).
+[[annotations]]
+path = ["data/manual/**", "manual/spec/**", "manual/content/**", "manual/figures/**",
+        "packages/ground-truth/data/**", "tools/eval/fixtures/**", "tools/eval/scenarios/**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Synthetic data: hand-written or generated fixtures that stand in for
+# machine data or catalog content. The code around them stays Apache-2.0.
+[[annotations]]
+path = ["packages/contracts/fixtures/**", "apps/**/test/fixtures/**",
+        "apps/frontend/src/test/fixtures/**", "tools/eval/fixtures/**",
+        "tools/eval/scenarios/**", "tools/init/tests/fixtures/**",
+        "services/modbus/testdata/**", "tools/manual-build/tests/fixtures/**",
+        "manual/tools/tests/fixtures/**", "data/fixtures/*.json"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# MetroPT-3 derived fixtures and statistics keep the upstream authors' copyright (CC BY 4.0,
+# doi:10.24432/C5VW3R). data/metropt3-first-month-stats.json is computed over the CSV by
+# scripts/data/metropt3_stats.py, and JSON carries no comment header.
+[[annotations]]
+path = ["data/fixtures/metropt3-*", "data/SHA256SUMS", "data/metropt3-first-month-stats.json"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The IBM Plex faces the manual PDFs embed, with IBM's licence text beside them.
+[[annotations]]
+path = ["manual/fonts/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2017 IBM Corp. (IBM Plex, Reserved Font Name \"Plex\")"
+SPDX-License-Identifier = "OFL-1.1"
+
+# The manual-build mini fixture's derived bands are MetroPT-3 statistics, so
+# they keep the upstream authors' copyright the way data/fixtures/metropt3-*
+# does. JSON carries no comment header, and the fixture table above names
+# Meddle S.r.l. only, so this one states the credit explicitly.
+[[annotations]]
+path = ["tools/manual-build/tests/fixtures/mini-spec/spec/derived/*.json"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# shadcn/ui component sources copied by its CLI (see
+# apps/frontend/components.json). The copied files carry no SPDX header of
+# their own; the few edited after the CLI keep a comment header naming the
+# edit, and this table keeps LICENSES/MIT.txt referenced.
+[[annotations]]
+path = ["apps/frontend/src/components/ui/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 shadcn"
+SPDX-License-Identifier = "MIT"
+
+# manual/fonts/fonts.json is ours, not IBM's: the fetch script writes it with
+# the release tags and the per-file hashes of the six faces. It must stay below
+# the `manual/fonts/**` table above, which would otherwise make it OFL-1.1.
+[[annotations]]
+path = ["manual/fonts/fonts.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The reference fault catalog `fdp-manual-build export-catalog` writes. It is
+# manual content, not code, and JSON carries no comment header; the
+# `tools/eval/fixtures/**` tables above already say so, and this table states
+# it for the one file the evaluation and the contracts read by name.
+# The catalog prints the normal bands derived from the first MetroPT-3 month,
+# so it keeps the upstream authors' credit beside ours.
+[[annotations]]
+path = ["tools/eval/fixtures/catalog.json"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# JSON Schemas shipped inside the manual-build package. They are code that
+# validates the export, not content, so they must not drift into CC BY 4.0 if
+# a later data table ever matches `tools/manual-build/**`.
+[[annotations]]
+path = ["tools/manual-build/src/fdp_manual_build/schemas/*.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The two-page PDF the pdfplumber-based acceptance checks are unit-tested
+# against. A PDF carries no comment header, and it is synthetic fixture
+# content, not code; the `tools/manual-build/tests/fixtures/**` table above
+# resolves to the same licence, and this table states it for the one binary a
+# reviewer would otherwise have to trace.
+[[annotations]]
+path = ["tools/manual-build/tests/fixtures/pdf/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The committed manual itself: the two rendered PDFs and the build manifest
+# that records which sources and which container they came from. The
+# `data/manual/**` table above resolves to the same licence; this one states
+# it for the three files the demo, the pipeline and CI read by name, because
+# neither a PDF nor a JSON document carries a comment header. The two PDFs
+# print the normal bands derived from the first MetroPT-3 month, so they keep
+# the upstream authors' credit beside ours; the manifest holds only hashes and
+# build facts, so it names Meddle S.r.l. alone.
+[[annotations]]
+path = ["data/manual/cau-7-clean.pdf", "data/manual/cau-7-realistic.pdf"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = ["data/manual/build-manifest.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The contract source of truth: the JSON Schemas, the topic table and
+# the generated TypeScript are code, not content, and must not drift into
+# CC BY 4.0 if a later data table ever matches `packages/contracts/**`. The
+# general `**/*.json` table above already resolves the two JSON classes this
+# way; this table states it for the files every other area reads by name.
+# `packages/contracts/fixtures/**` stays CC-BY-4.0 through the synthetic-data
+# table above — it is deliberately not listed here.
+[[annotations]]
+path = ["packages/contracts/schemas/**", "packages/contracts/topics.json",
+        "packages/contracts/src/generated/**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The ground-truth data. Both files are derivatives of the MetroPT-3
+# dataset — the failure table is generated from statistics computed over the
+# CSV, and the presets name instants in it — so they keep the upstream
+# authors' copyright beside ours, the way `data/fixtures/metropt3-*` does. The
+# `packages/ground-truth/data/**` table above already gives them CC BY 4.0;
+# this one adds the credit, which a JSON file cannot carry in a header.
+# `data/injections.json` is deliberately absent: the injection catalog is
+# synthetic, so the table above keeps it at Meddle S.r.l. alone.
+[[annotations]]
+path = ["packages/ground-truth/data/metropt3-failures.json",
+        "packages/ground-truth/data/presets.json"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The broker's two credential files. They are record-per-line
+# formats with no comment syntax: `mosquitto_passwd -U` hashes every line it
+# reads, so an SPDX header would become a credential named
+# "# SPDX-FileCopyrightText", and Mosquitto's own loader parses `passwd` the
+# same way. They hold the non-secret PoC defaults of the local stack, not
+# secrets.
+[[annotations]]
+path = ["infra/mosquitto/passwd.txt", "infra/mosquitto/passwd"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The embedding pin and the reference vectors behind it. Neither file
+# carries a comment header. `embedding.json` is configuration the backend and
+# init both load, and the fixture is the parity contract both of them assert
+# against in their own test suites — machine-readable inputs to code, not
+# manual or catalog content — so both stay at the code licence. The fixture
+# must be named here because the `packages/contracts/fixtures/**` synthetic-data
+# table above would otherwise make it CC BY 4.0.
+[[annotations]]
+path = ["packages/contracts/embedding.json", "packages/contracts/fixtures/embeddings/*.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The invalid-catalog fixtures the injection loader is tested against.
+# They are synthetic data, not code, and JSON carries no comment header.
+# The `services/modbus/testdata/**` table above covers the module's own testdata
+# directory but not this package-level one, so the general `**/*.json` table
+# would otherwise leave the fixtures at the code licence.
+[[annotations]]
+path = ["services/modbus/internal/injection/testdata/**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# PostgreSQL's english stop list, which the backend's database-free full-text
+# stand-in drops as `to_tsvector('english', …)` does.
+# PostgreSQL takes its stop word files from the Snowball project, which
+# releases them under the 3-clause BSD licence, so the list keeps that
+# copyright; the file's own Apache-2.0 header covers the wrapper around it,
+# hence `aggregate`, as for the shadcn/ui sources above.
+[[annotations]]
+path = ["apps/backend/src/retrieval/english-stop.ts"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2001 Dr Martin Porter", "2002 Richard Boulton"]
+SPDX-License-Identifier = "BSD-3-Clause"
+
+# The IBM Plex faces the UI self-hosts: the four woff2 files taken from
+# the IBM Plex release zips, and IBM's licence text beside them. woff2 carries no
+# comment header, and the licence text stays as IBM wrote it.
+[[annotations]]
+path = ["apps/frontend/public/fonts/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2017 IBM Corp. (IBM Plex, Reserved Font Name \"Plex\")"
+SPDX-License-Identifier = "OFL-1.1"
+
+# The shadcn CLI configuration of the frontend. It is ours, not
+# shadcn's, and the CLI parses it as strict JSON, so it cannot carry a header;
+# the general `**/*.json` table already resolves it this way, and this table
+# states it for the one JSON file that sits beside MIT-licensed sources.
+[[annotations]]
+path = ["apps/frontend/components.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Meddle S.r.l."
+SPDX-License-Identifier = "Apache-2.0"
+
+# The data of the frontend's end-to-end fake backend: the overlay
+# catalog repeats the preset and injection menus and the MetroPT-3 failure
+# table, so it keeps the upstream authors' credit; the register map and the
+# catalog entries beside it are synthetic data. JSON carries no header.
+[[annotations]]
+path = ["apps/frontend/e2e/fake-backend/*.json"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The UI screenshots the README shows: documentation, taken with
+# Playwright from the Compose stack's own dashboard. Their charts draw replayed
+# MetroPT-3 rows, so they keep the upstream authors' credit. PNG carries no
+# comment header.
+[[annotations]]
+path = ["docs/img/*.png"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2021 Narjes Davari, Bruno Veloso, Rita P. Ribeiro, João Gama (MetroPT-3 Dataset, UCI Machine Learning Repository)", "2026 Meddle S.r.l."]
+SPDX-License-Identifier = "CC-BY-4.0"

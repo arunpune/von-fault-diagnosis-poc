@@ -1,0 +1,429 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Programmable parameters of the CTRL-7 controller: the registry of chapter 4.
+# Every threshold that a controller message compares against lives here, so that
+# the message list and the parameter list cannot disagree. The controller refuses
+# a value that violates one of the constraints below.
+# Numbers with a unit belong in min / default / max; the description text refers
+# to other objects through the Jinja namespace of manual/tools/context.py.
+schema_version: 1
+settings:
+  - id: cut_in_pressure
+    param_no: P01
+    name: Cut-in pressure
+    unit: bar
+    type: number
+    min: 5.0
+    default: 8.0
+    max: 9.5
+    step: 0.1
+    access: operator
+    signal: line_pressure
+    description: >-
+      Line pressure at which the controller loads the compressor. Lowering it
+      makes the unit run less often but lets the line fall further between two
+      loaded runs.
+    used_by: [regulation]
+    constraints:
+      - {relation: lte, other: cut_out_pressure, margin: -0.5, text: must stay below the cut-out pressure by at least the regulation margin}
+  - id: cut_out_pressure
+    param_no: P02
+    name: Cut-out pressure
+    unit: bar
+    type: number
+    min: 6.0
+    default: 10.0
+    max: 11.0
+    step: 0.1
+    access: operator
+    signal: line_pressure
+    description: >-
+      Line pressure at which the controller unloads the compressor. Raising it
+      increases the stored energy in the reservoirs and the power the unit draws
+      at the end of a loaded run.
+    used_by: [regulation]
+    constraints:
+      - {relation: gte, other: cut_in_pressure, margin: 0.5, text: must stay above the cut-in pressure by at least the regulation margin}
+      - {relation: lte, other: machine.ratings.max_working_pressure, text: must not exceed the maximum working pressure of the unit}
+  - id: unload_run_on_time
+    param_no: P03
+    name: Unloaded run-on time
+    unit: s
+    type: integer
+    min: 60
+    default: 420
+    max: 900
+    step: 10
+    access: operator
+    description: >-
+      How long the motor keeps running unloaded after the line has reached the
+      cut-out pressure. A longer run-on time answers a new demand without a motor
+      start; a shorter one saves the energy of the unloaded run.
+    used_by: [regulation]
+  - id: restart_delay
+    param_no: P04
+    name: Restart delay
+    unit: s
+    type: integer
+    min: 0
+    default: 30
+    max: 300
+    step: 5
+    access: operator
+    description: >-
+      Minimum time between a motor stop and the next motor start. It protects the
+      motor against a restart while it is still running down.
+    used_by: [regulation]
+  - id: motor_start_mask_time
+    param_no: P05
+    name: Motor start mask time
+    unit: s
+    type: integer
+    min: 5
+    default: 15
+    max: 60
+    step: 1
+    access: operator
+    description: >-
+      Time after a motor start during which the controller ignores the messages
+      that depend on the load. It covers the current peak and the pressure
+      transients of the start.
+    used_by: [alarm_evaluation]
+  - id: max_continuous_load_time
+    param_no: P06
+    name: Maximum continuous load time
+    unit: min
+    type: integer
+    min: 5
+    default: 10
+    max: 60
+    step: 1
+    access: operator
+    description: >-
+      How long the unit may stay loaded without reaching the cut-out pressure
+      before the controller raises {{ ref("alarm:W102") }}. A loaded run that
+      never ends normally points at a demand the unit cannot cover.
+    used_by: [alarm_evaluation]
+  - id: max_starts_per_hour
+    param_no: P07
+    name: Maximum motor starts per hour
+    unit: per_hour
+    type: integer
+    min: 1
+    default: 6
+    max: 12
+    step: 1
+    access: operator
+    description: >-
+      How often the motor may start within a rolling hour before the controller
+      raises {{ ref("alarm:W108") }}. Frequent starts heat the motor windings and
+      wear the contactor.
+    used_by: [alarm_evaluation]
+  - id: low_pressure_alarm_delay
+    param_no: P08
+    name: Low line pressure delay
+    unit: s
+    type: integer
+    min: 0
+    default: 10
+    max: 60
+    step: 1
+    access: operator
+    description: >-
+      How long the low-pressure switch has to stay closed before the controller
+      raises {{ ref("alarm:W101") }}. It suppresses the message during a short
+      demand peak.
+    used_by: [alarm_evaluation]
+  - id: oil_temperature_warning
+    param_no: P09
+    name: Oil temperature warning limit
+    unit: degC
+    type: integer
+    min: 60
+    default: 75
+    max: 90
+    step: 1
+    access: service
+    signal: oil_temperature
+    description: >-
+      Oil temperature above which the controller raises
+      {{ ref("alarm:W104") }}. It is the first stage of the oil temperature
+      chain and leaves time to clean the coolers before the unit stops.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: lt, other: oil_temperature_shutdown_warning, text: must stay below the oil temperature shutdown warning limit}
+  - id: oil_temperature_shutdown_warning
+    param_no: P10
+    name: Oil temperature shutdown warning limit
+    unit: degC
+    type: integer
+    min: 70
+    default: 85
+    max: 100
+    step: 1
+    access: service
+    signal: oil_temperature
+    description: >-
+      Oil temperature above which the controller announces an approaching
+      shutdown with {{ ref("alarm:X201") }}. The unit keeps running at this
+      stage.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: gt, other: oil_temperature_warning, text: must stay above the oil temperature warning limit}
+      - {relation: lt, other: oil_temperature_shutdown, text: must stay below the oil temperature shutdown limit}
+  - id: oil_temperature_shutdown
+    param_no: P11
+    name: Oil temperature shutdown limit
+    unit: degC
+    type: integer
+    min: 80
+    default: 95
+    max: 110
+    step: 1
+    access: service
+    signal: oil_temperature
+    description: >-
+      Oil temperature above which the controller stops the unit with
+      {{ ref("alarm:S301") }} and inhibits a restart until the message is reset.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: gt, other: oil_temperature_shutdown_warning, text: must stay above the oil temperature shutdown warning limit}
+  - id: discharge_pressure_shutdown_warning
+    param_no: P12
+    name: Discharge pressure shutdown warning limit
+    unit: bar
+    type: number
+    min: 10.0
+    default: 11.0
+    max: 11.5
+    step: 0.1
+    access: service
+    signal: discharge_pressure
+    description: >-
+      Discharge pressure above which the controller announces an approaching
+      shutdown with {{ ref("alarm:X202") }}.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: lt, other: discharge_pressure_shutdown, text: must stay below the discharge pressure shutdown limit}
+  - id: discharge_pressure_shutdown
+    param_no: P13
+    name: Discharge pressure shutdown limit
+    unit: bar
+    type: number
+    min: 10.5
+    default: 11.5
+    max: 12.0
+    step: 0.1
+    access: service
+    signal: discharge_pressure
+    description: >-
+      Discharge pressure above which the controller stops the unit with
+      {{ ref("alarm:S302") }}. It is the electronic backup of the safety valve
+      and must stay below it.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: gt, other: discharge_pressure_shutdown_warning, text: must stay above the discharge pressure shutdown warning limit}
+      - {relation: lte, other: machine.ratings.safety_valve_setting, text: must not exceed the setting of the safety valve}
+  - id: motor_current_warning
+    param_no: P14
+    name: Motor current warning limit
+    unit: A
+    type: number
+    min: 6.0
+    default: 7.5
+    max: 9.0
+    step: 0.1
+    access: service
+    signal: motor_current
+    description: >-
+      Motor current above which the controller raises
+      {{ ref("alarm:W106") }} while the unit is loaded. A rising current points
+      at a mechanical load on the airend or at a supply problem.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: lt, other: motor_current_shutdown_warning, text: must stay below the motor current shutdown warning limit}
+  - id: motor_current_shutdown_warning
+    param_no: P15
+    name: Motor current shutdown warning limit
+    unit: A
+    type: number
+    min: 7.0
+    default: 8.5
+    max: 9.5
+    step: 0.1
+    access: service
+    signal: motor_current
+    description: >-
+      Motor current above which the controller announces an approaching shutdown
+      with {{ ref("alarm:X203") }}.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: gt, other: motor_current_warning, text: must stay above the motor current warning limit}
+      - {relation: lt, other: motor_current_shutdown, text: must stay below the motor current shutdown limit}
+  - id: motor_current_shutdown
+    param_no: P16
+    name: Motor current shutdown limit
+    unit: A
+    type: number
+    min: 8.0
+    default: 9.5
+    max: 10.5
+    step: 0.1
+    access: service
+    signal: motor_current
+    description: >-
+      Motor current above which the controller stops the unit with
+      {{ ref("alarm:S303") }}. It complements, and does not replace, the motor
+      protection relay in the starter.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: gt, other: motor_current_shutdown_warning, text: must stay above the motor current shutdown warning limit}
+  - id: motor_current_low_warning
+    param_no: P17
+    name: Motor current low limit
+    unit: A
+    type: number
+    min: 3.0
+    default: 5.0
+    max: 6.0
+    step: 0.1
+    access: service
+    signal: motor_current
+    description: >-
+      Motor current below which the controller raises
+      {{ ref("alarm:W107") }} while the unit is loaded. A loaded run at unloaded
+      current means the airend is not compressing.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: lt, other: motor_current_warning, text: must stay below the motor current warning limit}
+  - id: ambient_temperature_high_warning
+    param_no: P18
+    name: Ambient temperature high limit
+    unit: degC
+    type: integer
+    min: 30
+    default: 40
+    max: 50
+    step: 1
+    access: operator
+    signal: ambient_temperature
+    description: >-
+      Cooling-air temperature above which the controller raises
+      {{ ref("alarm:W109") }}. It mirrors the upper ambient operating limit of
+      the unit, so raising it is only meaningful together with extra ventilation.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: eq, other: machine.limits.ambient_operating.max, text: must equal the upper ambient operating limit of the unit}
+  - id: ambient_temperature_low_warning
+    param_no: P19
+    name: Ambient temperature low limit
+    unit: degC
+    type: integer
+    min: -10
+    default: 2
+    max: 10
+    step: 1
+    access: operator
+    signal: ambient_temperature
+    description: >-
+      Cooling-air temperature below which the controller raises
+      {{ ref("alarm:W110") }}. It mirrors the lower ambient operating limit of
+      the unit, below which condensate in the unit can freeze.
+    used_by: [alarm_evaluation]
+    constraints:
+      - {relation: eq, other: machine.limits.ambient_operating.min, text: must equal the lower ambient operating limit of the unit}
+  - id: dryer_tower_period
+    param_no: P20
+    name: Dryer tower period
+    unit: s
+    type: integer
+    min: 30
+    default: 60
+    max: 300
+    step: 10
+    access: operator
+    description: >-
+      How long one desiccant tower stays in drying service before the controller
+      swaps the towers. A longer period saves purge air but lets the drying tower
+      load up with more moisture.
+    used_by: [dryer]
+  - id: dryer_changeover_timeout
+    param_no: P21
+    name: Dryer changeover timeout
+    unit: s
+    type: integer
+    min: 60
+    default: 180
+    max: 900
+    step: 10
+    access: operator
+    description: >-
+      How long the controller waits for a tower changeover while the unit
+      delivers air before it raises {{ ref("alarm:W111") }}. It has to leave room
+      for a complete tower period plus the changeover itself.
+    used_by: [dryer, alarm_evaluation]
+    constraints:
+      - {relation: gte, other: dryer_tower_period, margin: 60, text: must leave room for at least two complete tower periods}
+  - id: purge_pressure_warning
+    param_no: P22
+    name: Dryer purge pressure warning limit
+    unit: bar
+    type: number
+    min: 0.2
+    default: 0.5
+    max: 2.0
+    step: 0.1
+    access: service
+    signal: dryer_purge_pressure
+    description: >-
+      Purge line pressure above which the controller raises
+      {{ ref("alarm:W103") }}. A purge line that stays pressurised means the
+      regeneration air is not leaving the dryer freely.
+    used_by: [alarm_evaluation]
+  - id: separator_pressure_warning
+    param_no: P23
+    name: Separator discharge pressure warning limit
+    unit: bar
+    type: number
+    min: 0.2
+    default: 0.5
+    max: 2.0
+    step: 0.1
+    access: service
+    signal: separator_discharge_pressure
+    description: >-
+      Separator discharge pressure above which the controller raises
+      {{ ref("alarm:W112") }} while the unit is loaded. The port should be vented
+      by the open drain during a loaded run.
+    used_by: [alarm_evaluation]
+  - id: reservoir_deviation_warning
+    param_no: P24
+    name: Reservoir pressure deviation limit
+    unit: bar
+    type: number
+    min: 0.2
+    default: 0.5
+    max: 2.0
+    step: 0.1
+    access: service
+    description: >-
+      Difference between the reservoir pressure and the line pressure above which
+      the controller raises {{ ref("alarm:W113") }}. A lasting difference points
+      at a restriction between the reservoirs and the pneumatic panel.
+    used_by: [alarm_evaluation]
+  - id: separator_element_dp_warning
+    param_no: P25
+    name: Separator element pressure drop limit
+    unit: bar
+    type: number
+    min: 0.5
+    default: 1.0
+    max: 2.0
+    step: 0.1
+    access: service
+    description: >-
+      Pressure drop across the separator element above which the controller
+      raises {{ ref("alarm:W117") }} while the unit is loaded. A rising drop is
+      the normal ageing signature of the element.
+    used_by: [alarm_evaluation]

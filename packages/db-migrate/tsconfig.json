@@ -1,0 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // Everything this package writes, tests and configuration included, checked
+  // and never emitted: `pnpm run typecheck` and the editor use this file.
+  // `tsconfig.build.json` is the narrower project that emits dist/.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts", "vitest.integration.config.ts"]
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:status-sim:v1",
+  "title": "Status sim",
+  "description": "Replay status of the simulator, published retained on plant/{unit_id}/status/sim once a second and immediately after every change of state or speed. Anonymous browser clients subscribe to this topic, so it says only where the replay cursor sits and how fast it moves; nothing about what the simulator adds on top of the replayed rows ever appears here (ground-truth isolation, docs/architecture.md#ground-truth-isolation).",
+  "type": "object",
+  "allOf": [{ "$ref": "urn:fdp:schema:common:v1#/$defs/envelope" }],
+  "properties": {
+    "schema": { "type": "string", "const": "urn:fdp:schema:status-sim:v1" },
+    "sim_ts": {
+      "description": "Data time the replay cursor sits on.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+    },
+    "state": {
+      "description": "Whether the cursor is stopped, running or held.",
+      "$ref": "urn:fdp:schema:common:v1#/$defs/sim_state"
+    },
+    "speed": {
+      "description": "Simulated seconds per wall-clock second: 1 is real time, 3600 is one hour per second.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600
+    },
+    "head_seq": {
+      "description": "Sequence number of the newest sample in the ring buffer; 0 means no sample has been written yet.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "dataset": {
+      "description": "The replayed rows the cursor moves through.",
+      "type": "object",
+      "properties": {
+        "first_ts": {
+          "description": "Data time of the first row.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+        },
+        "last_ts": {
+          "description": "Data time of the last row.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+        },
+        "rows": {
+          "description": "How many rows the simulator indexed.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "description": "SHA-256 of the replayed file, when the simulator computed one.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source": {
+          "description": "Where the replayed rows come from, such as the file name the simulator opened.",
+          "type": "string"
+        }
+      },
+      "required": ["first_ts", "last_ts", "rows"],
+      "additionalProperties": false
+    },
+    "loop": {
+      "description": "True when the cursor returns to the first row after the last one.",
+      "type": "boolean"
+    },
+    "uptime_s": {
+      "description": "Whole seconds since the simulator process started.",
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": ["schema", "sim_ts", "state", "speed", "head_seq", "dataset", "loop", "uptime_s"],
+  "additionalProperties": true
+}

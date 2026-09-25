@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+
+# Secrets: they come from the environment only
+.env
+.env.*
+!.env.example
+
+# Large or third-party data: no third-party manual and no large file in Git
+data/metropt3/*
+!data/metropt3/.gitkeep
+data/byo-manual/*
+!data/byo-manual/.gitkeep
+data/models/
+# Slices cut from the full CSV at test time, never committed
+data/fixtures/metropt3/
+
+# Recorded model answers for the evaluation harness. They stay out of Git until
+# publishing cached responses is cleared with TypeSafe; CI runs the harness in
+# mock mode, so nothing depends on them being there.
+tools/eval/fixtures/cassettes/
+
+# Local tool state of a contributor's machine (installed skills, their lock
+# file, linked worktrees), not part of the project
+.claude/
+.agents/
+skills-lock.json
+
+# Brand blocklist working copy: plain terms stay out of Git
+tools/blocklist/private/
+
+# Build outputs
+# Host-side caches the CI stack reuses between runs: compose.ci.yaml binds
+# .cache/models as the embedding model cache.
+.cache/
+node_modules/
+dist/
+build/
+out/
+tmp/
+coverage/
+manual/build/
+# The fresh container build acceptance check #9 compares with.
+.rebuild/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.import_linter_cache/
+*.tsbuildinfo
+.eslintcache
+*.log
+reports/*
+!reports/.gitkeep
+playwright-report/
+test-results/
+.worktrees/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store

@@ -1,0 +1,411 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:meta:register-map:v1",
+  "title": "Register map",
+  "description": "Shape of packages/contracts/generated/register-map.json, the canonical Modbus register map generated from manual/spec/{signals,alarms,settings}.yaml. Meta schemas describe configuration files rather than messages, so their $id lives in the urn:fdp:meta namespace and never appears in a message's schema field. The invariants JSON Schema cannot state — offsets unique inside a block, alarm bits unique, the 7/8/1 group counts — are asserted by test/regmap.test.ts.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "description": "Map version; header registers 12 and 13 mirror it and a gateway refuses a foreign major.",
+      "type": "object",
+      "properties": {
+        "major": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "minor": { "type": "integer", "minimum": 0, "maximum": 65535 }
+      },
+      "required": ["major", "minor"],
+      "additionalProperties": false
+    },
+    "source": {
+      "description": "The three input documents with their SHA-256, and whether they were the provisional fixture under packages/contracts/test/fixtures/manual-spec.",
+      "type": "object",
+      "properties": {
+        "signals": { "$ref": "#/$defs/source_path" },
+        "alarms": { "$ref": "#/$defs/source_path" },
+        "settings": { "$ref": "#/$defs/source_path" },
+        "signals_sha256": { "$ref": "#/$defs/sha256" },
+        "alarms_sha256": { "$ref": "#/$defs/sha256" },
+        "settings_sha256": { "$ref": "#/$defs/sha256" },
+        "provisional": { "type": "boolean" }
+      },
+      "required": [
+        "signals",
+        "alarms",
+        "settings",
+        "signals_sha256",
+        "alarms_sha256",
+        "settings_sha256",
+        "provisional"
+      ],
+      "additionalProperties": false
+    },
+    "modbus": {
+      "description": "How the simulator serves the map: one unit, holding registers, high word first.",
+      "type": "object",
+      "properties": {
+        "unit_id": { "type": "integer", "minimum": 1, "maximum": 247 },
+        "function_code": { "type": "integer", "const": 3 },
+        "word_order": { "type": "string", "const": "big_endian_high_word_first" }
+      },
+      "required": ["unit_id", "function_code", "word_order"],
+      "additionalProperties": false
+    },
+    "encoding": {
+      "description": "The value encodings shared by the simulator and the gateway.",
+      "type": "object",
+      "properties": {
+        "analog": { "type": "string", "const": "int16_scaled" },
+        "digital": { "type": "string", "const": "uint16_bool" },
+        "u32": { "type": "string", "const": "two_registers_high_first" },
+        "u64": { "type": "string", "const": "four_registers_high_first" }
+      },
+      "required": ["analog", "digital", "u32", "u64"],
+      "additionalProperties": false
+    },
+    "header": {
+      "description": "The header block at address 0; its fields mirror the constants of internal/regmap/layout.go.",
+      "type": "object",
+      "properties": {
+        "base": { "type": "integer", "const": 0 },
+        "regs": { "type": "integer", "const": 32 },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/register_field" }
+        }
+      },
+      "required": ["base", "regs", "fields"],
+      "additionalProperties": false
+    },
+    "ring": {
+      "description": "Ring-buffer geometry: slot n of sample seq starts at base + (seq mod slots) × slot_regs.",
+      "type": "object",
+      "properties": {
+        "base": { "type": "integer", "const": 1024 },
+        "slots": { "type": "integer", "const": 256 },
+        "slot_regs": { "type": "integer", "const": 32 }
+      },
+      "required": ["base", "slots", "slot_regs"],
+      "additionalProperties": false
+    },
+    "slot": {
+      "description": "The layout view of one ring slot, in ascending offset order: the gateway decodes from it.",
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/register_field" }
+        }
+      },
+      "required": ["fields"],
+      "additionalProperties": false
+    },
+    "signals": {
+      "description": "The consumer-friendly signal view, in signals.yaml order.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/signal" }
+    },
+    "alarms": {
+      "description": "Every message with evaluation: sim, ascending bit.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/alarm" }
+    },
+    "messages_without_bit": {
+      "description": "Every message the simulator does not evaluate, in alarms.yaml order.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/message_without_bit" }
+    }
+  },
+  "required": [
+    "version",
+    "source",
+    "modbus",
+    "encoding",
+    "header",
+    "ring",
+    "slot",
+    "signals",
+    "alarms",
+    "messages_without_bit"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "source_path": {
+      "description": "Repository-relative path of an input document.",
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9._/-]*\\.yaml$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "tag": {
+      "description": "A signal tag: the id of manual/spec/signals.yaml.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "alarm_code": {
+      "description": "A CTRL-7 message code: W, X, S or M followed by three digits.",
+      "type": "string",
+      "pattern": "^[WXSM][0-9]{3}$"
+    },
+    "offset": {
+      "description": "A register offset inside the 32-register header block or ring slot.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31
+    },
+    "register_field": {
+      "title": "Register field",
+      "description": "One field of the header block or of a ring slot, at a fixed offset.",
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "offset": { "$ref": "#/$defs/offset" },
+        "type": { "type": "string", "enum": ["i16", "u16", "u32", "u64"] },
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "minLength": 1 },
+        "signal": { "$ref": "#/$defs/tag" },
+        "enum": {
+          "description": "The meaning of each value of an enumerated register, keyed by the value.",
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "bits": {
+          "description": "The bit index of each named flag of a bit-field register.",
+          "type": "object",
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+          "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 31 }
+        }
+      },
+      "required": ["name", "offset", "type"],
+      "additionalProperties": false
+    },
+    "signal": {
+      "title": "Signal",
+      "description": "One tag of the registry with its slot offset, scale and engineering unit.",
+      "type": "object",
+      "properties": {
+        "tag": { "$ref": "#/$defs/tag" },
+        "label": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "metropt_column": {
+          "description": "The MetroPT-3 CSV header verbatim, or null for a synthetic tag.",
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "group": { "type": "string", "enum": ["analog", "digital", "extra"] },
+        "kind": {
+          "type": "string",
+          "enum": ["pressure", "temperature", "current", "switch", "command", "status"]
+        },
+        "unit": { "type": "string", "enum": ["bar", "degC", "A", "bool"] },
+        "subsystem": { "$ref": "#/$defs/identifier" },
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "offset": { "$ref": "#/$defs/offset" },
+        "range": {
+          "type": "array",
+          "prefixItems": [{ "type": "number" }, { "type": "number" }],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        }
+      },
+      "required": [
+        "tag",
+        "label",
+        "name",
+        "metropt_column",
+        "group",
+        "kind",
+        "unit",
+        "subsystem",
+        "scale",
+        "offset",
+        "range"
+      ],
+      "additionalProperties": false
+    },
+    "trigger_leaf": {
+      "title": "Trigger leaf",
+      "description": "One comparison of a trigger: the branch shape an all/any condition repeats.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["threshold", "digital", "state_duration", "differential", "derived"]
+        },
+        "signal": { "oneOf": [{ "$ref": "#/$defs/tag" }, { "type": "null" }] },
+        "signal_b": { "$ref": "#/$defs/tag" },
+        "op": { "type": "string", "enum": ["", "gt", "lt"] },
+        "threshold": { "type": "number" },
+        "value": { "type": "boolean" },
+        "unit": {
+          "type": "string",
+          "enum": ["", "bar", "degC", "A", "bool", "s", "per_hour", "h"]
+        },
+        "state": { "type": "string", "enum": ["loaded", "unloaded", "off"] },
+        "duration_s": { "type": "integer", "minimum": 0 },
+        "derived": { "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "abs": { "type": "boolean" },
+        "note": { "type": "string" }
+      },
+      "required": ["kind", "signal", "op", "threshold", "unit", "derived", "abs", "note"],
+      "additionalProperties": false
+    },
+    "trigger": {
+      "title": "Trigger",
+      "description": "The evaluation rule of one alarm: a leaf comparison or a one-level all/any composite, plus the manual's state guard, delay, start mask and reset band.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["threshold", "digital", "state_duration", "differential", "derived", "composite"]
+        },
+        "signal": { "oneOf": [{ "$ref": "#/$defs/tag" }, { "type": "null" }] },
+        "signal_b": { "$ref": "#/$defs/tag" },
+        "op": { "type": "string", "enum": ["", "gt", "lt"] },
+        "threshold": { "type": "number" },
+        "value": { "type": "boolean" },
+        "unit": {
+          "type": "string",
+          "enum": ["", "bar", "degC", "A", "bool", "s", "per_hour", "h"]
+        },
+        "state": { "type": "string", "enum": ["loaded", "unloaded", "off"] },
+        "duration_s": { "type": "integer", "minimum": 0 },
+        "when": {
+          "description": "The manual's trigger state verbatim; running is unloaded ∪ loaded.",
+          "type": "string",
+          "enum": ["any", "loaded", "unloaded", "off", "running"]
+        },
+        "delay_s": { "type": "integer", "minimum": 0 },
+        "start_mask_s": { "type": "integer", "minimum": 0 },
+        "hysteresis": { "type": "number", "minimum": 0 },
+        "reset_mode": {
+          "type": "string",
+          "enum": ["auto", "auto_hysteresis", "manual", "manual_service"]
+        },
+        "derived": { "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "abs": { "type": "boolean" },
+        "note": { "type": "string" },
+        "all": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/trigger_leaf" }
+        },
+        "any": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/trigger_leaf" }
+        }
+      },
+      "required": [
+        "kind",
+        "signal",
+        "op",
+        "threshold",
+        "unit",
+        "when",
+        "delay_s",
+        "start_mask_s",
+        "hysteresis",
+        "reset_mode",
+        "derived",
+        "abs",
+        "note"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "A composite carries exactly one branch list; a leaf carries none.",
+          "if": { "properties": { "kind": { "const": "composite" } }, "required": ["kind"] },
+          "then": {
+            "oneOf": [
+              { "properties": { "all": true }, "required": ["all"] },
+              { "properties": { "any": true }, "required": ["any"] }
+            ]
+          },
+          "else": {
+            "allOf": [
+              { "not": { "properties": { "all": true }, "required": ["all"] } },
+              { "not": { "properties": { "any": true }, "required": ["any"] } }
+            ]
+          }
+        },
+        {
+          "description": "A digital trigger names the state its tag must hold.",
+          "if": { "properties": { "kind": { "const": "digital" } }, "required": ["kind"] },
+          "then": { "properties": { "value": true }, "required": ["value"] }
+        },
+        {
+          "description": "A state_duration trigger names the machine state and the number of seconds.",
+          "if": { "properties": { "kind": { "const": "state_duration" } }, "required": ["kind"] },
+          "then": {
+            "properties": { "state": true, "duration_s": true },
+            "required": ["state", "duration_s"]
+          }
+        },
+        {
+          "description": "A differential trigger names both tags.",
+          "if": { "properties": { "kind": { "const": "differential" } }, "required": ["kind"] },
+          "then": { "properties": { "signal_b": true }, "required": ["signal_b"] }
+        }
+      ]
+    },
+    "alarm": {
+      "title": "Alarm",
+      "description": "One message the simulator evaluates into alarm_bits, with its translated trigger and the manual's resolved structured trigger beside it.",
+      "type": "object",
+      "properties": {
+        "code": { "$ref": "#/$defs/alarm_code" },
+        "bit": { "type": "integer", "minimum": 0, "maximum": 31 },
+        "type": {
+          "type": "string",
+          "enum": ["warning", "shutdown_warning", "shutdown", "service"]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "display": { "type": "string", "minLength": 1 },
+        "family": { "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "rank": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+        "trigger": { "$ref": "#/$defs/trigger" },
+        "trigger_source": {
+          "description": "The manual's structured trigger verbatim, with every {setting} reference resolved to its unit and default value, so that a consumer can extend its evaluator without reading the YAML.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "bit",
+        "type",
+        "title",
+        "display",
+        "family",
+        "rank",
+        "trigger",
+        "trigger_source"
+      ],
+      "additionalProperties": false
+    },
+    "message_without_bit": {
+      "title": "Message without bit",
+      "description": "One controller message that the simulator does not evaluate, so it occupies no alarm bit.",
+      "type": "object",
+      "properties": {
+        "code": { "$ref": "#/$defs/alarm_code" },
+        "type": {
+          "type": "string",
+          "enum": ["warning", "shutdown_warning", "shutdown", "service"]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "evaluation": { "type": "string", "enum": ["none", "manual"] }
+      },
+      "required": ["code", "type", "title", "evaluation"],
+      "additionalProperties": false
+    }
+  }
+}

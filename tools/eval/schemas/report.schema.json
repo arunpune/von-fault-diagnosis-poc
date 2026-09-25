@@ -1,0 +1,1255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:eval:report:v1",
+  "title": "Evaluation report",
+  "description": "run.json: one fdp-eval run, its backends, every scenario it replayed against every backend and the scores, the summary per backend and the core-10 gate, the tuning list of a --tuning run and, when the run was started with --exit-eval, every condition of that exit eval (read at detection level since 2026-09-24), when the run replayed the whole recording, its E6 summary, and, when a replayed scenario carries a design target, its reading, which is never gated. Instants are ISO 8601 UTC; a ratio with no denominator is null. No key, header, raw provider body or decision state is ever part of a report: a decision appears with its state_digest only.",
+  "type": "object",
+  "properties": {
+    "schema": { "const": "urn:fdp:eval:report:v1" },
+    "run": { "$ref": "#/$defs/run" },
+    "backends": { "type": "array", "items": { "$ref": "#/$defs/backend" }, "minItems": 1 },
+    "scenarios": { "type": "array", "items": { "$ref": "#/$defs/scenario" }, "minItems": 1 },
+    "summary": { "oneOf": [{ "$ref": "#/$defs/summary" }, { "type": "null" }] },
+    "gate": { "oneOf": [{ "$ref": "#/$defs/gate" }, { "type": "null" }] },
+    "tuning": { "$ref": "#/$defs/tuning" },
+    "exit_eval": { "$ref": "#/$defs/exit_eval" },
+    "full_recording": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/full_recording" },
+      "minItems": 1
+    },
+    "design_targets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/design_reading" },
+      "minItems": 1
+    }
+  },
+  "required": ["schema", "run", "backends", "scenarios", "summary", "gate"],
+  "additionalProperties": false,
+  "$defs": {
+    "instant": { "type": "string", "format": "date-time" },
+    "optional_instant": { "type": ["string", "null"], "format": "date-time" },
+    "ratio": { "type": ["number", "null"] },
+    "count": { "type": "integer", "minimum": 0 },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "backend_mode": { "enum": ["live", "cassette", "mock", "-"] },
+    "level": { "enum": ["ticket", "review"] },
+    "pass_level": { "enum": ["detection", "diagnosis"] },
+    "suspect": {
+      "type": "object",
+      "description": "One suspect event detection raised: what detection level is scored on.",
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "sim_ts": { "$ref": "#/$defs/instant" },
+        "symptom_key": { "type": "string", "minLength": 1 }
+      },
+      "required": ["event_id", "sim_ts", "symptom_key"],
+      "additionalProperties": false
+    },
+    "detection": {
+      "type": "object",
+      "description": "A scenario's suspect events read at detection level: the scored ones (after the warmup), the warmup's, those outside every positive span and excluded window, and each positive window's first suspect event in its credited span [span_from, to) with the budget's deadline.",
+      "properties": {
+        "suspects": { "$ref": "#/$defs/count" },
+        "warmup_suspects": { "$ref": "#/$defs/count" },
+        "outside_windows": { "$ref": "#/$defs/count" },
+        "windows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "window_id": { "type": "string", "minLength": 1 },
+              "headline": { "type": "boolean" },
+              "first_suspect": { "oneOf": [{ "$ref": "#/$defs/suspect" }, { "type": "null" }] },
+              "deadline": { "$ref": "#/$defs/optional_instant" },
+              "detected": { "type": "boolean" }
+            },
+            "required": ["window_id", "headline", "first_suspect", "deadline", "detected"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["suspects", "warmup_suspects", "outside_windows", "windows"],
+      "additionalProperties": false
+    },
+    "design_target": {
+      "type": "object",
+      "description": "The scenario file's design target: the causes a diagnosis of its unlabelled episodes is read against. Reported, never scored or gated.",
+      "properties": {
+        "accepted": { "$ref": "#/$defs/ids" },
+        "provenance": { "type": "string", "minLength": 1 }
+      },
+      "required": ["accepted", "provenance"],
+      "additionalProperties": false
+    },
+    "design_level": {
+      "type": "object",
+      "properties": {
+        "on_target": { "$ref": "#/$defs/count" },
+        "off_target": { "$ref": "#/$defs/count" },
+        "benign": { "$ref": "#/$defs/count" },
+        "outside": { "$ref": "#/$defs/count" },
+        "first": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ticket_id": { "type": "string", "minLength": 1 },
+                "opened_sim_ts": { "$ref": "#/$defs/instant" },
+                "fault_at_open": { "type": "string", "minLength": 1 }
+              },
+              "required": ["ticket_id", "opened_sim_ts", "fault_at_open"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "met": { "type": "boolean" }
+      },
+      "required": ["on_target", "off_target", "benign", "outside", "first", "met"],
+      "additionalProperties": false
+    },
+    "design_reading": {
+      "type": "object",
+      "description": "One pair's tickets and decisions inside its scenario's unlabelled episodes, read against the scenario's design target. A report, never gated: no gate, exit eval, pass rule or threshold selection reads it.",
+      "properties": {
+        "scenario": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+        "backend": { "enum": ["rules", "jev", "llm"] },
+        "gated": { "const": false },
+        "accepted": { "$ref": "#/$defs/ids" },
+        "provenance": { "type": "string", "minLength": 1 },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "$ref": "#/$defs/instant" },
+              "to": { "$ref": "#/$defs/instant" }
+            },
+            "required": ["from", "to"],
+            "additionalProperties": false
+          }
+        },
+        "review": { "$ref": "#/$defs/design_level" },
+        "ticket": { "$ref": "#/$defs/design_level" },
+        "decisions": {
+          "type": "object",
+          "properties": {
+            "total": { "$ref": "#/$defs/count" },
+            "on_target": { "$ref": "#/$defs/count" },
+            "by_choice": { "type": "object", "additionalProperties": { "$ref": "#/$defs/count" } }
+          },
+          "required": ["total", "on_target", "by_choice"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "scenario",
+        "backend",
+        "gated",
+        "accepted",
+        "provenance",
+        "episodes",
+        "review",
+        "ticket",
+        "decisions"
+      ],
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^\\d{8}-\\d{6}-[a-z0-9][a-z0-9_-]*$" },
+        "mode": { "enum": ["in_process", "stack"] },
+        "profile": { "type": "string", "minLength": 1 },
+        "scenario_filter": { "$ref": "#/$defs/ids" },
+        "started_wall_ts": { "$ref": "#/$defs/instant" },
+        "finished_wall_ts": { "$ref": "#/$defs/instant" },
+        "git_sha": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
+        "node": { "type": "string", "minLength": 1 },
+        "backend_version": { "type": "string", "minLength": 1 },
+        "ground_truth": {
+          "type": "object",
+          "properties": {
+            "package_version": { "type": "string", "minLength": 1 },
+            "failures_sha256": { "$ref": "#/$defs/sha256" },
+            "injections_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] }
+          },
+          "required": ["package_version", "failures_sha256", "injections_sha256"],
+          "additionalProperties": false
+        },
+        "catalog": {
+          "type": "object",
+          "description": "The catalog the retriever ranked: reference is the ablation, file:<path> the catalog extracted from the realistic PDF.",
+          "properties": {
+            "source": { "enum": ["reference", "file", "ingested"] },
+            "name": { "type": "string", "pattern": "^(reference|ingested|file:.+)$" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "entries": { "$ref": "#/$defs/count" },
+            "faults": { "$ref": "#/$defs/count" }
+          },
+          "required": ["source", "name", "sha256", "entries", "faults"],
+          "additionalProperties": false
+        },
+        "alarm_registry": {
+          "type": "object",
+          "properties": {
+            "source": { "enum": ["manual", "provisional", "off"] },
+            "sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] }
+          },
+          "required": ["source", "sha256"],
+          "additionalProperties": false
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "ticket_min": {
+              "description": "GATE_TICKET_MIN_CONFIDENCE, the global ticket threshold; a backend with its own pair (jev) states it in backends[].thresholds.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "review_min": {
+              "description": "GATE_REVIEW_MIN_CONFIDENCE, the global review threshold; a backend with its own pair (jev) states it in backends[].thresholds.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_interval_sim_min": { "type": "number", "exclusiveMinimum": 0 },
+            "episode_clear_sim_min": { "type": "number", "exclusiveMinimum": 0 },
+            "persist_sim_min": {
+              "description": "GATE_PERSIST_SIM_MIN: sim minutes of unbroken evidence before an episode that owns no ticket is decided. Absent from reports written before it existed.",
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "ticket_min",
+            "review_min",
+            "decision_interval_sim_min",
+            "episode_clear_sim_min"
+          ],
+          "additionalProperties": false
+        },
+        "rules_disabled": { "$ref": "#/$defs/ids" },
+        "prices": {
+          "type": "object",
+          "properties": {
+            "jev_input_per_mtok": { "type": "number", "minimum": 0 },
+            "llm_input_per_mtok": { "type": "number", "minimum": 0 },
+            "llm_output_per_mtok": { "type": "number", "minimum": 0 },
+            "as_of": { "type": "string", "format": "date" }
+          },
+          "required": ["jev_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
+          "additionalProperties": false
+        },
+        "seed": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "required": [
+        "id",
+        "mode",
+        "profile",
+        "scenario_filter",
+        "started_wall_ts",
+        "finished_wall_ts",
+        "git_sha",
+        "node",
+        "backend_version",
+        "ground_truth",
+        "catalog",
+        "alarm_registry",
+        "thresholds",
+        "rules_disabled",
+        "prices",
+        "seed"
+      ],
+      "additionalProperties": false
+    },
+    "backend": {
+      "type": "object",
+      "properties": {
+        "name": { "enum": ["rules", "jev", "llm"] },
+        "model": { "type": "string", "minLength": 1 },
+        "mode": { "$ref": "#/$defs/backend_mode" },
+        "informative": {
+          "description": "False for a mock column, whose answers say nothing about the model, and for a backend whose every decision failed.",
+          "type": "boolean"
+        },
+        "calls": { "$ref": "#/$defs/count" },
+        "failures": { "$ref": "#/$defs/count" },
+        "failure_reasons": {
+          "description": "Why the failed decisions failed, as '<kind>: <message>' with a count, most frequent first; empty when none did. The message is the backend's own sentence, never a provider body. Optional so that a report written before it existed still validates.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reason": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["reason", "count"],
+            "additionalProperties": false
+          }
+        },
+        "cassette_hits": { "$ref": "#/$defs/count" },
+        "cassette_misses": { "$ref": "#/$defs/count" },
+        "cassette_miss_digests": { "type": "array", "items": { "$ref": "#/$defs/sha256" } },
+        "cassette_reused": {
+          "description": "Cassette hits past the last answer their cassette recorded, answered with that answer again: the recording kept fewer answers of the request than the run asked for, so those decisions need not be the live run's. Optional so that a report written before it existed still validates.",
+          "$ref": "#/$defs/count"
+        },
+        "cassette_resample": {
+          "description": "--resample: which rotation of each repeated request's recorded answers the cassette server served; 0 is the recording's own order. Cassette mode only; optional so that a report written before it existed still validates.",
+          "$ref": "#/$defs/count"
+        },
+        "cassette_answers_max": {
+          "description": "The most recorded answers any cassette the run hit held: how many resamples the recording can give (the pre-registered sweep replays that many). Cassette mode only; optional so that a report written before it existed still validates.",
+          "$ref": "#/$defs/count"
+        },
+        "thresholds": {
+          "description": "The pair the gate applied to this backend's decisions: JEV_GATE_* for jev (0.85 / 0.65 by default, the pre-registered choice; a run made before Jev had its own default pair defaulted each to its GATE_* twin), GATE_* for rules and llm. Optional so that a report written before it existed still validates; run.thresholds then holds the pair every backend used.",
+          "type": "object",
+          "properties": {
+            "ticket_min": { "type": "number", "minimum": 0, "maximum": 1 },
+            "review_min": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["ticket_min", "review_min"],
+          "additionalProperties": false
+        },
+        "rate_limit": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "calls": { "$ref": "#/$defs/count" },
+                "retries": { "$ref": "#/$defs/count" },
+                "waited_ms": { "type": "number", "minimum": 0 }
+              },
+              "required": ["calls", "retries", "waited_ms"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "model",
+        "mode",
+        "informative",
+        "calls",
+        "failures",
+        "cassette_hits",
+        "cassette_misses",
+        "cassette_miss_digests",
+        "rate_limit"
+      ],
+      "additionalProperties": false
+    },
+    "window": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "from": { "$ref": "#/$defs/instant" },
+        "to": { "$ref": "#/$defs/instant" },
+        "lead_from": { "$ref": "#/$defs/instant" },
+        "accepted": { "$ref": "#/$defs/ids" },
+        "benign": { "type": "boolean" },
+        "onset": { "$ref": "#/$defs/optional_instant" },
+        "onset_known": { "type": "boolean" },
+        "native_lps_first": { "$ref": "#/$defs/optional_instant" },
+        "headline": { "type": "boolean" }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "lead_from",
+        "accepted",
+        "benign",
+        "onset",
+        "onset_known",
+        "native_lps_first",
+        "headline"
+      ],
+      "additionalProperties": false
+    },
+    "excluded": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "from": { "$ref": "#/$defs/instant" },
+        "to": { "$ref": "#/$defs/instant" },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["id", "from", "to", "reason"],
+      "additionalProperties": false
+    },
+    "ticket": {
+      "type": "object",
+      "properties": {
+        "ticket_id": { "type": "string", "minLength": 1 },
+        "episode_id": { "type": "string", "minLength": 1 },
+        "opened_sim_ts": { "$ref": "#/$defs/instant" },
+        "fault_at_open": { "type": "string", "minLength": 1 },
+        "fault_latest": { "type": "string", "minLength": 1 },
+        "max_level": { "$ref": "#/$defs/level" },
+        "closed_sim_ts": { "$ref": "#/$defs/optional_instant" },
+        "open_at_end": { "type": "boolean" },
+        "verdict": {
+          "enum": [
+            "tp",
+            "recovered",
+            "duplicate",
+            "misdiagnosed",
+            "fp",
+            "ignored",
+            "benign",
+            "warmup"
+          ]
+        },
+        "window_id": { "type": ["string", "null"] }
+      },
+      "required": [
+        "ticket_id",
+        "episode_id",
+        "opened_sim_ts",
+        "fault_at_open",
+        "fault_latest",
+        "max_level",
+        "closed_sim_ts",
+        "open_at_end",
+        "verdict",
+        "window_id"
+      ],
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "properties": {
+        "input_tokens": { "$ref": "#/$defs/count" },
+        "output_tokens": { "$ref": "#/$defs/count" }
+      },
+      "required": ["input_tokens", "output_tokens"],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "decision_id": { "type": "string", "minLength": 1 },
+        "episode_id": { "type": "string", "minLength": 1 },
+        "sim_ts": { "$ref": "#/$defs/instant" },
+        "choice": { "type": "string", "minLength": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "gate": { "enum": ["ticket", "review", "log"] },
+        "abstained": { "type": "boolean" },
+        "benign_choice": { "type": "boolean" },
+        "usage": { "$ref": "#/$defs/usage" },
+        "backend": { "type": "string", "minLength": 1 },
+        "state_digest": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "persisted_sim_min": {
+          "description": "How long the episode's own symptom had fired without a break when the decision was taken, in sim minutes: the threshold sweep never lets a decision below GATE_PERSIST_SIM_MIN open a ticket. Optional so that a report written before it existed still validates.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "decision_id",
+        "episode_id",
+        "sim_ts",
+        "choice",
+        "confidence",
+        "gate",
+        "abstained",
+        "benign_choice",
+        "usage",
+        "backend",
+        "state_digest"
+      ],
+      "additionalProperties": false
+    },
+    "fault_score": {
+      "type": "object",
+      "properties": {
+        "tp": { "$ref": "#/$defs/count" },
+        "fp": { "$ref": "#/$defs/count" },
+        "fn": { "$ref": "#/$defs/count" },
+        "windows": { "$ref": "#/$defs/count" },
+        "precision": { "$ref": "#/$defs/ratio" },
+        "recall": { "$ref": "#/$defs/ratio" }
+      },
+      "required": ["tp", "fp", "fn", "windows", "precision", "recall"],
+      "additionalProperties": false
+    },
+    "precision_recall": {
+      "type": "object",
+      "properties": {
+        "level": { "$ref": "#/$defs/level" },
+        "per_fault": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/fault_score" }
+        },
+        "micro": { "$ref": "#/$defs/fault_score" },
+        "macro": {
+          "type": "object",
+          "properties": {
+            "precision": { "$ref": "#/$defs/ratio" },
+            "recall": { "$ref": "#/$defs/ratio" },
+            "precision_faults": { "$ref": "#/$defs/count" },
+            "recall_faults": { "$ref": "#/$defs/count" }
+          },
+          "required": ["precision", "recall", "precision_faults", "recall_faults"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["level", "per_fault", "micro", "macro"],
+      "additionalProperties": false
+    },
+    "precision_recall_levels": {
+      "type": "object",
+      "properties": {
+        "ticket": { "$ref": "#/$defs/precision_recall" },
+        "review": { "$ref": "#/$defs/precision_recall" }
+      },
+      "required": ["ticket", "review"],
+      "additionalProperties": false
+    },
+    "match_counts": {
+      "type": "object",
+      "properties": {
+        "tp": { "$ref": "#/$defs/count" },
+        "fp": { "$ref": "#/$defs/count" },
+        "fn": { "$ref": "#/$defs/count" },
+        "misdiagnosed": { "$ref": "#/$defs/count" },
+        "recovered": { "$ref": "#/$defs/count" },
+        "duplicates": { "$ref": "#/$defs/count" },
+        "ignored": { "$ref": "#/$defs/count" },
+        "benign": { "$ref": "#/$defs/count" }
+      },
+      "required": [
+        "tp",
+        "fp",
+        "fn",
+        "misdiagnosed",
+        "recovered",
+        "duplicates",
+        "ignored",
+        "benign"
+      ],
+      "additionalProperties": false
+    },
+    "lead_time": {
+      "type": "object",
+      "properties": {
+        "window_id": { "type": "string", "minLength": 1 },
+        "fault": { "type": "string", "minLength": 1 },
+        "first_correct_ticket": { "$ref": "#/$defs/instant" },
+        "native_code": { "type": ["string", "null"] },
+        "native_first": { "$ref": "#/$defs/optional_instant" },
+        "lead_minutes": { "$ref": "#/$defs/ratio" },
+        "lps_first": { "$ref": "#/$defs/optional_instant" },
+        "lps_lead_minutes": { "$ref": "#/$defs/ratio" },
+        "latency_minutes": { "type": "number" },
+        "qualifier": { "enum": ["", ">="] }
+      },
+      "required": [
+        "window_id",
+        "fault",
+        "first_correct_ticket",
+        "native_code",
+        "native_first",
+        "lead_minutes",
+        "lps_first",
+        "lps_lead_minutes",
+        "latency_minutes",
+        "qualifier"
+      ],
+      "additionalProperties": false
+    },
+    "rates": {
+      "type": "object",
+      "properties": {
+        "tickets": { "$ref": "#/$defs/count" },
+        "false_tickets": { "$ref": "#/$defs/count" },
+        "covered_machine_days": { "type": "number", "minimum": 0 },
+        "negative_machine_days": { "type": "number", "minimum": 0 },
+        "tickets_per_machine_day": { "$ref": "#/$defs/ratio" },
+        "false_tickets_per_machine_day": { "$ref": "#/$defs/ratio" }
+      },
+      "required": [
+        "tickets",
+        "false_tickets",
+        "covered_machine_days",
+        "negative_machine_days",
+        "tickets_per_machine_day",
+        "false_tickets_per_machine_day"
+      ],
+      "additionalProperties": false
+    },
+    "abstention": {
+      "type": "object",
+      "properties": {
+        "correct": { "$ref": "#/$defs/count" },
+        "total": { "$ref": "#/$defs/count" },
+        "accuracy": { "$ref": "#/$defs/ratio" },
+        "decisions": { "$ref": "#/$defs/count" },
+        "explicit": { "$ref": "#/$defs/count" },
+        "explicit_rate": { "$ref": "#/$defs/ratio" },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "correct": { "type": "boolean" },
+              "reasons": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["id", "correct", "reasons"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "correct",
+        "total",
+        "accuracy",
+        "decisions",
+        "explicit",
+        "explicit_rate",
+        "cases"
+      ],
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "minLength": 1 },
+        "usd": { "type": "number", "minimum": 0 },
+        "input_tokens": { "$ref": "#/$defs/count" },
+        "output_tokens": { "$ref": "#/$defs/count" },
+        "calls": { "$ref": "#/$defs/count" },
+        "per_decision": { "$ref": "#/$defs/ratio" },
+        "per_ticket": { "$ref": "#/$defs/ratio" },
+        "prices": {
+          "type": "object",
+          "properties": {
+            "input_per_mtok": { "type": "number", "minimum": 0 },
+            "output_per_mtok": { "type": "number", "minimum": 0 },
+            "as_of": { "type": "string", "format": "date" }
+          },
+          "required": ["input_per_mtok", "output_per_mtok", "as_of"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "backend",
+        "usd",
+        "input_tokens",
+        "output_tokens",
+        "calls",
+        "per_decision",
+        "per_ticket",
+        "prices"
+      ],
+      "additionalProperties": false
+    },
+    "metropt3_check": {
+      "type": "object",
+      "description": "Whether every MetroPT-3 headline failure was detected; always in-sample, because the detection rules were designed after inspecting F1-F4. At ticket or review level a true-positive ticket counts; at detection level a suspect event in the failure's credited span within its budget.",
+      "properties": {
+        "level": { "enum": ["ticket", "review", "detection"] },
+        "detected": { "$ref": "#/$defs/ids" },
+        "missed": { "$ref": "#/$defs/ids" },
+        "pass": { "type": "boolean" },
+        "in_sample": { "const": true }
+      },
+      "required": ["level", "detected", "missed", "pass", "in_sample"],
+      "additionalProperties": false
+    },
+    "gate_counts": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "minLength": 1 },
+        "level": { "$ref": "#/$defs/pass_level" },
+        "scenarios": { "$ref": "#/$defs/ids" },
+        "passed": { "$ref": "#/$defs/count" },
+        "total": { "$ref": "#/$defs/count" },
+        "positives_passed": { "$ref": "#/$defs/count" },
+        "positives_total": { "$ref": "#/$defs/count" },
+        "failed": { "$ref": "#/$defs/ids" },
+        "missing": { "$ref": "#/$defs/ids" },
+        "pass": { "type": "boolean" }
+      },
+      "required": [
+        "backend",
+        "level",
+        "scenarios",
+        "passed",
+        "total",
+        "positives_passed",
+        "positives_total",
+        "failed",
+        "missing",
+        "pass"
+      ],
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+        "title": { "type": "string", "minLength": 1 },
+        "group": {
+          "enum": ["recording_positive", "injected", "negative", "abstain", "diagnostic"]
+        },
+        "split": { "enum": ["dev", "test", "heldout"] },
+        "positive": { "type": "boolean" },
+        "backend": { "enum": ["rules", "jev", "llm"] },
+        "model": { "type": "string", "minLength": 1 },
+        "mode": { "$ref": "#/$defs/backend_mode" },
+        "seed": { "type": "integer", "minimum": 0 },
+        "scored": { "type": "boolean" },
+        "expect": {
+          "type": "object",
+          "properties": {
+            "tickets": { "enum": ["at_least_one", "none"] },
+            "fault": { "enum": ["accepted", "injected", "benign_or_none", "any"] },
+            "within_min": { "type": ["number", "null"], "minimum": 0 },
+            "max_false_tickets": { "$ref": "#/$defs/count" },
+            "pass_level": { "$ref": "#/$defs/pass_level" }
+          },
+          "required": ["tickets", "fault", "within_min", "max_false_tickets", "pass_level"],
+          "additionalProperties": false
+        },
+        "replay": {
+          "type": "object",
+          "properties": {
+            "from": { "$ref": "#/$defs/instant" },
+            "to": { "$ref": "#/$defs/instant" },
+            "samples": { "$ref": "#/$defs/count" },
+            "batches": { "$ref": "#/$defs/count" },
+            "discontinuities": { "$ref": "#/$defs/count" },
+            "covered_machine_days": { "type": "number", "minimum": 0 },
+            "negative_machine_days": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "from",
+            "to",
+            "samples",
+            "batches",
+            "discontinuities",
+            "covered_machine_days",
+            "negative_machine_days"
+          ],
+          "additionalProperties": false
+        },
+        "warmup_min": { "type": "number", "minimum": 0 },
+        "events_file": {
+          "type": "string",
+          "pattern": "^scenarios/[a-z][a-z0-9_]{2,63}\\.(rules|jev|llm)\\.jsonl$"
+        },
+        "windows": { "type": "array", "items": { "$ref": "#/$defs/window" } },
+        "excluded": { "type": "array", "items": { "$ref": "#/$defs/excluded" } },
+        "benign_fault_ids": { "$ref": "#/$defs/ids" },
+        "design_target": { "$ref": "#/$defs/design_target" },
+        "tickets": { "type": "array", "items": { "$ref": "#/$defs/ticket" } },
+        "suspect_events": {
+          "description": "Every suspect event the replay raised, warmup included, so detection level can be re-scored from the report. Optional so that a report written before it existed still validates.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/suspect" }
+        },
+        "decisions": { "type": "array", "items": { "$ref": "#/$defs/decision" } },
+        "decisions_summary": {
+          "type": "object",
+          "properties": {
+            "count": { "$ref": "#/$defs/count" },
+            "failed": { "$ref": "#/$defs/count" },
+            "abstained": { "$ref": "#/$defs/count" },
+            "by_choice": { "type": "object", "additionalProperties": { "$ref": "#/$defs/count" } },
+            "by_gate": {
+              "type": "object",
+              "properties": {
+                "ticket": { "$ref": "#/$defs/count" },
+                "review": { "$ref": "#/$defs/count" },
+                "log": { "$ref": "#/$defs/count" }
+              },
+              "required": ["ticket", "review", "log"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["count", "failed", "abstained", "by_choice", "by_gate"],
+          "additionalProperties": false
+        },
+        "suspects": { "$ref": "#/$defs/count" },
+        "episodes": {
+          "type": "object",
+          "properties": {
+            "opened": { "$ref": "#/$defs/count" },
+            "merged": { "$ref": "#/$defs/count" },
+            "closed": { "$ref": "#/$defs/count" },
+            "aborted": { "$ref": "#/$defs/count" }
+          },
+          "required": ["opened", "merged", "closed", "aborted"],
+          "additionalProperties": false
+        },
+        "alarms": {
+          "type": "object",
+          "properties": {
+            "raised": { "$ref": "#/$defs/count" },
+            "first_by_code": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string", "minLength": 1 },
+                  "sim_ts": { "$ref": "#/$defs/instant" }
+                },
+                "required": ["code", "sim_ts"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["raised", "first_by_code"],
+          "additionalProperties": false
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "match": {
+              "type": "object",
+              "properties": {
+                "ticket": { "$ref": "#/$defs/match_counts" },
+                "review": { "$ref": "#/$defs/match_counts" }
+              },
+              "required": ["ticket", "review"],
+              "additionalProperties": false
+            },
+            "precision_recall": { "$ref": "#/$defs/precision_recall_levels" },
+            "lead_times": { "type": "array", "items": { "$ref": "#/$defs/lead_time" } },
+            "rates": { "$ref": "#/$defs/rates" },
+            "abstention": { "oneOf": [{ "$ref": "#/$defs/abstention" }, { "type": "null" }] },
+            "cost": { "$ref": "#/$defs/cost" },
+            "detection": {
+              "description": "The suspect events read at detection level. Optional so that a report written before it existed still validates.",
+              "$ref": "#/$defs/detection"
+            }
+          },
+          "required": ["match", "precision_recall", "lead_times", "rates", "abstention", "cost"],
+          "additionalProperties": false
+        },
+        "pass": {
+          "type": "object",
+          "description": "detection is the detection level E3 gates (since 2026-09-24): a suspect event in a positive's credited span within its budget, no suspect event on a normal-operation negative, the ticket rule on an abstain case. review_diagnosis is the ticket rule at review-or-ticket level, which a report written before 2026-09-24 carried as detection. diagnosis is review_diagnosis and a correct first ticket-level ticket (E4).",
+          "properties": {
+            "detection": { "type": "boolean" },
+            "review_diagnosis": {
+              "description": "Optional so that a report written before it existed still validates.",
+              "type": "boolean"
+            },
+            "diagnosis": { "type": "boolean" },
+            "reasons": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["detection", "diagnosis", "reasons"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "group",
+        "split",
+        "positive",
+        "backend",
+        "model",
+        "mode",
+        "seed",
+        "scored",
+        "expect",
+        "replay",
+        "warmup_min",
+        "events_file",
+        "windows",
+        "excluded",
+        "benign_fault_ids",
+        "tickets",
+        "decisions",
+        "decisions_summary",
+        "suspects",
+        "episodes",
+        "alarms",
+        "metrics",
+        "pass"
+      ],
+      "additionalProperties": false
+    },
+    "backend_summary": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "minLength": 1 },
+        "scenarios": { "$ref": "#/$defs/count" },
+        "precision_recall": { "$ref": "#/$defs/precision_recall_levels" },
+        "lead_times": { "type": "array", "items": { "$ref": "#/$defs/lead_time" } },
+        "rates": { "$ref": "#/$defs/rates" },
+        "abstention": { "$ref": "#/$defs/abstention" },
+        "cost": { "$ref": "#/$defs/cost" },
+        "metropt3_check": { "$ref": "#/$defs/metropt3_check" },
+        "metropt3_detection": {
+          "description": "The MetroPT-3 check at detection level. Optional so that a report written before it existed still validates.",
+          "$ref": "#/$defs/metropt3_check"
+        },
+        "gate": { "$ref": "#/$defs/gate_counts" }
+      },
+      "required": [
+        "backend",
+        "scenarios",
+        "precision_recall",
+        "lead_times",
+        "rates",
+        "abstention",
+        "cost",
+        "metropt3_check",
+        "gate"
+      ],
+      "additionalProperties": false
+    },
+    "comparison_row": {
+      "type": "object",
+      "properties": {
+        "metric": { "type": "string", "minLength": 1 },
+        "rules": { "$ref": "#/$defs/ratio" },
+        "jev": { "$ref": "#/$defs/ratio" },
+        "llm": { "$ref": "#/$defs/ratio" },
+        "delta": { "$ref": "#/$defs/ratio" },
+        "lower_is_better": { "type": "boolean" }
+      },
+      "required": ["metric", "rules", "jev", "llm", "delta", "lower_is_better"],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "headline_backend": { "type": "string", "minLength": 1 },
+        "core10": { "$ref": "#/$defs/ids" },
+        "backends": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/backend_summary" },
+          "minItems": 1
+        },
+        "comparison": { "type": "array", "items": { "$ref": "#/$defs/comparison_row" } },
+        "metropt3_check": { "$ref": "#/$defs/metropt3_check" }
+      },
+      "required": ["headline_backend", "core10", "backends", "comparison", "metropt3_check"],
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "description": "The headline backend's core-10 gate (at least 8 of 10 and 5 of the 6 positives). A run that scored part of the ten is attainable while its failures leave room for both thresholds. When every decision of the headline backend failed, nothing was scored: the verdict is not_scored, never a pass, with no scenario passed or failed and all ten missing.",
+      "properties": {
+        "backend": { "type": "string", "minLength": 1 },
+        "level": { "$ref": "#/$defs/pass_level" },
+        "enforced": { "type": "boolean" },
+        "complete": { "type": "boolean" },
+        "verdict": { "enum": ["pass", "fail", "attainable", "unattainable", "not_scored"] },
+        "pass": { "type": "boolean" },
+        "passed": { "$ref": "#/$defs/count" },
+        "scored": { "$ref": "#/$defs/count" },
+        "total": { "$ref": "#/$defs/count" },
+        "positives_passed": { "$ref": "#/$defs/count" },
+        "positives_scored": { "$ref": "#/$defs/count" },
+        "positives_total": { "$ref": "#/$defs/count" },
+        "failed": { "$ref": "#/$defs/ids" },
+        "missing": { "$ref": "#/$defs/ids" },
+        "core10": {
+          "type": "object",
+          "properties": {
+            "rules_detection": { "type": ["string", "null"], "pattern": "^\\d+/\\d+$" },
+            "jev_diagnosis": { "type": ["string", "null"], "pattern": "^\\d+/\\d+$" }
+          },
+          "required": ["rules_detection", "jev_diagnosis"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "backend",
+        "level",
+        "enforced",
+        "complete",
+        "verdict",
+        "pass",
+        "passed",
+        "scored",
+        "total",
+        "positives_passed",
+        "positives_scored",
+        "positives_total",
+        "failed",
+        "missing",
+        "core10"
+      ],
+      "additionalProperties": false
+    },
+    "tuning": {
+      "type": "object",
+      "description": "--tuning: the explicit tuning list the run replayed, and every one of its scenarios whose slice a core-10 scenario also replays. A shared slice is reported, never refused: the dev/test split allows the injected scenarios outside the core-10.",
+      "properties": {
+        "scenarios": { "$ref": "#/$defs/ids" },
+        "shared_slices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+              "slice": { "type": "string", "minLength": 1 },
+              "core10": { "$ref": "#/$defs/ids" }
+            },
+            "required": ["scenario", "slice", "core10"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["scenarios", "shared_slices"],
+      "additionalProperties": false
+    },
+    "full_recording": {
+      "type": "object",
+      "description": "E6: one backend's replay of the whole MetroPT-3 recording (the full profile's metropt3_full) read on its own — the in-sample MetroPT-3 check over its headline windows at both levels, false tickets per machine-day over its negative time, and the tickets that opened inside an unlabelled episode, which are listed apart and never counted as false positives.",
+      "properties": {
+        "scenario": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+        "backend": { "type": "string", "minLength": 1 },
+        "replay": {
+          "type": "object",
+          "properties": {
+            "from": { "$ref": "#/$defs/instant" },
+            "to": { "$ref": "#/$defs/instant" }
+          },
+          "required": ["from", "to"],
+          "additionalProperties": false
+        },
+        "metropt3_check": {
+          "type": "object",
+          "properties": {
+            "ticket": { "$ref": "#/$defs/metropt3_check" },
+            "review": { "$ref": "#/$defs/metropt3_check" }
+          },
+          "required": ["ticket", "review"],
+          "additionalProperties": false
+        },
+        "false_tickets": {
+          "type": "object",
+          "properties": {
+            "ticket": { "$ref": "#/$defs/count" },
+            "review": { "$ref": "#/$defs/count" }
+          },
+          "required": ["ticket", "review"],
+          "additionalProperties": false
+        },
+        "covered_machine_days": { "type": "number", "minimum": 0 },
+        "negative_machine_days": { "type": "number", "minimum": 0 },
+        "false_tickets_per_machine_day": {
+          "type": "object",
+          "properties": {
+            "ticket": { "$ref": "#/$defs/ratio" },
+            "review": { "$ref": "#/$defs/ratio" }
+          },
+          "required": ["ticket", "review"],
+          "additionalProperties": false
+        },
+        "unlabelled_detections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ticket_id": { "type": "string", "minLength": 1 },
+              "opened_sim_ts": { "$ref": "#/$defs/instant" },
+              "fault_at_open": { "type": "string", "minLength": 1 },
+              "max_level": { "$ref": "#/$defs/level" },
+              "episode_from": { "$ref": "#/$defs/instant" },
+              "episode_to": { "$ref": "#/$defs/instant" }
+            },
+            "required": [
+              "ticket_id",
+              "opened_sim_ts",
+              "fault_at_open",
+              "max_level",
+              "episode_from",
+              "episode_to"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "scenario",
+        "backend",
+        "replay",
+        "metropt3_check",
+        "false_tickets",
+        "covered_machine_days",
+        "negative_machine_days",
+        "false_tickets_per_machine_day",
+        "unlabelled_detections"
+      ],
+      "additionalProperties": false
+    },
+    "exit_eval_status": { "enum": ["pass", "fail", "not_covered"] },
+    "e3_condition": {
+      "enum": [
+        "core10_counts",
+        "metropt3_check",
+        "negatives_no_suspect",
+        "abstain_non_benign",
+        "depot_no_ticket"
+      ]
+    },
+    "e3_scenario": {
+      "type": "object",
+      "description": "One scenario an E3 condition reads. Only a scenario replayed over its whole range covers it; the tickets (as scenarios[] reports them) or the suspect events are those that break the condition.",
+      "properties": {
+        "scenario": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+        "status": { "$ref": "#/$defs/exit_eval_status" },
+        "replay": { "enum": ["whole", "partial", "none"] },
+        "tickets": { "type": "array", "items": { "$ref": "#/$defs/ticket" } },
+        "suspects": { "type": "array", "items": { "$ref": "#/$defs/suspect" } }
+      },
+      "required": ["scenario", "status", "replay", "tickets", "suspects"],
+      "additionalProperties": false
+    },
+    "e3_negatives": {
+      "type": "object",
+      "properties": {
+        "status": { "$ref": "#/$defs/exit_eval_status" },
+        "scenarios": { "type": "array", "items": { "$ref": "#/$defs/e3_scenario" } }
+      },
+      "required": ["status", "scenarios"],
+      "additionalProperties": false
+    },
+    "e3_metropt3_detection": {
+      "type": "object",
+      "description": "E3's MetroPT-3 condition at detection level: a suspect event in each headline failure's credited span within its budget.",
+      "properties": {
+        "status": { "$ref": "#/$defs/exit_eval_status" },
+        "level": { "const": "detection" },
+        "detected": { "$ref": "#/$defs/ids" },
+        "missed": { "$ref": "#/$defs/ids" },
+        "not_replayed": { "$ref": "#/$defs/ids" },
+        "in_sample": { "const": true }
+      },
+      "required": ["status", "level", "detected", "missed", "not_replayed", "in_sample"],
+      "additionalProperties": false
+    },
+    "e3_metropt3_baseline": {
+      "type": "object",
+      "description": "The rules backend's ticket-level MetroPT-3 check at review-or-ticket level, E3's earlier check: recorded, never gated.",
+      "properties": {
+        "level": { "const": "review" },
+        "detected": { "$ref": "#/$defs/ids" },
+        "missed": { "$ref": "#/$defs/ids" },
+        "not_replayed": { "$ref": "#/$defs/ids" },
+        "in_sample": { "const": true }
+      },
+      "required": ["level", "detected", "missed", "not_replayed", "in_sample"],
+      "additionalProperties": false
+    },
+    "e3_baseline_counts": {
+      "type": "object",
+      "properties": {
+        "level": { "enum": ["review_diagnosis", "diagnosis"] },
+        "passed": { "$ref": "#/$defs/count" },
+        "total": { "$ref": "#/$defs/count" },
+        "positives_passed": { "$ref": "#/$defs/count" },
+        "positives_total": { "$ref": "#/$defs/count" },
+        "failed": { "$ref": "#/$defs/ids" },
+        "not_replayed": { "$ref": "#/$defs/ids" }
+      },
+      "required": [
+        "level",
+        "passed",
+        "total",
+        "positives_passed",
+        "positives_total",
+        "failed",
+        "not_replayed"
+      ],
+      "additionalProperties": false
+    },
+    "exit_eval": {
+      "type": "object",
+      "description": "--exit-eval e3, at detection level since 2026-09-24: every E3 condition the run can see, read from the rules backend, each pass, fail or not_covered with its evidence — the core-10 counts and the MetroPT-3 check at detection level (a suspect event in the credited span within the budget), no suspect event on the normal-operation negatives, no non-benign ticket on the abstain cases and no ticket at all on the depot day. The verdict is fail when a covered condition broke, pass only when every condition was covered and held, and incomplete otherwise; incomplete is never a pass. baseline records the rules backend's diagnosis figures (tickets naming an accepted fault), which never change the verdict.",
+      "properties": {
+        "name": { "const": "e3" },
+        "backend": { "const": "rules" },
+        "verdict": { "enum": ["pass", "fail", "incomplete"] },
+        "failed": { "type": "array", "items": { "$ref": "#/$defs/e3_condition" } },
+        "not_covered": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": { "$ref": "#/$defs/e3_condition" },
+              "missing": { "$ref": "#/$defs/ids" }
+            },
+            "required": ["condition", "missing"],
+            "additionalProperties": false
+          }
+        },
+        "conditions": {
+          "type": "object",
+          "properties": {
+            "core10_counts": {
+              "type": "object",
+              "properties": {
+                "status": { "$ref": "#/$defs/exit_eval_status" },
+                "level": { "const": "detection" },
+                "gate_verdict": { "enum": ["pass", "fail", "attainable", "unattainable"] },
+                "passed": { "$ref": "#/$defs/count" },
+                "total": { "$ref": "#/$defs/count" },
+                "positives_passed": { "$ref": "#/$defs/count" },
+                "positives_total": { "$ref": "#/$defs/count" },
+                "failed": { "$ref": "#/$defs/ids" },
+                "not_replayed": { "$ref": "#/$defs/ids" }
+              },
+              "required": [
+                "status",
+                "level",
+                "gate_verdict",
+                "passed",
+                "total",
+                "positives_passed",
+                "positives_total",
+                "failed",
+                "not_replayed"
+              ],
+              "additionalProperties": false
+            },
+            "metropt3_check": { "$ref": "#/$defs/e3_metropt3_detection" },
+            "negatives_no_suspect": { "$ref": "#/$defs/e3_negatives" },
+            "abstain_non_benign": { "$ref": "#/$defs/e3_negatives" },
+            "depot_no_ticket": { "$ref": "#/$defs/e3_scenario" }
+          },
+          "required": [
+            "core10_counts",
+            "metropt3_check",
+            "negatives_no_suspect",
+            "abstain_non_benign",
+            "depot_no_ticket"
+          ],
+          "additionalProperties": false
+        },
+        "baseline": {
+          "type": "object",
+          "description": "The rules backend's diagnosis figures over the scenarios the check read: the core-10 at review diagnosis and at diagnosis, and the MetroPT-3 check at review-or-ticket level on tickets. Recorded, never gated.",
+          "properties": {
+            "gated": { "const": false },
+            "review_diagnosis": { "$ref": "#/$defs/e3_baseline_counts" },
+            "diagnosis": { "$ref": "#/$defs/e3_baseline_counts" },
+            "metropt3_check": { "$ref": "#/$defs/e3_metropt3_baseline" }
+          },
+          "required": ["gated", "review_diagnosis", "diagnosis", "metropt3_check"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["name", "backend", "verdict", "failed", "not_covered", "conditions", "baseline"],
+      "additionalProperties": false
+    }
+  }
+}

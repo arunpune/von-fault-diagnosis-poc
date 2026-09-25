@@ -1,0 +1,23 @@
+{
+  "name": "@fdp/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "@fdp/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "@fdp/source": "./src/testing.ts",
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    },
+    "./mock": {
+      "@fdp/source": "./src/mock.ts",
+      "types": "./dist/mock.d.ts",
+      "default": "./dist/mock.js"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "type": "subscribe",
+  "channels": ["status.sim", "status.backend", "telemetry.series", "decision", "ticket"]
+}

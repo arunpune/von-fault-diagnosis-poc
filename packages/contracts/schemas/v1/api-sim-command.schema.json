@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-sim-command:v1",
+  "title": "Api sim command",
+  "description": "The body of POST /api/sim/{cmd}. The route fills `cmd` from the path segment before it validates, so the body a client sends is the argument object and the validated document is the pair. The per-command argument definitions below are copied from control-cmd.schema.json and test/ws-api.test.ts asserts the two copies stay deep-equal: the REST body and the MQTT command the backend publishes from it must never drift apart.",
+  "type": "object",
+  "$defs": {
+    "command": {
+      "title": "Command",
+      "description": "What the simulator is asked to do.",
+      "type": "string",
+      "enum": ["play", "pause", "set_speed", "jump", "inject", "clear_injections", "reset"]
+    },
+    "no_args": {
+      "title": "No args",
+      "description": "The empty argument object of play, pause, clear_injections and reset.",
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "set_speed_args": {
+      "title": "Set speed args",
+      "description": "Arguments of set_speed.",
+      "type": "object",
+      "properties": {
+        "speed": {
+          "description": "Simulated seconds per wall-clock second: 1 is real time, 3600 is one hour per second.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      },
+      "required": ["speed"],
+      "additionalProperties": false
+    },
+    "jump_args": {
+      "title": "Jump args",
+      "description": "Arguments of jump: exactly one of a ground-truth preset or a data time. Each alternative is closed, so naming both is rejected.",
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "preset_id": {
+              "description": "Identifier of a replay preset offered in the ground-truth catalog.",
+              "$ref": "urn:fdp:schema:common:v1#/$defs/preset_id"
+            }
+          },
+          "required": ["preset_id"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "sim_ts": {
+              "description": "Data time to jump to; it must lie inside the replayed dataset.",
+              "$ref": "urn:fdp:schema:common:v1#/$defs/iso_ts"
+            }
+          },
+          "required": ["sim_ts"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "inject_args": {
+      "title": "Inject args",
+      "description": "Arguments of inject. Omitted parameters fall back to the values the injection declares in the ground-truth catalog.",
+      "type": "object",
+      "properties": {
+        "injection_id": {
+          "description": "Identifier of a fault injection offered by the simulator.",
+          "$ref": "urn:fdp:schema:common:v1#/$defs/injection_id"
+        },
+        "params": {
+          "description": "Overrides for the strength and the length of the injection.",
+          "type": "object",
+          "properties": {
+            "magnitude": {
+              "description": "Strength of the injection, in the unit the injection declares.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "duration_sim_min": {
+              "description": "Length of the injection in simulated minutes, up to ten simulated days.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 14400
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["injection_id"],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "cmd": { "const": "play" },
+        "args": { "$ref": "#/$defs/no_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "pause" },
+        "args": { "$ref": "#/$defs/no_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "clear_injections" },
+        "args": { "$ref": "#/$defs/no_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "reset" },
+        "args": { "$ref": "#/$defs/no_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "set_speed" },
+        "args": { "$ref": "#/$defs/set_speed_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "jump" },
+        "args": { "$ref": "#/$defs/jump_args" }
+      },
+      "required": ["cmd", "args"]
+    },
+    {
+      "properties": {
+        "cmd": { "const": "inject" },
+        "args": { "$ref": "#/$defs/inject_args" }
+      },
+      "required": ["cmd", "args"]
+    }
+  ],
+  "properties": {
+    "cmd": { "$ref": "#/$defs/command" },
+    "args": {
+      "description": "The arguments of the command; empty for the commands that take none.",
+      "type": "object"
+    }
+  },
+  "required": ["cmd", "args"],
+  "additionalProperties": false
+}

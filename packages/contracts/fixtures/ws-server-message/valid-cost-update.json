@@ -1,0 +1,13 @@
+{
+  "schema": "urn:fdp:schema:ws-server-message:v1",
+  "unit_id": "cau-7",
+  "wall_ts": "2026-06-05T09:41:13.700Z",
+  "type": "cost.update",
+  "payload": {
+    "decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
+    "cost_usd": 0.000077028,
+    "total_usd": 0.003182,
+    "calls": 41,
+    "backend": "jev"
+  }
+}

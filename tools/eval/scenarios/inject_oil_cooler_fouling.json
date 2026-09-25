@@ -1,0 +1,44 @@
+{
+  "schema": "urn:fdp:eval:scenario:v1",
+  "id": "inject_oil_cooler_fouling",
+  "title": "Injected fouled oil cooler on a normal day",
+  "group": "injected",
+  "profiles": ["smoke", "core", "full"],
+  "split": "test",
+  "positive": true,
+  "source": {
+    "kind": "slice",
+    "name": "baseline-feb03"
+  },
+  "replay": {
+    "from": "2020-02-03T00:00:00.000Z",
+    "to": "2020-02-04T00:00:00.000Z",
+    "overrides": {
+      "smoke": {
+        "to": "2020-02-03T10:00:00.000Z"
+      }
+    }
+  },
+  "injections": [
+    {
+      "injection_id": "oil_cooler_fouling",
+      "at": "2020-02-03T02:00:00.000Z",
+      "params": {
+        "magnitude": 1
+      }
+    }
+  ],
+  "ground_truth": {
+    "kind": "injection"
+  },
+  "expect": {
+    "tickets": "at_least_one",
+    "fault": "injected",
+    "within_min": 360,
+    "max_false_tickets": 0,
+    "pass_level": "diagnosis"
+  },
+  "warmup_min": 60,
+  "seed": 17,
+  "notes": "3 February is a plain working day of the first month, so everything the pipeline sees beyond the injection is normal operation. The definition ramps in over 180 minutes and runs for ten hours, so the budget is six hours from the start; the smoke override keeps the ramp and the first two hours of the hold."
+}

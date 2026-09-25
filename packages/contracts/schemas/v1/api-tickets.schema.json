@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fdp:schema:api-tickets:v1",
+  "title": "Api tickets",
+  "description": "The body of GET /api/tickets?status=review|open|resolved|closed|all: one page of ticket messages, newest first. The items are the ticket messages the backend also publishes on the broker, so the list and the live frames carry exactly the same document. `next_cursor` is the opaque token of the next page and is null on the last one.",
+  "type": "object",
+  "properties": {
+    "items": {
+      "description": "The tickets of this page, newest first.",
+      "type": "array",
+      "items": { "$ref": "urn:fdp:schema:ticket:v1" }
+    },
+    "next_cursor": {
+      "description": "Opaque token of the next page, null on the last one.",
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["items", "next_cursor"],
+  "additionalProperties": true
+}

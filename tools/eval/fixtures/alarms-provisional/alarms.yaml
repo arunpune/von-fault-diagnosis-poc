@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC-BY-4.0
+#
+# Provisional CTRL-7 message registry for the evaluation harness, in the
+# manual's trigger grammar (manual/spec/alarms.yaml).
+#
+# Five messages in the manual's own grammar, with the manual's codes and tag
+# ids, so that the port has something to evaluate in a worktree that carries
+# no manual/spec and so that the unit tests have a small table to read. Bit 4 is
+# absent on purpose: W105 is not part of the five, and the bits are the real
+# ones rather than a dense range. A report built from this file marks the
+# registry `provisional`.
+#
+# The last entry is a message the simulator never evaluates; it is here so that
+# the `unevaluable` list of the loader is exercised by the fixture as well.
+schema_version: 1
+alarms:
+  - code: W101
+    type: warning
+    bit: 0
+    evaluation: sim
+    title: Line pressure low
+    display: LINE PRESS LOW
+    trigger:
+      kind: signal
+      state: any
+      condition: { signal: low_pressure_switch, op: eq, threshold: { value: 1, unit: bool } }
+      for_s: { setting: low_pressure_alarm_delay }
+    reset:
+      mode: auto
+  - code: W102
+    type: warning
+    bit: 1
+    evaluation: sim
+    title: Continuous load time exceeded
+    display: CONT LOAD TIME
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        { signal: continuous_load_time, op: gt, threshold: { setting: max_continuous_load_time } }
+      for_s: 0
+    reset:
+      mode: auto
+  - code: W103
+    type: warning
+    bit: 2
+    evaluation: sim
+    title: Dryer purge pressure high
+    display: PURGE PRESS HIGH
+    trigger:
+      kind: signal
+      state: loaded
+      condition:
+        { signal: dryer_purge_pressure, op: gt, threshold: { setting: purge_pressure_warning } }
+      for_s: 60
+    reset:
+      mode: auto_hysteresis
+      hysteresis: { value: 0.1, unit: bar }
+  - code: W104
+    type: warning
+    bit: 3
+    evaluation: sim
+    title: Oil temperature high
+    display: OIL TEMP HIGH
+    trigger:
+      kind: signal
+      state: running
+      condition:
+        { signal: oil_temperature, op: gt, threshold: { setting: oil_temperature_warning } }
+      for_s: 300
+    reset:
+      mode: auto_hysteresis
+      hysteresis: { value: 5, unit: degC }
+  - code: W106
+    type: warning
+    bit: 5
+    evaluation: sim
+    title: Motor current high
+    display: MOTOR CURR HIGH
+    trigger:
+      kind: signal
+      state: loaded
+      exclude_start_s: { setting: motor_start_mask_time }
+      condition: { signal: motor_current, op: gt, threshold: { setting: motor_current_warning } }
+      for_s: 60
+    reset:
+      mode: auto
+  - code: S307
+    type: shutdown
+    bit: null
+    evaluation: none
+    title: Emergency stop activated
+    display: EMERGENCY STOP
+    trigger:
+      kind: external
+      input: emergency_stop_chain
+    reset:
+      mode: manual

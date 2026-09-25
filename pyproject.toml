@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+[project]
+name = "fault-diagnosis-poc"
+version = "0.0.0"
+description = "Virtual uv workspace root: shared dev tooling for the Python packages under tools/"
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[tool.uv]
+package = false
+required-version = ">=0.12.12"
+
+[tool.uv.workspace]
+# Explicit, not a glob: a glob errors on tools/eval, which is a pnpm package.
+# uv silently ignores a listed member that does not exist, so the list can name
+# every Python package of the repository.
+members = ["tools/init", "tools/manual-build", "tools/repo-checks", "tools/blocklist"]
+
+[dependency-groups]
+# `fdp-init[llm]` puts the optional structurer's SDK into the development
+# environment, so `uv sync --all-packages` type-checks and tests
+# `catalog/anthropic_structurer.py`; the image installs the extra itself.
+dev = [
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "ruff==0.16.8",
+  "mypy==2.3.1",
+  "import-linter==2.15",
+  "fdp-init[llm]",
+]
+
+[tool.uv.sources]
+fdp-init = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["tools/*/src", "tools/*/tests"]
+extend-exclude = ["**/generated/**", ".venv", "node_modules", "manual/build"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RUF", "PTH", "PL", "ERA", "S"]
+ignore = ["PLR2004", "S101", "S603", "S607"] # magic numbers in checks, asserts in tests, subprocess with fixed argv
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "PLR"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+# One entry per workspace member.
+packages = ["fdp_init", "fdp_manual_build", "fdp_repo_checks", "fdp_blocklist"]
+warn_unreachable = true
+
+# Untyped runtime dependencies of fdp-init. mypy reads only the root config,
+# so the table lives here.
+[[tool.mypy.overrides]]
+module = [
+  "pdfplumber",
+  "pdfplumber.*",
+  "onnxruntime",
+  "tokenizers",
+  "pg8000",
+  "pg8000.*",
+  "pgvector",
+  "pgvector.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tools"]
+# `make test-py` is the fast gate and must not need Docker, so the default
+# selection drops the `integration` layer; `make test-integration-py` passes
+# `-m integration` on the command line, which replaces this one.
+addopts = "-q -ra --import-mode=importlib -m 'not integration'"
+markers = [
+  "integration: needs Docker (testcontainers); run with -m integration",
+  "network: needs internet",
+  "weasyprint: needs a working WeasyPrint (Pango/Cairo); run with -m weasyprint",
+  "docker: builds or runs a container image; run with -m docker",
+  "sources: reads the real manual/spec sources; run with -m sources",
+]
+
+# The import boundaries on the Python side
+# (docs/architecture.md#import-boundaries). The lists grow with the members.
+# `lint-imports` fails on a listed package that is not importable, so a name
+# only appears once its member exists.
+[tool.importlinter]
+root_packages = ["fdp_init", "fdp_manual_build", "fdp_repo_checks", "fdp_blocklist"]
+
+[[tool.importlinter.contracts]]
+name = "Python tools are independent"
+type = "independence"
+modules = ["fdp_init", "fdp_manual_build", "fdp_repo_checks", "fdp_blocklist"]
+
+[[tool.importlinter.contracts]]
+name = "init never imports evaluation or ground-truth code"
+type = "forbidden"
+source_modules = ["fdp_init"]
+forbidden_modules = ["fdp_manual_build", "fdp_repo_checks", "fdp_blocklist"]

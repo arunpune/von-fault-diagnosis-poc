@@ -1,0 +1,78 @@
+{
+  "benign": true,
+  "checks": [
+    "Read the ambient temperature at the cooling-air inlet and compare it with the operating limits of section 5.2.",
+    "Check that the cooling-air inlet and outlet are clear and that warm outlet air is not being drawn back in.",
+    "Compare the oil temperature with the ambient temperature; when the difference between them is normal, the cooler is doing its job.",
+    "Check whether other equipment in the room has started to give off heat."
+  ],
+  "conditions": [
+    {
+      "alarms": ["W104", "X201", "S301", "W109", "W116", "S306"],
+      "condition_id": "oil_temperature_high",
+      "likelihood": "common",
+      "note": "The room itself is warm; the difference between oil and cooling air is the same as always.",
+      "title": "Oil temperature high"
+    },
+    {
+      "alarms": [],
+      "condition_id": "water_in_air",
+      "likelihood": "occasional",
+      "note": "Warm, humid intake air carries more water into the towers than the regeneration cycle removes.",
+      "title": "Condensate or moisture in the delivered air"
+    }
+  ],
+  "fault_id": "high_ambient_temperature",
+  "maintenance": ["oil_cooler_cleaning"],
+  "manual_ref": {
+    "anchor": "fault:high_ambient_temperature",
+    "section": "8.7",
+    "title": "Oil temperature high"
+  },
+  "name": "Ambient temperature above the operating range",
+  "pages": {
+    "clean": [30, 35],
+    "realistic": [31, 35]
+  },
+  "parts": [],
+  "related_alarms": ["W104", "X201", "S301", "W109", "W116", "S306"],
+  "remedy": "No repair is needed on the unit. Improve the ventilation of the room, duct the warm outlet air away from the intake, or move the heat source. Until the room is put right, monitor the oil temperature and the difference between it and the ambient reading: as long as that difference stays normal, the cooling circuit is sound. Watch the delivered air for moisture as well, because a warm intake loads the dryer more heavily.",
+  "signal_moves": [
+    {
+      "direction": "high",
+      "onset": "sustained",
+      "phase": "any",
+      "signal": "ambient_temperature",
+      "text": "Ambient temperature (T2) is persistently high in every state."
+    },
+    {
+      "direction": "rises",
+      "note": "The difference between oil and cooling air stays as it always was; both simply sit higher.",
+      "onset": "gradual",
+      "phase": "any",
+      "signal": "oil_temperature",
+      "text": "Oil temperature (T1) rises gradually in every state. The difference between oil and cooling air stays as it always was; both simply sit higher."
+    },
+    {
+      "behaviour": "load_cycle_rate",
+      "direction": "unchanged",
+      "text": "How often the compressor loads per hour is unchanged."
+    },
+    {
+      "direction": "unchanged",
+      "note": "Nothing is dragging; this separates a warm room from mechanical wear.",
+      "phase": "loaded",
+      "signal": "motor_current",
+      "text": "Motor current (I1) is unchanged while loaded. Nothing is dragging; this separates a warm room from mechanical wear."
+    }
+  ],
+  "signal_moves_text": [
+    "Ambient temperature (T2) is persistently high in every state.",
+    "Oil temperature (T1) rises gradually in every state. The difference between oil and cooling air stays as it always was; both simply sit higher.",
+    "How often the compressor loads per hour is unchanged.",
+    "Motor current (I1) is unchanged while loaded. Nothing is dragging; this separates a warm room from mechanical wear."
+  ],
+  "source": "yaml",
+  "subsystem": "cooling",
+  "summary": "The cooling air reaching the unit is warmer than the reference conditions allow, so the cooler cannot pull the oil down to its usual temperature. The unit and its cooling circuit are sound; the room around them has changed. Warm air also carries more moisture into the dryer."
+}

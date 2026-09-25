@@ -1,0 +1,24 @@
+{
+  "status": "degraded",
+  "wall_ts": "2026-06-05T09:41:12.000Z",
+  "version": "1.0.0",
+  "backend": {
+    "name": "jev",
+    "model": "jev-1.13.0"
+  },
+  "mqtt": {
+    "diag": "ok",
+    "ops": "down"
+  },
+  "db": {
+    "app": "ok",
+    "gt": "down"
+  },
+  "heartbeats": {
+    "telemetry": "silent",
+    "decision_api": "unknown"
+  },
+  "sim": null,
+  "counters": {},
+  "uptime_s": 12
+}

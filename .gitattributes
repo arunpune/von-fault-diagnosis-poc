@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: CC0-1.0
+
+* text=auto eol=lf
+
+*.pdf binary
+*.ttf binary
+*.woff2 binary
+*.png binary
+*.onnx binary
+
+pnpm-lock.yaml -diff linguist-generated
+uv.lock -diff linguist-generated
+go.sum -diff linguist-generated
+**/generated/** linguist-generated
+
+# Never diff a cut dataset slice: slices are cut locally and gitignored, so this
+# only guards an accidental add.
+data/fixtures/**/*.csv -diff
+
+# The migration runner hashes the bytes of a migration file and refuses to
+# re-apply one whose hash changed (see db/README.md), so a CRLF checkout would
+# make the same commit look edited on another platform. `* text=auto eol=lf`
+# above already normalises them; this states it for the files it matters for.
+db/**/*.sql text eol=lf
