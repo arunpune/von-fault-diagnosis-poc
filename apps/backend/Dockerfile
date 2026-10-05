@@ -11,7 +11,7 @@
 # excludes them from the context, and `pnpm deploy` copies only what the
 # package declares in `files`.
 
-FROM node:24.21.0-trixie-slim AS build
+FROM node:26.10.0-trixie-slim AS build
 RUN corepack enable && corepack prepare pnpm@11.27.0 --activate
 WORKDIR /repo
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
@@ -29,7 +29,7 @@ RUN pnpm install --frozen-lockfile --filter "@fdp/backend..." \
  && pnpm --filter "@fdp/backend..." build \
  && pnpm --filter @fdp/backend deploy --prod --legacy /out
 
-FROM node:24.21.0-trixie-slim
+FROM node:26.10.0-trixie-slim
 ENV NODE_ENV=production PORT=3000
 WORKDIR /app
 COPY --from=build /out .
