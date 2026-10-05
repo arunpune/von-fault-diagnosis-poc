@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The three helpers the rest of the harness builds on: the dataset clock
@@ -106,13 +106,13 @@ describe("redact", () => {
   it("masks every value under a secret-shaped key, however deep", () => {
     const masked = redact({
       TYPESAFE_API_KEY: "sk-real",
-      nested: { token: "t", Authorization: "Bearer x", password: "p", model: "jev-1.13.0" },
+      nested: { token: "t", Authorization: "Bearer x", password: "p", model: "von-1.13.0" },
       list: [{ api_key: "k" }, { profile: "core" }],
     });
 
     expect(masked).toEqual({
       TYPESAFE_API_KEY: REDACTED,
-      nested: { token: REDACTED, Authorization: REDACTED, password: REDACTED, model: "jev-1.13.0" },
+      nested: { token: REDACTED, Authorization: REDACTED, password: REDACTED, model: "von-1.13.0" },
       list: [{ api_key: REDACTED }, { profile: "core" }],
     });
   });
@@ -166,14 +166,14 @@ describe("createLogger", () => {
     const stream = captureStream();
     const log = createLogger({ env: { EVAL_LOG_JSON: "1" }, stream });
 
-    const fields: LogFields = { backend: "jev", TYPESAFE_API_KEY: "sk-real" };
+    const fields: LogFields = { backend: "von", TYPESAFE_API_KEY: "sk-real" };
     log.info("backend selected", fields);
 
     expect(stream.lines).toHaveLength(1);
     expect(JSON.parse(stream.lines[0] ?? "")).toEqual({
       level: "info",
       msg: "backend selected",
-      backend: "jev",
+      backend: "von",
       TYPESAFE_API_KEY: REDACTED,
     });
   });

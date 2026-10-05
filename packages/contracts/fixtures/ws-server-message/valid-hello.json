@@ -6,8 +6,8 @@
   "payload": {
     "server_version": "1.0.0",
     "schema_major": 1,
-    "decision_backend": "jev",
-    "model": "jev-1.13.0",
+    "decision_backend": "von",
+    "model": "von-1.13.0",
     "unit_id": "cau-7"
   }
 }

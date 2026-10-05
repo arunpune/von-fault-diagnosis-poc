@@ -4,7 +4,7 @@
 // The wire types of `POST /v1/systemone` and the three named answer policies of the mock TypeSafe
 // server.
 //
-// The types are declared here rather than imported from `@typesafe-ai/sdk`: `packages/contracts`
+// The types are declared here rather than imported from `von-sdk`: `packages/contracts`
 // carries no runtime dependency beyond Ajv, and the SDK is a dev dependency of the compatibility
 // test only. `mock/sdk-compat.test.ts` is what keeps the two in step — it sends the SDK's own
 // objects and asserts that a hand-built question is byte-identical to the helper's.

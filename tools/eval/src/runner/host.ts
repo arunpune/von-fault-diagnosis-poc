@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The in-process pipeline host: one bound scenario, one backend, one run.
@@ -105,7 +105,7 @@ export type TimedOutput = PipelineOutput & { readonly batchSimTs: string };
 export type HostConfig = Pick<
   EvalConfig,
   | "gate"
-  | "jevGate"
+  | "vonGate"
   | "decisionIntervalSimMin"
   | "episodeClearSimMin"
   | "persistSimMin"
@@ -188,13 +188,13 @@ export class MissingCsvError extends Error {
 /**
  * The prices the decision message's `cost` block is computed at.
  *
- * Jev bills input tokens only, the LLM both, and the rules backend nothing.
+ * Von bills input tokens only, the LLM both, and the rules backend nothing.
  */
 export function messagePrices(backend: BackendName, prices: Prices): MessagePrices {
   switch (backend) {
-    case "jev":
+    case "von":
       return {
-        price_input_per_mtok: prices.jevInputPerMtok,
+        price_input_per_mtok: prices.vonInputPerMtok,
         price_output_per_mtok: 0,
         prices_as_of: prices.asOf,
       };
@@ -234,7 +234,7 @@ export function buildPipelinePorts(
 
 /**
  * The pipeline configuration, from the run's configuration, for one backend: the gate gets that
- * backend's pair, Jev's own or `GATE_*`, as the runtime's `pipelineConfig` gives it to the
+ * backend's pair, Von's own or `GATE_*`, as the runtime's `pipelineConfig` gives it to the
  * backend it runs.
  */
 export function buildPipelineConfig(cfg: HostConfig, backend: BackendName): PipelineConfig {

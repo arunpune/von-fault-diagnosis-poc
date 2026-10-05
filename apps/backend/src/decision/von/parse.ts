@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Reading Jev's answers (docs/decision-backends.md#reading-the-answers).
+ * Reading Von's answers (docs/decision-backends.md#reading-the-answers).
  *
  * Every answer stays inside the options the request supplied, so nothing here
  * parses prose: it reads a label, a probability vector and a handful of numbers
@@ -41,8 +41,8 @@ export const INCONSISTENT_BELOW_SUPPORT = 0.4;
 export const SEVERITY_ORDER: readonly SeverityLevel[] = ["low", "medium", "high", "critical"];
 
 /** The parts of a `POST /v1/systemone` response the backend keeps. */
-export interface JevResponse {
-  /** The versioned id that answered; compared with the pinned `JEV_MODEL`. */
+export interface VonResponse {
+  /** The versioned id that answered; compared with the pinned `VON_MODEL`. */
   readonly model: string;
   readonly answers: Readonly<Record<string, unknown>>;
   readonly usage: DecisionUsage;
@@ -64,7 +64,7 @@ export interface ParsedAnswers {
 
 /** An answer that could not be read is a validation failure, never a guess. */
 function invalid(detail: string): DecisionError {
-  return new DecisionError("validation", `jev answered with ${detail}`);
+  return new DecisionError("validation", `von answered with ${detail}`);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -86,7 +86,7 @@ function tokenCount(value: unknown, which: string): number {
  * missing `usage` would otherwise surface as a `TypeError` deep inside the
  * pipeline instead of as a decision that failed validation.
  */
-export function readResponse(body: unknown): JevResponse {
+export function readResponse(body: unknown): VonResponse {
   if (!isRecord(body)) throw invalid("a body that is not an object");
   const { model, answers, usage } = body;
   if (typeof model !== "string" || model === "") throw invalid("no model id");

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The static side of the Compose smoke test: what can be proven about scripts/smoke.sh and
@@ -370,7 +370,7 @@ describe("the embedded checker", () => {
     /** Nothing listens on port 1, so every ticket read fails and the poll gives up at once. */
     const NO_BACKEND = "http://127.0.0.1:1";
 
-    function decisionFile(backend: "jev" | "rules"): string {
+    function decisionFile(backend: "von" | "rules"): string {
       const path = join(tempDir(), "decision.json");
       const decision = {
         decision_id: "d-1",
@@ -394,7 +394,7 @@ describe("the embedded checker", () => {
     });
 
     it("fails with exit 3 and no known cause for any other backend", () => {
-      const result = checker(["wait-ticket", NO_BACKEND, decisionFile("jev"), "0"]);
+      const result = checker(["wait-ticket", NO_BACKEND, decisionFile("von"), "0"]);
       expect(result.status).toBe(EXIT_NO_TICKET);
       expect(result.stdout).not.toMatch(/known failure/);
     });

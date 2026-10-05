@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The environment and the flags of `fdp-eval run`, read once into one frozen
@@ -63,14 +63,14 @@ import type { Profile } from "./scenario/schema.ts";
 import { REPO_ROOT } from "./slices.ts";
 
 /** The decision backends a run may compare. */
-export const BACKEND_NAMES = ["rules", "jev", "llm"] as const;
+export const BACKEND_NAMES = ["rules", "von", "llm"] as const;
 
 export type BackendName = (typeof BACKEND_NAMES)[number];
 
-/** How the Jev backend is reached; `auto` picks by keys and cassettes. */
-export const JEV_MODES = ["auto", "live", "cassette", "mock"] as const;
+/** How the Von backend is reached; `auto` picks by keys and cassettes. */
+export const VON_MODES = ["auto", "live", "cassette", "mock"] as const;
 
-export type JevMode = (typeof JEV_MODES)[number];
+export type VonMode = (typeof VON_MODES)[number];
 
 /** Where the fault catalog of a run comes from. */
 export type CatalogSource =
@@ -128,22 +128,22 @@ export interface EvalConfig {
   readonly finalHeldout: boolean;
   /** `--exit-eval`: the exit eval whose every condition the run checks, or `undefined`. */
   readonly exitEval: ExitEvalName | undefined;
-  readonly jevMode: JevMode;
+  readonly vonMode: VonMode;
   /** Absolute path of the full MetroPT-3 CSV, for `source.kind = csv`. */
   readonly csvPath: string;
   readonly typesafeBaseUrl: string;
-  readonly jevModel: string;
+  readonly vonModel: string;
   readonly llmProvider: string;
   readonly llmModel: string;
   readonly prices: Prices;
   /** `GATE_TICKET_MIN_CONFIDENCE` and `GATE_REVIEW_MIN_CONFIDENCE`: the rules and llm backends' pair. */
   readonly gate: GateThresholds;
   /**
-   * Jev's own pair: `JEV_GATE_TICKET_MIN_CONFIDENCE` and `JEV_GATE_REVIEW_MIN_CONFIDENCE`, 0.85
-   * and 0.65 by default (`DEFAULTS.jevGate`, the pre-registered choice), independent of
+   * Von's own pair: `VON_GATE_TICKET_MIN_CONFIDENCE` and `VON_GATE_REVIEW_MIN_CONFIDENCE`, 0.85
+   * and 0.65 by default (`DEFAULTS.vonGate`, the pre-registered choice), independent of
    * `GATE_*`. `gateFor` picks a backend's pair.
    */
-  readonly jevGate: GateThresholds;
+  readonly vonGate: GateThresholds;
   readonly decisionIntervalSimMin: number;
   readonly episodeClearSimMin: number;
   /**
@@ -180,7 +180,7 @@ export interface LoadConfigOptions {
   readonly finalRunRecord?: string;
   /**
    * The pre-registered sweep's committed choice, which the held-out set's one run reads;
-   * `tools/eval/records/jev-thresholds-choice.md` by default.
+   * `tools/eval/records/von-thresholds-choice.md` by default.
    */
   readonly choiceRecord?: string;
   /** Whether that record is committed and unchanged since; asks Git by default. */
@@ -189,7 +189,7 @@ export interface LoadConfigOptions {
 
 /** A configuration value that cannot be used, named by the flag or variable that set it. */
 export class ConfigError extends Error {
-  /** The flag (`--jobs`) or variable (`JEV_MODEL`) to fix. */
+  /** The flag (`--jobs`) or variable (`VON_MODEL`) to fix. */
   readonly flag: string;
   /** A usage or configuration error exits 1. */
   readonly exitCode: number = EXIT_USAGE;
@@ -257,24 +257,24 @@ export class EvalSecrets {
 /** The defaults of the harness and the backend. */
 export const DEFAULTS = Object.freeze({
   profile: "core" as Profile,
-  backends: Object.freeze(["rules", "jev"] as BackendName[]),
-  jevMode: "auto" as JevMode,
+  backends: Object.freeze(["rules", "von"] as BackendName[]),
+  vonMode: "auto" as VonMode,
   outDir: "reports/eval",
   jobs: 1,
   csvPath: "data/metropt3/MetroPT3(AirCompressor).csv",
   typesafeBaseUrl: "https://api.typesafe.ai",
-  jevModel: "jev-1.13.0",
+  vonModel: "von-1.13.0",
   llmProvider: "anthropic",
   llmModel: "claude-opus-5",
   prices: Object.freeze({
-    jevInputPerMtok: 0.042,
+    vonInputPerMtok: 0.042,
     llmInputPerMtok: 5,
     llmOutputPerMtok: 25,
     asOf: "2026-09-19",
   }),
   gate: Object.freeze({ ticketMin: 0.85, reviewMin: 0.6 }),
-  /** Jev's own pair, not GATE_*: the choice in tools/eval/records/jev-thresholds-choice.md. */
-  jevGate: Object.freeze({ ticketMin: 0.85, reviewMin: 0.65 }),
+  /** Von's own pair, not GATE_*: the choice in tools/eval/records/von-thresholds-choice.md. */
+  vonGate: Object.freeze({ ticketMin: 0.85, reviewMin: 0.65 }),
   decisionIntervalSimMin: 30,
   episodeClearSimMin: 120,
   persistSimMin: 1,
@@ -284,8 +284,8 @@ export const DEFAULTS = Object.freeze({
 /** The one LLM provider the backend implements. */
 const LLM_PROVIDERS = ["anthropic"] as const;
 
-/** A pinned Jev version; aliases such as `jev-latest` would make a run unrepeatable. */
-const JEV_MODEL_PATTERN = /^jev-\d+\.\d+\.\d+$/;
+/** A pinned Von version; aliases such as `von-latest` would make a run unrepeatable. */
+const VON_MODEL_PATTERN = /^von-\d+\.\d+\.\d+$/;
 
 /** The scenario id grammar of `scenario.schema.json`. */
 const SCENARIO_ID_PATTERN = /^[a-z][a-z0-9_]{2,63}$/;
@@ -323,11 +323,11 @@ export const CONFIG_USAGE = [
   "                                    heldout only with --final-heldout",
   "  --tuning                          replay the tuning list instead of a profile;",
   "                                    not with --profile or --scenario",
-  "  --backends <rules,jev[,llm]>      backends to compare (default rules,jev)",
+  "  --backends <rules,von[,llm]>      backends to compare (default rules,von)",
   "  --scenario <id>                   only this scenario; repeatable",
   "  --catalog <reference|file:<path>|ingested>   fault catalog source (default reference)",
   "  --db-url <url>                    eval-role database URL, for --catalog ingested",
-  "  --record                          record live Jev answers as cassettes",
+  "  --record                          record live Von answers as cassettes",
   "  --confirm-live                    allow a live mode to call the API",
   "  --out <dir>                       report directory (default reports/eval)",
   "  --jobs <n>                        parallel workers (default 1)",
@@ -336,7 +336,7 @@ export const CONFIG_USAGE = [
   "  --exit-eval <e3>                  check every E3 condition the run can see; exit 2 when one fails",
   "  --resample <n>                    cassette mode: serve the n-th rotation of each repeated",
   "                                    request's recorded answers (default 0, as recorded)",
-  "  --final-heldout                   the held-out set's one run, once the Jev thresholds are",
+  "  --final-heldout                   the held-out set's one run, once the Von thresholds are",
   "                                    fixed (tools/eval/records/heldout-seal.md); refused once",
   "                                    recorded",
 ].join("\n");
@@ -466,22 +466,22 @@ const NOT_WITH_FINAL_HELDOUT = [
 
 /** Where the held-out set's one run reads the pre-registered choice, and how it asks "committed". */
 export interface ChoiceGuard {
-  /** The choice record; `tools/eval/records/jev-thresholds-choice.md` by default. */
+  /** The choice record; `tools/eval/records/von-thresholds-choice.md` by default. */
   readonly path?: string;
   /** Whether the record is committed and unchanged since; asks Git by default. */
   readonly committed?: (path: string) => boolean;
 }
 
-/** The triple a run is configured with: the pipeline's persistence and Jev's own pair. */
+/** The triple a run is configured with: the pipeline's persistence and Von's own pair. */
 interface ConfiguredTriple {
   readonly persistSimMin: number;
-  readonly jevGate: GateThresholds;
+  readonly vonGate: GateThresholds;
 }
 
 /**
- * The Jev thresholds pre-registration, as amended on 2026-09-24: the held-out set's one run uses
+ * The Von thresholds pre-registration, as amended on 2026-09-24: the held-out set's one run uses
  * exactly the triple the pre-registered sweep chose, read from its committed record
- * (tools/eval/records/jev-thresholds-choice.md, `choice.ts`), and nothing else.
+ * (tools/eval/records/von-thresholds-choice.md, `choice.ts`), and nothing else.
  *
  * @throws ConfigError on `--final-heldout` when there is no record, it cannot be read, or it is
  * not committed and unchanged since; on the first variable that differs from the record otherwise.
@@ -501,7 +501,7 @@ function checkChosenTriple(configured: ConfiguredTriple, guard: ChoiceGuard): vo
   if (chosen === undefined) {
     throw new ConfigError(
       FINAL_HELDOUT_FLAG,
-      `the Jev thresholds are not fixed: ${CHOICE_RECORD_FILE}, the pre-registered sweep's ` +
+      `the Von thresholds are not fixed: ${CHOICE_RECORD_FILE}, the pre-registered sweep's ` +
         "committed choice, does not exist. The held-out set runs once, after the choice is " +
         "recorded (fdp-eval sweep --preregistered --from-runs --record-choice) and committed " +
         `(${HELDOUT_SEAL_FILE})`,
@@ -522,15 +522,15 @@ function checkChosenTriple(configured: ConfiguredTriple, guard: ChoiceGuard): vo
       text: (value: number) => String(value),
     },
     {
-      name: "JEV_GATE_REVIEW_MIN_CONFIDENCE",
+      name: "VON_GATE_REVIEW_MIN_CONFIDENCE",
       chosen: chosen.reviewMin,
-      given: configured.jevGate.reviewMin,
+      given: configured.vonGate.reviewMin,
       text: (value: number) => value.toFixed(2),
     },
     {
-      name: "JEV_GATE_TICKET_MIN_CONFIDENCE",
+      name: "VON_GATE_TICKET_MIN_CONFIDENCE",
       chosen: chosen.ticketMin,
-      given: configured.jevGate.ticketMin,
+      given: configured.vonGate.ticketMin,
       text: (value: number) => value.toFixed(2),
     },
   ].filter((entry) => Math.abs(entry.chosen - entry.given) > 1e-9);
@@ -567,7 +567,7 @@ interface HeldoutContext {
  * It is refused without an explicit `--profile heldout --final-heldout`, and refused for good
  * once the final run's record exists. The run replays every sealed scenario as sealed, so no flag
  * that narrows or re-seeds it is taken, nor one that judges the core-10. It is the clean E4
- * figure, so it asks Jev live and is confirmed up front: no cassette holds a held-out request, a
+ * figure, so it asks Von live and is confirmed up front: no cassette holds a held-out request, a
  * mock column is not informative, and the live plan's mock replay must never run on its own.
  * Last, it runs with exactly the triple the pre-registered sweep chose (`checkChosenTriple`).
  *
@@ -598,7 +598,7 @@ function checkHeldout(
   if (!final) {
     throw new ConfigError(
       "--profile",
-      `${HELDOUT_PROFILE} replays the held-out set, which runs once, after the Jev thresholds ` +
+      `${HELDOUT_PROFILE} replays the held-out set, which runs once, after the Von thresholds ` +
         `are fixed under the pre-registration (${HELDOUT_SEAL_FILE}); that one run gives ` +
         FINAL_HELDOUT_FLAG,
     );
@@ -617,16 +617,16 @@ function checkHeldout(
       throw new ConfigError(`--${name}`, `not taken by the held-out set's one run: ${why}`);
     }
   }
-  if (!context.backends.includes("jev")) {
+  if (!context.backends.includes("von")) {
     throw new ConfigError(
       "--backends",
-      "the held-out set's one run measures Jev (the clean E4 figure); name jev",
+      "the held-out set's one run measures Von (the clean E4 figure); name von",
     );
   }
-  if (envValue(context.env, "EVAL_JEV_MODE") !== "live") {
+  if (envValue(context.env, "EVAL_VON_MODE") !== "live") {
     throw new ConfigError(
-      "EVAL_JEV_MODE",
-      "the held-out set's one run asks Jev live (no cassette holds a held-out request, and a " +
+      "EVAL_VON_MODE",
+      "the held-out set's one run asks Von live (no cassette holds a held-out request, and a " +
         "mock column is not informative); set it to live",
     );
   }
@@ -648,7 +648,7 @@ function checkHeldout(
  * @throws ConfigError naming `--profile`, `--final-heldout` or the variable that differs.
  */
 export function assertFinalHeldoutRun(
-  cfg: Pick<EvalConfig, "profile" | "finalHeldout" | "persistSimMin" | "jevGate">,
+  cfg: Pick<EvalConfig, "profile" | "finalHeldout" | "persistSimMin" | "vonGate">,
   record: string = finalRunRecordPath(),
   choice: ChoiceGuard = {},
 ): void {
@@ -699,10 +699,10 @@ function parseCatalog(
   throw new ConfigError("--catalog", `'${text}' is not reference, file:<path> or ingested`);
 }
 
-function parseJevModel(env: Env): string {
-  const model = envValue(env, "JEV_MODEL") ?? DEFAULTS.jevModel;
-  if (!JEV_MODEL_PATTERN.test(model)) {
-    throw new ConfigError("JEV_MODEL", `'${model}' is not a pinned version such as jev-1.13.0`);
+function parseVonModel(env: Env): string {
+  const model = envValue(env, "VON_MODEL") ?? DEFAULTS.vonModel;
+  if (!VON_MODEL_PATTERN.test(model)) {
+    throw new ConfigError("VON_MODEL", `'${model}' is not a pinned version such as von-1.13.0`);
   }
   return model;
 }
@@ -727,7 +727,7 @@ function parsePrices(env: Env): Prices {
     throw new ConfigError("PRICES_AS_OF", `'${asOf}' is not a YYYY-MM-DD day`);
   }
   return {
-    jevInputPerMtok: envNumber(env, "JEV_PRICE_INPUT_PER_MTOK", DEFAULTS.prices.jevInputPerMtok, 0),
+    vonInputPerMtok: envNumber(env, "VON_PRICE_INPUT_PER_MTOK", DEFAULTS.prices.vonInputPerMtok, 0),
     llmInputPerMtok: envNumber(env, "LLM_PRICE_INPUT_PER_MTOK", DEFAULTS.prices.llmInputPerMtok, 0),
     llmOutputPerMtok: envNumber(
       env,
@@ -752,43 +752,43 @@ function parseGate(env: Env): GateThresholds {
 }
 
 /**
- * Jev's own pair, defaulting to the pre-registered choice (`DEFAULTS.jevGate`) and never to
+ * Von's own pair, defaulting to the pre-registered choice (`DEFAULTS.vonGate`) and never to
  * `GATE_*`, as the backend's `loadEnv` reads it.
  */
-function parseJevGate(env: Env): GateThresholds {
+function parseVonGate(env: Env): GateThresholds {
   const ticketMin = envNumber(
     env,
-    "JEV_GATE_TICKET_MIN_CONFIDENCE",
-    DEFAULTS.jevGate.ticketMin,
+    "VON_GATE_TICKET_MIN_CONFIDENCE",
+    DEFAULTS.vonGate.ticketMin,
     0,
     1,
   );
   const reviewMin = envNumber(
     env,
-    "JEV_GATE_REVIEW_MIN_CONFIDENCE",
-    DEFAULTS.jevGate.reviewMin,
+    "VON_GATE_REVIEW_MIN_CONFIDENCE",
+    DEFAULTS.vonGate.reviewMin,
     0,
     1,
   );
   if (reviewMin > ticketMin) {
     throw new ConfigError(
-      "JEV_GATE_REVIEW_MIN_CONFIDENCE",
-      `Jev's review threshold ${reviewMin} is above its ticket threshold ${ticketMin} ` +
-        "(JEV_GATE_* default to 0.65 / 0.85)",
+      "VON_GATE_REVIEW_MIN_CONFIDENCE",
+      `Von's review threshold ${reviewMin} is above its ticket threshold ${ticketMin} ` +
+        "(VON_GATE_* default to 0.65 / 0.85)",
     );
   }
   return { ticketMin, reviewMin };
 }
 
 /**
- * The pair the gate applies to a backend's decisions: Jev's own, `GATE_*` for the rules and llm
+ * The pair the gate applies to a backend's decisions: Von's own, `GATE_*` for the rules and llm
  * backends, as the runtime's `gateThresholds` picks it.
  */
 export function gateFor(
-  cfg: Pick<EvalConfig, "gate" | "jevGate">,
+  cfg: Pick<EvalConfig, "gate" | "vonGate">,
   backend: BackendName,
 ): GateThresholds {
-  return backend === "jev" ? cfg.jevGate : cfg.gate;
+  return backend === "von" ? cfg.vonGate : cfg.gate;
 }
 
 /** A path as given, made absolute against `cwd`; a default is made absolute against the repository. */
@@ -838,14 +838,14 @@ export function loadConfig(
   const rulesDisabled = envValue(env, "RULES_DISABLED");
   const backends = parseBackends(flags.backends);
   const gate = parseGate(env);
-  const jevGate = parseJevGate(env);
+  const vonGate = parseVonGate(env);
   const persistSimMin = envNumber(env, "GATE_PERSIST_SIM_MIN", DEFAULTS.persistSimMin, 0);
   const profile = parseProfile(flags, env);
   checkHeldout(profile, flags, {
     env,
     backends,
     record: options.finalRunRecord ?? finalRunRecordPath(),
-    triple: { persistSimMin, jevGate },
+    triple: { persistSimMin, vonGate },
     choice: {
       ...(options.choiceRecord === undefined ? {} : { path: options.choiceRecord }),
       ...(options.choiceCommitted === undefined ? {} : { committed: options.choiceCommitted }),
@@ -865,10 +865,10 @@ export function loadConfig(
     failOnGate: flags["fail-on-gate"] ?? false,
     finalHeldout: flags["final-heldout"] ?? false,
     exitEval: parseExitEval(flags["exit-eval"], backends),
-    jevMode: oneOf(envValue(env, "EVAL_JEV_MODE") ?? DEFAULTS.jevMode, JEV_MODES, "EVAL_JEV_MODE"),
+    vonMode: oneOf(envValue(env, "EVAL_VON_MODE") ?? DEFAULTS.vonMode, VON_MODES, "EVAL_VON_MODE"),
     csvPath: pathFrom(envValue(env, "METROPT_CSV"), DEFAULTS.csvPath, cwd),
     typesafeBaseUrl: parseBaseUrl(env),
-    jevModel: parseJevModel(env),
+    vonModel: parseVonModel(env),
     llmProvider: oneOf(
       envValue(env, "LLM_PROVIDER") ?? DEFAULTS.llmProvider,
       LLM_PROVIDERS,
@@ -877,7 +877,7 @@ export function loadConfig(
     llmModel: envValue(env, "LLM_MODEL") ?? DEFAULTS.llmModel,
     prices: parsePrices(env),
     gate,
-    jevGate,
+    vonGate,
     decisionIntervalSimMin: envPositive(
       env,
       "DECISION_INTERVAL_SIM_MIN",

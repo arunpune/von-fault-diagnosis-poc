@@ -4,7 +4,7 @@
 /**
  * Which backend a run builds, over the environment combinations that matter.
  *
- * The failure cases are the interesting ones. A run configured for Jev that
+ * The failure cases are the interesting ones. A run configured for Von that
  * quietly answered with the rules twin would put a whole evaluation under the
  * wrong label, so every missing key and every missing factory has to stop the
  * process with a message naming what is missing.
@@ -30,7 +30,7 @@ function stub(name: DecisionBackend["name"], model: string): DecisionBackend {
 
 const ALL_FACTORIES: DecisionBackendFactories = {
   rules: () => stub("rules", "rules-v1"),
-  jev: (env: Env) => stub("jev", env.jevModel),
+  von: (env: Env) => stub("von", env.vonModel),
   llm: (env: Env) => stub("llm", env.llmModel),
 };
 
@@ -41,7 +41,7 @@ function envOf(source: NodeJS.ProcessEnv): Env {
 describe("selectBackend: which backend a run uses", () => {
   it.each([
     { name: "no key at all", source: {}, expected: "rules" },
-    { name: "a TypeSafe key", source: { TYPESAFE_API_KEY: "k" }, expected: "jev" },
+    { name: "a TypeSafe key", source: { TYPESAFE_API_KEY: "k" }, expected: "von" },
     {
       name: "an explicit rules choice with a key present",
       source: { DECISION_BACKEND: "rules", TYPESAFE_API_KEY: "k" },
@@ -53,17 +53,17 @@ describe("selectBackend: which backend a run uses", () => {
       expected: "llm",
     },
     {
-      name: "an explicit jev choice",
-      source: { DECISION_BACKEND: "jev", TYPESAFE_API_KEY: "k" },
-      expected: "jev",
+      name: "an explicit von choice",
+      source: { DECISION_BACKEND: "von", TYPESAFE_API_KEY: "k" },
+      expected: "von",
     },
   ])("$name builds the $expected backend", ({ source, expected }) => {
     expect(selectBackend(envOf(source), ALL_FACTORIES).name).toBe(expected);
   });
 
   it("builds the backend from the environment it was given", () => {
-    const env = envOf({ TYPESAFE_API_KEY: "k", JEV_MODEL: "jev-1.13.0" });
-    expect(selectBackend(env, ALL_FACTORIES).model).toBe("jev-1.13.0");
+    const env = envOf({ TYPESAFE_API_KEY: "k", VON_MODEL: "von-1.13.0" });
+    expect(selectBackend(env, ALL_FACTORIES).model).toBe("von-1.13.0");
   });
 });
 
@@ -71,7 +71,7 @@ describe("selectBackend: what stops a run at startup", () => {
   it("names the factory that was not injected", () => {
     const env = envOf({ TYPESAFE_API_KEY: "k" });
     expect(() => selectBackend(env, { rules: ALL_FACTORIES.rules })).toThrow(ConfigError);
-    expect(() => selectBackend(env, { rules: ALL_FACTORIES.rules })).toThrow(/no jev backend/);
+    expect(() => selectBackend(env, { rules: ALL_FACTORIES.rules })).toThrow(/no von backend/);
   });
 
   it("names the missing llm factory too", () => {

@@ -3,7 +3,7 @@
 
 # Evaluation
 
-This guide covers the evaluation harness in `tools/eval`: what it replays and how it keeps ground truth away from the diagnosis, the scenarios and profiles, the three ways it reaches Jev, the metrics and the evaluation gates they feed, how to read a report, how to score a running stack and sweep the gate thresholds, and where the current results stand. Read it before you run `make eval`, when a report or an evaluation record needs interpreting, and before you change a scenario or a metric. The package's own [README](../tools/eval/README.md) lists every flag and file, and [`tools/eval/records/`](../tools/eval/records/) holds the records of the threshold choice and the held-out set.
+This guide covers the evaluation harness in `tools/eval`: what it replays and how it keeps ground truth away from the diagnosis, the scenarios and profiles, the three ways it reaches Von, the metrics and the evaluation gates they feed, how to read a report, how to score a running stack and sweep the gate thresholds, and where the current results stand. Read it before you run `make eval`, when a report or an evaluation record needs interpreting, and before you change a scenario or a metric. The package's own [README](../tools/eval/README.md) lists every flag and file, and [`tools/eval/records/`](../tools/eval/records/) holds the records of the threshold choice and the held-out set.
 
 Running it needs the development toolchain of [development.md](development.md) and the dataset slices, but neither Docker nor a key:
 
@@ -11,10 +11,10 @@ Running it needs the development toolchain of [development.md](development.md) a
 make install         # the workspace dependencies, once
 make fetch-dataset   # download MetroPT-3 into data/metropt3/ and verify it, once
 make fixtures        # cut the slices the scenarios replay into data/fixtures/metropt3/, once
-make eval            # the core profile with the rules baseline and Jev; reports under reports/eval/
+make eval            # the core profile with the rules baseline and Von; reports under reports/eval/
 ```
 
-Without a key and without recorded cassettes, Jev runs against a mock server and its column is marked not informative (see [How Jev runs](#how-jev-runs)).
+Without a key and without recorded cassettes, Von runs against a mock server and its column is marked not informative (see [How Von runs](#how-von-runs)).
 
 The harness reads its settings from its flags and the process environment, never from `.env`: neither `make eval` nor the harness loads that file, so set a variable on the command line (`EVAL_PROFILE=full make eval`) or export it. `make eval` passes no flag, so flags go through the package script, as in `pnpm --filter @fdp/eval run eval -- --help`.
 
@@ -24,7 +24,7 @@ The harness reads its settings from its flags and the process environment, never
 
 ```mermaid
 flowchart TB
-    CFG["Flags and environment<br/>profile, backends, Jev mode"] --> SEL["Select the scenarios<br/>a profile, a scenario list or the tuning list"]
+    CFG["Flags and environment<br/>profile, backends, Von mode"] --> SEL["Select the scenarios<br/>a profile, a scenario list or the tuning list"]
     SEL --> BIND["Bind each scenario to ground truth<br/>windows, accepted faults, excluded windows"]
     GT[("@fdp/ground-truth<br/>failure table, injections")] --> BIND
     BIND --> PREP["Check the slices are cut, load the catalog,<br/>build the backends, plan any live call"]
@@ -53,7 +53,7 @@ A parity test proves the port against the real simulator and gateway: `tools/eva
 
 ### What an in-process run does not exercise
 
-The in-process pipeline has no database, broker or browser. Retrieval is the pipeline's database-free catalog retriever (signal moves and keywords), not the Postgres vector and full-text search the stack uses, and there is no MQTT or WebSocket transport and no heartbeat. Every report says so in its caveats, and [stack mode](#scoring-a-running-stack) measures the stack itself. Wall time is a fake clock that advances 1 ms per batch, so with the rules backend, the mock or the same cassettes two runs of the same profile give the same metrics; the generated ticket and episode ids and the wall-clock stamps differ. A live Jev answer is the one input that is not reproducible.
+The in-process pipeline has no database, broker or browser. Retrieval is the pipeline's database-free catalog retriever (signal moves and keywords), not the Postgres vector and full-text search the stack uses, and there is no MQTT or WebSocket transport and no heartbeat. Every report says so in its caveats, and [stack mode](#scoring-a-running-stack) measures the stack itself. Wall time is a fake clock that advances 1 ms per batch, so with the rules backend, the mock or the same cassettes two runs of the same profile give the same metrics; the generated ticket and episode ids and the wall-clock stamps differ. A live Von answer is the one input that is not reproducible.
 
 ### Ground truth stays on the harness side
 
@@ -133,11 +133,11 @@ The ten scenarios of the `test` split are the core-10, the set the evaluation ga
 
 | Profile          | Scenarios                                                                                                                   | What it is for                                                                                                                         |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `smoke`          | 5, four of them over a shortened range                                                                                      | A fast check; the `eval-smoke` job of `.github/workflows/ci.yml` runs it with Jev on the mock                                          |
+| `smoke`          | 5, four of them over a shortened range                                                                                      | A fast check; the `eval-smoke` job of `.github/workflows/ci.yml` runs it with Von on the mock                                          |
 | `core` (default) | 10, the core-10                                                                                                             | The gates of E3 and E4                                                                                                                 |
 | `dev`            | 12, the dev split: every scenario outside the core-10 and the held-out set                                                  | The complement of `core`; not a tuning set, because it replays `metropt3_full` and `f4_precursor_jul14`, which cover headline failures |
 | `full`           | 18, the core-10 and the dev split less its three diagnostic scenarios and the leak's dev twin, the whole recording included | E6; needs the full CSV at `METROPT_CSV` (default `data/metropt3/MetroPT3(AirCompressor).csv`)                                          |
-| `heldout`        | 6, the sealed held-out set                                                                                                  | One run, after Jev's thresholds were fixed; refused ever since ([The held-out set](#the-held-out-set))                                 |
+| `heldout`        | 6, the sealed held-out set                                                                                                  | One run, after Von's thresholds were fixed; refused ever since ([The held-out set](#the-held-out-set))                                 |
 | `--tuning`       | 10, the list in `tools/eval/src/tuning.ts`                                                                                  | The only scenarios design tuning and the threshold sweep may read, so the core-10 stays out of every tuning decision                   |
 
 `--tuning` replaces the profile: it cannot be combined with `--profile` or `--scenario`, it ignores `EVAL_PROFILE`, and the run is recorded with profile `tuning`. Before anything is replayed, a guard refuses any core-10 scenario, any scenario bound to a headline failure and any `recording` scenario. The four dev injections replay the same day as five core-10 scenarios; they inject faults the core-10 does not, so they are reported rather than refused.
@@ -186,10 +186,10 @@ Every scenario above except the six `heldout` ones was written, or had its windo
 The set runs once. Until that run only `fdp-eval validate` could read it: no other profile, `--scenario`, the tuning list, the sweep or a live plan selects it. The one run is
 
 ```bash
-EVAL_JEV_MODE=live pnpm --filter @fdp/eval run eval -- --profile heldout --final-heldout --backends rules,jev --record --confirm-live
+EVAL_VON_MODE=live pnpm --filter @fdp/eval run eval -- --profile heldout --final-heldout --backends rules,von --record --confirm-live
 ```
 
-and the harness refuses `heldout` without `--final-heldout`, with `--scenario`, `--seed`, `--fail-on-gate` or `--exit-eval`, with Jev in any mode but live, and with any gate triple but the one recorded in [`tools/eval/records/jev-thresholds-choice.md`](../tools/eval/records/jev-thresholds-choice.md). The run was made on 2026-09-24 and is recorded in [`tools/eval/records/heldout-final-run.md`](../tools/eval/records/heldout-final-run.md); since that record exists, every further held-out run is refused.
+and the harness refuses `heldout` without `--final-heldout`, with `--scenario`, `--seed`, `--fail-on-gate` or `--exit-eval`, with Von in any mode but live, and with any gate triple but the one recorded in [`tools/eval/records/von-thresholds-choice.md`](../tools/eval/records/von-thresholds-choice.md). The run was made on 2026-09-24 and is recorded in [`tools/eval/records/heldout-final-run.md`](../tools/eval/records/heldout-final-run.md); since that record exists, every further held-out run is refused.
 
 ### Running a profile
 
@@ -198,57 +198,57 @@ and the harness refuses `heldout` without `--final-heldout`, with `--scenario`, 
 | `--profile <name>`         | `EVAL_PROFILE`, else `core`   | `smoke`, `core`, `dev`, `full` or `heldout`; the flag wins over the variable                                                                                                 |
 | `--tuning`                 | off                           | Replay the tuning list instead of a profile                                                                                                                                  |
 | `--scenario <id>`          | every scenario of the profile | Narrow the run; repeatable; an id outside the profile is refused                                                                                                             |
-| `--backends <list>`        | `rules,jev`                   | Any of `rules`, `jev` and `llm`, in report order                                                                                                                             |
+| `--backends <list>`        | `rules,von`                   | Any of `rules`, `von` and `llm`, in report order                                                                                                                             |
 | `--catalog <source>`       | `reference`                   | `reference` (`tools/eval/fixtures/catalog.json`, written by `make manual`), `file:<path>` (a contracts catalog document) or `ingested` (a stack's database, with `--db-url`) |
 | `--db-url <url>`           | none                          | The `eval` role's connection string, for `--catalog ingested`                                                                                                                |
-| `--record`                 | off                           | Write every live Jev answer as a cassette                                                                                                                                    |
+| `--record`                 | off                           | Write every live Von answer as a cassette                                                                                                                                    |
 | `--confirm-live`           | off                           | Allow a live backend to call its API                                                                                                                                         |
 | `--out <dir>`              | `reports/eval`                | Where the run directory is written                                                                                                                                           |
 | `--fail-on-gate`           | off                           | Exit 2 when the core-10 gate fails, is out of reach or is not scored                                                                                                         |
 | `--exit-eval e3`           | off                           | Check every E3 condition the run can see; exit 2 when one breaks                                                                                                             |
-| `--resample <n>`           | 0                             | Cassette mode only: serve the n-th rotation of each repeated request's recorded answers ([Choosing Jev's thresholds](#choosing-jevs-thresholds))                             |
+| `--resample <n>`           | 0                             | Cassette mode only: serve the n-th rotation of each repeated request's recorded answers ([Choosing Von's thresholds](#choosing-vons-thresholds))                             |
 | `--final-heldout`          | off                           | The held-out set's one run; refused once it is recorded                                                                                                                      |
 | `--jobs <n>`, `--seed <n>` | 1, none                       | `--jobs` above 1 is refused, because the loop is sequential; `--seed` is recorded on every scenario run                                                                      |
 
 The backend variables of the README's [Configuration](../README.md#configuration) table, such as the model ids, the prices, `GATE_TICKET_MIN_CONFIDENCE`, `GATE_REVIEW_MIN_CONFIDENCE`, `DECISION_INTERVAL_SIM_MIN`, `EPISODE_CLEAR_SIM_MIN` and `RULES_DISABLED`, are read with the same defaults as the backend and passed to the pipeline unchanged; like every other setting, they come from the environment, not from `.env`. Some examples, from the package README:
 
 ```bash
-EVAL_PROFILE=smoke EVAL_JEV_MODE=mock make eval
+EVAL_PROFILE=smoke EVAL_VON_MODE=mock make eval
 pnpm --filter @fdp/eval run eval -- --profile smoke --scenario f3_air_leak_jun05
 pnpm --filter @fdp/eval run eval -- --tuning --backends rules --catalog reference
 EVAL_PROFILE=full make eval
 ```
 
-## How Jev runs
+## How Von runs
 
-`--backends` names the backends a run compares. The rules baseline always runs in process and costs nothing. Jev is always the pipeline's own `createJevBackend`, with the same state, the same questions, the same SDK and the same parser; `EVAL_JEV_MODE` decides only where its requests go.
+`--backends` names the backends a run compares. The rules baseline always runs in process and costs nothing. Von is always the pipeline's own `createVonBackend`, with the same state, the same questions, the same SDK and the same parser; `EVAL_VON_MODE` decides only where its requests go.
 
-| Mode       | `auto` picks it when                         | What answers                                                                                    | The Jev column                        |
+| Mode       | `auto` picks it when                         | What answers                                                                                    | The Von column                        |
 | ---------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
 | `live`     | `TYPESAFE_API_KEY` is set in the environment | The TypeSafe API at `TYPESAFE_BASE_URL`, after a plan and `--confirm-live`                      | Informative                           |
-| `cassette` | No key, and cassettes exist for `JEV_MODEL`  | A local server replaying recorded answers; a miss is answered by the mock and counted           | Informative, with its hits and misses |
+| `cassette` | No key, and cassettes exist for `VON_MODEL`  | A local server replaying recorded answers; a miss is answered by the mock and counted           | Informative, with its hits and misses |
 | `mock`     | Neither                                      | The contracts' mock TypeSafe server from `@fdp/contracts/mock`, with its `best-overlap` answers | `mock — not informative`              |
 
 ```mermaid
 flowchart TD
-    M{"EVAL_JEV_MODE"} -->|"live, cassette or mock"| AS["That mode, or exit 1<br/>when it cannot be built"]
+    M{"EVAL_VON_MODE"} -->|"live, cassette or mock"| AS["That mode, or exit 1<br/>when it cannot be built"]
     M -->|"auto, the default"| K{"TYPESAFE_API_KEY<br/>in the environment?"}
     K -->|"yes"| L["live<br/>planned first, calls only<br/>with the confirm-live flag"]
-    K -->|"no"| C{"Cassettes for<br/>JEV_MODEL?"}
+    K -->|"no"| C{"Cassettes for<br/>VON_MODEL?"}
     C -->|"yes"| CS["cassette<br/>recorded answers,<br/>misses answered by the mock"]
     C -->|"no"| MK["mock<br/>column not informative"]
 ```
 
-An explicit `EVAL_JEV_MODE` is taken as asked and fails with exit 1 when it cannot be built: `live` without a key, `cassette` without cassettes. The cassette and mock modes answer only `jev-1.13.0`, the one model the mock serves.
+An explicit `EVAL_VON_MODE` is taken as asked and fails with exit 1 when it cannot be built: `live` without a key, `cassette` without cassettes. The cassette and mock modes answer only `von-1.13.0`, the one model the mock serves.
 
 ### Live runs and recording
 
-A live run is planned before anything is called, so a paid call is never a surprise: the harness replays the run's scenarios once against the mock, counts the decisions, prices them at the dated prices and logs the plan. Without `--confirm-live` it stops there with exit 1, having called nothing. So `make eval` with `TYPESAFE_API_KEY` exported prints the plan and refuses, while `EVAL_JEV_MODE=cassette` or `mock` runs without calling. Live calls go through one serial queue per backend at 600 requests per minute; the SDK retries a 429 or 529 twice, and the harness then waits 60 s and tries once more before it records a failed decision.
+A live run is planned before anything is called, so a paid call is never a surprise: the harness replays the run's scenarios once against the mock, counts the decisions, prices them at the dated prices and logs the plan. Without `--confirm-live` it stops there with exit 1, having called nothing. So `make eval` with `TYPESAFE_API_KEY` exported prints the plan and refuses, while `EVAL_VON_MODE=cassette` or `mock` runs without calling. Live calls go through one serial queue per backend at 600 requests per minute; the SDK retries a 429 or 529 twice, and the harness then waits 60 s and tries once more before it records a failed decision.
 
 ```bash
 # with TYPESAFE_API_KEY exported, a live run: the plan and its estimated cost are logged first
 pnpm --filter @fdp/eval run eval -- --confirm-live
-# a recording: a run with Jev live and --record forced on
+# a recording: a run with Von live and --record forced on
 pnpm --filter @fdp/eval run record -- --profile core --confirm-live
 ```
 
@@ -256,28 +256,28 @@ A recording is a paid run; [`tools/eval/CASSETTES.md`](../tools/eval/CASSETTES.m
 
 ### Cassettes
 
-A cassette is one exchange with the live API, stored as `tools/eval/fixtures/cassettes/jev-1.13.0/<request_digest>.json` against `tools/eval/schemas/cassette.schema.json`. The digest is the SHA-256 of the canonical JSON of the request's model, state and questions, so the same question about the same state is the same cassette. A cassette keeps every answer its recording run received for that request, in order, and a replay serves the n-th answer to the n-th arrival, so a replay of the recorded profile makes every decision the live run made; an arrival past the last recorded answer gets that answer again and is counted as reused. A hit also returns the recorded token usage, so the report's cost is the live run's. The store refuses an edited or misnamed cassette, and the server checks every recorded answer against the mock's response schema when it starts.
+A cassette is one exchange with the live API, stored as `tools/eval/fixtures/cassettes/von-1.13.0/<request_digest>.json` against `tools/eval/schemas/cassette.schema.json`. The digest is the SHA-256 of the canonical JSON of the request's model, state and questions, so the same question about the same state is the same cassette. A cassette keeps every answer its recording run received for that request, in order, and a replay serves the n-th answer to the n-th arrival, so a replay of the recorded profile makes every decision the live run made; an arrival past the last recorded answer gets that answer again and is counted as reused. A hit also returns the recorded token usage, so the report's cost is the live run's. The store refuses an edited or misnamed cassette, and the server checks every recorded answer against the mock's response schema when it starts.
 
-A miss means the backend's state or questions changed since the recording. The mock answers it, the report lists the missed digests, and the remedy is to re-record, never to edit a cassette. Giving the diagnosis the evidence the manual uses to separate high air demand from a leak changed every Jev request, so cassettes recorded before that change no longer match. `auto` picks cassette mode as soon as any cassette exists for `JEV_MODEL`, whichever profile it was recorded for, so set `EVAL_JEV_MODE=mock` when a run covers scenarios the cassettes were never recorded for.
+A miss means the backend's state or questions changed since the recording. The mock answers it, the report lists the missed digests, and the remedy is to re-record, never to edit a cassette. Giving the diagnosis the evidence the manual uses to separate high air demand from a leak changed every Von request, so cassettes recorded before that change no longer match. `auto` picks cassette mode as soon as any cassette exists for `VON_MODEL`, whichever profile it was recorded for, so set `EVAL_VON_MODE=mock` when a run covers scenarios the cassettes were never recorded for.
 
-Cassettes are gitignored until TypeSafe's terms allow publishing them, so a fresh clone has none and runs Jev on the mock.
+Cassettes are gitignored until TypeSafe's terms allow publishing them, so a fresh clone has none and runs Von on the mock.
 
 ### The mock
 
-Without a key or cassettes, and always in CI, Jev talks to the contracts' mock server on a free local port. The backend, the state, the questions and the parser are the real ones; only the judgement is not Jev's, because the mock answers with its deterministic `best-overlap` policy. A Jev figure produced in mock mode is never quoted as a result.
+Without a key or cassettes, and always in CI, Von talks to the contracts' mock server on a free local port. The backend, the state, the questions and the parser are the real ones; only the judgement is not Von's, because the mock answers with its deterministic `best-overlap` policy. A Von figure produced in mock mode is never quoted as a result.
 
 ### The optional LLM column
 
-`--backends rules,jev,llm` adds the Anthropic Claude backend (`LLM_MODEL`, default `claude-opus-5`). It runs live or not at all: without `LLM_API_KEY` it is dropped with a warning, and with the key the plan and `--confirm-live` apply as for Jev. It has no cassettes. The backends themselves are described in [decision-backends.md](decision-backends.md).
+`--backends rules,von,llm` adds the Anthropic Claude backend (`LLM_MODEL`, default `claude-opus-5`). It runs live or not at all: without `LLM_API_KEY` it is dropped with a warning, and with the key the plan and `--confirm-live` apply as for Von. It has no cassettes. The backends themselves are described in [decision-backends.md](decision-backends.md).
 
 ### How every report says which
 
-- The header of `report.md` lists each backend with its mode and model, and every column heading carries the mode: `jev · live`, `jev · cassette` or `jev · mock — not informative`.
+- The header of `report.md` lists each backend with its mode and model, and every column heading carries the mode: `von · live`, `von · cassette` or `von · mock — not informative`.
 - `run.json` records each backend's `mode`, whether it is `informative`, its calls and failures and, in cassette mode, `cassette_hits`, `cassette_misses`, `cassette_miss_digests` and `cassette_reused`; a live backend adds its rate-limit counters.
 - The report's caveats and the console summary repeat the mode with those counters.
-- Every table that carries Jev figures opens with a notice: Jev-derived figures stay in the gitignored `reports/` until TypeSafe's terms allow publishing them.
+- Every table that carries Von figures opens with a notice: Von-derived figures stay in the gitignored `reports/` until TypeSafe's terms allow publishing them.
 
-The run's gate is Jev's only when Jev ran live or from cassettes; with a mock Jev it is the rules baseline's. Failed decisions are never silent: `report.md` opens with a bold warning and the console prints a `WARNING:` line with their count and reasons. When every decision of a backend failed, its column is marked not informative and a gate it heads reads `NOT SCORED` rather than a fail.
+The run's gate is Von's only when Von ran live or from cassettes; with a mock Von it is the rules baseline's. Failed decisions are never silent: `report.md` opens with a bold warning and the console prints a `WARNING:` line with their count and reasons. When every decision of a backend failed, its column is marked not informative and a gate it heads reads `NOT SCORED` rather than a fail.
 
 ## The metrics
 
@@ -399,11 +399,11 @@ The failure table lists unlabelled positive episodes, stretches that look like a
 
 ### The MetroPT-3 check
 
-The check asks whether each of the four headline failures (the failure table's `in_headline`: F1 to F4) was found. On tickets it asks for a true positive: at ticket level for Jev (E4), at review or ticket level for the rules backend's baseline. At detection level, which E3 reads, it asks for a suspect event in the failure's credited span within its scenario's budget; every backend summary carries it beside the ticket check. Every report labels it in-sample, because the detection rules were designed after inspecting F1 to F4. A run's summary pools every scenario that binds a headline window; a full run also reads the whole recording on its own, in the `full_recording` block, which is what E6 reads.
+The check asks whether each of the four headline failures (the failure table's `in_headline`: F1 to F4) was found. On tickets it asks for a true positive: at ticket level for Von (E4), at review or ticket level for the rules backend's baseline. At detection level, which E3 reads, it asks for a suspect event in the failure's credited span within its scenario's budget; every backend summary carries it beside the ticket check. Every report labels it in-sample, because the detection rules were designed after inspecting F1 to F4. A run's summary pools every scenario that binds a headline window; a full run also reads the whole recording on its own, in the `full_recording` block, which is what E6 reads.
 
 ### Cost
 
-Each decision costs its input tokens times the input price plus its output tokens times the output price, per million tokens, at the dated prices (`JEV_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_OUTPUT_PER_MTOK`, `PRICES_AS_OF`), summed per scenario, per backend and per ticket. Jev bills input tokens only, the rules backend costs nothing, and a cassette hit carries the usage the live call billed.
+Each decision costs its input tokens times the input price plus its output tokens times the output price, per million tokens, at the dated prices (`VON_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_OUTPUT_PER_MTOK`, `PRICES_AS_OF`), summed per scenario, per backend and per ticket. Von bills input tokens only, the rules backend costs nothing, and a cassette hit carries the usage the live call billed.
 
 ### When a scenario passes, and the gate
 
@@ -412,11 +412,11 @@ Each decision costs its input tokens times the input price plus its output token
 - Diagnosis level: review diagnosis and, for a scenario that expects a ticket, the first ticket-level ticket inside the window names an accepted fault within the budget; a negative or abstain scenario passes diagnosis when it passes review diagnosis.
 - Diagnostic scenarios print `reported` and never enter the summary.
 
-The core-10 gate passes with at least 8 of the 10 scenarios and at least 5 of the 6 positives at the backend's level, rules at detection and Jev at diagnosis, so a backend that never raises anything cannot pass on the negatives alone. The rules backend's two diagnosis flags are reported beside it as a baseline and never gated. A core-10 scenario the run did not score counts as failed. A partial run (the smoke profile, a scenario list, a tuning run) reports the gate as `attainable` or `unattainable` instead of `pass` or `fail`; only a core run decides it. `--fail-on-gate` exits 2 on `fail`, `unattainable` and `not_scored`.
+The core-10 gate passes with at least 8 of the 10 scenarios and at least 5 of the 6 positives at the backend's level, rules at detection and Von at diagnosis, so a backend that never raises anything cannot pass on the negatives alone. The rules backend's two diagnosis flags are reported beside it as a baseline and never gated. A core-10 scenario the run did not score counts as failed. A partial run (the smoke profile, a scenario list, a tuning run) reports the gate as `attainable` or `unattainable` instead of `pass` or `fail`; only a core run decides it. `--fail-on-gate` exits 2 on `fail`, `unattainable` and `not_scored`.
 
 ### The evaluation gates E1 to E6
 
-The project is checked against six evaluation gates, E1 to E6, each a command with a pass condition. The same scenario files and metric code serve every gate; only the profile, the backends and the pass level change. A pass never depends on editing a scenario's expectation or the ground truth to fit a result, a key is never needed for E1 to E3 or E5, every report names the backend's mode, and a Jev figure produced in mock mode is never quoted as a result.
+The project is checked against six evaluation gates, E1 to E6, each a command with a pass condition. The same scenario files and metric code serve every gate; only the profile, the backends and the pass level change. A pass never depends on editing a scenario's expectation or the ground truth to fit a result, a key is never needed for E1 to E3 or E5, every report names the backend's mode, and a Von figure produced in mock mode is never quoted as a result.
 
 - **E1, the source of truth and the reference catalog.** `make check-manual` passes every acceptance check of the manual PDFs ([manual.md](manual.md#acceptance-checks)), and `pnpm --filter @fdp/eval run validate` loads the reference catalog with every fault id the ground truth uses resolved.
 - **E2, contracts, ground truth and simulation.** The harness's unit and integration tests pass, the parity test among them: the TypeScript replay matches the simulator and the gateway ([The replay](#the-replay)).
@@ -426,21 +426,21 @@ The four this harness scores:
 | Exit eval                | Backend and level | Passes when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | E3, rules-only detection | rules, detection  | At least 8 of the core-10 and 5 of the 6 positives pass at detection level, a suspect event in each positive's credited span within its budget; the MetroPT-3 check finds 4 of 4 at that detection level on the F1 to F4 slices; `baseline_feb03_normal` and `frozen_logger_jun22` raise no suspect event, warmup and excluded windows included; `inject_high_ambient_benign` and `inject_oil_temperature_sensor_fault` produce no ticket naming a cause that is not benign; `depot_lps_jul31` opens no ticket at all. The rules backend's tickets are reported as a baseline, never gated |
-| E4, the Jev backend      | jev, diagnosis    | At least 8 of the core-10 and 5 of the 6 positives pass; the MetroPT-3 check finds 4 of 4 at ticket level, or 4 of 4 at review level with a written note per miss; abstention accuracy is at least the rules baseline's; zero cassette misses when replaying; cost per decision reported and the core profile under USD 0.05                                                                                                                                                                                                                                                               |
+| E4, the Von backend      | von, diagnosis    | At least 8 of the core-10 and 5 of the 6 positives pass; the MetroPT-3 check finds 4 of 4 at ticket level, or 4 of 4 at review level with a written note per miss; abstention accuracy is at least the rules baseline's; zero cassette misses when replaying; cost per decision reported and the core profile under USD 0.05                                                                                                                                                                                                                                                               |
 | E5, the whole system     | the stack         | `make smoke`, `make e2e` and `make eval-stack` pass on one kept stack; the stack scoring finds the jump to F3, the `oil_cooler_fouling` injection window, a ticket or review item naming an accepted fault in the F3 window and a review or ticket item for the injected fault; the `eval` role reads `gt.*` and cannot write; the smoke profile is green in CI                                                                                                                                                                                                                            |
-| E6, the full dataset     | rules or jev      | The MetroPT-3 check finds 4 of 4 at ticket level on the whole recording for at least one backend; false tickets per negative machine-day are reported (target at most 0.5 with Jev; a higher figure does not fail the gate but must be discussed in the CHANGELOG); detections inside unlabelled episodes are reported separately                                                                                                                                                                                                                                                          |
+| E6, the full dataset     | rules or von      | The MetroPT-3 check finds 4 of 4 at ticket level on the whole recording for at least one backend; false tickets per negative machine-day are reported (target at most 0.5 with Von; a higher figure does not fail the gate but must be discussed in the CHANGELOG); detections inside unlabelled episodes are reported separately                                                                                                                                                                                                                                                          |
 
 E3 is scored at detection level, a suspect event in the credited span, rather than on tickets. It is checked with `--exit-eval e3`, which reads the rules backend, marks each of its five conditions (`core10_counts`, `metropt3_check`, `negatives_no_suspect`, `abstain_non_benign`, `depot_no_ticket`) `pass`, `fail` or `not_covered` (a condition counts as covered only when the run replayed the scenario's whole range, and an uncovered condition is never passed), and gives the verdict `pass`, `fail` or `incomplete`; beside it, `exit_eval.baseline` records the rules backend's diagnosis figures with `gated: false`. No single run covers all of E3, because `frozen_logger_jun22` is in the dev split, so its recipe is two readings plus an ablation on the reference catalog:
 
 ```bash
 # no key needed
 uv run --package fdp-init fdp-init export-catalog --manual data/manual/cau-7-realistic.pdf --out reports/eval/ingested-realistic.json
-EVAL_JEV_MODE=mock pnpm --filter @fdp/eval run eval -- --profile core --backends rules,jev --catalog file:reports/eval/ingested-realistic.json --fail-on-gate --exit-eval e3
-EVAL_JEV_MODE=mock pnpm --filter @fdp/eval run eval -- --profile core --backends rules,jev --catalog reference --fail-on-gate --exit-eval e3
+EVAL_VON_MODE=mock pnpm --filter @fdp/eval run eval -- --profile core --backends rules,von --catalog file:reports/eval/ingested-realistic.json --fail-on-gate --exit-eval e3
+EVAL_VON_MODE=mock pnpm --filter @fdp/eval run eval -- --profile core --backends rules,von --catalog reference --fail-on-gate --exit-eval e3
 pnpm --filter @fdp/eval run eval -- --profile dev --backends rules --scenario frozen_logger_jun22 --exit-eval e3
 ```
 
-The headline reading scores the catalog init extracts from the realistic PDF, the path the stack ships; the reference catalog is the ablation. E3 passes only when neither the headline reading nor the frozen-logger reading is `fail` and each shows the conditions the other did not cover. E4 is `make eval` with Jev live or from cassettes, then `make eval-sweep`; E6 is `EVAL_PROFILE=full make eval`.
+The headline reading scores the catalog init extracts from the realistic PDF, the path the stack ships; the reference catalog is the ablation. E3 passes only when neither the headline reading nor the frozen-logger reading is `fail` and each shows the conditions the other did not cover. E4 is `make eval` with Von live or from cassettes, then `make eval-sweep`; E6 is `EVAL_PROFILE=full make eval`.
 
 ## Reading a report
 
@@ -479,7 +479,7 @@ The page opens with a header table: the profile, the scenario filter, each backe
 | Section                        | What it holds                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Headline                       | Failed-decision warnings; the core-10 gate with both counts; the MetroPT-3 check, labelled in-sample; a full run's whole-recording figures; under `--exit-eval e3`, the verdict, every condition with its evidence and the rules diagnosis baseline; every scenario with its group, split and `detection · review diagnosis · diagnosis` per backend |
-| Comparison                     | One row per metric, one column per backend with its mode; the rules confidence and Jev's are never compared, because the rules confidence is a margin, not a probability                                                                                                                                                                             |
+| Comparison                     | One row per metric, one column per backend with its mode; the rules confidence and Von's are never compared, because the rules confidence is a margin, not a probability                                                                                                                                                                             |
 | Per-fault precision and recall | Precision and recall at ticket and review level, and true positives, false positives and false negatives at ticket level, per backend and fault                                                                                                                                                                                                      |
 | Lead times                     | Per detected window: the first correct ticket, the native alarm and when it was raised, the lead vs native, the lead vs LPS and the latency                                                                                                                                                                                                          |
 | Abstention                     | Accuracy, correct cases, the explicit abstention rate, and why each case was judged as it was                                                                                                                                                                                                                                                        |
@@ -513,7 +513,7 @@ make smoke SMOKE_ARGS=--keep && make eval-stack
 pnpm --filter @fdp/eval run score-stack -- --db-url postgres://eval:eval@localhost:5432/fdp --from 2020-06-05T00:00:00Z
 ```
 
-Everything is read inside one read-only transaction: the catalog the stack ingested, its tickets, decisions, episodes, controller alarms and cost ledger, the ground truth the overlay stored (`gt.v_injection_windows` and `gt.markers`) and the one-minute telemetry aggregates. Each island of consecutive telemetry minutes is a replayed segment. The windows are every headline failure window the segments overlap, so a jump to the F3 preset lands in F3's, and every injection window; a ticket's fault at open is what the decision that opened it named, and a ticket a technician closed is read as it stood at its first closure, without the verdict. Each backend is scored by the same metrics as one scenario, `stack_replay`, and written to `reports/eval/<yyyymmdd-hhmmss>-stack/` as `run.json` with `run.mode: "stack"`, `report.md` with a closing "Stack inputs" section, and `stack.json`, which names the segments, markers and windows with their origin, the thresholds and the ledger. The command never writes to the database or to `latest.json`; `--from` and `--to` limit the simulated time it scores, and it exits 3 when the database holds nothing replayed or decided in that range. Retrieval here is the backend's Postgres path, and a stack whose Jev endpoint is the mock, such as the CI stack, has a Jev column that is not informative.
+Everything is read inside one read-only transaction: the catalog the stack ingested, its tickets, decisions, episodes, controller alarms and cost ledger, the ground truth the overlay stored (`gt.v_injection_windows` and `gt.markers`) and the one-minute telemetry aggregates. Each island of consecutive telemetry minutes is a replayed segment. The windows are every headline failure window the segments overlap, so a jump to the F3 preset lands in F3's, and every injection window; a ticket's fault at open is what the decision that opened it named, and a ticket a technician closed is read as it stood at its first closure, without the verdict. Each backend is scored by the same metrics as one scenario, `stack_replay`, and written to `reports/eval/<yyyymmdd-hhmmss>-stack/` as `run.json` with `run.mode: "stack"`, `report.md` with a closing "Stack inputs" section, and `stack.json`, which names the segments, markers and windows with their origin, the thresholds and the ledger. The command never writes to the database or to `latest.json`; `--from` and `--to` limit the simulated time it scores, and it exits 3 when the database holds nothing replayed or decided in that range. Retrieval here is the backend's Postgres path, and a stack whose Von endpoint is the mock, such as the CI stack, has a Von column that is not informative.
 
 ### Sweeping the gate thresholds
 
@@ -526,38 +526,38 @@ pnpm --filter @fdp/eval run sweep -- --run reports/eval/tuning/latest.json --gri
 
 The sweep reads a tuning run only, so no threshold is chosen on the scenarios the gates count. It refuses a stack run and, unless `--allow-test-split` is given (which reports and never chooses), any run that is not a tuning run. The design target of `unlabelled_leak_may19` is read at every pair in a section of its own, marked as never counted; no row reads it. Its tables are readings, not proposals: a change to a `GATE_*` default cites the tuning run it rests on, and no threshold is lowered to pass an evaluation gate. The gate itself is described in [decision-backends.md](decision-backends.md), and the detection rules' own thresholds in [detection.md](detection.md).
 
-### Choosing Jev's thresholds
+### Choosing Von's thresholds
 
-The gate reads a pair of thresholds per backend. Jev's is `JEV_GATE_TICKET_MIN_CONFIDENCE` and `JEV_GATE_REVIEW_MIN_CONFIDENCE`, which default to ticket 0.85 and review 0.65. The rules and LLM backends keep the global pair, 0.60 and 0.85, because the rules confidence is a margin over candidate supports, a gating quantity on a different scale and not a calibrated probability.
+The gate reads a pair of thresholds per backend. Von's is `VON_GATE_TICKET_MIN_CONFIDENCE` and `VON_GATE_REVIEW_MIN_CONFIDENCE`, which default to ticket 0.85 and review 0.65. The rules and LLM backends keep the global pair, 0.60 and 0.85, because the rules confidence is a margin over candidate supports, a gating quantity on a different scale and not a calibrated probability.
 
-Jev's pair, together with the persistence before a ticket (`GATE_PERSIST_SIM_MIN`, N), was chosen by a rule fixed in advance, before any Jev decision on the tuning list existed: [`tools/eval/records/jev-thresholds-preregistration.md`](../tools/eval/records/jev-thresholds-preregistration.md). The rule reads the tuning list only, never the core-10 or the held-out set; it sets a hard limit of 0.10 false tickets and 0.50 false reviews per negative machine-day, then applies the objective, tie and replacement clauses the file states, starting from the incumbent N = 1, 0.60 / 0.85. Its outcome, N = 1 with Jev at 0.65 / 0.85, is recorded in [`tools/eval/records/jev-thresholds-choice.md`](../tools/eval/records/jev-thresholds-choice.md), and those are the code defaults. Which clause decided is not published, because each clause states an outcome of Jev's figures on the tuning list.
+Von's pair, together with the persistence before a ticket (`GATE_PERSIST_SIM_MIN`, N), was chosen by a rule fixed in advance, before any Von decision on the tuning list existed: [`tools/eval/records/von-thresholds-preregistration.md`](../tools/eval/records/von-thresholds-preregistration.md). The rule reads the tuning list only, never the core-10 or the held-out set; it sets a hard limit of 0.10 false tickets and 0.50 false reviews per negative machine-day, then applies the objective, tie and replacement clauses the file states, starting from the incumbent N = 1, 0.60 / 0.85. Its outcome, N = 1 with Von at 0.65 / 0.85, is recorded in [`tools/eval/records/von-thresholds-choice.md`](../tools/eval/records/von-thresholds-choice.md), and those are the code defaults. Which clause decided is not published, because each clause states an outcome of Von's figures on the tuning list.
 
-The choice needs one Jev recording of the tuning list per N, made at 0.60 / 0.85:
+The choice needs one Von recording of the tuning list per N, made at 0.60 / 0.85:
 
 ```bash
-GATE_PERSIST_SIM_MIN=0 JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning   # the plan at N = 0; calls nothing
-GATE_PERSIST_SIM_MIN=1 JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning   # the plan at N = 1; calls nothing
+GATE_PERSIST_SIM_MIN=0 VON_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning   # the plan at N = 0; calls nothing
+GATE_PERSIST_SIM_MIN=1 VON_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning   # the plan at N = 1; calls nothing
 make eval-sweep                                                                                             # after both recordings, with no key
 ```
 
-The same two `record` commands with `--confirm-live` make the recordings, which are paid ([`tools/eval/CASSETTES.md`](../tools/eval/CASSETTES.md)). Because Jev's review threshold now defaults to 0.65, `record --tuning` warns unless `JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60` is set, and any other cassette replay of the recordings made at 0.60 / 0.85 needs the same setting, or its requests miss. `make eval-sweep` sets that pair itself, whatever the environment says.
+The same two `record` commands with `--confirm-live` make the recordings, which are paid ([`tools/eval/CASSETTES.md`](../tools/eval/CASSETTES.md)). Because Von's review threshold now defaults to 0.65, `record --tuning` warns unless `VON_GATE_REVIEW_MIN_CONFIDENCE=0.60` is set, and any other cassette replay of the recordings made at 0.60 / 0.85 needs the same setting, or its requests miss. `make eval-sweep` sets that pair itself, whatever the environment says.
 
-`make eval-sweep` runs `fdp-eval sweep --preregistered`. For each N of 0 and 1 it replays the tuning list for Jev alone from that N's recording, gated at 0.60 / 0.85, once per resample: resample 0 is the recording as it was answered, and each further resample serves every repeated request's recorded answers in another rotation (`--resample`), as many as the fullest cassette holds. It re-gates every resample over the pre-registered grid (review 0.50 to 0.80, ticket 0.70 to 0.95, review below ticket: 36 pairs), counts false tickets, false reviews and passed positives over the tuning list less `unlabelled_leak_may19` and `august_oil_level_aug10`, which are reported apart, and applies the selection rule as written: ties prefer N = 1 after fewer false reviews and fewer false tickets, before the pair closest to 0.60 / 0.85. It writes `reports/eval/sweep/preregistered-sweep.json` and `.md` with the chosen triple or "keep N = 1, 0.60 / 0.85", the reason and the readings of the rule it applied. It chooses nothing when a recording is missing or a resample could not be read as Jev's own answers: a cassette miss, a failed decision, or a replay the re-gating does not give back. The chosen N applies to the whole pipeline.
+`make eval-sweep` runs `fdp-eval sweep --preregistered`. For each N of 0 and 1 it replays the tuning list for Von alone from that N's recording, gated at 0.60 / 0.85, once per resample: resample 0 is the recording as it was answered, and each further resample serves every repeated request's recorded answers in another rotation (`--resample`), as many as the fullest cassette holds. It re-gates every resample over the pre-registered grid (review 0.50 to 0.80, ticket 0.70 to 0.95, review below ticket: 36 pairs), counts false tickets, false reviews and passed positives over the tuning list less `unlabelled_leak_may19` and `august_oil_level_aug10`, which are reported apart, and applies the selection rule as written: ties prefer N = 1 after fewer false reviews and fewer false tickets, before the pair closest to 0.60 / 0.85. It writes `reports/eval/sweep/preregistered-sweep.json` and `.md` with the chosen triple or "keep N = 1, 0.60 / 0.85", the reason and the readings of the rule it applied. It chooses nothing when a recording is missing or a resample could not be read as Von's own answers: a cassette miss, a failed decision, or a replay the re-gating does not give back. The chosen N applies to the whole pipeline.
 
-`pnpm --filter @fdp/eval run sweep -- --preregistered --from-runs --record-choice` writes the choice once to `tools/eval/records/jev-thresholds-choice.md`, with no Jev figure in it, and refuses when a record already exists. The held-out set's one run is refused with any other triple.
+`pnpm --filter @fdp/eval run sweep -- --preregistered --from-runs --record-choice` writes the choice once to `tools/eval/records/von-thresholds-choice.md`, with no Von figure in it, and refuses when a record already exists. The held-out set's one run is refused with any other triple.
 
 ## Current results
 
 Every figure below comes from the rules backend (`rules-v1`, no key, no cost) and the reference catalog unless it says otherwise. The detection rules were designed after inspecting F1 to F4, and the rules listed under [Decisions that shape the figures](#decisions-that-shape-the-figures) were set after the in-sample results had been seen, so every core-10 and whole-recording figure is in-sample. The figures are also provisional, because the failure table is a proposal that has not been independently reviewed. The held-out set is the one clean measurement.
 
-Jev was evaluated live and from recorded cassettes, on the core profile, the tuning list and the held-out set. Its results are unpublished pending TypeSafe's terms: every Jev-derived figure stays in the gitignored `reports/`.
+Von was evaluated live and from recorded cassettes, on the core profile, the tuning list and the held-out set. Its results are unpublished pending TypeSafe's terms: every Von-derived figure stays in the gitignored `reports/`.
 
 | Gate                                   | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | E3, rules-only detection               | Passes at detection level, in-sample, with both the realistic PDF's catalog and the reference catalog: 9 of 10 core-10, 5 of 6 positives and the MetroPT-3 check 4 of 4 at detection level, with every negative, abstain and depot condition met. `inject_air_leak_downstream` raises no suspect event. The rules diagnosis baseline, reported and never gated, is 4 of 10 and 0 of 6                                                                     |
-| E4, the Jev backend at diagnosis level | Evaluated; results unpublished pending TypeSafe's terms                                                                                                                                                                                                                                                                                                                                                                                                   |
+| E4, the Von backend at diagnosis level | Evaluated; results unpublished pending TypeSafe's terms                                                                                                                                                                                                                                                                                                                                                                                                   |
 | E5, the whole system                   | The Compose smoke, the browser tour and the stack scoring passed on one kept stack on 2026-09-23, before the backend and gate changes of 2026-09-24, and have not been re-run since. The quick-start smoke (`make smoke-quickstart`), which runs the README's path with the rules backend and no key, stopped at its ticket check in the same round: the F3 decision stays below the review threshold, so no ticket opens, and E5 is not green as a whole |
-| E6, the full dataset                   | Not met by the rules backend: 0 of 4 at ticket level on the whole recording (below). No Jev recording of the full profile was made                                                                                                                                                                                                                                                                                                                        |
+| E6, the full dataset                   | Not met by the rules backend: 0 of 4 at ticket level on the whole recording (below). No Von recording of the full profile was made                                                                                                                                                                                                                                                                                                                        |
 
 ### The rules-only baseline on the whole recording
 
@@ -574,17 +574,17 @@ Jev was evaluated live and from recorded cassettes, on the core profile, the tun
 
 An earlier run, made before the evidence that separates high air demand from a leak, the injection changes and the persistence before a ticket, read 2,481 suspect events, 1,655 decisions (1,548 log, 68 review, 39 ticket), 0.089 and 0.253 false tickets per negative machine-day and 1 detection inside an unlabelled episode. The recording includes the core-10's days, so the difference is in-sample too, and nothing was tuned on it.
 
-The rules confidence is a margin between the best candidates' supports, a gating quantity and not a calibrated probability ([decision-backends.md](decision-backends.md#why-the-confidence-is-a-margin)). For scale, E6 asks for 4 of 4 at ticket level and, for Jev, at most 0.5 false tickets per negative machine-day.
+The rules confidence is a margin between the best candidates' supports, a gating quantity and not a calibrated probability ([decision-backends.md](decision-backends.md#why-the-confidence-is-a-margin)). For scale, E6 asks for 4 of 4 at ticket level and, for Von, at most 0.5 false tickets per negative machine-day.
 
 ### The held-out run
 
-The held-out set ran once, on 2026-09-24, with the rules backend and Jev, at N = 1 with Jev at 0.65 / 0.85 and the rules backend at 0.60 / 0.85 ([`tools/eval/records/heldout-final-run.md`](../tools/eval/records/heldout-final-run.md)). The set has no pass threshold. The rules backend's figures, the only clean ones published:
+The held-out set ran once, on 2026-09-24, with the rules backend and Von, at N = 1 with Von at 0.65 / 0.85 and the rules backend at 0.60 / 0.85 ([`tools/eval/records/heldout-final-run.md`](../tools/eval/records/heldout-final-run.md)). The set has no pass threshold. The rules backend's figures, the only clean ones published:
 
 - Diagnosis: 0 of the 4 positives passed at diagnosis level, and both negatives passed without a ticket naming a cause that is not benign.
 - Detection (a suspect event in the credited span): 3 of the 4 positives were detected; the intake-valve injection was not, a known limit of the detection rules.
 - One negative day raised a `frequent_cycling` suspect event, so it fails the detection-level rule of no suspect event on a normal day. It opened no ticket.
 
-Jev's figures on the held-out set are unpublished, like its other results.
+Von's figures on the held-out set are unpublished, like its other results.
 
 ### Decisions that shape the figures
 
@@ -595,9 +595,9 @@ Seven scoring and design rules were set after the in-sample results had been see
 | The credited true-positive span opens at the earlier of the window start and the known data onset | The span opens at the onset for F2 and F3, and lead time searches its native alarm from there; a benign first ticket inside the span still fails diagnosis                                              |
 | The downstream-leak injection keeps only the faster idle decay                                    | The leak injection keeps only its idle decay, over each whole not-loaded period, and no oil offset (nor does heavy demand); a dev twin on 5 July joins the tuning list                                  |
 | F2's early purge-pressure blips count as negative time                                            | The labels stay; tickets on the blips stay false positives                                                                                                                                              |
-| The diagnosis gets the evidence the manual uses to separate high air demand from a leak           | Changes detection's evidence, the Jev criteria and the candidate order, not the metrics; every Jev request changed, so earlier cassettes miss                                                           |
+| The diagnosis gets the evidence the manual uses to separate high air demand from a leak           | Changes detection's evidence, the Von criteria and the candidate order, not the metrics; every Von request changed, so earlier cassettes miss                                                           |
 | E3 is scored at detection level: a suspect event in the credited span                             | E3 reads suspect events in each positive's credited span within its budget, and no suspect event on the normal-operation negatives; the thresholds stay; the rules diagnosis is a baseline, never gated |
-| A sealed held-out set, run once                                                                   | Every earlier figure stays in-sample; six held-out scenarios, validated and never replayed before, ran once after Jev's thresholds were fixed ([The held-out set](#the-held-out-set))                   |
+| A sealed held-out set, run once                                                                   | Every earlier figure stays in-sample; six held-out scenarios, validated and never replayed before, ran once after Von's thresholds were fixed ([The held-out set](#the-held-out-set))                   |
 | The tuning list's design target                                                                   | Fixes what tuning may read; `unlabelled_leak_may19`'s design target (the signature-A pair, inferred and unverified) is reported by the tuning readout and the sweep, never gated                        |
 
 The persistence before a ticket (`GATE_PERSIST_SIM_MIN`) was set the same way. The held-out set does not make any earlier figure clean.

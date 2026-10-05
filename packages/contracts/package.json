@@ -8,7 +8,7 @@
   "author": "Meddle S.r.l.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/meddleconnect/jev-fault-diagnosis-poc"
+    "url": "https://github.com/meddleconnect/von-fault-diagnosis-poc"
   },
   "exports": {
     ".": {
@@ -49,14 +49,14 @@
   },
   "dependencies": {
     "ajv": "catalog:",
-    "ajv-formats": "catalog:"
+    "ajv-formats": "catalog:",
+    "typescript": "catalog:",
+    "von-sdk": "^1.3.7"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "catalog:",
     "@types/node": "catalog:",
-    "@typesafe-ai/sdk": "catalog:",
     "json-schema-to-typescript": "catalog:",
-    "typescript": "catalog:",
     "vitest": "catalog:",
     "yaml": "catalog:",
     "zod": "catalog:"

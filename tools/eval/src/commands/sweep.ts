@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `fdp-eval sweep`: re-gate a stored run over a grid of gate thresholds
@@ -26,7 +26,7 @@
 // GATE_PERSIST_SIM_MIN (taken only because its episode owned a ticket) never
 // opens a ticket at another pair, when the run recorded `persisted_sim_min`.
 // Each backend is re-gated around the pair its gate applied
-// (`backends[].thresholds`, Jev's own for Jev). The command checks the
+// (`backends[].thresholds`, Von's own for Von). The command checks the
 // self-test and says so: a row that does not reproduce is reported with the
 // figures that differ.
 //
@@ -45,12 +45,12 @@
 // episode against the target, in a block of its own marked never counted. The
 // rows' figures never read it — the scenario is diagnostic, so it is not even
 // among the scored scenarios they pool — and the pre-registered threshold
-// selection (tools/eval/records/jev-thresholds-preregistration.md) leaves may19
+// selection (tools/eval/records/von-thresholds-preregistration.md) leaves may19
 // out by name.
 //
 // **`--preregistered` is the one form that chooses** (`preregistered.ts`,
-// tools/eval/records/jev-thresholds-preregistration.md): since the amendment of
-// 2026-09-24 a triple — GATE_PERSIST_SIM_MIN and Jev's pair — from the tuning
+// tools/eval/records/von-thresholds-preregistration.md): since the amendment of
+// 2026-09-24 a triple — GATE_PERSIST_SIM_MIN and Von's pair — from the tuning
 // list's two recordings (N = 0 and N = 1) replayed from cassettes once per
 // resample, over the grid and by the rule the pre-registration fixed. `make
 // eval-sweep` runs it; it takes `--out`, `--from-runs` and `--record-choice`
@@ -153,9 +153,9 @@ export function usage(): string {
     "Re-gates the decisions of a stored --tuning run over a grid of gate thresholds and writes",
     "sweep.json and sweep.md into the run's directory.",
     "",
-    "With --preregistered it makes the choice tools/eval/records/jev-thresholds-preregistration.md fixed",
-    "(amended 2026-09-24): a triple (GATE_PERSIST_SIM_MIN, Jev's review and ticket thresholds).",
-    "It replays the tuning list with Jev from cassettes, each GATE_PERSIST_SIM_MIN of 0 and 1 from",
+    "With --preregistered it makes the choice tools/eval/records/von-thresholds-preregistration.md fixed",
+    "(amended 2026-09-24): a triple (GATE_PERSIST_SIM_MIN, Von's review and ticket thresholds).",
+    "It replays the tuning list with Von from cassettes, each GATE_PERSIST_SIM_MIN of 0 and 1 from",
     "its own recording, once per resample that recording holds (no API call), re-gates every",
     "resample over the pre-registered grid, applies the selection rule and writes",
     "preregistered-sweep.json and .md under --out (what make eval-sweep runs).",
@@ -164,7 +164,7 @@ export function usage(): string {
     `  --run <path>          the run.json or latest.json to read (default ${DEFAULT_RUN})`,
     `  --grid <t>x<r>        ticket and review floors as from:to:step (default ${DEFAULT_GRID})`,
     "  --allow-test-split    read a run whose profile is not tuning; reports, never chooses",
-    "  --preregistered       the pre-registered choice of Jev's thresholds; not with the three above",
+    "  --preregistered       the pre-registered choice of Von's thresholds; not with the three above",
     `  --out <dir>           --preregistered: where the resample runs and the report go (default ${DEFAULT_OUT})`,
     "  --from-runs           --preregistered: sweep the resample runs already under --out, replay nothing",
     `  --record-choice       --preregistered: write the choice record, ${CHOICE_RECORD_FILE}, once`,

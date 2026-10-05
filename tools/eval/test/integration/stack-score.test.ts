@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Stack mode and the ingested catalog against a real, migrated Postgres (E5).
@@ -167,7 +167,7 @@ const DIAGNOSIS_SQL = [
        model, choice, confidence, probabilities, severity_level, severity_score, severity_confidence,
        gate_outcome, abstained, state, state_digest, input_tokens, output_tokens, message)
    SELECT d.decision_id::uuid, d.episode_id::uuid, d.event_id::uuid, $1, d.sim_ts::timestamptz, now(),
-          'jev', 'jev-1.13.0', d.choice, d.confidence::real, '{}', 'medium', 0.5, 0.8, d.gate,
+          'von', 'von-1.13.0', d.choice, d.confidence::real, '{}', 'medium', 0.5, 0.8, d.gate,
           false, '{}', repeat('d', 64), 1480, 0,
           '{"gate": {"ticket_min_confidence": 0.85, "review_min_confidence": 0.6}}'
      FROM (VALUES ('${DECISION_1}', '${EPISODE_1}', '${EVENT_1}', '2020-02-03T03:00Z',
@@ -188,18 +188,18 @@ const DIAGNOSIS_SQL = [
        opened_sim_ts, updated_sim_ts, resolved_sim_ts, close_reason, update_count)
    VALUES ('${TICKET_1}', '${EPISODE_1}', $1, 'resolved', 'oil_cooler_fouled', 'oil_temperature_high',
            'Oil cooler fouled — Oil temperature high', 'Dust on the cooler.', 'Clean it.', '{}', 0.7,
-           'medium', 'jev', 'jev-1.13.0', '${DECISION_2}', '2020-02-03T03:00Z', '2020-02-03T03:30Z',
+           'medium', 'von', 'von-1.13.0', '${DECISION_2}', '2020-02-03T03:00Z', '2020-02-03T03:30Z',
            '2020-02-03T05:30Z', 'silence', 1),
           ('${TICKET_2}', '${EPISODE_2}', $1, 'review', 'airend_bearing_wear', 'dryer_purge_high',
            'Airend bearing wear — Purge pressure high', 'A worn bearing.', 'Replace it.', '{}', 0.65,
-           'medium', 'jev', 'jev-1.13.0', '${DECISION_3}', '2020-06-05T07:00Z', '2020-06-05T07:00Z',
+           'medium', 'von', 'von-1.13.0', '${DECISION_3}', '2020-06-05T07:00Z', '2020-06-05T07:00Z',
            NULL, NULL, 0)`,
   `INSERT INTO app.native_alarms (unit_id, code, state, sim_ts)
    VALUES ($1, 'W102', 'raised', '2020-02-03T04:00Z'), ($1, 'W103', 'raised', '2020-06-05T10:30Z')`,
   `INSERT INTO app.cost_ledger (decision_id, backend, model, input_tokens, output_tokens,
        price_input_per_mtok, price_output_per_mtok, prices_as_of, sim_ts)
-   VALUES ('${DECISION_1}', 'jev', 'jev-1.13.0', 1480, 0, 0.042, 0, '2026-09-19', '2020-02-03T03:00Z'),
-          ('${DECISION_2}', 'jev', 'jev-1.13.0', 1480, 0, 0.042, 0, '2026-09-19', '2020-02-03T03:30Z')`,
+   VALUES ('${DECISION_1}', 'von', 'von-1.13.0', 1480, 0, 0.042, 0, '2026-09-19', '2020-02-03T03:00Z'),
+          ('${DECISION_2}', 'von', 'von-1.13.0', 1480, 0, 0.042, 0, '2026-09-19', '2020-02-03T03:30Z')`,
 ];
 
 // --- The seeded catalog -----------------------------------------------------------------
@@ -413,7 +413,7 @@ function expectedDecision(
     gate,
     abstained: false,
     usage: { input_tokens: 1480, output_tokens: 0 },
-    backend: "jev",
+    backend: "von",
     benignChoice: false,
   };
 }
@@ -532,7 +532,7 @@ describe.skipIf(!docker)("stack mode against a migrated Postgres", () => {
     const printed: string[] = [];
     const { score, files } = await executeScoreStack(
       { dbUrl: stack.urlFor("eval"), range: {}, outDir: out },
-      { EVAL_JEV_MODE: "mock" },
+      { EVAL_VON_MODE: "mock" },
       {
         now: () => utc("2026-09-23T12:00:00.000Z"),
         provenance: () => PROVENANCE,
@@ -542,12 +542,12 @@ describe.skipIf(!docker)("stack mode against a migrated Postgres", () => {
     );
     expect(await rowCounts(stack.adminUrl)).toEqual(before);
 
-    expect(score.backends.map((entry) => entry.backend)).toEqual(["jev"]);
+    expect(score.backends.map((entry) => entry.backend)).toEqual(["von"]);
     const pair = score.backends[0];
     if (pair === undefined) throw new Error("no scored backend");
 
     const binding = expectedBinding();
-    const prices = { ...loadConfig([], {}).prices, jevInputPerMtok: 0.042, asOf: "2026-09-19" };
+    const prices = { ...loadConfig([], {}).prices, vonInputPerMtok: 0.042, asOf: "2026-09-19" };
     const expected = scoreScenario(
       binding,
       EXPECTED_TICKETS,
@@ -555,7 +555,7 @@ describe.skipIf(!docker)("stack mode against a migrated Postgres", () => {
       EXPECTED_ALARMS,
       prices,
       {
-        backend: "jev",
+        backend: "von",
         nativeAlarmCodes: defaultNativeAlarmCodes(defaultAlarmRegistry()),
         reviewMin: 0.6,
         suspects: EXPECTED_SUSPECTS,
@@ -683,7 +683,7 @@ describe.skipIf(!docker)("stack mode against a migrated Postgres", () => {
           "--out",
           out,
         ],
-        { EVAL_JEV_MODE: "mock" },
+        { EVAL_VON_MODE: "mock" },
       );
       const code = await executeRun(cfg, {
         log: QUIET,

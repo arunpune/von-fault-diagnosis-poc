@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The README is the user-facing contract for commands, ports and variables, so these
@@ -334,7 +334,7 @@ describe("README consistency", () => {
     expect(placeholders(README), "placeholders left in the README").toEqual([]);
     for (const retired of ["<repo>", "<public-share-url>"]) expect(README).not.toContain(retired);
     expect(README).toContain(
-      "git clone https://github.com/meddleconnect/jev-fault-diagnosis-poc.git",
+      "git clone https://github.com/meddleconnect/von-fault-diagnosis-poc.git",
     );
   });
 

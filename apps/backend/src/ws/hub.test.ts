@@ -36,7 +36,7 @@ function fixture<T>(schema: string, file: string): T {
 }
 
 const TICKET = fixture<Ticket>("ticket", "valid-opened.json");
-const DECISION = fixture<Decision>("decision", "valid-jev-ticket.json");
+const DECISION = fixture<Decision>("decision", "valid-von-ticket.json");
 const SNAPSHOT = fixture<{ payload: SnapshotPayload }>(
   "ws-server-message",
   "valid-snapshot.json",

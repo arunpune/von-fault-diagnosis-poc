@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Contributing
@@ -108,7 +108,7 @@ with nothing but the documented toolchain. Run it before you claim that a change
 2. Create a feature branch from an up-to-date `main`, for example `fix/gateway-reconnect` or `feat/detection-new-rule`.
 3. Make your change in small, focused commits (section 4), with tests and documentation alongside the code.
 4. Run `make check`, plus the checks your change calls for (section 10), and push the branch to your fork.
-5. Open a pull request against `main` of `meddleconnect/jev-fault-diagnosis-poc` and fill in the template.
+5. Open a pull request against `main` of `meddleconnect/von-fault-diagnosis-poc` and fill in the template.
    CI runs on the pull request, and a maintainer reviews it.
 
 The `quickstart` CI job is expected to stop at its ticket check, for the reason the README gives under

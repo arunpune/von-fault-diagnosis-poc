@@ -1,19 +1,19 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The smoke profile end to end: the real CLI, as a child process, over the
 // committed scenarios and the cut MetroPT-3 slices, with the rules backend and
-// Jev against the contracts' mock server — the command CI's eval-smoke job
+// Von against the contracts' mock server — the command CI's eval-smoke job
 // runs.
 //
 //   node --conditions=@fdp/source src/cli.ts run --profile smoke \
-//        --backends rules,jev --out <tmp>          (EVAL_JEV_MODE=mock)
+//        --backends rules,von --out <tmp>          (EVAL_VON_MODE=mock)
 //
 // It asserts the smoke profile's list: exit 0; run.json valid; five scenarios ×
 // two backends; F3 detected by the rules backend with its first ticket inside the
 // F3 window; no non-benign ticket on the baseline day or the depot
 // depressurisation with rules; a review-or-ticket item naming the injected
-// oil-cooler fault with rules; the Jev column in mock mode; the comparison table
+// oil-cooler fault with rules; the Von column in mock mode; the comparison table
 // in report.md; all of it in under 180 s. It also greps every file the run wrote
 // for the mock key and for a bearer header.
 //
@@ -79,7 +79,7 @@ interface Outcome {
 
 /** The environment of the child: the mock mode, and no key it could ever reach for. */
 function childEnv(): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { ...process.env, EVAL_JEV_MODE: "mock" };
+  const env: NodeJS.ProcessEnv = { ...process.env, EVAL_VON_MODE: "mock" };
   for (const name of ["TYPESAFE_API_KEY", "LLM_API_KEY", "EVAL_PROFILE", "INIT_CWD"]) {
     delete env[name];
   }
@@ -124,7 +124,7 @@ describe("fdp-eval run --profile smoke", () => {
     expect(slicesCut || !datasetRequired(), absence).toBe(true);
   });
 
-  describe.skipIf(!slicesCut)("end to end, rules and a mock Jev", () => {
+  describe.skipIf(!slicesCut)("end to end, rules and a mock Von", () => {
     let out: string;
     let outcome: Outcome;
     let runDir: string;
@@ -138,7 +138,7 @@ describe("fdp-eval run --profile smoke", () => {
         "--profile",
         "smoke",
         "--backends",
-        "rules,jev",
+        "rules,von",
         "--out",
         out,
       ]);
@@ -184,10 +184,10 @@ describe("fdp-eval run --profile smoke", () => {
     });
 
     it("replays the five smoke scenarios against both backends", () => {
-      expect(report.backends.map((backend) => backend.name)).toEqual(["rules", "jev"]);
+      expect(report.backends.map((backend) => backend.name)).toEqual(["rules", "von"]);
       expect(report.scenarios).toHaveLength(10);
       for (const id of SMOKE_SCENARIOS) {
-        for (const backend of ["rules", "jev"]) expect(pair(id, backend).scored).toBe(true);
+        for (const backend of ["rules", "von"]) expect(pair(id, backend).scored).toBe(true);
       }
     });
 
@@ -195,7 +195,7 @@ describe("fdp-eval run --profile smoke", () => {
       const files = filesUnder(runDir);
       for (const id of SMOKE_SCENARIOS) {
         expect(files).toContain(join("scenarios", `${id}.rules.jsonl`));
-        expect(files).toContain(join("scenarios", `${id}.jev.jsonl`));
+        expect(files).toContain(join("scenarios", `${id}.von.jsonl`));
       }
       expect(files).toEqual(expect.arrayContaining(["run.json", "report.md"]));
       expect(readFileSync(join(out, "latest.json"), "utf8")).toBe(
@@ -203,10 +203,10 @@ describe("fdp-eval run --profile smoke", () => {
       );
     });
 
-    it("marks the Jev column as a mock, not informative", () => {
-      const jev = report.backends.find((backend) => backend.name === "jev");
-      expect(jev).toMatchObject({ mode: "mock", informative: false });
-      expect(markdown).toContain(`| Metric | rules | jev · ${MOCK_LABEL} |`);
+    it("marks the Von column as a mock, not informative", () => {
+      const von = report.backends.find((backend) => backend.name === "von");
+      expect(von).toMatchObject({ mode: "mock", informative: false });
+      expect(markdown).toContain(`| Metric | rules | von · ${MOCK_LABEL} |`);
     });
 
     it("renders the comparison table and labels the MetroPT-3 check in-sample", () => {
@@ -264,7 +264,7 @@ describe("fdp-eval run --profile smoke", () => {
         expect(text).not.toContain("Bearer");
       }
       for (const id of SMOKE_SCENARIOS) {
-        const log = readFileSync(join(runDir, "scenarios", `${id}.jev.jsonl`), "utf8");
+        const log = readFileSync(join(runDir, "scenarios", `${id}.von.jsonl`), "utf8");
         for (const line of log.split("\n").filter((entry) => entry !== "")) {
           const event = JSON.parse(line) as { type: string; output?: Record<string, unknown> };
           if (event.type !== "decision" || event.output === undefined) continue;

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 # SPDX-License-Identifier: Apache-2.0
 #
 # The single documented entry point (docs/development.md). Every target carries
@@ -314,10 +314,10 @@ DATABASE_URL_EVAL ?= $(if $(wildcard $(EVAL_STACK_URL_FILE)),$(shell cat $(EVAL_
 eval-stack: ## Score the running stack from its database, read-only as the eval role
 	$(PNPM) --filter @fdp/eval run score-stack -- --db-url "$(DATABASE_URL_EVAL)"
 
-# The pre-registered choice of Jev's gate thresholds and, since its amendment of
+# The pre-registered choice of Von's gate thresholds and, since its amendment of
 # 2026-09-24, of GATE_PERSIST_SIM_MIN with them: a triple
-# (tools/eval/records/jev-thresholds-preregistration.md). It replays the
-# explicit tuning list only, never a --profile dev or a core run, with Jev
+# (tools/eval/records/von-thresholds-preregistration.md). It replays the
+# explicit tuning list only, never a --profile dev or a core run, with Von
 # answered from cassettes and nothing called: each N of 0 and 1 from its own
 # recording, once per resample that recording holds, into
 # $(EVAL_SWEEP_OUT)/persist-<N>/resample-<r>/. It then re-gates every resample
@@ -325,19 +325,19 @@ eval-stack: ## Score the running stack from its database, read-only as the eval 
 # preregistered-sweep.json and .md there, or names a missing recording and
 # chooses nothing; reports/eval/latest.json stays `make eval`'s. The two
 # recordings are paid live runs that come before it:
-# `GATE_PERSIST_SIM_MIN=<N> JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning --confirm-live`
+# `GATE_PERSIST_SIM_MIN=<N> VON_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning --confirm-live`
 # for N = 0 and N = 1. The choice is recorded, once, with
 # `pnpm --filter @fdp/eval run sweep -- --preregistered --from-runs --record-choice`.
 EVAL_SWEEP_OUT ?= reports/eval/sweep
 
-eval-sweep: ## Re-gate Jev's recorded tuning-list answers at N = 0 and 1 over the pre-registered grid, every resample
+eval-sweep: ## Re-gate Von's recorded tuning-list answers at N = 0 and 1 over the pre-registered grid, every resample
 	$(PNPM) --filter @fdp/eval run sweep -- --preregistered --out "$(CURDIR)/$(EVAL_SWEEP_OUT)"
 
 # `scripts/smoke.sh --mode ci --keep` writes the URL of the stack it left
 # running to reports/smoke/ui-url. `make e2e` runs the README tour against
 # E2E_BASE_URL when it is set, else against that URL, else against
 # http://localhost:8080. The tour's expectations hold only on that CI stack
-# (the mock decision service answering as Jev), not on a `make up` stack.
+# (the mock decision service answering as Von), not on a `make up` stack.
 # Its `stack-setup` project rewinds the replay first, so the target can run
 # again on the same stack.
 E2E_UI_URL_FILE := reports/smoke/ui-url
@@ -365,7 +365,7 @@ smoke: ## Build the CI stack (mock decision service) and assert the README tour 
 smoke-quickstart: ## Run the README quick start with the rules backend and assert the tour
 	scripts/smoke.sh --mode quickstart $(SMOKE_ARGS)
 
-smoke-live: ## Assert one jev and one llm decision with the keys of ENV_FILE (default ./.env)
+smoke-live: ## Assert one von and one llm decision with the keys of ENV_FILE (default ./.env)
 	scripts/smoke.sh --mode live $(SMOKE_ARGS)
 
 # The image smoke of the Go module: it starts nothing of the stack, so it needs

@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Which backends a run compares, and how each is reached.
 //
-// `--backends` names them (default `rules,jev`). The rules baseline is always
-// the pipeline's twin. Jev's mode follows `EVAL_JEV_MODE`: an explicit mode is
+// `--backends` names them (default `rules,von`). The rules baseline is always
+// the pipeline's twin. Von's mode follows `EVAL_VON_MODE`: an explicit mode is
 // taken as asked, and `auto` walks this order —
 //
 //   live      when TYPESAFE_API_KEY is set
@@ -12,7 +12,7 @@
 //   mock      otherwise
 //
 // — taking the first mode that applies *and* that this checkout can build
-// (`AVAILABLE_JEV_MODES`; all three today). The LLM runs live or not
+// (`AVAILABLE_VON_MODES`; all three today). The LLM runs live or not
 // at all: named in `--backends` without `LLM_API_KEY`, it is dropped with a
 // warning and never built.
 //
@@ -27,13 +27,13 @@
 // *that* a key is set, the value never leaves `EvalSecrets`.
 
 import { ConfigError } from "../config.ts";
-import type { BackendName, EvalConfig, JevMode } from "../config.ts";
+import type { BackendName, EvalConfig, VonMode } from "../config.ts";
 import { HELDOUT_PROFILE } from "../heldout.ts";
 import { createLogger } from "../log.ts";
 import type { Logger } from "../log.ts";
 import { CASSETTES_DIR, CassetteStore } from "./cassette.ts";
-import { createJevHandle } from "./jev.ts";
-import type { ResolvedJevMode } from "./jev.ts";
+import { createVonHandle } from "./von.ts";
+import type { ResolvedVonMode } from "./von.ts";
 import { createLlmHandle } from "./llm.ts";
 import type { MockOptions } from "./mock.ts";
 import { planLiveRun } from "./plan.ts";
@@ -43,27 +43,27 @@ import type { BackendHandle, HandleDeps } from "./types.ts";
 
 export { CASSETTES_DIR } from "./cassette.ts";
 
-/** The Jev modes this checkout can build. */
-export const AVAILABLE_JEV_MODES: ReadonlySet<ResolvedJevMode> = new Set<ResolvedJevMode>([
+/** The Von modes this checkout can build. */
+export const AVAILABLE_VON_MODES: ReadonlySet<ResolvedVonMode> = new Set<ResolvedVonMode>([
   "live",
   "cassette",
   "mock",
 ]);
 
 /** What `auto` looks at. */
-export interface JevModeFacts {
+export interface VonModeFacts {
   /** True when `TYPESAFE_API_KEY` is set; the value itself is never looked at here. */
   readonly hasKey: boolean;
   /** Recorded answers on disk for the run's model. */
   readonly cassettes: number;
 }
 
-/** The mode Jev runs in, why, and which preferred modes were passed over on the way. */
-export interface JevModeChoice {
-  readonly mode: ResolvedJevMode;
+/** The mode Von runs in, why, and which preferred modes were passed over on the way. */
+export interface VonModeChoice {
+  readonly mode: ResolvedVonMode;
   readonly reason: string;
   /** Modes that applied but are not available in this checkout. */
-  readonly passedOver: readonly ResolvedJevMode[];
+  readonly passedOver: readonly ResolvedVonMode[];
 }
 
 /** Plans the live calls of a run before any is made. */
@@ -75,7 +75,7 @@ export interface SelectDeps extends HandleDeps {
   readonly log?: Logger;
   /** The cassette root; `CASSETTES_DIR` by default. */
   readonly cassettesDir?: string;
-  /** How a mock-mode Jev answers; `best-overlap` by default. */
+  /** How a mock-mode Von answers; `best-overlap` by default. */
   readonly mock?: MockOptions;
   /** How a run with a live backend is planned; a mock replay of its scenarios by default. */
   readonly plan?: LivePlanner;
@@ -87,23 +87,23 @@ export function cassetteCount(model: string, root: string = CASSETTES_DIR): numb
 }
 
 /**
- * Resolves `EVAL_JEV_MODE` into the mode a run uses.
+ * Resolves `EVAL_VON_MODE` into the mode a run uses.
  *
- * An explicit mode is returned as asked; whether it can be built is `createJevHandle`'s
+ * An explicit mode is returned as asked; whether it can be built is `createVonHandle`'s
  * question, and it answers with an error rather than a silent substitute. `auto` takes the
  * first mode of the auto order that applies and is in `available`.
  */
-export function resolveJevMode(
-  requested: JevMode,
-  facts: JevModeFacts,
+export function resolveVonMode(
+  requested: VonMode,
+  facts: VonModeFacts,
   model: string,
-  available: ReadonlySet<ResolvedJevMode> = AVAILABLE_JEV_MODES,
-): JevModeChoice {
+  available: ReadonlySet<ResolvedVonMode> = AVAILABLE_VON_MODES,
+): VonModeChoice {
   if (requested !== "auto") {
-    return { mode: requested, reason: `EVAL_JEV_MODE=${requested}`, passedOver: [] };
+    return { mode: requested, reason: `EVAL_VON_MODE=${requested}`, passedOver: [] };
   }
 
-  const order: readonly { mode: ResolvedJevMode; applies: boolean; why: string }[] = [
+  const order: readonly { mode: ResolvedVonMode; applies: boolean; why: string }[] = [
     { mode: "live", applies: facts.hasKey, why: "TYPESAFE_API_KEY is set" },
     {
       mode: "cassette",
@@ -113,30 +113,30 @@ export function resolveJevMode(
     { mode: "mock", applies: true, why: "no key and no cassettes" },
   ];
 
-  const passedOver: ResolvedJevMode[] = [];
+  const passedOver: ResolvedVonMode[] = [];
   const skipped: string[] = [];
   for (const option of order) {
     if (!option.applies) continue;
     if (available.has(option.mode)) {
       const why = skipped.length === 0 ? option.why : `${skipped.join("; ")}; using ${option.mode}`;
-      return { mode: option.mode, reason: `EVAL_JEV_MODE=auto: ${why}`, passedOver };
+      return { mode: option.mode, reason: `EVAL_VON_MODE=auto: ${why}`, passedOver };
     }
     passedOver.push(option.mode);
     skipped.push(`${option.why}, but ${option.mode} mode is not available in this checkout`);
   }
-  throw new Error(`EVAL_JEV_MODE=auto: none of ${[...available].join(", ")} applies`);
+  throw new Error(`EVAL_VON_MODE=auto: none of ${[...available].join(", ")} applies`);
 }
 
 /** One backend of the run as chosen, before anything is built. */
 type Choice =
   | { readonly name: "rules"; readonly reason: string }
-  | { readonly name: "jev"; readonly mode: ResolvedJevMode; readonly reason: string }
+  | { readonly name: "von"; readonly mode: ResolvedVonMode; readonly reason: string }
   | { readonly name: "llm"; readonly reason: string };
 
 /** The backend a choice reaches a live API with, if it does. */
 function liveName(choice: Choice): LiveBackendName | undefined {
   if (choice.name === "llm") return "llm";
-  if (choice.name === "jev" && choice.mode === "live") return "jev";
+  if (choice.name === "von" && choice.mode === "live") return "von";
   return undefined;
 }
 
@@ -150,14 +150,14 @@ function choose(
   switch (name) {
     case "rules":
       return { name, reason: "the rules baseline always runs in process" };
-    case "jev": {
-      const facts: JevModeFacts = {
+    case "von": {
+      const facts: VonModeFacts = {
         hasKey: cfg.secrets.typesafeApiKey !== undefined,
-        cassettes: cassetteCount(cfg.jevModel, deps.cassettesDir),
+        cassettes: cassetteCount(cfg.vonModel, deps.cassettesDir),
       };
-      const choice = resolveJevMode(cfg.jevMode, facts, cfg.jevModel);
+      const choice = resolveVonMode(cfg.vonMode, facts, cfg.vonModel);
       if (choice.passedOver.length > 0) {
-        log.warn("jev mode passed over", { passed_over: choice.passedOver, reason: choice.reason });
+        log.warn("von mode passed over", { passed_over: choice.passedOver, reason: choice.reason });
       }
       return { name, mode: choice.mode, reason: choice.reason };
     }
@@ -214,7 +214,7 @@ async function confirmLive(
       prices_as_of: row.pricesAsOf,
       scenarios: plan.scenarios,
       // The plan replays at the run's own persistence: N moves which decisions are asked,
-      // and the tuning list is recorded once per N (the Jev thresholds pre-registration).
+      // and the tuning list is recorded once per N (the Von thresholds pre-registration).
       persist_sim_min: cfg.persistSimMin,
       confirmed: cfg.confirmLive,
     });
@@ -229,21 +229,21 @@ async function confirmLive(
 }
 
 /**
- * `--resample` rotates recorded answers, so it means something only to a Jev replayed from
+ * `--resample` rotates recorded answers, so it means something only to a Von replayed from
  * cassettes. Anywhere else it would be silently ignored, and a run that said "resample 2" while
  * serving live or mock answers would be mislabelled; it is refused before anything is built.
  *
- * @throws ConfigError on `--resample` when it is above 0 and Jev does not run in cassette mode.
+ * @throws ConfigError on `--resample` when it is above 0 and Von does not run in cassette mode.
  */
 function requireCassetteForResample(cfg: EvalConfig, choices: readonly Choice[]): void {
   if ((cfg.resample ?? 0) === 0) return;
-  const jev = choices.find((choice) => choice.name === "jev");
-  if (jev?.name === "jev" && jev.mode === "cassette") return;
-  const where = jev?.name === "jev" ? `Jev runs in ${jev.mode} mode` : "the run does not name jev";
+  const von = choices.find((choice) => choice.name === "von");
+  if (von?.name === "von" && von.mode === "cassette") return;
+  const where = von?.name === "von" ? `Von runs in ${von.mode} mode` : "the run does not name von";
   throw new ConfigError(
     "--resample",
-    `${cfg.resample} rotates Jev's recorded answers and needs Jev in cassette mode ` +
-      `(EVAL_JEV_MODE=cassette), but ${where}`,
+    `${cfg.resample} rotates Von's recorded answers and needs Von in cassette mode ` +
+      `(EVAL_VON_MODE=cassette), but ${where}`,
   );
 }
 
@@ -259,8 +259,8 @@ async function build(
     case "rules":
       handle = createRulesHandle(deps);
       break;
-    case "jev":
-      handle = await createJevHandle(cfg, choice.mode, deps, deps.mock);
+    case "von":
+      handle = await createVonHandle(cfg, choice.mode, deps, deps.mock);
       break;
     case "llm":
       handle = createLlmHandle(cfg);

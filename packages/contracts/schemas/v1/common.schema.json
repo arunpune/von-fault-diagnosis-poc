@@ -133,7 +133,7 @@
       "title": "Decision backend",
       "description": "Which decision backend produced an answer.",
       "type": "string",
-      "enum": ["jev", "llm", "rules"]
+      "enum": ["von", "llm", "rules"]
     },
     "subsystem": {
       "title": "Subsystem",

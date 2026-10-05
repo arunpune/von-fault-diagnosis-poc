@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The diagnosis schema, asserted against a real server
@@ -771,7 +771,7 @@ describe("0007_cost_system · the generated cost column", () => {
       return Object.fromEntries(result.rows.map((row) => [row.model, row.cost_usd]));
     });
     // 1234 input tokens at 0.042 per million.
-    expect(costs["jev-1.13"]).toBe("0.0000518280");
+    expect(costs["von-1.13"]).toBe("0.0000518280");
     // 1000 input at 5 plus 200 output at 25, per million.
     expect(costs["llm-medium"]).toBe("0.0100000000");
   });
@@ -791,8 +791,8 @@ describe("0007_cost_system · the generated cost column", () => {
     });
     expect(totals).toEqual([
       {
-        backend: "jev",
-        model: "jev-1.13",
+        backend: "von",
+        model: "von-1.13",
         calls: "1",
         input_tokens: "1234",
         cost_usd: "0.0000518280",

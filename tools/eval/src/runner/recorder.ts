@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // From the pipeline's event log to the records the metrics score.
@@ -25,8 +25,8 @@
 // **A decision is kept whether or not it moved a ticket.** Abstention and cost
 // are measured on the decisions, so every answered one becomes a
 // `DecisionRecord`; a failed call is counted apart, since it has no choice to
-// score. Rules and Jev confidences are different quantities (the rules one is a
-// calibrated gating quantity, Jev's a probability): the record carries the
+// score. Rules and Von confidences are different quantities (the rules one is a
+// calibrated gating quantity, Von's a probability): the record carries the
 // backend beside the confidence so no report sets the two side by side unnamed.
 
 import type { PipelineOutput, Ticket } from "@fdp/backend/pipeline";

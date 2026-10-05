@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Builders for the records the metrics tests score, and the readers for the
@@ -166,7 +166,7 @@ export function decision(fields: Partial<DecisionRecord> & { decisionId: string 
 
 /** Prices with the dated figures the reference cost cases use. */
 export const TEST_PRICES: Prices = {
-  jevInputPerMtok: 0.042,
+  vonInputPerMtok: 0.042,
   llmInputPerMtok: 5,
   llmOutputPerMtok: 25,
   asOf: "2026-09-19",
@@ -369,7 +369,7 @@ export function readFixture(name: string): MetricsFixture {
     reviewMin: num(source["review_min"], `${name}.review_min`),
     nativeAlarmCodes: strings(source["native_alarm_codes"], `${name}.native_alarm_codes`),
     prices: {
-      jevInputPerMtok: num(prices["jev_input_per_mtok"], `${name}.prices.jev_input_per_mtok`),
+      vonInputPerMtok: num(prices["von_input_per_mtok"], `${name}.prices.von_input_per_mtok`),
       llmInputPerMtok: num(prices["llm_input_per_mtok"], `${name}.prices.llm_input_per_mtok`),
       llmOutputPerMtok: num(prices["llm_output_per_mtok"], `${name}.prices.llm_output_per_mtok`),
       asOf: str(prices["as_of"], `${name}.prices.as_of`),

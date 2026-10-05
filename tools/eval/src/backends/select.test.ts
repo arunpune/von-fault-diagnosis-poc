@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Backend selection and the handles it builds.
 //
-// Every test runs offline: the rules backend is in process, the Jev handle
+// Every test runs offline: the rules backend is in process, the Von handle
 // talks to the contracts' mock on a free local port, and "live" is that mock
 // reached with a stand-in key. The live plan is a stub here — the real one
 // replays scenarios and is exercised by the cassette round trip — so these
@@ -26,15 +26,15 @@ import { createLogger } from "../log.ts";
 import type { Logger } from "../log.ts";
 import { createFakeWallClock } from "../runner/host.ts";
 import { CassetteStore, cassetteOf } from "./cassette.ts";
-import { createJevHandle } from "./jev.ts";
-import { createMockJevHandle, DEFAULT_MOCK_POLICY, MOCK_API_KEY } from "./mock.ts";
+import { createVonHandle } from "./von.ts";
+import { createMockVonHandle, DEFAULT_MOCK_POLICY, MOCK_API_KEY } from "./mock.ts";
 import type { LiveBackendName, LivePlan } from "./plan.ts";
 import { createRulesHandle } from "./rules.ts";
 import {
-  AVAILABLE_JEV_MODES,
+  AVAILABLE_VON_MODES,
   cassetteCount,
   closeBackends,
-  resolveJevMode,
+  resolveVonMode,
   selectBackends,
 } from "./select.ts";
 import type { LivePlanner } from "./select.ts";
@@ -110,11 +110,11 @@ function stubPlanner(): { plan: LivePlanner; asked: LiveBackendName[][] } {
         scenarios: 1,
         rows: live.map((backend) => ({
           backend,
-          model: backend === "jev" ? cfg.jevModel : cfg.llmModel,
+          model: backend === "von" ? cfg.vonModel : cfg.llmModel,
           calls: 12,
           inputTokens: 18_000,
           outputTokens: backend === "llm" ? 3600 : 0,
-          usd: backend === "jev" ? 0.000756 : 0.18,
+          usd: backend === "von" ? 0.000756 : 0.18,
           pricesAsOf: cfg.prices.asOf,
         })),
       };
@@ -133,40 +133,40 @@ async function answers(url: string): Promise<boolean> {
   }
 }
 
-describe("resolveJevMode", () => {
+describe("resolveVonMode", () => {
   const none = { hasKey: false, cassettes: 0 };
 
   it("takes an explicit mode as asked", () => {
     for (const mode of ["live", "cassette", "mock"] as const) {
-      expect(resolveJevMode(mode, none, MOCK_MODEL)).toEqual({
+      expect(resolveVonMode(mode, none, MOCK_MODEL)).toEqual({
         mode,
-        reason: `EVAL_JEV_MODE=${mode}`,
+        reason: `EVAL_VON_MODE=${mode}`,
         passedOver: [],
       });
     }
   });
 
   it("walks the auto order: live with a key, cassette with recordings, mock otherwise", () => {
-    expect([...AVAILABLE_JEV_MODES].sort()).toEqual(["cassette", "live", "mock"]);
-    expect(resolveJevMode("auto", { hasKey: true, cassettes: 3 }, MOCK_MODEL)).toEqual({
+    expect([...AVAILABLE_VON_MODES].sort()).toEqual(["cassette", "live", "mock"]);
+    expect(resolveVonMode("auto", { hasKey: true, cassettes: 3 }, MOCK_MODEL)).toEqual({
       mode: "live",
-      reason: "EVAL_JEV_MODE=auto: TYPESAFE_API_KEY is set",
+      reason: "EVAL_VON_MODE=auto: TYPESAFE_API_KEY is set",
       passedOver: [],
     });
-    expect(resolveJevMode("auto", { hasKey: false, cassettes: 3 }, MOCK_MODEL)).toEqual({
+    expect(resolveVonMode("auto", { hasKey: false, cassettes: 3 }, MOCK_MODEL)).toEqual({
       mode: "cassette",
-      reason: `EVAL_JEV_MODE=auto: 3 cassette(s) exist for ${MOCK_MODEL}`,
+      reason: `EVAL_VON_MODE=auto: 3 cassette(s) exist for ${MOCK_MODEL}`,
       passedOver: [],
     });
-    expect(resolveJevMode("auto", none, MOCK_MODEL)).toEqual({
+    expect(resolveVonMode("auto", none, MOCK_MODEL)).toEqual({
       mode: "mock",
-      reason: "EVAL_JEV_MODE=auto: no key and no cassettes",
+      reason: "EVAL_VON_MODE=auto: no key and no cassettes",
       passedOver: [],
     });
   });
 
   it("says what it passed over when a mode is not in the available set", () => {
-    const choice = resolveJevMode(
+    const choice = resolveVonMode(
       "auto",
       { hasKey: true, cassettes: 2 },
       MOCK_MODEL,
@@ -186,11 +186,11 @@ describe("cassetteCount", () => {
     writeFileSync(join(root, MOCK_MODEL, "a.json"), "{}");
     writeFileSync(join(root, MOCK_MODEL, "b.json"), "{}");
     writeFileSync(join(root, MOCK_MODEL, "notes.txt"), "");
-    mkdirSync(join(root, "jev-9.9.9"));
-    writeFileSync(join(root, "jev-9.9.9", "c.json"), "{}");
+    mkdirSync(join(root, "von-9.9.9"));
+    writeFileSync(join(root, "von-9.9.9", "c.json"), "{}");
 
     expect(cassetteCount(MOCK_MODEL, root)).toBe(2);
-    expect(cassetteCount("jev-1.0.0", root)).toBe(0);
+    expect(cassetteCount("von-1.0.0", root)).toBe(0);
   });
 });
 
@@ -200,14 +200,14 @@ describe("counted", () => {
   it("counts calls and the calls that threw, and rethrows untouched", async () => {
     const failure = new DecisionError("timeout", "no answer");
     const backend: DecisionBackend = {
-      name: "jev",
+      name: "von",
       model: MOCK_MODEL,
       decide: () => Promise.reject(failure),
     };
     const stats = newStats();
     const wrapped = counted(backend, stats);
 
-    expect(wrapped.name).toBe("jev");
+    expect(wrapped.name).toBe("von");
     expect(wrapped.model).toBe(MOCK_MODEL);
     await expect(wrapped.decide(input)).rejects.toBe(failure);
     await expect(wrapped.decide(input)).rejects.toBe(failure);
@@ -229,9 +229,9 @@ describe("handles", () => {
   });
 
   it("starts a mock server that accepts only the harness bearer", async () => {
-    const handle = await createMockJevHandle({ jevModel: MOCK_MODEL }, { wall });
+    const handle = await createMockVonHandle({ vonModel: MOCK_MODEL }, { wall });
     try {
-      expect(handle.name).toBe("jev");
+      expect(handle.name).toBe("von");
       expect(handle.mode).toBe("mock");
       expect(handle.model).toBe(MOCK_MODEL);
       expect(handle.server.answerPolicy).toBe(DEFAULT_MOCK_POLICY);
@@ -251,7 +251,7 @@ describe("handles", () => {
   });
 
   it("stops the mock server on close, and a second close is harmless", async () => {
-    const handle = await createMockJevHandle({ jevModel: MOCK_MODEL }, { wall });
+    const handle = await createMockVonHandle({ vonModel: MOCK_MODEL }, { wall });
     expect(await answers(handle.server.url)).toBe(true);
     await handle.close();
     await handle.close();
@@ -259,8 +259,8 @@ describe("handles", () => {
   });
 
   it("takes confident-first when a caller asks for it", async () => {
-    const handle = await createMockJevHandle(
-      { jevModel: MOCK_MODEL },
+    const handle = await createMockVonHandle(
+      { vonModel: MOCK_MODEL },
       { wall },
       { answerPolicy: "confident-first" },
     );
@@ -272,34 +272,34 @@ describe("handles", () => {
   });
 
   it("refuses a model the mock does not answer", async () => {
-    const error = await createMockJevHandle({ jevModel: "jev-1.14.0" }, { wall }).catch(
+    const error = await createMockVonHandle({ vonModel: "von-1.14.0" }, { wall }).catch(
       (caught: unknown) => caught,
     );
     expect(error).toBeInstanceOf(ConfigError);
-    expect((error as ConfigError).flag).toBe("JEV_MODEL");
+    expect((error as ConfigError).flag).toBe("VON_MODEL");
   });
 
   it("builds each mode, and names what a mode is missing", async () => {
-    const live = await createJevHandle(config({ TYPESAFE_API_KEY: FAKE_KEY }), "live", { wall });
+    const live = await createVonHandle(config({ TYPESAFE_API_KEY: FAKE_KEY }), "live", { wall });
     expect(live.mode).toBe("live");
     await live.close();
 
-    const cassette = await createJevHandle(config(), "cassette", {
+    const cassette = await createVonHandle(config(), "cassette", {
       wall,
       cassettesDir: oneCassette(),
     });
     expect(cassette.mode).toBe("cassette");
     await cassette.close();
 
-    const noKey = await createJevHandle(config(), "live", { wall }).catch(
+    const noKey = await createVonHandle(config(), "live", { wall }).catch(
       (caught: unknown) => caught,
     );
     expect((noKey as ConfigError).flag).toBe("TYPESAFE_API_KEY");
-    const noCassettes = await createJevHandle(config(), "cassette", {
+    const noCassettes = await createVonHandle(config(), "cassette", {
       wall,
       cassettesDir: emptyCassettes(),
     }).catch((caught: unknown) => caught);
-    expect((noCassettes as ConfigError).flag).toBe("EVAL_JEV_MODE");
+    expect((noCassettes as ConfigError).flag).toBe("EVAL_VON_MODE");
   });
 
   it("labels the signals with the register map's names", () => {
@@ -311,7 +311,7 @@ describe("handles", () => {
 describe("selectBackends", () => {
   const wall = createFakeWallClock();
 
-  it("resolves rules and mock Jev without keys or cassettes, logs both modes and plans nothing", async () => {
+  it("resolves rules and mock Von without keys or cassettes, logs both modes and plans nothing", async () => {
     const { log, text } = capture();
     const planner = stubPlanner();
     const handles = await selectBackends(config(), {
@@ -323,12 +323,12 @@ describe("selectBackends", () => {
     try {
       expect(handles.map(({ name, mode, model }) => ({ name, mode, model }))).toEqual([
         { name: "rules", mode: "-", model: "rules-v1" },
-        { name: "jev", mode: "mock", model: MOCK_MODEL },
+        { name: "von", mode: "mock", model: MOCK_MODEL },
       ]);
       const written = text();
       expect(written).toContain('backend="rules" mode="-" model="rules-v1"');
-      expect(written).toContain(`backend="jev" mode="mock" model="${MOCK_MODEL}"`);
-      expect(written).toContain("EVAL_JEV_MODE=auto: no key and no cassettes");
+      expect(written).toContain(`backend="von" mode="mock" model="${MOCK_MODEL}"`);
+      expect(written).toContain("EVAL_VON_MODE=auto: no key and no cassettes");
       expect(planner.asked).toEqual([]);
     } finally {
       await closeBackends(handles);
@@ -336,13 +336,13 @@ describe("selectBackends", () => {
   });
 
   it("keeps the order --backends gives", async () => {
-    const handles = await selectBackends(config({}, ["--backends", "jev,rules"]), {
+    const handles = await selectBackends(config({}, ["--backends", "von,rules"]), {
       wall,
       log: capture().log,
       cassettesDir: emptyCassettes(),
     });
     try {
-      expect(handles.map((handle) => handle.name)).toEqual(["jev", "rules"]);
+      expect(handles.map((handle) => handle.name)).toEqual(["von", "rules"]);
     } finally {
       await closeBackends(handles);
     }
@@ -352,8 +352,8 @@ describe("selectBackends", () => {
     const { log, text } = capture();
     const handles = await selectBackends(config(), { wall, log, cassettesDir: oneCassette() });
     try {
-      expect(handles.find((handle) => handle.name === "jev")?.mode).toBe("cassette");
-      expect(text()).toContain(`EVAL_JEV_MODE=auto: 1 cassette(s) exist for ${MOCK_MODEL}`);
+      expect(handles.find((handle) => handle.name === "von")?.mode).toBe("cassette");
+      expect(text()).toContain(`EVAL_VON_MODE=auto: 1 cassette(s) exist for ${MOCK_MODEL}`);
     } finally {
       await closeBackends(handles);
     }
@@ -366,25 +366,25 @@ describe("selectBackends", () => {
       cassettesDir: oneCassette(),
     });
     try {
-      const jev = handles.find((handle) => handle.name === "jev");
-      expect(jev?.mode).toBe("cassette");
-      expect(jev?.stats.cassetteResample).toBe(2);
+      const von = handles.find((handle) => handle.name === "von");
+      expect(von?.mode).toBe("cassette");
+      expect(von?.stats.cassetteResample).toBe(2);
     } finally {
       await closeBackends(handles);
     }
   });
 
-  it("refuses --resample when Jev does not replay cassettes, before building or planning anything", async () => {
+  it("refuses --resample when Von does not replay cassettes, before building or planning anything", async () => {
     const planner = stubPlanner();
     for (const [env, argv, where] of [
-      [{}, ["--resample", "1"], "Jev runs in mock mode"],
-      [{ EVAL_JEV_MODE: "mock" }, ["--resample", "1"], "Jev runs in mock mode"],
+      [{}, ["--resample", "1"], "Von runs in mock mode"],
+      [{ EVAL_VON_MODE: "mock" }, ["--resample", "1"], "Von runs in mock mode"],
       [
-        { EVAL_JEV_MODE: "live", TYPESAFE_API_KEY: FAKE_KEY },
+        { EVAL_VON_MODE: "live", TYPESAFE_API_KEY: FAKE_KEY },
         ["--resample", "1"],
-        "Jev runs in live mode",
+        "Von runs in live mode",
       ],
-      [{}, ["--resample", "1", "--backends", "rules"], "the run does not name jev"],
+      [{}, ["--resample", "1", "--backends", "rules"], "the run does not name von"],
     ] as const) {
       const error = await selectBackends(config(env, argv), {
         wall,
@@ -412,10 +412,10 @@ describe("selectBackends", () => {
     expect(error).toBeInstanceOf(ConfigError);
     expect((error as ConfigError).flag).toBe("--confirm-live");
     const message = (error as Error).message;
-    expect(message).toContain(`jev (${MOCK_MODEL}): 12 planned call(s)`);
+    expect(message).toContain(`von (${MOCK_MODEL}): 12 planned call(s)`);
     expect(message).toContain("USD 0.000756");
     expect(message).toContain("nothing was called");
-    expect(planner.asked).toEqual([["jev"]]);
+    expect(planner.asked).toEqual([["von"]]);
 
     const written = text();
     expect(written).toContain("warn live plan");
@@ -427,13 +427,13 @@ describe("selectBackends", () => {
 
   it("refuses an explicit live mode without --confirm-live, before building anything", async () => {
     const error = await selectBackends(
-      config({ EVAL_JEV_MODE: "live", TYPESAFE_API_KEY: FAKE_KEY }, ["--backends", "rules,jev"]),
+      config({ EVAL_VON_MODE: "live", TYPESAFE_API_KEY: FAKE_KEY }, ["--backends", "rules,von"]),
       { wall, log: capture().log, plan: stubPlanner().plan },
     ).catch((caught: unknown) => caught);
     expect((error as ConfigError).flag).toBe("--confirm-live");
   });
 
-  it("builds a live Jev handle with --confirm-live and logs the plan first", async () => {
+  it("builds a live Von handle with --confirm-live and logs the plan first", async () => {
     const api = await startMockTypeSafe({ port: 0, apiKey: FAKE_KEY });
     const { log, text } = capture();
     try {
@@ -443,11 +443,11 @@ describe("selectBackends", () => {
       );
       expect(handles.map((handle) => `${handle.name}:${handle.mode}`)).toEqual([
         "rules:-",
-        "jev:live",
+        "von:live",
       ]);
       const written = text();
       expect(written.indexOf("live plan")).toBeLessThan(
-        written.indexOf('backend="jev" mode="live"'),
+        written.indexOf('backend="von" mode="live"'),
       );
       expect(written).toContain("confirmed=true");
       expect(written).not.toContain(FAKE_KEY);
@@ -461,7 +461,7 @@ describe("selectBackends", () => {
   it("drops the llm backend without its key, and warns", async () => {
     const { log, text } = capture();
     const handles = await selectBackends(
-      config({ EVAL_JEV_MODE: "mock" }, ["--backends", "rules,llm"]),
+      config({ EVAL_VON_MODE: "mock" }, ["--backends", "rules,llm"]),
       { wall, log, plan: stubPlanner().plan },
     );
     try {
@@ -485,7 +485,7 @@ describe("selectBackends", () => {
     const { log, text } = capture();
     const planner = stubPlanner();
     const error = await selectBackends(
-      config({ EVAL_JEV_MODE: "mock", LLM_API_KEY: FAKE_LLM_KEY }, ["--backends", "rules,jev,llm"]),
+      config({ EVAL_VON_MODE: "mock", LLM_API_KEY: FAKE_LLM_KEY }, ["--backends", "rules,von,llm"]),
       { wall, log, plan: planner.plan },
     ).catch((caught: unknown) => caught);
     expect((error as ConfigError).flag).toBe("--confirm-live");
@@ -496,7 +496,7 @@ describe("selectBackends", () => {
 
   it("builds the keyed llm backend live with --confirm-live", async () => {
     const handles = await selectBackends(
-      config({ EVAL_JEV_MODE: "mock", LLM_API_KEY: FAKE_LLM_KEY }, [
+      config({ EVAL_VON_MODE: "mock", LLM_API_KEY: FAKE_LLM_KEY }, [
         "--backends",
         "llm",
         "--confirm-live",

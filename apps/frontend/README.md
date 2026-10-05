@@ -138,7 +138,7 @@ scripts):
 
 ```bash
 make fixtures                                             # the CI slice the stack replays
-scripts/smoke.sh --mode ci --keep --report reports/smoke  # jev against the mock TypeSafe server, left running
+scripts/smoke.sh --mode ci --keep --report reports/smoke  # von against the mock TypeSafe server, left running
 make e2e                                                  # E2E_BASE_URL, else reports/smoke/ui-url
 docker compose -p "$(cat reports/smoke/project)" down -v --remove-orphans
 ```
@@ -152,7 +152,7 @@ land in review; the rules backend and the review path are covered by the mock pr
 as `scripts/smoke.sh` does. There it closes the injected fault's ticket, since that jump resolves the air-leak ticket.
 
 The fake replays a synthetic compressor waveform at 600× until told otherwise; 90 simulated minutes after a jump to
-"Air leak – 5 Jun 2020" it emits a suspect event, a Jev decision, a ticket and the cost update, and 60 simulated minutes
+"Air leak – 5 Jun 2020" it emits a suspect event, a Von decision, a ticket and the cost update, and 60 simulated minutes
 after "Inject fault → Oil cooler fouling" the same for the injected fault. It also runs on its own:
 `PORT=0 node e2e/fake-backend/server.ts` prints `FAKE_BACKEND_PORT=<n>`. `PERF=0` empties the `perf` project,
 `FDP_TIMING_SLACK` widens every wall-clock bound (1 by default, 3 in CI), and reports land in `playwright-report/` with

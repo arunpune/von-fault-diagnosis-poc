@@ -181,7 +181,7 @@ export function createStore(): Store {
       by_backend: byBackend,
       by_day: days,
       prices: {
-        jev_input_per_mtok: PRICES.jevInputPerMtok,
+        von_input_per_mtok: PRICES.vonInputPerMtok,
         llm_input_per_mtok: null,
         llm_output_per_mtok: null,
         as_of: PRICES.asOf,

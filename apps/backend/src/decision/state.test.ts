@@ -67,7 +67,7 @@ import {
   LONGEST_QUESTION_TOKEN_BUDGET,
   longestQuestionTokens,
   REQUEST_TOKEN_BUDGET,
-} from "./jev/questions.ts";
+} from "./von/questions.ts";
 
 function inputFor(event: DecisionInput["event"], candidateIds: readonly string[]): DecisionInput {
   return {

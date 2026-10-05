@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // A hand-made run for the report tests: every ticket outcome, both backends,
@@ -81,7 +81,7 @@ export const SAMPLE_CATALOG: EvalCatalog = {
 
 /** The configuration the sample run restates, with `--fail-on-gate` on. */
 export function sampleConfig(): ReportConfig {
-  return loadConfig(["--profile", "core", "--fail-on-gate"], { EVAL_JEV_MODE: "mock" });
+  return loadConfig(["--profile", "core", "--fail-on-gate"], { EVAL_VON_MODE: "mock" });
 }
 
 function bound(id: string, profile: Profile): BoundScenario {
@@ -155,7 +155,7 @@ function decisions(backend: BackendName, inputTokens: number): DecisionRecord[] 
 }
 
 /** The decision message and backend output of the sample's second decision. */
-function decisionEvent(backend: "rules" | "jev"): TimedOutput {
+function decisionEvent(backend: "rules" | "von"): TimedOutput {
   const message: Decision = {
     schema: "urn:fdp:schema:decision:v1",
     unit_id: "cau-7",
@@ -165,7 +165,7 @@ function decisionEvent(backend: "rules" | "jev"): TimedOutput {
     event_id: "00000000-0000-4000-8000-000000000022",
     sim_ts: at(180).toISOString(),
     backend,
-    model: backend === "rules" ? "rules-v1" : "jev-1.13.0",
+    model: backend === "rules" ? "rules-v1" : "von-1.13.0",
     status: "ok",
     choice: "oil_cooler_fouled",
     probabilities: { oil_cooler_fouled: 0.92, none_of_these: 0.08 },
@@ -214,10 +214,10 @@ function result(
   suspects: readonly SuspectRecord[] = [],
   decided: readonly DecisionRecord[] = tickets.length === 0
     ? []
-    : decisions(backend.name, backend.name === "jev" ? 1480 : 0),
+    : decisions(backend.name, backend.name === "von" ? 1480 : 0),
 ): ScenarioResult {
   const events =
-    tickets.length === 0 ? [] : [decisionEvent(backend.name === "jev" ? "jev" : "rules")];
+    tickets.length === 0 ? [] : [decisionEvent(backend.name === "von" ? "von" : "rules")];
   const metrics = scoreScenario(
     binding,
     tickets,
@@ -267,7 +267,7 @@ function result(
 function backendRecord(name: BackendName, mode: BackendMode): BackendRecord {
   return {
     name,
-    model: name === "rules" ? "rules-v1" : "jev-1.13.0",
+    model: name === "rules" ? "rules-v1" : "von-1.13.0",
     mode,
     informative: mode !== "mock",
     stats: { calls: 3, failures: 0, cassetteMisses: 0 },
@@ -275,12 +275,12 @@ function backendRecord(name: BackendName, mode: BackendMode): BackendRecord {
 }
 
 /**
- * A run of the oil-cooler scenario and the August diagnostic one against rules and a mock Jev.
+ * A run of the oil-cooler scenario and the August diagnostic one against rules and a mock Von.
  *
  * @param runDir where the run's files would be written; the result only names it.
  */
 export function sampleRunResult(runDir: string): RunResult {
-  const backends = [backendRecord("rules", "-"), backendRecord("jev", "mock")];
+  const backends = [backendRecord("rules", "-"), backendRecord("von", "mock")];
   const oilCooler = bound("inject_oil_cooler_fouling", "core");
   const oilBinding = oilCoolerBinding(oilCooler);
   const august = bound("august_oil_level_aug10", "dev");

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,7 +9,7 @@
 #
 #   ci          compose.yaml + compose.ci.yaml (fixture slice, mock TypeSafe
 #               server with MOCK_ANSWER_POLICY=best-overlap), a unique project
-#               and ephemeral ports; the backend is jev against the mock.
+#               and ephemeral ports; the backend is von against the mock.
 #               `make smoke`.
 #   quickstart  the README path with the rules backend (no key). In CI it runs
 #               the README commands in the current clone; anywhere else it
@@ -17,7 +17,7 @@
 #               ephemeral ports, and never touches .env or a running demo.
 #               `make smoke-quickstart`.
 #   live        compose.yaml with the ONE authoritative .env named by ENV_FILE:
-#               a jev phase, then an llm phase. `make smoke-live`.
+#               a von phase, then an llm phase. `make smoke-live`.
 #
 # Only docker and python3 are needed on the host. Every HTTP call and every
 # look inside a JSON body is done by the Python program embedded below
@@ -78,7 +78,7 @@ INJECTION_MAGNITUDE=2
 # six-hour February segment runs out.
 INJECTION_SPEED=600
 
-JEV_MODEL_DEFAULT=jev-1.13.0
+VON_MODEL_DEFAULT=von-1.13.0
 LLM_MODEL_DEFAULT=claude-opus-5
 RULES_MODEL=rules-v1
 
@@ -857,9 +857,9 @@ Usage: scripts/smoke.sh [--mode ci|quickstart|live] [--project NAME] [--keep]
 Builds the stack, starts it and walks the README tour through the API.
 
   --mode MODE            ci (default): compose.yaml + compose.ci.yaml, mock
-                         decision service, jev backend, ephemeral ports.
+                         decision service, von backend, ephemeral ports.
                          quickstart: the README path, rules backend.
-                         live: compose.yaml with the keys of ENV_FILE, a jev
+                         live: compose.yaml with the keys of ENV_FILE, a von
                          phase and an llm phase.
   --project NAME         Compose project name (default: <mode>-<random>)
   --keep                 leave the stack running and write
@@ -986,15 +986,15 @@ mqtt_client() {
 expected_backend() {
 	case "$MODE" in
 	quickstart) echo rules ;;
-	*) echo jev ;;
+	*) echo von ;;
 	esac
 }
 
 expected_model() {
 	case "$MODE" in
 	quickstart) echo "$RULES_MODEL" ;;
-	live) env_file_value JEV_MODEL "$JEV_MODEL_DEFAULT" ;;
-	*) echo "$JEV_MODEL_DEFAULT" ;;
+	live) env_file_value VON_MODEL "$VON_MODEL_DEFAULT" ;;
+	*) echo "$VON_MODEL_DEFAULT" ;;
 	esac
 }
 
@@ -1285,7 +1285,7 @@ tour() {
 	check cost "$UI" "$REPORT_DIR/decision.json"
 	step_ok "$CHECK_DETAIL"
 
-	# MUST in every mode: jev via the mock always clears the ticket gate, and
+	# MUST in every mode: von via the mock always clears the ticket gate, and
 	# the rules backend must reach at least review on signature A.
 	step_begin ticket
 	check wait-ticket "$UI" "$REPORT_DIR/decision.json" "$(bound "$TICKET_TIMEOUT_S")"
@@ -1619,7 +1619,7 @@ configure() {
 	live)
 		PROJECT="${PROJECT:-live-$RANDOM$RANDOM}"
 		COMPOSE_ARGS=(-p "$PROJECT" --env-file "$ENV_FILE" -f compose.yaml)
-		export DECISION_BACKEND=jev
+		export DECISION_BACKEND=von
 		export LLM_API_KEY=""
 		;;
 	esac

@@ -17,7 +17,7 @@
 //                          backend; every socket is closed as on a restart
 //
 // Run on its own with `node e2e/fake-backend/server.ts`: `PORT` (0, the default, picks a free
-// port), `HOST` (127.0.0.1) and `FAKE_DECISION_BACKEND` (jev | rules); it prints
+// port), `HOST` (127.0.0.1) and `FAKE_DECISION_BACKEND` (von | rules); it prints
 // `FAKE_BACKEND_PORT=<port>` once it listens.
 
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
@@ -54,7 +54,7 @@ const TICKET_FILTERS: readonly TicketStatusFilter[] = [
   "closed",
   "all",
 ];
-const BACKENDS: readonly BackendMode[] = ["jev", "rules"];
+const BACKENDS: readonly BackendMode[] = ["von", "rules"];
 
 export interface FakeBackendOptions {
   /** 0 (the default) lets the system pick a free port. */
@@ -177,7 +177,7 @@ function ticketFilter(url: URL): TicketStatusFilter {
 
 function backendOf(request: Request): BackendMode {
   const fromBody = isRecord(request.body) ? request.body.backend : undefined;
-  const value = textParam(request.url, "backend") ?? fromBody ?? "jev";
+  const value = textParam(request.url, "backend") ?? fromBody ?? "von";
   const backend = BACKENDS.find((candidate) => candidate === value);
   if (backend === undefined) {
     throw new BadRequest(`backend must be one of ${BACKENDS.join(", ")}`, "backend");
@@ -251,7 +251,7 @@ export async function startFakeBackend(options: FakeBackendOptions = {}): Promis
     });
   }
 
-  let scenario = newScenario(options.backend ?? "jev");
+  let scenario = newScenario(options.backend ?? "von");
 
   const routes: readonly Route[] = [
     { method: "GET", pattern: /^\/api\/health$/, handle: () => ok(scenario.health()) },
@@ -495,7 +495,7 @@ export async function startFakeBackend(options: FakeBackendOptions = {}): Promis
 }
 
 async function main(): Promise<void> {
-  const requested = process.env.FAKE_DECISION_BACKEND ?? "jev";
+  const requested = process.env.FAKE_DECISION_BACKEND ?? "von";
   const backend = BACKENDS.find((candidate) => candidate === requested);
   if (backend === undefined) {
     throw new Error(`FAKE_DECISION_BACKEND must be one of ${BACKENDS.join(", ")}`);

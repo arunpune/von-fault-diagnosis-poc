@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # `@fdp/eval`
@@ -6,7 +6,7 @@
 The evaluation harness. It replays MetroPT-3 windows and injected faults through the backend's own
 pipeline, scores the tickets and decisions that come out against ground truth, and writes the
 numbers the README promises: precision and recall per fault, lead time against the controller's own
-alarm, tickets per machine-day, abstention accuracy, cost, and the rules-only baseline beside Jev.
+alarm, tickets per machine-day, abstention accuracy, cost, and the rules-only baseline beside Von.
 
 It runs in process and in TypeScript, so what it scores is the backend's own pipeline rather than a
 re-implementation, and its replay is checked against the Go simulator's for parity. How the
@@ -34,7 +34,7 @@ only preparation.
 | `src/metrics/` | The scoring library — ticket/window matching, precision and recall, lead time, machine-day rates, abstention, cost, the MetroPT-3 check, comparison and the threshold sweep. It imports nothing but `node:` builtins and itself. |
 | `scenarios/` | The 21 evaluation scenarios, the core leak's dev twin and the six sealed held-out scenarios, each carrying its `split` and `positive`. |
 | `src/config.ts` | Flags and environment into one frozen configuration; the keys and the database URL live in `EvalSecrets`, which prints as `[redacted]`. |
-| `src/backends/` | The rules baseline and Jev against the contracts' mock, each wrapped to count its calls; the live Jev and LLM handles (`jev.ts`, `llm.ts`) behind one rate-limited queue each (`ratelimit.ts`), the cassette store and replay server (`digest.ts`, `cassette.ts`, `cassette-server.ts`) and the plan with its cost estimate that every live run prints first (`plan.ts`). |
+| `src/backends/` | The rules baseline and Von against the contracts' mock, each wrapped to count its calls; the live Von and LLM handles (`von.ts`, `llm.ts`) behind one rate-limited queue each (`ratelimit.ts`), the cassette store and replay server (`digest.ts`, `cassette.ts`, `cassette-server.ts`) and the plan with its cost estimate that every live run prints first (`plan.ts`). |
 | `src/runner/host.ts`, `recorder.ts` | One scenario through a fresh pipeline with a fake wall clock, and its event log summarised into tickets and decisions. |
 | `src/runner/run.ts` | The scenario loop, the core-10 gate, the E3 check of `--exit-eval e3` and the exit codes; `types.ts` holds the run record the writers read. |
 | `src/tuning.ts` | The explicit tuning list, its guard against test-split data and the shared-slice report. |
@@ -46,12 +46,12 @@ only preparation.
 | `src/catalog/ingested.ts` | The `ingested` catalog source, read from `app.v_catalog_entries` and `app.catalog_conditions` as role `eval`. |
 | `src/stack/` | Stack mode — `db.ts` (the read-only SELECTs), `score.ts` (rows to records, windows and covered time), `report.ts` (`run.json`, `report.md`, `stack.json`). |
 | `src/commands/score-stack.ts`, `sweep.ts` | `fdp-eval score-stack` and `fdp-eval sweep`. |
-| `src/commands/regate.ts`, `preregistered.ts`, `src/choice.ts` | A stored run back in the metrics' vocabulary and re-gated at one pair, which both sweeps share; `fdp-eval sweep --preregistered`, the choice of the triple by [`records/jev-thresholds-preregistration.md`](records/jev-thresholds-preregistration.md) (per-N resample replays, the grid, the rule, its readings); the committed choice record it writes and the held-out run reads. |
+| `src/commands/regate.ts`, `preregistered.ts`, `src/choice.ts` | A stored run back in the metrics' vocabulary and re-gated at one pair, which both sweeps share; `fdp-eval sweep --preregistered`, the choice of the triple by [`records/von-thresholds-preregistration.md`](records/von-thresholds-preregistration.md) (per-N resample replays, the grid, the rule, its readings); the committed choice record it writes and the held-out run reads. |
 | `test/integration/stack-score.test.ts`, `full-profile.test.ts` | Stack mode and the ingested catalog against a migrated Postgres; one month of the full profile over the real CSV. |
 | `src/commands/record.ts` | `fdp-eval record`, a live run with `--record` that writes cassettes (see [CASSETTES.md](CASSETTES.md)). |
 | `test/backends/cassette-roundtrip.test.ts` | Record, replay and a counted miss through the real run, offline, against a scripted mock (integration suite). |
 | `test/live/` | The opt-in live smoke tests, run only by `test:live` with keys and `--confirm-live`. |
-| `records/` | The pre-registration of Jev's thresholds and its recorded choice, and the held-out set's seal and final-run record; each notes how it was edited for publication in the italic line at its top. |
+| `records/` | The pre-registration of Von's thresholds and its recorded choice, and the held-out set's seal and final-run record; each notes how it was edited for publication in the italic line at its top. |
 
 ## Commands
 
@@ -59,11 +59,11 @@ only preparation.
 | --- | --- |
 | `make eval` | `pnpm --filter @fdp/eval run eval` → `fdp-eval run`, profile from `EVAL_PROFILE` (default `core`) |
 | `make eval-stack` | `fdp-eval score-stack --db-url "$(DATABASE_URL_EVAL)"`: the stack `scripts/smoke.sh --keep` left running (its `reports/smoke/db-url-eval`), else `postgres://eval:eval@localhost:5432/fdp` |
-| `make eval-sweep` | `fdp-eval sweep --preregistered --out reports/eval/sweep`: the triple (`GATE_PERSIST_SIM_MIN` and Jev's pair) chosen as [the pre-registration](records/jev-thresholds-preregistration.md) fixed and amended, from the tuning list's recordings at N = 0 and N = 1 replayed from cassettes, every resample |
+| `make eval-sweep` | `fdp-eval sweep --preregistered --out reports/eval/sweep`: the triple (`GATE_PERSIST_SIM_MIN` and Von's pair) chosen as [the pre-registration](records/von-thresholds-preregistration.md) fixed and amended, from the tuning list's recordings at N = 0 and N = 1 replayed from cassettes, every resample |
 | `pnpm --filter @fdp/eval run validate` | checks the scenario files against the schema and ground truth |
 | `pnpm --filter @fdp/eval run record` | records model answers into cassettes (needs `--confirm-live`) |
 | `pnpm --filter @fdp/eval run score-stack` | scores a run of the Compose stack from the database |
-| `pnpm --filter @fdp/eval run sweep` | re-gates a stored `--tuning` run over a grid of gate thresholds; `--preregistered` makes the pre-registered choice of Jev's thresholds |
+| `pnpm --filter @fdp/eval run sweep` | re-gates a stored `--tuning` run over a grid of gate thresholds; `--preregistered` makes the pre-registered choice of Von's thresholds |
 | `pnpm --filter @fdp/eval test` | the offline suite: no Docker, no key, no dataset needed |
 | `pnpm --filter @fdp/eval test:integration` | the Docker-backed suites, the cassette round trip and the end-to-end smoke run |
 | `pnpm --filter @fdp/eval test:live -- --confirm-live` | the live smoke tests against the real APIs; keys required, and every call is paid |
@@ -94,13 +94,13 @@ replays `metropt3_full` and `f4_precursor_jul14`, which carry the headline failu
 
 `heldout` is the sealed held-out set: six scenarios on six days of their own, split `heldout`, drawn
 blind and sealed in [`records/heldout-seal.md`](records/heldout-seal.md). **It runs once, after the
-Jev thresholds are fixed under the pre-registration**, and nothing else replays it: no other
+Von thresholds are fixed under the pre-registration**, and nothing else replays it: no other
 profile, `--scenario`, the tuning list, the sweep or a live plan selects it. The one run is
-`EVAL_JEV_MODE=live … --profile heldout --final-heldout --confirm-live` with `jev` among the
+`EVAL_VON_MODE=live … --profile heldout --final-heldout --confirm-live` with `von` among the
 backends; the harness refuses `heldout` without `--final-heldout`, with `--scenario`, `--seed`,
-`--fail-on-gate` or `--exit-eval`, with any triple (`GATE_PERSIST_SIM_MIN` and Jev's pair) but the
+`--fail-on-gate` or `--exit-eval`, with any triple (`GATE_PERSIST_SIM_MIN` and Von's pair) but the
 one the pre-registered sweep chose and
-[`records/jev-thresholds-choice.md`](records/jev-thresholds-choice.md) records, and for good once
+[`records/von-thresholds-choice.md`](records/von-thresholds-choice.md) records, and for good once
 [`records/heldout-final-run.md`](records/heldout-final-run.md) records the run. `fdp-eval validate`
 is the one command that may read the six files before then.
 
@@ -108,7 +108,7 @@ is the one command that may read the six files before then.
 
 ```bash
 make fixtures                                             # once: cut the slices
-EVAL_PROFILE=smoke EVAL_JEV_MODE=mock make eval           # what CI runs, about 3 s
+EVAL_PROFILE=smoke EVAL_VON_MODE=mock make eval           # what CI runs, about 3 s
 pnpm --filter @fdp/eval run eval -- --profile core --fail-on-gate      # the core-10 counts only
 pnpm --filter @fdp/eval run eval -- --profile core --backends rules \
   --catalog file:reports/eval/ingested-realistic.json     # the headline catalog, as init extracts it
@@ -117,22 +117,22 @@ pnpm --filter @fdp/eval run eval -- --tuning --backends rules --catalog referenc
 pnpm --filter @fdp/eval run eval -- --help                # every flag
 ```
 
-The flags: `--profile`, `--backends rules,jev[,llm]` (default `rules,jev`), `--scenario <id>`
+The flags: `--profile`, `--backends rules,von[,llm]` (default `rules,von`), `--scenario <id>`
 (repeatable; it narrows the profile and refuses an id the profile does not replay),
 `--catalog reference|file:<path>|ingested`, `--db-url`, `--record`, `--confirm-live`, `--out <dir>`
 (default `reports/eval` at the repository root), `--jobs 1`, `--seed` and `--fail-on-gate`, plus
 `--exit-eval e3` and `--tuning` (below), and `--resample <r>` (cassette mode only: serve each
 repeated request's recorded answers rotated by r; see [CASSETTES.md](CASSETTES.md)). Flags win over
 the environment. The gate reads each backend's own pair: `GATE_TICKET_MIN_CONFIDENCE` and
-`GATE_REVIEW_MIN_CONFIDENCE` for rules and llm, `JEV_GATE_TICKET_MIN_CONFIDENCE` and
-`JEV_GATE_REVIEW_MIN_CONFIDENCE` for Jev (0.85 and 0.65 by default, the pre-registered choice in
-[`records/jev-thresholds-choice.md`](records/jev-thresholds-choice.md), whatever `GATE_*` says), and
-`run.json` records it on `backends[].thresholds`. `EVAL_JEV_MODE` picks how Jev is reached (`auto`,
+`GATE_REVIEW_MIN_CONFIDENCE` for rules and llm, `VON_GATE_TICKET_MIN_CONFIDENCE` and
+`VON_GATE_REVIEW_MIN_CONFIDENCE` for Von (0.85 and 0.65 by default, the pre-registered choice in
+[`records/von-thresholds-choice.md`](records/von-thresholds-choice.md), whatever `GATE_*` says), and
+`run.json` records it on `backends[].thresholds`. `EVAL_VON_MODE` picks how Von is reached (`auto`,
 `live`, `cassette`, `mock`); without a key or cassettes, and always in CI, it is the contracts' mock
-server, and every Jev figure of such a run is **not informative**; how cassettes are recorded,
+server, and every Von figure of such a run is **not informative**; how cassettes are recorded,
 replayed and kept is [CASSETTES.md](CASSETTES.md). With `TYPESAFE_API_KEY` exported, `auto` resolves
 to `live`, so every live run is planned first and refused (exit 1) without `--confirm-live`:
-`make eval` then prints the plan and stops, and `EVAL_JEV_MODE=cassette` or `mock` runs it without
+`make eval` then prints the plan and stops, and `EVAL_VON_MODE=cassette` or `mock` runs it without
 calling. `make eval` passes no flag, so a flag goes through
 `pnpm --filter @fdp/eval run eval -- <flags>`.
 
@@ -158,7 +158,7 @@ keeps what a re-score needs — its windows, excluded windows, benign causes and
 its choice and confidence — in the field names of `fixtures/metrics/`. The event logs keep every
 output of the pipeline except a decision's state and its raw provider bodies; the state is
 represented by its `state_digest`. Reports are written under the gitignored `reports/`, and
-Jev-derived figures stay there: they are not published
+Von-derived figures stay there: they are not published
 ([CASSETTES.md](CASSETTES.md#why-cassettes-are-not-committed)).
 
 A summary table is printed on stdout (log lines go to stderr): one line per scenario with each
@@ -172,7 +172,7 @@ none; an abstain case keeps the ticket rule. *Review diagnosis* is the ticket ru
 an accepted fault at review-or-ticket level in time, the false tickets within the allowance — which
 "detection" named before E3 was re-scoped to detection on 2026-09-24. *Diagnosis* adds that the
 first ticket-level ticket in the window names an accepted fault. The rules backend is gated at
-detection and Jev at diagnosis; the rules backend's two diagnosis flags are a recorded baseline.
+detection and Von at diagnosis; the rules backend's two diagnosis flags are a recorded baseline.
 
 ### Reading the report
 
@@ -184,7 +184,7 @@ detection and Jev at diagnosis; the rules backend's two diagnosis flags are a re
    with its evidence and the rules backend's diagnosis baseline when the run was started with
    `--exit-eval e3`, and every scenario with its group, split and three pass flags per backend.
 2. **Comparison** — one row per metric, one column per backend with its mode in the heading; a
-   mock Jev column reads *mock — not informative*.
+   mock Von column reads *mock — not informative*.
 3. **Per-fault precision and recall**, at ticket and at review level.
 4. **Lead times** — per detected window, against the controller's own alarm and the low-pressure
    switch; `≥` marks a latency measured from an onset that is only a lower bound (F1).
@@ -205,9 +205,9 @@ window), `benign` (a cause the scenario calls normal operation) or `warmup` (ope
 scenario's warmup ended, replayed but never scored). Diagnostic scenarios are replayed and listed
 but never scored.
 
-**Which gate.** Each backend is counted at its own level — rules at detection, Jev at diagnosis —
-and the gate the run reports (and `--fail-on-gate` enforces) is Jev's only when Jev ran live or from
-cassettes; with a mock Jev it is the rules baseline's. A run that scored all ten core-10 scenarios
+**Which gate.** Each backend is counted at its own level — rules at detection, Von at diagnosis —
+and the gate the run reports (and `--fail-on-gate` enforces) is Von's only when Von ran live or from
+cassettes; with a mock Von it is the rules baseline's. A run that scored all ten core-10 scenarios
 passes or fails by the core-10 rule: at least 8 of the 10 and 5 of the 6 positives. A run that
 scored only some of them — the smoke profile, a `--scenario` list — is `attainable` while the
 failures it has seen still leave room for both thresholds and `unattainable` once they do not; only
@@ -225,7 +225,7 @@ split.
 and depot days already make 8/10. E3
 ([the evaluation gates](../../docs/evaluation.md#the-evaluation-gates-e1-to-e6))
 asks for more, so `--exit-eval e3` checks all five of its conditions on the **rules** backend (E3 is
-rules-only; with `--backends rules,jev` it reads the rules pairs, and a `--backends` list without
+rules-only; with `--backends rules,von` it reads the rules pairs, and a `--backends` list without
 `rules` is refused). E3 was re-scoped on 2026-09-24, after the E3 and E4 results had been seen: it
 gates the rules layer's **detection** — suspect events — and no longer its diagnosis; the thresholds
 did not move:
@@ -247,21 +247,21 @@ were covered and held, and `incomplete` otherwise: `E3 INCOMPLETE — not a pass
 the console and in report.md's headline, exit 0 on its own. `run.json` carries the check as its
 `exit_eval` block, and beside the conditions its `baseline`: the rules backend's diagnosis figures
 — the core-10 at review diagnosis and at diagnosis, and the MetroPT-3 check on tickets at
-review-or-ticket level — marked `gated: false`, reported and never part of the verdict. E4 (Jev,
+review-or-ticket level — marked `gated: false`, reported and never part of the verdict. E4 (Von,
 ≥ 8/10 at diagnosis level) is the diagnosis gate.
 
 No single run covers all five, because `frozen_logger_jun22` is dev split and a core run never
-replays it. The E3 recipe is therefore two readings plus the ablation (`EVAL_JEV_MODE=mock`; keys
+replays it. The E3 recipe is therefore two readings plus the ablation (`EVAL_VON_MODE=mock`; keys
 are never needed):
 
 ```bash
 # 1. The headline: the core-10 on the catalog init extracts from the realistic PDF.
 uv run --package fdp-init fdp-init export-catalog --manual data/manual/cau-7-realistic.pdf \
   --out reports/eval/ingested-realistic.json
-pnpm --filter @fdp/eval run eval -- --profile core --backends rules,jev \
+pnpm --filter @fdp/eval run eval -- --profile core --backends rules,von \
   --catalog file:reports/eval/ingested-realistic.json --fail-on-gate --exit-eval e3
 # 2. The ablation: the same on the reference catalog.
-pnpm --filter @fdp/eval run eval -- --profile core --backends rules,jev \
+pnpm --filter @fdp/eval run eval -- --profile core --backends rules,von \
   --catalog reference --fail-on-gate --exit-eval e3
 # 3. The one E3 negative a core run never replays.
 pnpm --filter @fdp/eval run eval -- --profile dev --backends rules \
@@ -362,7 +362,7 @@ database holds nothing replayed or diagnosed in the range.
 ## The threshold sweep
 
 ```bash
-make eval-sweep                                              # the pre-registered choice of Jev's thresholds
+make eval-sweep                                              # the pre-registered choice of Von's thresholds
 pnpm --filter @fdp/eval run sweep -- --run reports/eval/<run>/run.json --grid 0.6:0.95:0.05x0.5:0.8:0.05
 ```
 
@@ -380,22 +380,22 @@ because an episode that owns no ticket is decided only once its evidence has hel
 sooner or later than the run did would have taken other decisions. One half of that is respected: a
 decision whose evidence had not yet held for `GATE_PERSIST_SIM_MIN` (its `persisted_sim_min` in
 `run.json`), which only an episode owning a ticket could take, never opens a ticket at another pair.
-Each backend is re-gated around the pair its gate applied (`backends[].thresholds`; Jev has its own
+Each backend is re-gated around the pair its gate applied (`backends[].thresholds`; Von has its own
 pair since 2026-09-24). It reads a `--tuning` run only: a stack run, another profile or a test-split
 scenario is refused (exit 1) unless `--allow-test-split` is given, which reports and never chooses.
 Every table is a reading, not a proposal: a `GATE_*` change is a deliberate decision that cites the
 tuning run, and no threshold is lowered to pass E3.
 
-### The pre-registered choice of Jev's thresholds and the persistence
+### The pre-registered choice of Von's thresholds and the persistence
 
 `make eval-sweep` runs `fdp-eval sweep --preregistered`, the procedure
-[`records/jev-thresholds-preregistration.md`](records/jev-thresholds-preregistration.md) fixed
-before any Jev decision on the tuning list existed. Its amendment of 2026-09-24, also made before
+[`records/von-thresholds-preregistration.md`](records/von-thresholds-preregistration.md) fixed
+before any Von decision on the tuning list existed. Its amendment of 2026-09-24, also made before
 any, makes the choice a **triple**: `GATE_PERSIST_SIM_MIN` (N, the sim minutes a symptom must
-persist before an episode without a ticket is decided) with Jev's review and ticket thresholds. It
+persist before an episode without a ticket is decided) with Von's review and ticket thresholds. It
 calls nothing:
 
-1. For each N of 0 and 1, it replays the tuning list for Jev alone, from that N's own recording,
+1. For each N of 0 and 1, it replays the tuning list for Von alone, from that N's own recording,
    gated at 0.60 / 0.85 (the pair of the recordings) with `GATE_PERSIST_SIM_MIN` = N. The first
    replay goes into `reports/eval/sweep/persist-<N>/resample-0/`, then once more per further
    answer the fullest cassette it hit holds at N into `resample-<r>/` (`--resample r`: each
@@ -435,36 +435,36 @@ three cases:
 - **A resample is not given back.** Re-gated at 0.60 / 0.85, it does not reproduce its own run.
 
 `--record-choice` writes the choice once to
-[`records/jev-thresholds-choice.md`](records/jev-thresholds-choice.md), from the runs already swept
+[`records/von-thresholds-choice.md`](records/von-thresholds-choice.md), from the runs already swept
 when given with `--from-runs` (`src/choice.ts`). The record holds the triple as the three variables,
 the outcome, the pre-registration's commit, the report's path, the catalog and the resample runs. It
-holds no Jev figure, and not the clause of the rule that decided, because each clause states an
-outcome of Jev's figures on the tuning list and neither is published. It refuses a withheld choice
+holds no Von figure, and not the clause of the rule that decided, because each clause states an
+outcome of Von's figures on the tuning list and neither is published. It refuses a withheld choice
 and an existing record. The record is then committed, and the choice applied by setting
-`GATE_PERSIST_SIM_MIN`, `JEV_GATE_REVIEW_MIN_CONFIDENCE` and `JEV_GATE_TICKET_MIN_CONFIDENCE`. The
+`GATE_PERSIST_SIM_MIN`, `VON_GATE_REVIEW_MIN_CONFIDENCE` and `VON_GATE_TICKET_MIN_CONFIDENCE`. The
 sealed held-out set's one run is refused with any other triple, or before the record is committed.
 
 The recordings are the paid steps before it, one per N. Without `--confirm-live`, each of these
 commands prints its plan and calls nothing:
 
 ```bash
-GATE_PERSIST_SIM_MIN=0 JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning
-GATE_PERSIST_SIM_MIN=1 JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning
+GATE_PERSIST_SIM_MIN=0 VON_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning
+GATE_PERSIST_SIM_MIN=1 VON_GATE_REVIEW_MIN_CONFIDENCE=0.60 pnpm --filter @fdp/eval run record -- --tuning
 ```
 
 The same two commands with `--confirm-live` record ([CASSETTES.md](CASSETTES.md)).
 
-Since 2026-09-24 the code defaults are the chosen triple: N = 1, Jev at 0.65 / 0.85. Which clause
-decided is not published, because each clause states an outcome of Jev's figures.
+Since 2026-09-24 the code defaults are the chosen triple: N = 1, Von at 0.65 / 0.85. Which clause
+decided is not published, because each clause states an outcome of Von's figures.
 The recordings were made at 0.60 / 0.85, and the sweep still replays them there. A re-recording of the
-tuning list therefore sets `JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60`, or `record` warns, and so does any
+tuning list therefore sets `VON_GATE_REVIEW_MIN_CONFIDENCE=0.60`, or `record` warns, and so does any
 other cassette replay of those recordings.
 
 ## In CI
 
 The `eval-smoke` job of `.github/workflows/ci.yml` runs
 `pnpm --filter @fdp/eval run eval -- --fail-on-gate` with `EVAL_PROFILE=smoke` and
-`EVAL_JEV_MODE=mock` in every run of the workflow, and uploads `reports/eval/**` as the `eval-smoke`
+`EVAL_VON_MODE=mock` in every run of the workflow, and uploads `reports/eval/**` as the `eval-smoke`
 artifact. With the rules backend gated at detection level the smoke scenarios leave the core-10
 gate attainable, so the job exits 0; it exits 2 once they put the gate out of reach. The Docker suites
 (`pnpm --filter @fdp/eval test:integration`: parity, stack mode, the smoke E2E) run in the node leg
@@ -490,7 +490,7 @@ restored the dataset. To reuse a copy of the 218 MB source CSV already on disk, 
 another checkout, point `METROPT_CSV_HOST` at it.
 
 `fixtures/catalog.json` is the reference fault catalog `make manual` writes. The harness reads it and
-never edits it. `fixtures/cassettes/` holds recorded model answers and is gitignored: recorded Jev
+never edits it. `fixtures/cassettes/` holds recorded model answers and is gitignored: recorded Von
 answers are not published ([CASSETTES.md](CASSETTES.md#why-cassettes-are-not-committed)).
 
 ## The isolation rule

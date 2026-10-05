@@ -9,7 +9,7 @@
 //   * `profile` — how long to wait: the stack decides only after its decision interval, up to
 //     `DECISION_INTERVAL_SIM_MIN` × 60 / speed seconds after the symptom plus retrieval, so its
 //     bounds are generous (120 s). Every wall-clock bound is multiplied by `FDP_TIMING_SLACK`
-//     (1 locally, 3 in CI). Both backends answer the tour with jev-1.13.0 and open tickets: the
+//     (1 locally, 3 in CI). Both backends answer the tour with von-1.13.0 and open tickets: the
 //     stack's mock TypeSafe server runs the `best-overlap` policy, which answers at 0.9 and so
 //     always clears the 0.85 ticket gate.
 //   * `fakeBackend` — the control API of the fake (`/__test/*`), or null in stack mode, where a
@@ -34,7 +34,7 @@ export interface E2EOptions {
 }
 
 /** The decision backends the fake can play. */
-export type FakeDecisionBackend = "jev" | "rules";
+export type FakeDecisionBackend = "von" | "rules";
 
 export interface ModeProfile {
   readonly mode: E2EMode;
@@ -107,7 +107,7 @@ export interface FakeBackendControl {
 
 function controlOf(request: APIRequestContext): FakeBackendControl {
   return {
-    async reset(backend = "jev") {
+    async reset(backend = "von") {
       await expectOk(await request.post("/__test/reset", { data: { backend } }), "/__test/reset");
     },
     async emit(frame) {

@@ -599,7 +599,7 @@ function createSerialQueue(): <T>(task: () => Promise<T>) => Promise<T> {
 // registry's severity hints.
 export { Secret } from "../config/secret.ts";
 export { createCatalogRetriever } from "../retrieval/index.ts";
-export { createJevBackend } from "../decision/jev/index.ts";
+export { createVonBackend } from "../decision/von/index.ts";
 export { createAnthropicProvider, createLlmBackend } from "../decision/llm/index.ts";
 export { selectBackend } from "../decision/select.ts";
 export { buildState } from "../decision/state.ts";
@@ -611,7 +611,7 @@ export type { Decision, SuspectEvent, TelemetrySamples, Ticket } from "@fdp/cont
 export type { WallClock } from "../clock.ts";
 export type { Env } from "../config/env.ts";
 export type { Prices } from "../cost/index.ts";
-export type { JevBackendOptions } from "../decision/jev/index.ts";
+export type { VonBackendOptions } from "../decision/von/index.ts";
 export type { AnthropicProviderOptions, LlmBackendOptions } from "../decision/llm/index.ts";
 export type { LlmProvider } from "../decision/llm/provider.ts";
 export type { RulesBackendOptions } from "../decision/rules/index.ts";

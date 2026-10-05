@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The local server a cassette run's Jev backend talks to
+// The local server a cassette run's Von backend talks to
 // (tools/eval/CASSETTES.md).
 //
 // It is the contracts' mock TypeSafe server with one scripted policy: the
 // digest of each incoming `{ model, state, questions }` is looked up among the
-// recorded cassettes, and a hit answers with the recorded answers. So the Jev
+// recorded cassettes, and a hit answers with the recorded answers. So the Von
 // backend is the real one in cassette mode too — the same state, the same
 // questions, the same SDK, the same parser — and only the answers come from a
 // file instead of from the model.
@@ -26,12 +26,12 @@
 // the model really answered, and over k resamples every arrival of a repeated
 // request is served every answer the recording holds — which is how the
 // pre-registered threshold sweep reads each alternative answer without a new
-// call (tools/eval/records/jev-thresholds-preregistration.md). A request with
+// call (tools/eval/records/von-thresholds-preregistration.md). A request with
 // one answer gets it in every resample. `answersMax` says how many answers the
 // fullest cassette the run hit held: the number of resamples it can give.
 //
 // A server told a GATE_PERSIST_SIM_MIN (`persistSimMin`, the run's own) serves
-// each cassette's recording made at that value, and only it: the Jev
+// each cassette's recording made at that value, and only it: the Von
 // thresholds pre-registration's amendment of 2026-09-24 records the tuning
 // list at N = 0 and at N = 1 into one store, and judges each N on its own
 // recording (`cassette.ts`). A cassette that holds recordings at other values

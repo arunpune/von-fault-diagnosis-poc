@@ -80,7 +80,7 @@ export interface CostLedgerRow extends Prices {
 /**
  * The prices `backend` is billed at.
  *
- * Jev bills input tokens only — its answers are option ids and numbers, and
+ * Von bills input tokens only — its answers are option ids and numbers, and
  * the price list carries no output price for it — and the rules twin calls
  * nothing at all, so its rows cost zero and still exist, which is what makes
  * "what would this run have cost with a model" answerable from one table.
@@ -88,9 +88,9 @@ export interface CostLedgerRow extends Prices {
 export function pricesFor(env: Env, backend: DecisionBackendName): Prices {
   const asOf = env.prices.asOf;
   switch (backend) {
-    case "jev":
+    case "von":
       return {
-        price_input_per_mtok: env.prices.jevInputPerMtok,
+        price_input_per_mtok: env.prices.vonInputPerMtok,
         price_output_per_mtok: 0,
         prices_as_of: asOf,
       };
@@ -110,13 +110,13 @@ export function pricesFor(env: Env, backend: DecisionBackendName): Prices {
  *
  * The language-model prices are `null` until a key configures that backend,
  * because a figure the run could not have been billed at would read as a claim
- * about what it spent. Jev's input price is always shown: the cost panel uses
+ * about what it spent. Von's input price is always shown: the cost panel uses
  * it to price a run that has not called anything yet.
  */
 export function summaryPrices(env: Env): ApiCost["prices"] {
   const llmConfigured = env.llmApiKey !== null;
   return {
-    jev_input_per_mtok: env.prices.jevInputPerMtok,
+    von_input_per_mtok: env.prices.vonInputPerMtok,
     llm_input_per_mtok: llmConfigured ? env.prices.llmInputPerMtok : null,
     llm_output_per_mtok: llmConfigured ? env.prices.llmOutputPerMtok : null,
     as_of: env.prices.asOf,

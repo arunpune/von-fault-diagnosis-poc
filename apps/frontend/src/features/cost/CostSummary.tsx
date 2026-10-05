@@ -3,7 +3,7 @@
 
 // The running total of the Cost tab: what every billed decision has cost so far, the calls and
 // tokens behind it, the prices it was computed with and the day they were checked, and the
-// split per decision backend. Costs keep six decimals, so a Jev decision billed at $0.000077 is
+// split per decision backend. Costs keep six decimals, so a Von decision billed at $0.000077 is
 // visible and not rounded to zero.
 
 import { useId } from "react";

@@ -112,7 +112,7 @@ describe("TicketSheet", () => {
 
     const [failed, answered] = rows as [HTMLElement, HTMLElement];
     expect(failed).toHaveTextContent("2020-06-05 10:11:12");
-    expect(failed).toHaveTextContent("Jev");
+    expect(failed).toHaveTextContent("Von");
     expect(failed).toHaveTextContent("—");
     expect(failed).toHaveTextContent("Failed");
     expect(answered).toHaveTextContent("2020-06-05 09:41:12");

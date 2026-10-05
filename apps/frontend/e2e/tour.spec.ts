@@ -5,7 +5,7 @@
 // locators and the test ids of src/lib/testids.ts only — no CSS selector, no DOM structure:
 //
 //   1. Play: the replay plays at 600×, the recorder draws its lanes, the sim clock moves and the
-//      status bar names the decision backend, Jev with jev-1.13.0.
+//      status bar names the decision backend, Von with von-1.13.0.
 //   2. Jump to "Air leak – 5 Jun 2020": a toast, the jump marker, the recorder re-anchored on
 //      5 June, signature A (the unit stays loaded, purge pressure far above its resting value)
 //      and, once the replay passes 10:00, the band of dataset failure F3.
@@ -43,8 +43,8 @@ import { tid } from "@/lib/testids";
 /** The README's replay speed: ten simulated minutes per wall second. */
 const README_SPEED = 600;
 
-/** Both backends answer the tour with Jev: the fake by script, the stack through its mock. */
-const DECISION_BACKEND = "Jev · jev-1.13.0";
+/** Both backends answer the tour with Von: the fake by script, the stack through its mock. */
+const DECISION_BACKEND = "Von · von-1.13.0";
 
 const F3_PRESET = "Air leak – 5 Jun 2020";
 const F3_DAY = "2020-06-05";
@@ -100,7 +100,7 @@ const EXPECTED: Readonly<Record<E2EMode, TourExpectations>> = {
     injectionAtMaximum: false,
     injectedChosen: true,
   },
-  // The stack's mock Jev answers by best overlap at 0.9, and an open episode is decided again at
+  // The stack's mock Von answers by best overlap at 0.9, and an open episode is decided again at
   // every decision interval. Its fixture slice holds 06:00–14:00 of 5 June, where the injected
   // oil temperature never trips a rule before the segment ends, and six hours of February, where
   // it does at full magnitude after about 150 simulated minutes: the choice scripts/smoke.sh

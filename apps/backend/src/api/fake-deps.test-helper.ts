@@ -132,7 +132,7 @@ export function runtimeStatus(): RuntimeStatus {
 function fixtureDecisions(): Decision[] {
   return [
     contract<Decision>("decision", "valid-failed.json"),
-    contract<Decision>("decision", "valid-jev-ticket.json"),
+    contract<Decision>("decision", "valid-von-ticket.json"),
   ];
 }
 
@@ -219,9 +219,9 @@ export function fakeApiDeps(): FakeApi {
         ticketMinConfidence: 0.85,
         reviewMinConfidence: 0.6,
         persistSimMin: 1,
-        jev: { ticketMinConfidence: 0.85, reviewMinConfidence: 0.6 },
+        von: { ticketMinConfidence: 0.85, reviewMinConfidence: 0.6 },
       },
-      decisionBackend: "jev",
+      decisionBackend: "von",
     },
     ingest,
     detector,
@@ -257,7 +257,7 @@ export function fakeApiDeps(): FakeApi {
       tickets: readers.tickets,
       cost: {
         async summary() {
-          return contract<ApiCost>("api-cost", "valid-jev-and-llm.json");
+          return contract<ApiCost>("api-cost", "valid-von-and-llm.json");
         },
         async ledger(limit) {
           calls.ledger.push(limit);

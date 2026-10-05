@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The mock TypeSafe System One server. Every unit test, every integration test and the Compose CI
@@ -54,16 +54,16 @@ import responseSchema from "./schemas/systemone-response.schema.json" with { typ
 const Ajv2020 = _Ajv2020 as unknown as typeof _Ajv2020.default;
 
 /** The versioned model id the mock always answers with, and the aliases it accepts. */
-export const MOCK_MODEL = "jev-1.13.0";
+export const MOCK_MODEL = "von-1.13.0";
 
 /** The model ids `POST /v1/systemone` accepts; anything else is a 422. */
-export const ACCEPTED_MODELS: readonly string[] = [MOCK_MODEL, "jev-latest", "jev-preview"];
+export const ACCEPTED_MODELS: readonly string[] = [MOCK_MODEL, "von-latest", "von-preview"];
 
 /** What `GET /v1/models` answers. The real docs do not publish this body. */
 export const MOCK_MODEL_LIST = {
   models: [
-    { id: "jev-latest", resolves_to: MOCK_MODEL },
-    { id: "jev-preview", resolves_to: MOCK_MODEL },
+    { id: "von-latest", resolves_to: MOCK_MODEL },
+    { id: "von-preview", resolves_to: MOCK_MODEL },
   ],
 } as const;
 
@@ -96,7 +96,7 @@ export interface MockTypeSafeOptions {
   readonly host?: string;
   /** The single accepted bearer token. Left out, any non-empty bearer is accepted. */
   readonly apiKey?: string;
-  /** The model id every response reports. Default `jev-1.13.0`. */
+  /** The model id every response reports. Default `von-1.13.0`. */
   readonly model?: string;
   /** Delay before each API answer, for reproducing a slow upstream. */
   readonly latencyMs?: number;

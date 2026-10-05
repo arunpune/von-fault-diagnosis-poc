@@ -8,7 +8,7 @@
   "author": "Meddle S.r.l.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/meddleconnect/jev-fault-diagnosis-poc"
+    "url": "https://github.com/meddleconnect/von-fault-diagnosis-poc"
   },
   "engines": {
     "node": ">=24.18.0 <25"
@@ -38,12 +38,12 @@
     "@fastify/websocket": "catalog:",
     "@fdp/contracts": "workspace:*",
     "@huggingface/tokenizers": "catalog:",
-    "@typesafe-ai/sdk": "catalog:",
     "fastify": "catalog:",
     "mqtt": "catalog:",
     "onnxruntime-node": "catalog:",
     "pg": "catalog:",
     "pino": "catalog:",
+    "von-sdk": "^1.3.7",
     "zod": "catalog:"
   },
   "devDependencies": {

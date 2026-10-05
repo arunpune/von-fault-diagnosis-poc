@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 # SPDX-License-Identifier: CC0-1.0
 
 pnpm-lock.yaml
@@ -71,8 +71,8 @@ packages/contracts/fixtures/embeddings/**
 # export.
 apps/backend/test/fixtures/catalog/man/catalog.json
 
-# The golden Jev request and its reported tokens. The test compares the file
+# The golden Von request and its reported tokens. The test compares the file
 # byte for byte with JSON.stringify(body, null, 2) of the request the SDK
 # sent, and `vitest -u` rewrites it that way; Prettier collapses the short
 # arrays, which would break the comparison and leave the tree dirty.
-apps/backend/test/fixtures/jev/*.json
+apps/backend/test/fixtures/von/*.json

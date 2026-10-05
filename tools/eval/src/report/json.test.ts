@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `run.json`: built from a hand-made run, validated by its own schema, and
@@ -150,7 +150,7 @@ describe("the run block", () => {
         persist_sim_min: 1,
       },
       rules_disabled: ["flow_pulses_missing"],
-      prices: { jev_input_per_mtok: 0.042, as_of: "2026-09-19" },
+      prices: { von_input_per_mtok: 0.042, as_of: "2026-09-19" },
       seed: null,
     });
   });
@@ -183,18 +183,18 @@ describe("the run block", () => {
     };
     expect(report.backends).toEqual([
       { name: "rules", model: "rules-v1", mode: "-", informative: true, ...counters },
-      { name: "jev", model: "jev-1.13.0", mode: "mock", informative: false, ...counters },
+      { name: "von", model: "von-1.13.0", mode: "mock", informative: false, ...counters },
     ]);
   });
 
   it("carries a cassette backend's hits, misses and missed digests, and a live one's queue", () => {
     const sample = sampleRunResult(runDir);
-    const [rules, jev] = sample.backends;
-    if (rules === undefined || jev === undefined) {
+    const [rules, von] = sample.backends;
+    if (rules === undefined || von === undefined) {
       throw new Error("the sample run has two backends");
     }
     const cassette = {
-      ...jev,
+      ...von,
       mode: "cassette" as const,
       informative: true,
       stats: {
@@ -343,7 +343,7 @@ describe("a scenario entry", () => {
   });
 
   it("marks a diagnostic scenario as reported, not scored", () => {
-    expect(scenario("august_oil_level_aug10", "jev").scored).toBe(false);
+    expect(scenario("august_oil_level_aug10", "von").scored).toBe(false);
     expect(entry.scored).toBe(true);
   });
 });
@@ -353,7 +353,7 @@ describe("the summary and the gate", () => {
     expect(report.summary?.headline_backend).toBe("rules");
     expect(report.summary?.backends.map((backend) => [backend.backend, backend.scenarios])).toEqual(
       [
-        ["jev", 1],
+        ["von", 1],
         ["rules", 1],
       ],
     );
@@ -381,7 +381,7 @@ describe("the summary and the gate", () => {
       positives_scored: 1,
       positives_total: 6,
       failed: ["inject_oil_cooler_fouling"],
-      core10: { rules_detection: "0/10", jev_diagnosis: "0/10" },
+      core10: { rules_detection: "0/10", von_diagnosis: "0/10" },
     });
     expect(report.gate?.missing).toHaveLength(9);
   });

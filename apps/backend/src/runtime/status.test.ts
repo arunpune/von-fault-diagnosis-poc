@@ -41,7 +41,7 @@ function fixture<T>(schema: string, file: string): T {
 const SIM = fixture<StatusSim>("status-sim", "valid-playing.json");
 const PAUSED = fixture<StatusSim>("status-sim", "valid-paused.json");
 const GATEWAY = fixture<StatusGateway>("status-gateway", "valid-connected.json");
-const BACKEND = fixture<StatusBackend>("status-backend", "valid-jev.json");
+const BACKEND = fixture<StatusBackend>("status-backend", "valid-von.json");
 const ALERT = fixture<AlertSystem>("alert-system", "valid-raised.json");
 const CATALOG = fixture<GroundTruthCatalog>("gt-catalog", "valid-full.json");
 const ACTIVE = fixture<ActiveFaultInjections>("gt-injection-active", "valid-one-running.json");

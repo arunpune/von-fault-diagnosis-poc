@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Stack mode's scoring: the rows a running stack left in Postgres, turned into
@@ -661,14 +661,14 @@ export function stackPersistence(decisions: readonly DecisionRow[], fallback: nu
  */
 export function stackPrices(ledger: readonly LedgerRow[], fallback: Prices): Prices {
   const latest = (backend: string) => ledger.find((row) => row.backend === backend);
-  const jev = latest("jev");
+  const von = latest("von");
   const llm = latest("llm");
   const asOf = ledger
     .map((row) => row.prices_as_of)
     .sort()
     .pop();
   return {
-    jevInputPerMtok: jev?.price_input_per_mtok ?? fallback.jevInputPerMtok,
+    vonInputPerMtok: von?.price_input_per_mtok ?? fallback.vonInputPerMtok,
     llmInputPerMtok: llm?.price_input_per_mtok ?? fallback.llmInputPerMtok,
     llmOutputPerMtok: llm?.price_output_per_mtok ?? fallback.llmOutputPerMtok,
     asOf: asOf ?? fallback.asOf,

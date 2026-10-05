@@ -179,25 +179,25 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-fdp}
       PG_APP_PASSWORD: ${PG_APP_PASSWORD:-app_rw}
       PG_GT_PASSWORD: ${PG_GT_PASSWORD:-gt_rw}
-      # Empty means "unset": the backend then picks jev when a key is set and
+      # Empty means "unset": the backend then picks von when a key is set and
       # the rules engine otherwise.
       DECISION_BACKEND: ${DECISION_BACKEND:-}
       TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
       TYPESAFE_BASE_URL: ${TYPESAFE_BASE_URL:-https://api.typesafe.ai}
-      JEV_MODEL: ${JEV_MODEL:-jev-1.13.0}
+      VON_MODEL: ${VON_MODEL:-von-1.13.0}
       LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-claude-opus-5}
-      JEV_PRICE_INPUT_PER_MTOK: ${JEV_PRICE_INPUT_PER_MTOK:-0.042}
+      VON_PRICE_INPUT_PER_MTOK: ${VON_PRICE_INPUT_PER_MTOK:-0.042}
       LLM_PRICE_INPUT_PER_MTOK: ${LLM_PRICE_INPUT_PER_MTOK:-5}
       LLM_PRICE_OUTPUT_PER_MTOK: ${LLM_PRICE_OUTPUT_PER_MTOK:-25}
       PRICES_AS_OF: ${PRICES_AS_OF:-2026-09-19}
       GATE_TICKET_MIN_CONFIDENCE: ${GATE_TICKET_MIN_CONFIDENCE:-0.85}
       GATE_REVIEW_MIN_CONFIDENCE: ${GATE_REVIEW_MIN_CONFIDENCE:-0.60}
       GATE_PERSIST_SIM_MIN: ${GATE_PERSIST_SIM_MIN:-1}
-      # Jev's own pair, the pre-registered choice; the rules and llm backends keep GATE_*.
-      JEV_GATE_TICKET_MIN_CONFIDENCE: ${JEV_GATE_TICKET_MIN_CONFIDENCE:-0.85}
-      JEV_GATE_REVIEW_MIN_CONFIDENCE: ${JEV_GATE_REVIEW_MIN_CONFIDENCE:-0.65}
+      # Von's own pair, the pre-registered choice; the rules and llm backends keep GATE_*.
+      VON_GATE_TICKET_MIN_CONFIDENCE: ${VON_GATE_TICKET_MIN_CONFIDENCE:-0.85}
+      VON_GATE_REVIEW_MIN_CONFIDENCE: ${VON_GATE_REVIEW_MIN_CONFIDENCE:-0.65}
       DECISION_INTERVAL_SIM_MIN: ${DECISION_INTERVAL_SIM_MIN:-30}
       EPISODE_CLEAR_SIM_MIN: ${EPISODE_CLEAR_SIM_MIN:-120}
       HEARTBEAT_TELEMETRY_TIMEOUT_S: ${HEARTBEAT_TELEMETRY_TIMEOUT_S:-15}
@@ -229,6 +229,8 @@ services:
       mqtt: { condition: service_healthy }
     restart: unless-stopped
     logging: *logging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build: { context: ., dockerfile: apps/frontend/Dockerfile }

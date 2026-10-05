@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `report.md` and the summary table: every section in its order, the labels
-// the report must carry (the gate's two counts, the Jev notice, the catalog
+// the report must carry (the gate's two counts, the Von notice, the catalog
 // source, the mock column), the E3 verdict and the tuning list's shared
 // slices, and no secret on the page.
 
@@ -25,7 +25,7 @@ import {
 } from "./fixtures.ts";
 import { buildRunReport } from "./json.ts";
 import {
-  JEV_NOTICE,
+  VON_NOTICE,
   MOCK_LABEL,
   REPORT_MD_NAME,
   SECTION_HEADINGS,
@@ -49,12 +49,12 @@ const report: RunReport = buildRunReport({
 });
 const page = renderMarkdown(report);
 
-/** The report without its Jev backend, as a `--backends rules` run would write it. */
+/** The report without its Von backend, as a `--backends rules` run would write it. */
 function rulesOnly(source: RunReport): RunReport {
   return {
     ...source,
-    backends: source.backends.filter((backend) => backend.name !== "jev"),
-    scenarios: source.scenarios.filter((scenario) => scenario.backend !== "jev"),
+    backends: source.backends.filter((backend) => backend.name !== "von"),
+    scenarios: source.scenarios.filter((scenario) => scenario.backend !== "von"),
   };
 }
 
@@ -91,7 +91,7 @@ describe("report.md", () => {
     expect(headline).toContain("**Core-10 gate: ATTAINABLE**");
     expect(headline).toContain("0/10 core-10 scenarios passed, 0/6 positives");
     expect(headline).toContain("Partial run: 1 of the 10 core-10 scenarios were scored");
-    expect(headline).toContain("rules at detection level 0/10; jev at diagnosis level 0/10");
+    expect(headline).toContain("rules at detection level 0/10; von at diagnosis level 0/10");
     expect(headline).toContain("Enforced with `--fail-on-gate`: yes");
   });
 
@@ -109,7 +109,7 @@ describe("report.md", () => {
 
   it("heads the comparison with one column per backend, the mock one marked not informative", () => {
     const comparison = section(page, "Comparison");
-    expect(comparison).toContain(`| Metric | rules | jev · ${MOCK_LABEL} |`);
+    expect(comparison).toContain(`| Metric | rules | von · ${MOCK_LABEL} |`);
     for (const label of [
       "Precision, micro (ticket level)",
       "Precision, macro (ticket level)",
@@ -127,15 +127,15 @@ describe("report.md", () => {
     }
   });
 
-  it("prints the Jev notice above every table that carries Jev figures", () => {
+  it("prints the Von notice above every table that carries Von figures", () => {
     for (const heading of ["Comparison", "Per-fault precision and recall", "Lead times", "Cost"]) {
-      expect(section(page, heading)).toContain(JEV_NOTICE);
+      expect(section(page, heading)).toContain(VON_NOTICE);
     }
   });
 
-  it("prints no Jev notice when Jev did not run", () => {
+  it("prints no Von notice when Von did not run", () => {
     const rules = renderMarkdown(rulesOnly(report));
-    expect(rules).not.toContain(JEV_NOTICE);
+    expect(rules).not.toContain(VON_NOTICE);
     expect(rules).not.toContain(MOCK_LABEL);
   });
 
@@ -148,7 +148,7 @@ describe("report.md", () => {
   it("shows every ticket of a scenario with its verdict", () => {
     const scenarios = section(page, "Scenarios");
     expect(scenarios).toContain("### `inject_oil_cooler_fouling` · rules");
-    expect(scenarios).toContain(`### \`inject_oil_cooler_fouling\` · jev · ${MOCK_LABEL}`);
+    expect(scenarios).toContain(`### \`inject_oil_cooler_fouling\` · von · ${MOCK_LABEL}`);
     for (const verdict of [
       "warmup",
       "misdiagnosed",
@@ -165,7 +165,7 @@ describe("report.md", () => {
 
   it("states the caveats: the mock, the catalog, the labels and the in-process limits", () => {
     const caveats = section(page, "Caveats");
-    expect(caveats).toContain(`jev ran in mock mode (${MOCK_LABEL})`);
+    expect(caveats).toContain(`von ran in mock mode (${MOCK_LABEL})`);
     expect(caveats).toContain("the reference `catalog.json`, which is the ablation");
     expect(caveats).toContain("a proposal until a human signs it off");
     expect(caveats).toContain("no MQTT or WebSocket transport and no heartbeat");
@@ -195,7 +195,7 @@ describe("the summary table", () => {
 
   it("prints one line per scenario with each backend's three pass flags", () => {
     expect(text).toContain("cells read detection · review diagnosis · diagnosis");
-    expect(text).toMatch(/^scenario +split +rules +jev \(mock — not informative\)$/m);
+    expect(text).toMatch(/^scenario +split +rules +von \(mock — not informative\)$/m);
     expect(text).toMatch(
       /^inject_oil_cooler_fouling +test +FAIL · FAIL · FAIL +FAIL · FAIL · FAIL$/m,
     );
@@ -228,7 +228,7 @@ describe("cassette and live backends on the page and in the summary", () => {
     ...report,
     backends: [
       ...report.backends.map((backend) =>
-        backend.name === "jev"
+        backend.name === "von"
           ? {
               ...backend,
               mode: "cassette" as const,
@@ -257,7 +257,7 @@ describe("cassette and live backends on the page and in the summary", () => {
 
   it("names each mode with its hits and misses, the missed digests and the live queue", () => {
     const caveats = section(modesPage, "Caveats");
-    expect(caveats).toContain("- jev ran from cassettes: 2 hit(s), 2 miss(es).");
+    expect(caveats).toContain("- von ran from cassettes: 2 hit(s), 2 miss(es).");
     expect(caveats).toContain(`  - Missed request digests: \`${missed}\`\n`);
     expect(caveats).toContain(
       "- llm ran live: 3 call(s), 1 failed. The live queue sent 5 request(s), repeated 1 after a rate limit and waited 60100 ms.",
@@ -266,7 +266,7 @@ describe("cassette and live backends on the page and in the summary", () => {
 
   it("prints the same counts in the summary", () => {
     const text = renderConsoleSummary(withModes, { runJson: "r.json", reportMd: "r.md" });
-    expect(text).toContain("jev: cassette mode, 2 hit(s), 2 miss(es)\n");
+    expect(text).toContain("von: cassette mode, 2 hit(s), 2 miss(es)\n");
     expect(text).toContain("llm: live mode, 3 call(s), 1 failed, 1 rate-limit retr(ies)\n");
   });
 
@@ -291,14 +291,14 @@ describe("cassette and live backends on the page and in the summary", () => {
     const reusing: RunReport = {
       ...withModes,
       backends: withModes.backends.map((backend) =>
-        backend.name === "jev" ? { ...backend, cassette_reused: 41 } : backend,
+        backend.name === "von" ? { ...backend, cassette_reused: 41 } : backend,
       ),
     };
     expect(section(renderMarkdown(reusing), "Caveats")).toContain(
       "  - 41 hit(s) asked for a request more often than its cassette recorded answers and got its last answer again.",
     );
     expect(renderConsoleSummary(reusing, { runJson: "r.json", reportMd: "r.md" })).toContain(
-      "jev: cassette mode, 2 hit(s), 2 miss(es), 41 reused an earlier answer (fewer recorded than asked)\n",
+      "von: cassette mode, 2 hit(s), 2 miss(es), 41 reused an earlier answer (fewer recorded than asked)\n",
     );
     expect(section(modesPage, "Caveats")).not.toContain("got its last answer again");
   });

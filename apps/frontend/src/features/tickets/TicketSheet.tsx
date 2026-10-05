@@ -54,7 +54,7 @@ export interface TicketSheetProps {
 }
 
 const BACKEND_LABELS: Readonly<Record<string, string>> = {
-  jev: "Jev",
+  von: "Von",
   llm: "LLM",
   rules: "Rules",
 };

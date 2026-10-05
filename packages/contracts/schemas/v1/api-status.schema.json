@@ -32,11 +32,11 @@
       "type": "object",
       "properties": {
         "ticket_min_confidence": {
-          "description": "The ticket threshold of the running decision backend: JEV_GATE_TICKET_MIN_CONFIDENCE for jev, GATE_TICKET_MIN_CONFIDENCE for rules and llm.",
+          "description": "The ticket threshold of the running decision backend: VON_GATE_TICKET_MIN_CONFIDENCE for von, GATE_TICKET_MIN_CONFIDENCE for rules and llm.",
           "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
         },
         "review_min_confidence": {
-          "description": "The review threshold of the running decision backend: JEV_GATE_REVIEW_MIN_CONFIDENCE for jev, GATE_REVIEW_MIN_CONFIDENCE for rules and llm.",
+          "description": "The review threshold of the running decision backend: VON_GATE_REVIEW_MIN_CONFIDENCE for von, GATE_REVIEW_MIN_CONFIDENCE for rules and llm.",
           "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
         },
         "persist_sim_min": {

@@ -7,8 +7,8 @@
     "unit_id": "cau-7",
     "wall_ts": "2026-09-19T10:00:05.000Z",
     "backend": {
-      "name": "jev",
-      "model": "jev-1.13.0"
+      "name": "von",
+      "model": "von-1.13.0"
     },
     "decision": {
       "total": 42,

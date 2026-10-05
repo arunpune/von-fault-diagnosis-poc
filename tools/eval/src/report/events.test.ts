@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The event log keeps every output and drops what no file may carry: a
@@ -29,8 +29,8 @@ function decisionMessage(): Decision {
     episode_id: "00000000-0000-4000-8000-000000000002",
     event_id: "00000000-0000-4000-8000-000000000003",
     sim_ts: "2020-02-03T02:30:00.000Z",
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     status: "ok",
     choice: "oil_cooler_fouled",
     probabilities: { oil_cooler_fouled: 0.9, none_of_these: 0.1 },
@@ -58,8 +58,8 @@ function decisionMessage(): Decision {
 
 function backendOutput(): DecisionOutput {
   return {
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     choice: "oil_cooler_fouled",
     probabilities: { oil_cooler_fouled: 0.9, none_of_these: 0.1 },
     confidence: 0.9,
@@ -132,7 +132,7 @@ describe("the event log", () => {
   it("writes one JSON object per line with nothing of the state or the bodies in it", () => {
     const directory = mkdtempSync(join(tmpdir(), "fdp-eval-events-"));
     directories.push(directory);
-    const path = join(directory, eventLogName("inject_oil_cooler_fouling", "jev"));
+    const path = join(directory, eventLogName("inject_oil_cooler_fouling", "von"));
     writeEventLog(path, [DECISION, ALARM]);
 
     const text = readFileSync(path, "utf8");

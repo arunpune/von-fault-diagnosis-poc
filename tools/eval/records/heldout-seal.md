@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # The held-out set, its selection rule and its seal
@@ -21,19 +21,19 @@ The set was built in this order, one commit each, all on 2026-09-24:
 
 ## The one-run rule
 
-**The held-out set runs once, after the Jev thresholds are fixed under the pre-registration**
-(`tools/eval/records/jev-thresholds-preregistration.md`). "Fixed" means that the chosen pair, the sweep report path and the
+**The held-out set runs once, after the Von thresholds are fixed under the pre-registration**
+(`tools/eval/records/von-thresholds-preregistration.md`). "Fixed" means that the chosen pair, the sweep report path and the
 pre-registration's commit are recorded, as its "After the choice" says. Its result is the clean E4 figure.
 
 - **Before the run.** Nobody replays a held-out scenario in any mode (mock, rules, cassette, live, stack), plans a live run
   over it, sweeps it, tunes on it or reads its rows. `fdp-eval validate` is the one command allowed over it: it loads each
   file, checks it against the schema and binds it to ground truth, and replays nothing. No cassette holds a held-out
-  request. The final run therefore needs an explicit go-ahead for a live Jev recording, and its Jev-derived figures
+  request. The final run therefore needs an explicit go-ahead for a live Von recording, and its Von-derived figures
   are not published.
-- **The run.** `EVAL_JEV_MODE=live pnpm --filter @fdp/eval run eval -- --profile heldout --final-heldout
-  --confirm-live`, with `--backends` naming `jev`, and with the catalog and the thresholds of the choice. `--record` keeps the answers as cassettes. Every held-out scenario is replayed, none left out, with its sealed
+- **The run.** `EVAL_VON_MODE=live pnpm --filter @fdp/eval run eval -- --profile heldout --final-heldout
+  --confirm-live`, with `--backends` naming `von`, and with the catalog and the thresholds of the choice. `--record` keeps the answers as cassettes. Every held-out scenario is replayed, none left out, with its sealed
   seed. The run uses no `--scenario`, `--seed`, `--fail-on-gate`, `--exit-eval` or `--tuning`, because each of them would
-  change what is measured. The harness refuses every one of them, and it refuses Jev in any mode but live and a run not
+  change what is measured. The harness refuses every one of them, and it refuses Von in any mode but live and a run not
   confirmed up front (see [The guards](#the-guards)).
 - **After the run.** Straight after the run, whatever its outcome and an aborted run included, the operator commits
   `tools/eval/records/heldout-final-run.md`. It records the command, the exit code, the run id, the commit, the catalog and its
@@ -213,7 +213,7 @@ f48d0deec08796ef7951a8bccdf6f894a2dae85abaaef332e752efca11fcfa4f  slice-entry:he
 a6031a9de5874f2e4a2104f0042188b71d90b917be934b75a892d5d5eed2b477  slice-entry:heldout-aug01
 ```
 
-Sealed on 2026-09-24. **Rule: the held-out set runs once, after the Jev thresholds are fixed under the
+Sealed on 2026-09-24. **Rule: the held-out set runs once, after the Von thresholds are fixed under the
 pre-registration.**
 
 ## The guards
@@ -228,16 +228,16 @@ Each guard sits where the thing it guards is decided. Every one is tested withou
   refuses `heldout` without `--final-heldout`, and refuses it once the record exists, before anything is bound.
 - **The tuning list** (`tuning.ts`). Its guard refuses a held-out id.
 - **The configuration** (`config.ts`). `--profile heldout` is refused without `--final-heldout`. It is also refused when
-  it comes from `EVAL_PROFILE`, with `--scenario`, `--seed`, `--fail-on-gate` or `--exit-eval`, without `jev` in
-  `--backends`, with `EVAL_JEV_MODE` other than `live`, and without `--confirm-live`. `--final-heldout` with any other
+  it comes from `EVAL_PROFILE`, with `--scenario`, `--seed`, `--fail-on-gate` or `--exit-eval`, without `von` in
+  `--backends`, with `EVAL_VON_MODE` other than `live`, and without `--confirm-live`. `--final-heldout` with any other
   profile or with `--tuning` is refused. Once `tools/eval/records/heldout-final-run.md` exists, every held-out run is refused.
 - **The live plan** (`backends/select.ts`). The plan is a mock replay. It never runs for a held-out run that would not go
   on to run.
 - **The sweep** (`commands/sweep.ts`, `metrics/sweep.ts`). A run of the held-out set is never re-gated, whatever the
   flags.
-- **The chosen triple** (`config.ts`, `choice.ts`; added on 2026-09-24 with the Jev thresholds pre-registration's
+- **The chosen triple** (`config.ts`, `choice.ts`; added on 2026-09-24 with the Von thresholds pre-registration's
   amendment, and changing nothing sealed). The final run is refused unless `GATE_PERSIST_SIM_MIN`,
-  `JEV_GATE_REVIEW_MIN_CONFIDENCE` and `JEV_GATE_TICKET_MIN_CONFIDENCE` are exactly the triple the pre-registered sweep
-  chose. The triple is read from its committed record, `tools/eval/records/jev-thresholds-choice.md`, and the run is also refused
+  `VON_GATE_REVIEW_MIN_CONFIDENCE` and `VON_GATE_TICKET_MIN_CONFIDENCE` are exactly the triple the pre-registered sweep
+  chose. The triple is read from its committed record, `tools/eval/records/von-thresholds-choice.md`, and the run is also refused
   before that record exists or while it is uncommitted or changed since its commit.
 - **The slice replay test** (`replay/index.test.ts`). It replays every defined slice except the held-out ones.

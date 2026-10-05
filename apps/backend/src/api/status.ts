@@ -7,7 +7,7 @@
  * Everything the status bar and its lamps need in one call, which the user
  * interface makes on every WebSocket open: the retained simulator and gateway
  * statuses, the backend's own status, the raised system alerts, the running
- * injections, the two gate thresholds of the running decision backend (Jev's
+ * injections, the two gate thresholds of the running decision backend (Von's
  * own pair or the global one) and the persistence a symptom's evidence needs
  * before it can open a review or a ticket. The runtime reports the live part;
  * the gate's parameters come from the environment, because they are what the

@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // What a run holds on to for each decision backend it compares.
 //
 // The backends themselves are the pipeline's: `createRulesBackend` and
-// `createJevBackend` from `@fdp/backend/pipeline`, never a copy. A handle adds
+// `createVonBackend` from `@fdp/backend/pipeline`, never a copy. A handle adds
 // what the harness needs around one: the mode the report prints beside the
 // column (`mock` columns are "not informative"), a `close()` for the local
 // server a mode may have started, and the counters the report quotes — calls
@@ -70,7 +70,7 @@ export interface HandleDeps {
   /**
    * The wall clock the mock and cassette backends stamp latencies with: the run's fake clock,
    * so a replayed latency is a function of the replay and not of the machine it ran on. A live
-   * answer's latency reads the process clock instead (`jev.ts`, `llm.ts`).
+   * answer's latency reads the process clock instead (`von.ts`, `llm.ts`).
    */
   readonly wall: WallClock;
 }

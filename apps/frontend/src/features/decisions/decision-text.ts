@@ -21,7 +21,7 @@ const GATE_WORDS: Readonly<Record<string, string>> = {
 };
 
 const BACKEND_NAMES: Readonly<Record<string, string>> = {
-  jev: "Jev",
+  von: "Von",
   llm: "Claude",
   rules: "Rules",
 };
@@ -75,7 +75,7 @@ export function failureWords(decision: Decision): string | null {
   return decision.status === "failed" ? "unknown" : null;
 }
 
-/** The backend and its model as the status bar's chip names them: "Jev · jev-1.13.0", "Rules". */
+/** The backend and its model as the status bar's chip names them: "Von · von-1.13.0", "Rules". */
 export function backendLabel(backend: string, model: string): string {
   const name = BACKEND_NAMES[backend] ?? humanize(backend);
   return backend === "rules" || model === "" ? name : `${name} · ${model}`;

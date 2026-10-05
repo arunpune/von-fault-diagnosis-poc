@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// Recorded Jev answers on disk (tools/eval/CASSETTES.md).
+// Recorded Von answers on disk (tools/eval/CASSETTES.md).
 //
 // A cassette is one request to the live API and what the model answered it —
 // filed under the digest of the request (`digest.ts`), one directory per
 // pinned model:
 //
-//   fixtures/cassettes/jev-1.13.0/<request_digest>.json
+//   fixtures/cassettes/von-1.13.0/<request_digest>.json
 //
 // The same request can be sent more than once in a run: an episode whose
 // state has not moved is decided again every interval with byte-identical
@@ -18,7 +18,7 @@
 // serves the n-th answer to the n-th arrival (`cassette-server.ts`). A
 // cassette recorded before kept only its last answer; it still loads, as one.
 //
-// **One recording per GATE_PERSIST_SIM_MIN.** The Jev thresholds
+// **One recording per GATE_PERSIST_SIM_MIN.** The Von thresholds
 // pre-registration's amendment of 2026-09-24 records the tuning list twice,
 // at N = 0 and at N = 1, into this one store, and each N is judged on its own
 // recording. The two recordings send many of the same requests (the state is
@@ -80,7 +80,7 @@ export const CASSETTE_SCHEMA_PATH: string = fileURLToPath(
 );
 
 /**
- * Where recorded Jev answers live, one directory per model; gitignored until the vendor's
+ * Where recorded Von answers live, one directory per model; gitignored until the vendor's
  * publication terms allow committing them.
  */
 export const CASSETTES_DIR: string = fileURLToPath(
@@ -183,7 +183,7 @@ export function responsesOf(cassette: Cassette): readonly CassetteResponse[] {
 export interface ResponsesAtOptions {
   /**
    * Serve only a recording that says it was made at the replay's value: a cassette recorded
-   * before recordings were told apart, which carries no value, is then served at none. The Jev
+   * before recordings were told apart, which carries no value, is then served at none. The Von
    * thresholds pre-registration reads each N on the recording made at N "and on no other".
    */
   readonly ownRecordingOnly?: boolean;
@@ -303,7 +303,7 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
 }
 
 /**
- * The cassette of one answered live call, built from the provider bodies the Jev backend keeps
+ * The cassette of one answered live call, built from the provider bodies the Von backend keeps
  * in `DecisionOutput.raw` (the request it handed the SDK and the response body, no headers).
  *
  * @throws CassetteError when either body is missing or is not the cassette shape.

@@ -6,7 +6,7 @@
  *
  * One real decision per backend, from the same hand-built F3-like event and
  * the same fixture candidates the decision tests use (signature A: the dryer
- * purge valve does not seat), so the Jev answer and the language-model answer
+ * purge valve does not seat), so the Von answer and the language-model answer
  * describe one situation and can be read side by side.
  *
  * The assertions are about shape only. A live model is not a fixture: which

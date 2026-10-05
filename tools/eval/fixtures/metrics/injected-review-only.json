@@ -2,11 +2,11 @@
   "schema": "urn:fdp:eval:metrics-fixture:v1",
   "id": "injected_review_only",
   "note": "An injected fault the backend only ever put in the review queue: detected at review level, missed at ticket level. The two decisions carry the reference usage of 1234 input tokens.",
-  "backend": "jev",
+  "backend": "von",
   "review_min": 0.6,
   "native_alarm_codes": [],
   "prices": {
-    "jev_input_per_mtok": 0.042,
+    "von_input_per_mtok": 0.042,
     "llm_input_per_mtok": 5,
     "llm_output_per_mtok": 25,
     "as_of": "2026-09-19"
@@ -60,7 +60,7 @@
       "gate": "review",
       "abstained": false,
       "usage": { "input_tokens": 1234, "output_tokens": 0 },
-      "backend": "jev",
+      "backend": "von",
       "benign_choice": false
     },
     {
@@ -72,7 +72,7 @@
       "gate": "review",
       "abstained": false,
       "usage": { "input_tokens": 1234, "output_tokens": 0 },
-      "backend": "jev",
+      "backend": "von",
       "benign_choice": false
     }
   ],

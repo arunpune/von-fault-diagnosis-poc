@@ -1,29 +1,29 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `fdp-eval sweep --preregistered`, which `make eval-sweep` runs: the choice
-// of Jev's gate thresholds and the pipeline's persistence, made the way
-// tools/eval/records/jev-thresholds-preregistration.md fixed it on 2026-09-23 and
-// amended it on 2026-09-24, both before any Jev decision on the tuning list
+// of Von's gate thresholds and the pipeline's persistence, made the way
+// tools/eval/records/von-thresholds-preregistration.md fixed it on 2026-09-23 and
+// amended it on 2026-09-24, both before any Von decision on the tuning list
 // existed.
 //
 //   fdp-eval sweep --preregistered [--out <dir>] [--from-runs] [--record-choice]
 //
 // **What it chooses.** A triple (N, review, ticket): N is GATE_PERSIST_SIM_MIN
 // in {0, 1}, which applies to the pipeline as a whole, and the pair is
-// Jev's own. Each N changes which requests exist, so each N is read from its
+// Von's own. Each N changes which requests exist, so each N is read from its
 // own recording of the tuning list, the recorder run with
 // GATE_PERSIST_SIM_MIN = N. One cassette store holds both, and serves a replay
 // at N the answers recorded at N only (`backends/cassette.ts`).
 //
-// **What it reads.** The tuning list, and only it, answered by Jev from
+// **What it reads.** The tuning list, and only it, answered by Von from
 // cassettes: nothing here can call an API. Each N's recording is replayed once
 // per resample (`--resample r`, `backends/cassette-server.ts`): resample 0 is
 // the recording in the order the model answered it, and resample r serves
 // every repeated request's recorded answers rotated by r, so over R_N
 // resamples every arrival is served every answer the recording holds. R_N is
 // the most answers any cassette N's replay hit holds at N. Each replay runs
-// the Jev gate at 0.60 / 0.85, the pair the recordings were made at, and
+// the Von gate at 0.60 / 0.85, the pair the recordings were made at, and
 // GATE_PERSIST_SIM_MIN = N. `--from-runs` sweeps the resample runs a previous
 // invocation left under `--out` instead of replaying them.
 //
@@ -41,7 +41,7 @@
 // ties (then N = 1, then the pair closest to 0.60 / 0.85), and "stay unless
 // clearly better" against (N = 1, 0.60 / 0.85). The readings the
 // pre-registration leaves to its implementation are fixed below (`READINGS`),
-// written before any tuning-list decision of Jev had been recorded, and every
+// written before any tuning-list decision of Von had been recorded, and every
 // report repeats them. When a recording is missing — an N whose replay had no
 // cassette hit at N — no triple is chosen and the report names the recording.
 // When a resample could not be read as the model's own answers — a cassette
@@ -51,12 +51,12 @@
 //
 // **What it never does.** It never reads a core-10 scenario: it replays
 // `--tuning` only, and refuses a run that is not exactly the tuning list. Its
-// figures go to the gitignored `reports/`, because they are Jev-derived. It
+// figures go to the gitignored `reports/`, because they are Von-derived. It
 // changes no default. With `--record-choice` it writes the committed record of
-// the choice (tools/eval/records/jev-thresholds-choice.md, `choice.ts`): the
-// triple as the three variables, and where it came from, without a Jev figure.
+// the choice (tools/eval/records/von-thresholds-choice.md, `choice.ts`): the
+// triple as the three variables, and where it came from, without a Von figure.
 // Once the record is committed, the triple becomes GATE_PERSIST_SIM_MIN,
-// JEV_GATE_REVIEW_MIN_CONFIDENCE and JEV_GATE_TICKET_MIN_CONFIDENCE, as the
+// VON_GATE_REVIEW_MIN_CONFIDENCE and VON_GATE_TICKET_MIN_CONFIDENCE, as the
 // pre-registration's "After the choice" describes; the held-out set's one run
 // reads the record and runs with exactly that triple.
 
@@ -74,7 +74,7 @@ import { ConfigError, loadConfig } from "../config.ts";
 import type { Env, EvalConfig } from "../config.ts";
 import { sweep } from "../metrics/index.ts";
 import type { ScenarioMetrics, ThresholdPair } from "../metrics/index.ts";
-import { JEV_NOTICE } from "../report/markdown.ts";
+import { VON_NOTICE } from "../report/markdown.ts";
 import { LATEST_JSON_NAME, ReportSchemaError, validateReport } from "../report/json.ts";
 import type { ReportScenario, RunReport } from "../report/types.ts";
 import { executeRun } from "../runner/run.ts";
@@ -82,10 +82,10 @@ import { TUNING_REPORTED_APART, TUNING_REPORTED_ONLY, TUNING_SCENARIOS } from ".
 import { SweepUsageError, backendThresholds, rescoreScenario, sweepRunOf } from "./regate.ts";
 
 /** The file that fixed the procedure, the grid and the rule. */
-export const PREREGISTRATION = "tools/eval/records/jev-thresholds-preregistration.md";
+export const PREREGISTRATION = "tools/eval/records/von-thresholds-preregistration.md";
 
 /** The one backend the pre-registration chooses thresholds for. */
-export const PREREGISTERED_BACKEND = "jev";
+export const PREREGISTERED_BACKEND = "von";
 
 /** The review thresholds of the grid. */
 export const REVIEW_AXIS: readonly number[] = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8];
@@ -102,14 +102,14 @@ export const PERSIST_AXIS: readonly number[] = [0, 1];
 /** 0.60 / 0.85 as `[ticketMin, reviewMin]`: the pair of the recordings, and the incumbent's. */
 export const INCUMBENT: ThresholdPair = [0.85, 0.6];
 
-/** A point of the sweep: the pipeline's GATE_PERSIST_SIM_MIN and Jev's pair. */
+/** A point of the sweep: the pipeline's GATE_PERSIST_SIM_MIN and Von's pair. */
 export interface Triple {
   readonly persistSimMin: number;
   /** `[ticketMin, reviewMin]`. */
   readonly pair: ThresholdPair;
 }
 
-/** (N = 1, 0.60 / 0.85): what the pipeline and Jev keep unless a triple is clearly better. */
+/** (N = 1, 0.60 / 0.85): what the pipeline and Von keep unless a triple is clearly better. */
 export const INCUMBENT_TRIPLE: Triple = Object.freeze({ persistSimMin: 1, pair: INCUMBENT });
 
 /** The hard constraint, per negative machine-day, on every resample. */
@@ -129,13 +129,13 @@ const EPSILON = 1e-9;
 
 /**
  * How this implementation reads what the pre-registration leaves open. Fixed on 2026-09-24,
- * before any Jev decision on the tuning list had been recorded, and repeated in every report;
+ * before any Von decision on the tuning list had been recorded, and repeated in every report;
  * rewritten the same day, still before any recording, for the amendment's triples.
  */
 export const READINGS: readonly string[] = [
   "Triples: (N, review, ticket), N = GATE_PERSIST_SIM_MIN in {0, 1} and the 36 pairs of the grid at each N, 72 triples. Each N is read from its own recording of the tuning list, the recorder run with GATE_PERSIST_SIM_MIN = N, replayed at N; the one cassette store serves a replay at N the answers recorded at N and no others. The chosen N applies to the pipeline as a whole; the rules backend is a recorded baseline no gate reads.",
   "Resample: resample 0 replays N's recording in the order the model answered; resample r serves each repeated request's recorded answers rotated by r (the arrival resample 0 answers with answer i gets answer (i + r) mod k). A request recorded once gets its one answer in every resample. N has as many resamples as the fullest cassette its replay hit holds answers at N, so the two N may have different numbers of resamples.",
-  "Decisions: each resample's replay runs the Jev gate at 0.60 / 0.85, the pair of the recordings, with GATE_PERSIST_SIM_MIN = N; its decisions and episode merges are re-gated as the replay took them, and a decision whose evidence had not persisted for N (taken only because its episode owned a ticket) never opens a ticket at another pair. Every figure is therefore a re-gating, approximate as the threshold sweep is.",
+  "Decisions: each resample's replay runs the Von gate at 0.60 / 0.85, the pair of the recordings, with GATE_PERSIST_SIM_MIN = N; its decisions and episode merges are re-gated as the replay took them, and a decision whose evidence had not persisted for N (taken only because its episode owned a ticket) never opens a ticket at another pair. Every figure is therefore a re-gating, approximate as the threshold sweep is.",
   "False tickets and false reviews: the false positives of the ticket classification, misdiagnoses included and benign, ignored and warm-up tickets not, at ticket level (tickets that reached ticket level) and at review level (every ticket, those that reached ticket level included); each is summed over the counted scenarios and divided by their summed negative machine-days.",
   "Counted scenarios: the ten of the tuning list less unlabelled_leak_may19 (the tuning list's design case) and august_oil_level_aug10 (the amendment of 2026-09-24), which are reported apart and never counted: neither's tickets are false tickets, neither's time is negative time, and neither is a positive. The report lists both separately, with every ticket they opened.",
   "Positives: the counted scenarios that bind a non-benign scoring window (f4b_recurrence_jul17 and the five injections, the dev twin included). One passes when the scenario's own pass rule holds at its expect.pass_level, its budget and false-ticket allowance included: the ticket rule, so a `detection` level reads the review-or-ticket rule that was renamed review_diagnosis on 2026-09-24, when E3's detection level moved to suspect events.",
@@ -183,8 +183,8 @@ export function tripleText(triple: Triple): string {
 export function tripleVariables(triple: Triple): string {
   return (
     `GATE_PERSIST_SIM_MIN=${String(triple.persistSimMin)}, ` +
-    `JEV_GATE_REVIEW_MIN_CONFIDENCE=${triple.pair[1].toFixed(2)}, ` +
-    `JEV_GATE_TICKET_MIN_CONFIDENCE=${triple.pair[0].toFixed(2)}`
+    `VON_GATE_REVIEW_MIN_CONFIDENCE=${triple.pair[1].toFixed(2)}, ` +
+    `VON_GATE_TICKET_MIN_CONFIDENCE=${triple.pair[0].toFixed(2)}`
   );
 }
 
@@ -250,8 +250,8 @@ function storedTicketRulePass(scenario: ReportScenario): boolean {
     : (scenario.pass.review_diagnosis ?? scenario.pass.detection);
 }
 
-/** The Jev scenarios of a run, in the run's order. */
-function jevScenarios(report: RunReport): ReportScenario[] {
+/** The Von scenarios of a run, in the run's order. */
+function vonScenarios(report: RunReport): ReportScenario[] {
   return report.scenarios.filter((scenario) => scenario.backend === PREREGISTERED_BACKEND);
 }
 
@@ -291,7 +291,7 @@ export function resampleFigures(
   pair: ThresholdPair,
   resample: number,
 ): ResampleFigures {
-  const all = jevScenarios(report).map((scenario) => scenarioFigures(scenario, report, pair));
+  const all = vonScenarios(report).map((scenario) => scenarioFigures(scenario, report, pair));
   const counted = all.filter((entry) => !TUNING_REPORTED_ONLY.includes(entry.scenario));
   const reportedOnly = all.filter((entry) => TUNING_REPORTED_ONLY.includes(entry.scenario));
   const falseTickets = counted.reduce((total, entry) => total + entry.falseTickets, 0);
@@ -357,7 +357,7 @@ export type SelectionClause =
 
 /** What the rule decided. */
 export interface Selection {
-  /** `change`: the pipeline and Jev move to `chosen`; `keep`: they keep the incumbent. */
+  /** `change`: the pipeline and Von move to `chosen`; `keep`: they keep the incumbent. */
   readonly outcome: "change" | "keep";
   readonly chosen: Triple;
   readonly decidedBy: SelectionClause;
@@ -568,7 +568,7 @@ export function applySelectionRule(
     if (best === undefined) {
       return keep(
         "none-qualifies",
-        `${broken}, and so does every triple of the grid: no triple qualifies, so the pipeline and Jev stay at ${tripleText(incumbent)} and the finding is recorded.`,
+        `${broken}, and so does every triple of the grid: no triple qualifies, so the pipeline and Von stay at ${tripleText(incumbent)} and the finding is recorded.`,
       );
     }
     return {
@@ -677,7 +677,7 @@ export function recordCommand(persistSimMin: number): string {
 
 /**
  * Refuses a run the pre-registered sweep may not read: not a `--tuning` run of exactly the tuning
- * list, a test-split scenario, Jev not replayed from cassettes, a resample other than the one
+ * list, a test-split scenario, Von not replayed from cassettes, a resample other than the one
  * expected, a gate other than 0.60 / 0.85, no GATE_PERSIST_SIM_MIN (a run from before the
  * persistence rule), or a GATE_PERSIST_SIM_MIN other than its recording's.
  *
@@ -696,28 +696,28 @@ export function refuseForeignRun(report: RunReport, resample: number, persistSim
       `${name} replayed test-split scenarios (${testSplit.map((scenario) => scenario.id).join(", ")}); thresholds are never chosen on the core-10`,
     );
   }
-  const ids = jevScenarios(report).map((scenario) => scenario.id);
+  const ids = vonScenarios(report).map((scenario) => scenario.id);
   const expected = [...TUNING_SCENARIOS];
   if (ids.length !== expected.length || expected.some((id) => !ids.includes(id))) {
     throw new SweepUsageError(
-      `${name} did not replay exactly the tuning list for jev (it replayed ${ids.join(", ") || "nothing"})`,
+      `${name} did not replay exactly the tuning list for von (it replayed ${ids.join(", ") || "nothing"})`,
     );
   }
-  const jev = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
-  if (jev?.mode !== "cassette") {
+  const von = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
+  if (von?.mode !== "cassette") {
     throw new SweepUsageError(
-      `${name} did not replay Jev from cassettes (mode ${jev?.mode ?? "absent"}): the pre-registered sweep reads recorded answers only`,
+      `${name} did not replay Von from cassettes (mode ${von?.mode ?? "absent"}): the pre-registered sweep reads recorded answers only`,
     );
   }
-  if ((jev.cassette_resample ?? 0) !== resample) {
+  if ((von.cassette_resample ?? 0) !== resample) {
     throw new SweepUsageError(
-      `${name} served resample ${jev.cassette_resample ?? 0}, not ${resample}`,
+      `${name} served resample ${von.cassette_resample ?? 0}, not ${resample}`,
     );
   }
   const own = backendThresholds(report, PREREGISTERED_BACKEND);
   if (!samePair([own.ticketMin, own.reviewMin], INCUMBENT)) {
     throw new SweepUsageError(
-      `${name} gated Jev at ${pairText([own.ticketMin, own.reviewMin])}; the pre-registered sweep re-gates decisions taken at ${pairText(INCUMBENT)}, the pair of the recording`,
+      `${name} gated Von at ${pairText([own.ticketMin, own.reviewMin])}; the pre-registered sweep re-gates decisions taken at ${pairText(INCUMBENT)}, the pair of the recording`,
     );
   }
   const persist = report.run.thresholds.persist_sim_min;
@@ -738,7 +738,7 @@ function selfCheck(report: RunReport): string[] {
   const own = backendThresholds(report, PREREGISTERED_BACKEND);
   const pair: ThresholdPair = [own.ticketMin, own.reviewMin];
   const differences: string[] = [];
-  for (const scenario of jevScenarios(report)) {
+  for (const scenario of vonScenarios(report)) {
     const regated = scenarioFigures(scenario, report, pair);
     const stored = {
       falseTickets: scenario.metrics.match.ticket.fp,
@@ -759,10 +759,10 @@ function selfCheck(report: RunReport): string[] {
 
 /** Reads one resample's run of N's recording: its counters, its self-check and why it cannot be read. */
 export function checkRun(report: RunReport, resample: number, persistSimMin: number): RunCheck {
-  const jev = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
+  const von = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
   const differences = selfCheck(report);
-  const misses = jev?.cassette_misses ?? 0;
-  const failures = jev?.failures ?? 0;
+  const misses = von?.cassette_misses ?? 0;
+  const failures = von?.failures ?? 0;
   const where = `GATE_PERSIST_SIM_MIN = ${String(persistSimMin)}, resample ${resample}`;
   const withheld = [
     ...(misses > 0
@@ -781,9 +781,9 @@ export function checkRun(report: RunReport, resample: number, persistSimMin: num
     persistSimMin,
     resample,
     runId: report.run.id,
-    cassetteHits: jev?.cassette_hits ?? 0,
+    cassetteHits: von?.cassette_hits ?? 0,
     cassetteMisses: misses,
-    cassetteReused: jev?.cassette_reused ?? 0,
+    cassetteReused: von?.cassette_reused ?? 0,
     failures,
     reproduces: differences.length === 0,
     differences,
@@ -793,16 +793,16 @@ export function checkRun(report: RunReport, resample: number, persistSimMin: num
 
 /** Whether N's replay found no recording at N: no hit, and at least one miss. */
 function recordingMissing(report: RunReport): boolean {
-  const jev = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
-  return (jev?.cassette_hits ?? 0) === 0 && (jev?.cassette_misses ?? 0) > 0;
+  const von = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
+  return (von?.cassette_hits ?? 0) === 0 && (von?.cassette_misses ?? 0) > 0;
 }
 
 /** The message that names a missing recording. */
 function missingMessage(report: RunReport, persistSimMin: number): string {
-  const jev = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
+  const von = report.backends.find((backend) => backend.name === PREREGISTERED_BACKEND);
   return (
     `GATE_PERSIST_SIM_MIN = ${String(persistSimMin)}: the tuning list has no recording at this N ` +
-    `(none of the ${jev?.cassette_misses ?? 0} request(s) of its replay found a cassette recorded at N = ${String(persistSimMin)}), ` +
+    `(none of the ${von?.cassette_misses ?? 0} request(s) of its replay found a cassette recorded at N = ${String(persistSimMin)}), ` +
     `so no triple is chosen; record it with ${recordCommand(persistSimMin)} (a paid run, started by hand), then run make eval-sweep again`
   );
 }
@@ -906,7 +906,7 @@ const LICENCE_HEADER: readonly string[] = [
 /* REUSE-IgnoreEnd */
 
 const DISCLOSURE =
-  "Every decision behind this procedure — Jev's own thresholds, the pre-registration and its " +
+  "Every decision behind this procedure — Von's own thresholds, the pre-registration and its " +
   "amendment of 2026-09-24 (N chosen with the pair, august reported apart), the persistence " +
   "before the first decision and the changes that came with it — was made on 2026-09-23/24 " +
   "after the E3 and E4 results had been seen, so every figure they move stays labelled " +
@@ -1045,11 +1045,11 @@ export function renderPreregisteredMarkdown(result: PreregisteredResult): string
   const lines = [
     ...LICENCE_HEADER,
     "",
-    "# Pre-registered sweep of Jev's gate thresholds and the persistence",
+    "# Pre-registered sweep of Von's gate thresholds and the persistence",
     "",
-    JEV_NOTICE,
+    VON_NOTICE,
     "",
-    `The procedure and the rule are \`${PREREGISTRATION}\`'s, as amended on 2026-09-24. ${runCount} resample run(s) of the tuning list, Jev from cassettes, each GATE_PERSIST_SIM_MIN of ${PERSIST_AXIS.join(", ")} from its own recording; ${result.triples.length} triples.`,
+    `The procedure and the rule are \`${PREREGISTRATION}\`'s, as amended on 2026-09-24. ${runCount} resample run(s) of the tuning list, Von from cassettes, each GATE_PERSIST_SIM_MIN of ${PERSIST_AXIS.join(", ")} from its own recording; ${result.triples.length} triples.`,
     "",
     `**${outcomeLine(result)}**`,
     "",
@@ -1132,7 +1132,7 @@ export function renderPreregisteredConsole(
 ): string {
   const runCount = result.recordings.reduce((total, check) => total + check.runs.length, 0);
   const lines = [
-    `fdp-eval sweep --preregistered: jev, ${result.triples.length} triples over ${runCount} resample run(s) of the tuning list, GATE_PERSIST_SIM_MIN ${PERSIST_AXIS.join(" and ")} each from its own recording (${PREREGISTRATION})`,
+    `fdp-eval sweep --preregistered: von, ${result.triples.length} triples over ${runCount} resample run(s) of the tuning list, GATE_PERSIST_SIM_MIN ${PERSIST_AXIS.join(" and ")} each from its own recording (${PREREGISTRATION})`,
   ];
   const rows = [
     [...TABLE_HEADER],
@@ -1271,7 +1271,7 @@ function chosenTriple(triple: Triple): ChosenTriple {
 
 /**
  * The committed record of a settled choice (`choice.ts`): the triple, where it came from, and no
- * Jev figure, the clause that decided included.
+ * Von figure, the clause that decided included.
  *
  * @throws SweepUsageError when no triple is chosen (a recording missing, or a resample withheld).
  */
@@ -1317,9 +1317,9 @@ export function resampleDirectory(outDir: string, persistSimMin: number, resampl
 }
 
 /**
- * The configuration of resample r's replay of N's recording: the tuning list, Jev alone, from
- * cassettes, gated at 0.60 / 0.85, at GATE_PERSIST_SIM_MIN = N, whatever `EVAL_JEV_MODE`,
- * `--backends`, `JEV_GATE_*` or `GATE_PERSIST_SIM_MIN` the environment carries. Only a recording
+ * The configuration of resample r's replay of N's recording: the tuning list, Von alone, from
+ * cassettes, gated at 0.60 / 0.85, at GATE_PERSIST_SIM_MIN = N, whatever `EVAL_VON_MODE`,
+ * `--backends`, `VON_GATE_*` or `GATE_PERSIST_SIM_MIN` the environment carries. Only a recording
  * that says it was made at N is served (`cassetteOwnRecordingOnly`): a cassette that does not say
  * its value cannot show it is N's, so it is a miss, and a miss withholds the choice.
  */
@@ -1343,10 +1343,10 @@ export function resampleConfig(
   );
   return Object.freeze({
     ...cfg,
-    jevMode: "cassette",
+    vonMode: "cassette",
     record: false,
     confirmLive: false,
-    jevGate: { ticketMin: INCUMBENT[0], reviewMin: INCUMBENT[1] },
+    vonGate: { ticketMin: INCUMBENT[0], reviewMin: INCUMBENT[1] },
     persistSimMin,
     cassetteOwnRecordingOnly: true,
   });
@@ -1409,7 +1409,7 @@ export interface PreregisteredRequest {
   readonly env: Env;
   /** `--record-choice`: write the committed record of a settled choice. */
   readonly recordChoice?: boolean;
-  /** Where the record goes; `tools/eval/records/jev-thresholds-choice.md` by default. */
+  /** Where the record goes; `tools/eval/records/von-thresholds-choice.md` by default. */
   readonly choicePath?: string;
 }
 
@@ -1446,9 +1446,9 @@ export async function executePreregistered(
     const first = await obtain(persistSimMin, 0).catch((error: unknown) => {
       // An empty store: the cassette handle refuses before anything is replayed, and no N has a
       // recording. Say which recordings are missing and how each is made.
-      if (error instanceof ConfigError && error.flag === "EVAL_JEV_MODE") {
+      if (error instanceof ConfigError && error.flag === "EVAL_VON_MODE") {
         throw new ConfigError(
-          "EVAL_JEV_MODE",
+          "EVAL_VON_MODE",
           `the cassette store holds no recording (${error.message}), so the tuning list's ` +
             `recordings at ${PERSIST_AXIS.map((value) => `GATE_PERSIST_SIM_MIN = ${String(value)}`).join(" and ")} ` +
             `are all missing and no triple is chosen; record them with ` +

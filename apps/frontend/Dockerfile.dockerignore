@@ -1,1 +1,56 @@
-.dockerignore
+# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+#
+# One exclusion list for every image: all Dockerfiles build with the repository
+# root as their context, so this file decides what the daemon receives seven
+# times over.
+#
+# What must stay in the context, because an image copies it:
+#   packages/ground-truth/data   -> the simulator image
+#   db/migrations                -> the init image
+#   packages/contracts           -> the init image (schemas, embedding.json)
+#                                   and the mock decision service image
+#   infra/mosquitto              -> the broker image (conf, acl, credentials)
+#   pnpm-workspace.yaml, package.json, pnpm-lock.yaml, tsconfig.base.json,
+#   apps/, pyproject.toml, uv.lock, tools/init  -> the node and init images
+# Kept because they are small and the bind mounts of compose.yaml read them
+# from the host anyway: data/manual, data/SHA256SUMS, data/fixtures.
+
+# Secrets never enter a build context: they come from the environment only.
+.env
+.env.*
+!.env.example
+
+# Version control and local tool state (a linked worktree under these
+# directories is a whole checkout of this repository).
+.git
+.claude
+.worktrees
+
+# Installed dependencies.
+**/node_modules
+**/.venv
+
+# Build output and caches.
+**/dist
+**/build
+**/coverage
+.cache
+.rebuild
+tools/manual-build/.build
+# Bytecode a host test run leaves beside the sources: the init image copies
+# tools/init/src whole, and a stray .pyc would only invalidate that layer.
+**/__pycache__
+
+# Large or generated data: the dataset arrives by download into a bind mount
+# and the models into a volume, never through an image layer (ground rules 5 and 6,
+# CONTRIBUTING.md).
+data/metropt3
+data/byo-manual
+data/models
+
+# Reports and logs written by a previous run.
+reports
+**/playwright-report
+**/test-results
+**/*.log

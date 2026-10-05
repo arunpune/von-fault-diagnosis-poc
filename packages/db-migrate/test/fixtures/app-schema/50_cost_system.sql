@@ -11,7 +11,7 @@
 
 INSERT INTO app.cost_ledger (decision_id, backend, model, input_tokens, output_tokens,
                              price_input_per_mtok, price_output_per_mtok, prices_as_of, sim_ts)
-VALUES ('bbbbbbbb-0000-4000-8000-000000000001', 'jev', 'jev-1.13', 1234, 0,
+VALUES ('bbbbbbbb-0000-4000-8000-000000000001', 'von', 'von-1.13', 1234, 0,
         0.042, 0, DATE '2026-09-01', '2020-02-09T10:05:30Z'),
        ('bbbbbbbb-0000-4000-8000-000000000002', 'llm', 'llm-medium', 1000, 200,
         5, 25, DATE '2026-09-01', '2020-02-09T11:05:30Z');

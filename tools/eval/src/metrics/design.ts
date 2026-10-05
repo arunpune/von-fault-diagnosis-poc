@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The design target of a diagnostic scenario, read and reported, never scored.
@@ -19,8 +19,8 @@
 // for a design target, so `scoreScenario`, the core-10 gate, the E3 check and
 // the sweep's figures cannot read one; the runner and the sweep call
 // `designReading` beside them and write what it returns in a block of its own,
-// marked `gated: false`. The pre-registered Jev threshold selection
-// (tools/eval/records/jev-thresholds-preregistration.md) excludes may19 by name
+// marked `gated: false`. The pre-registered Von threshold selection
+// (tools/eval/records/von-thresholds-preregistration.md) excludes may19 by name
 // as well.
 //
 // The episodes are the scenario's excluded windows with the reason

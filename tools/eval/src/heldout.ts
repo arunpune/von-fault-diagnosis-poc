@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The held-out set, and what keeps it out of every run but its one final run
 // (tools/eval/records/heldout-seal.md).
 //
 // Every figure before it keeps its in-sample label, and the held-out set was
-// authored blind, sealed, and runs once, after the Jev thresholds are fixed
+// authored blind, sealed, and runs once, after the Von thresholds are fixed
 // under the pre-registration. The set has its own split and its own profile,
 // both `heldout`, and its own slices, whose names begin with `heldout-`. The
 // guards live where the thing they guard is decided, and this module holds only
@@ -18,11 +18,11 @@
 //   - the run (`config.ts`, `runner/run.ts`): `--profile heldout` is refused
 //     without `--final-heldout`, the final run is refused once its record is
 //     committed, and `--scenario` naming a held-out id under another profile is
-//     refused by name; since the Jev thresholds pre-registration's amendment of
+//     refused by name; since the Von thresholds pre-registration's amendment of
 //     2026-09-24 the final run is also refused unless it runs with exactly the
-//     triple (GATE_PERSIST_SIM_MIN and Jev's pair) the pre-registered sweep
+//     triple (GATE_PERSIST_SIM_MIN and Von's pair) the pre-registered sweep
 //     chose, read from its committed record (`choice.ts`,
-//     tools/eval/records/jev-thresholds-choice.md);
+//     tools/eval/records/von-thresholds-choice.md);
 //   - the live plan (`backends/select.ts`): a held-out run is never planned by a
 //     mock replay unless it goes on to run;
 //   - the sweep (`commands/sweep.ts`, `metrics/sweep.ts`): a held-out run is

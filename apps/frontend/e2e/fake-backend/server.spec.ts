@@ -108,7 +108,7 @@ test.describe("the fake backend behind vite preview", () => {
 
   test.afterAll(async ({ playwright }) => {
     const reset = await playwright.request.newContext({ baseURL: process.env.FAKE_BACKEND_URL });
-    await reset.post("/__test/reset", { data: { backend: "jev" } });
+    await reset.post("/__test/reset", { data: { backend: "von" } });
     await reset.dispose();
   });
 
@@ -227,8 +227,8 @@ test.describe("the fake backend behind vite preview", () => {
     expect(socket.frames.slice(0, 2).map((frame) => frame.type)).toEqual(["hello", "snapshot"]);
     expect(socket.frames[0]?.payload).toMatchObject({
       schema_major: 1,
-      decision_backend: "jev",
-      model: "jev-1.13.0",
+      decision_backend: "von",
+      model: "von-1.13.0",
     });
     const series = socket.of("telemetry.series");
     expect(series.length).toBeGreaterThan(2);

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The scenario loop, the core-10 gate and the E3 check of `--exit-eval e3`.
@@ -93,7 +93,7 @@ function temporaryDirectory(): string {
 }
 
 function config(argv: readonly string[], out: string = temporaryDirectory()): EvalConfig {
-  return loadConfig([...argv, "--out", out], { EVAL_JEV_MODE: "mock" });
+  return loadConfig([...argv, "--out", out], { EVAL_VON_MODE: "mock" });
 }
 
 /** A backend that must never be asked: the host is stubbed, so nothing calls `decide`. */
@@ -110,7 +110,7 @@ interface StubHandle extends BackendHandle {
 function stubHandle(name: BackendName, mode: BackendMode): StubHandle {
   const handle: StubHandle = {
     name,
-    model: name === "rules" ? "rules-v1" : "jev-1.13.0",
+    model: name === "rules" ? "rules-v1" : "von-1.13.0",
     mode,
     backend: SILENT,
     stats: { calls: 0, failures: 0, cassetteMisses: 0 },
@@ -163,7 +163,7 @@ interface Harness {
 }
 
 function harness(modes: Partial<Record<BackendName, BackendMode>> = {}): Harness {
-  const handles = [stubHandle("rules", "-"), stubHandle("jev", modes.jev ?? "mock")];
+  const handles = [stubHandle("rules", "-"), stubHandle("von", modes.von ?? "mock")];
   const state: Harness = {
     handles,
     calls: [],
@@ -287,13 +287,13 @@ describe("defaultNativeAlarmCodes", () => {
 });
 
 describe("headlineBackend", () => {
-  it("is Jev only when Jev's answers are informative", () => {
+  it("is Von only when Von's answers are informative", () => {
     const rules = { name: "rules" as const, mode: "-" as const };
-    expect(headlineBackend([rules, { name: "jev", mode: "live" }])).toBe("jev");
-    expect(headlineBackend([rules, { name: "jev", mode: "cassette" }])).toBe("jev");
-    expect(headlineBackend([rules, { name: "jev", mode: "mock" }])).toBe("rules");
+    expect(headlineBackend([rules, { name: "von", mode: "live" }])).toBe("von");
+    expect(headlineBackend([rules, { name: "von", mode: "cassette" }])).toBe("von");
+    expect(headlineBackend([rules, { name: "von", mode: "mock" }])).toBe("rules");
     expect(headlineBackend([rules])).toBe("rules");
-    expect(headlineBackend([{ name: "jev", mode: "mock" }])).toBe("jev");
+    expect(headlineBackend([{ name: "von", mode: "mock" }])).toBe("von");
     expect(headlineBackend([])).toBeUndefined();
   });
 });
@@ -352,9 +352,9 @@ describe("judgeGate", () => {
 
 describe("judgeRunGate and backendRecord, when decisions failed", () => {
   const all = CORE_10_SCENARIO_IDS.map((id) => passed(id, id === "baseline_feb03_normal"));
-  const counts = coreGate(all, "jev", "diagnosis");
+  const counts = coreGate(all, "von", "diagnosis");
   const record = (calls: number, failures: number) => ({
-    name: "jev" as const,
+    name: "von" as const,
     stats: { calls, failures, cassetteMisses: 0 },
   });
 
@@ -382,7 +382,7 @@ describe("judgeRunGate and backendRecord, when decisions failed", () => {
 
   it("marks a backend whose every decision failed not informative, as it does a mock", () => {
     const handle = (mode: BackendMode, calls: number, failures: number): BackendHandle => ({
-      ...stubHandle("jev", mode),
+      ...stubHandle("von", mode),
       stats: { calls, failures, cassetteMisses: 0 },
     });
     expect(backendRecord(handle("cassette", 151, 151)).informative).toBe(false);
@@ -425,7 +425,7 @@ describe("runEvaluation over the smoke profile", () => {
 
   it("replays every scenario against every backend, scenario by scenario", async () => {
     const run = await result;
-    expect(stubs.calls).toEqual(SMOKE_IDS.flatMap((id) => [`${id}.rules`, `${id}.jev`]));
+    expect(stubs.calls).toEqual(SMOKE_IDS.flatMap((id) => [`${id}.rules`, `${id}.von`]));
     expect(run.results).toHaveLength(10);
     expect(run.results.every((entry) => entry.scored)).toBe(true);
   });
@@ -449,15 +449,15 @@ describe("runEvaluation over the smoke profile", () => {
       run.backends.map(({ name, mode, informative }) => ({ name, mode, informative })),
     ).toEqual([
       { name: "rules", mode: "-", informative: true },
-      { name: "jev", mode: "mock", informative: false },
+      { name: "von", mode: "mock", informative: false },
     ]);
     expect(stubs.handles.map((handle) => handle.closed)).toEqual([1, 1]);
   });
 
-  it("reads the gate of the rules baseline at detection level while Jev is a mock", async () => {
+  it("reads the gate of the rules baseline at detection level while Von is a mock", async () => {
     const run = await result;
     expect(run.summary?.gate).toMatchObject({ backend: "rules", level: "detection" });
-    expect(run.summary?.backends.map((backend) => backend.backend)).toEqual(["jev", "rules"]);
+    expect(run.summary?.backends.map((backend) => backend.backend)).toEqual(["von", "rules"]);
   });
 
   it("judges the smoke subset as a partial run of the core-10", async () => {
@@ -520,7 +520,7 @@ describe("executeRun", () => {
     expect(code).toBe(EXIT_GATE_FAILED);
   });
 
-  /** A failed Jev decision, as the pipeline records a 500 from the API. */
+  /** A failed Von decision, as the pipeline records a 500 from the API. */
   function failedDecision(bound: BoundScenario): TimedOutput {
     return {
       type: "decision",
@@ -528,7 +528,7 @@ describe("executeRun", () => {
         decision_id: `00000000-0000-4000-8000-${String(bound.scenario.seed).padStart(12, "0")}`,
         episode_id: "00000000-0000-4000-8000-000000000001",
         sim_ts: bound.replay.from.toISOString(),
-        backend: "jev",
+        backend: "von",
         status: "failed",
         choice: "none_of_these",
         confidence: 0,
@@ -544,23 +544,23 @@ describe("executeRun", () => {
   }
 
   /**
-   * A smoke run whose Jev backend ran in `mode` and failed `failed` of its decisions: one decision
+   * A smoke run whose Von backend ran in `mode` and failed `failed` of its decisions: one decision
    * per scenario, the first `failed` scenarios' ones failing with a 500.
    */
   async function executeWithFailures(mode: BackendMode, failed: number, argv: readonly string[]) {
     const out = temporaryDirectory();
     const printed: string[] = [];
     const warnings: string[] = [];
-    const stubs = harness({ jev: mode });
-    const jev = stubs.handles[1] as StubHandle;
-    Object.assign(jev, { stats: { calls: SMOKE_IDS.length, failures: failed, cassetteMisses: 0 } });
+    const stubs = harness({ von: mode });
+    const von = stubs.handles[1] as StubHandle;
+    Object.assign(von, { stats: { calls: SMOKE_IDS.length, failures: failed, cassetteMisses: 0 } });
     let seen = 0;
     const code = await executeRun(config(["--profile", "smoke", ...argv], out), {
       ...stubs.deps,
       log: { ...stubs.deps.log!, warn: (message: string) => warnings.push(message) },
       runScenario: (bound, handle) => {
         const run = emptyRun(bound, handle);
-        if (handle.name !== "jev" || seen >= failed) return Promise.resolve(run);
+        if (handle.name !== "von" || seen >= failed) return Promise.resolve(run);
         seen += 1;
         return Promise.resolve({
           ...run,
@@ -590,7 +590,7 @@ describe("executeRun", () => {
     };
   }
 
-  it("does not score, and says loudly, a Jev run whose every decision failed", async () => {
+  it("does not score, and says loudly, a Von run whose every decision failed", async () => {
     const { code, printed, warnings, report, markdown } = await executeWithFailures(
       "cassette",
       SMOKE_IDS.length,
@@ -598,7 +598,7 @@ describe("executeRun", () => {
     );
     expect(code).toBe(EXIT_GATE_FAILED);
     expect(report.backends[1]).toMatchObject({
-      name: "jev",
+      name: "von",
       mode: "cassette",
       informative: false,
       calls: 5,
@@ -606,49 +606,49 @@ describe("executeRun", () => {
       failure_reasons: [{ reason: "unknown: the TypeSafe API answered 500", count: 5 }],
     });
     expect(report.gate).toMatchObject({
-      backend: "jev",
+      backend: "von",
       verdict: "not_scored",
       pass: false,
       passed: 0,
       scored: 0,
       failed: [],
-      core10: { jev_diagnosis: null },
+      core10: { von_diagnosis: null },
     });
     expect(report.gate?.missing).toHaveLength(10);
 
     const warning =
-      "jev (cassette): every one of its 5 decision(s) failed — unknown: the TypeSafe API answered 500 ×5. Its column is not informative and its core-10 gate is not scored.";
+      "von (cassette): every one of its 5 decision(s) failed — unknown: the TypeSafe API answered 500 ×5. Its column is not informative and its core-10 gate is not scored.";
     expect(printed).toContain(
-      `WARNING: ${warning}\ngate: NOT SCORED: every decision of jev failed`,
+      `WARNING: ${warning}\ngate: NOT SCORED: every decision of von failed`,
     );
     expect(printed).toMatch(
-      /^scenario +split +rules +jev \(cassette — not informative, every decision failed\)$/m,
+      /^scenario +split +rules +von \(cassette — not informative, every decision failed\)$/m,
     );
     expect(printed).toContain(
-      "MetroPT-3 check (in-sample): not measured, every decision of jev failed",
+      "MetroPT-3 check (in-sample): not measured, every decision of von failed",
     );
     expect(printed).not.toContain("gate: FAIL");
 
     expect(markdown).toContain(`## Headline\n\n**Failed decisions — ${warning}**`);
-    expect(markdown).toContain("**Core-10 gate: NOT SCORED** — every decision of jev failed");
-    expect(markdown).toContain("jev at diagnosis level not scored (every decision failed)");
-    expect(markdown).toContain("| jev · cassette — not informative, every decision failed |");
+    expect(markdown).toContain("**Core-10 gate: NOT SCORED** — every decision of von failed");
+    expect(markdown).toContain("von at diagnosis level not scored (every decision failed)");
+    expect(markdown).toContain("| von · cassette — not informative, every decision failed |");
     expect(markdown).toContain("**MetroPT-3 check (in-sample)**: not measured");
     expect(warnings).toContain(
       "every decision of a backend failed: its column is not informative and its gate is not scored",
     );
   });
 
-  it("scores a Jev run with some failed decisions and still names them on every channel", async () => {
+  it("scores a Von run with some failed decisions and still names them on every channel", async () => {
     const { printed, warnings, report, markdown } = await executeWithFailures("live", 2, []);
     expect(report.backends[1]).toMatchObject({
       informative: true,
       failures: 2,
       failure_reasons: [{ reason: "unknown: the TypeSafe API answered 500", count: 2 }],
     });
-    expect(report.gate).toMatchObject({ backend: "jev", verdict: "unattainable" });
+    expect(report.gate).toMatchObject({ backend: "von", verdict: "unattainable" });
     const warning =
-      "jev (live): 2 of its 5 decision(s) failed — unknown: the TypeSafe API answered 500 ×2. A failed decision has no choice, so its figures count those as missing.";
+      "von (live): 2 of its 5 decision(s) failed — unknown: the TypeSafe API answered 500 ×2. A failed decision has no choice, so its figures count those as missing.";
     expect(printed).toContain(`WARNING: ${warning}\ngate: UNATTAINABLE`);
     expect(markdown).toContain(`**Failed decisions — ${warning}**`);
     expect(warnings).toContain("decisions of a backend failed: they are missing from its figures");
@@ -663,7 +663,7 @@ describe("executeRun", () => {
 
 describe("runEvaluation over a profile with diagnostic scenarios", () => {
   it("replays and writes them but keeps them out of the summary", async () => {
-    const stubs = harness({ jev: "live" });
+    const stubs = harness({ von: "live" });
     const run = await runEvaluation(config(["--profile", "dev", "--backends", "rules"]), {
       ...stubs.deps,
       selectBackends: () => Promise.resolve([stubHandle("rules", "-")]),
@@ -681,7 +681,7 @@ describe("runEvaluation --tuning", () => {
     const stubs = harness();
     const out = temporaryDirectory();
     const cfg = loadConfig(["--tuning", "--backends", "rules", ...argv, "--out", out], {
-      EVAL_JEV_MODE: "mock",
+      EVAL_VON_MODE: "mock",
       ...env,
     });
     const result = await runEvaluation(cfg, {
@@ -1255,14 +1255,14 @@ describe("evaluateE3", () => {
   });
 
   it("reads the rules backend only", () => {
-    const jevTicket = ticketIn("baseline_feb03_normal", "t-jev", 300, NON_BENIGN);
+    const vonTicket = ticketIn("baseline_feb03_normal", "t-von", 300, NON_BENIGN);
     const results = [
       ...run(),
-      pair("baseline_feb03_normal", [jevTicket], {
-        backend: "jev",
-        suspects: [suspect({ eventId: "s-jev", simTs: jevTicket.openedSimTs })],
+      pair("baseline_feb03_normal", [vonTicket], {
+        backend: "von",
+        suspects: [suspect({ eventId: "s-von", simTs: vonTicket.openedSimTs })],
       }),
-      pair("f4_air_leak_jul15", [], { backend: "jev" }),
+      pair("f4_air_leak_jul15", [], { backend: "von" }),
     ];
     expect(evaluateE3(results, E3_CONTEXT).verdict).toBe("pass");
   });

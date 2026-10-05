@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The cassette store (tools/eval/CASSETTES.md): what it writes, what it reads
@@ -27,7 +27,7 @@ import {
 import type { Cassette } from "./cassette.ts";
 import { requestDigest } from "./digest.ts";
 
-const MODEL = "jev-1.13.0";
+const MODEL = "von-1.13.0";
 
 const temporary: string[] = [];
 
@@ -111,9 +111,9 @@ describe("cassetteOf", () => {
     expect(() =>
       cassetteOf(
         { request: request("high"), response: RESPONSE },
-        { ...CONTEXT, model: "jev-1.14.0" },
+        { ...CONTEXT, model: "von-1.14.0" },
       ),
-    ).toThrow(/asked for jev-1.13.0, but the cassette is filed under jev-1.14.0/);
+    ).toThrow(/asked for von-1.13.0, but the cassette is filed under von-1.14.0/);
   });
 });
 
@@ -154,7 +154,7 @@ describe("withRepeat and responsesOf", () => {
   });
 });
 
-// The Jev thresholds pre-registration's amendment of 2026-09-24: the tuning list is recorded once
+// The Von thresholds pre-registration's amendment of 2026-09-24: the tuning list is recorded once
 // at GATE_PERSIST_SIM_MIN 0 and once at 1, into one store keyed by digest. The two recordings send
 // many of the same requests, so a cassette keeps one recording per value, and each run replaces
 // only its own.

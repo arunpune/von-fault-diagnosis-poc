@@ -38,8 +38,8 @@ export const DIAG_MQTT_USERNAME = "backend-diag";
 /** The model identifier the rules backend reports; it calls nothing. */
 export const RULES_MODEL = "rules-v1";
 
-/** Aliases such as `jev-latest` are refused: a run must name the version it used. */
-const JEV_MODEL_PATTERN = /^jev-\d+\.\d+\.\d+$/;
+/** Aliases such as `von-latest` are refused: a run must name the version it used. */
+const VON_MODEL_PATTERN = /^von-\d+\.\d+\.\d+$/;
 
 /** `""` means "not set" for every optional variable. */
 const optional = z.preprocess(
@@ -131,7 +131,7 @@ const probability = (fallback: number) =>
 
 const secret = optional.transform((value) => (value === undefined ? null : new Secret(value)));
 
-const DECISION_BACKENDS = ["jev", "llm", "rules"] as const;
+const DECISION_BACKENDS = ["von", "llm", "rules"] as const;
 
 const LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace", "silent"] as const;
 
@@ -153,12 +153,12 @@ const SCHEMA = z.object({
   DECISION_BACKEND: optionalWord(DECISION_BACKENDS),
   TYPESAFE_API_KEY: secret,
   TYPESAFE_BASE_URL: text("https://api.typesafe.ai"),
-  JEV_MODEL: optional.transform((value, ctx) => {
-    const resolved = value ?? "jev-1.13.0";
-    if (!JEV_MODEL_PATTERN.test(resolved)) {
+  VON_MODEL: optional.transform((value, ctx) => {
+    const resolved = value ?? "von-1.13.0";
+    if (!VON_MODEL_PATTERN.test(resolved)) {
       ctx.addIssue({
         code: "custom",
-        message: `expected a pinned version matching ${JEV_MODEL_PATTERN.source}, got ${resolved}`,
+        message: `expected a pinned version matching ${VON_MODEL_PATTERN.source}, got ${resolved}`,
       });
       return z.NEVER;
     }
@@ -169,7 +169,7 @@ const SCHEMA = z.object({
   LLM_MODEL: text("claude-opus-5"),
   LLM_BASE_URL: optional,
 
-  JEV_PRICE_INPUT_PER_MTOK: nonNegative(0.042),
+  VON_PRICE_INPUT_PER_MTOK: nonNegative(0.042),
   LLM_PRICE_INPUT_PER_MTOK: nonNegative(5),
   LLM_PRICE_OUTPUT_PER_MTOK: nonNegative(25),
   PRICES_AS_OF: text("2026-09-19"),
@@ -177,10 +177,10 @@ const SCHEMA = z.object({
   GATE_TICKET_MIN_CONFIDENCE: probability(0.85),
   GATE_REVIEW_MIN_CONFIDENCE: probability(0.6),
   GATE_PERSIST_SIM_MIN: nonNegative(1),
-  // Jev's own pair: the pre-registered choice (tools/eval/records/jev-thresholds-choice.md),
+  // Von's own pair: the pre-registered choice (tools/eval/records/von-thresholds-choice.md),
   // not GATE_*.
-  JEV_GATE_TICKET_MIN_CONFIDENCE: probability(0.85),
-  JEV_GATE_REVIEW_MIN_CONFIDENCE: probability(0.65),
+  VON_GATE_TICKET_MIN_CONFIDENCE: probability(0.85),
+  VON_GATE_REVIEW_MIN_CONFIDENCE: probability(0.65),
 
   DECISION_INTERVAL_SIM_MIN: positiveInt(30),
   EPISODE_CLEAR_SIM_MIN: positiveInt(120),
@@ -226,14 +226,14 @@ export interface Env {
   readonly decisionBackend: DecisionBackendName;
   readonly typesafeApiKey: Secret | null;
   readonly typesafeBaseUrl: string;
-  readonly jevModel: string;
+  readonly vonModel: string;
   readonly llmProvider: string;
   readonly llmApiKey: Secret | null;
   readonly llmModel: string;
   readonly llmBaseUrl: string | null;
 
   readonly prices: {
-    readonly jevInputPerMtok: number;
+    readonly vonInputPerMtok: number;
     readonly llmInputPerMtok: number;
     readonly llmOutputPerMtok: number;
     readonly asOf: string;
@@ -250,11 +250,11 @@ export interface Env {
      */
     readonly persistSimMin: number;
     /**
-     * Jev's own pair: `JEV_GATE_TICKET_MIN_CONFIDENCE` (default 0.85) and
-     * `JEV_GATE_REVIEW_MIN_CONFIDENCE` (default 0.65), the pre-registered choice
-     * (tools/eval/records/jev-thresholds-choice.md). The defaults do not follow `GATE_*`.
+     * Von's own pair: `VON_GATE_TICKET_MIN_CONFIDENCE` (default 0.85) and
+     * `VON_GATE_REVIEW_MIN_CONFIDENCE` (default 0.65), the pre-registered choice
+     * (tools/eval/records/von-thresholds-choice.md). The defaults do not follow `GATE_*`.
      */
-    readonly jev: GateThresholdPair;
+    readonly von: GateThresholdPair;
   };
 
   readonly decisionIntervalSimMin: number;
@@ -320,10 +320,10 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const typesafeApiKey = raw.TYPESAFE_API_KEY;
   const llmApiKey = raw.LLM_API_KEY;
   const decisionBackend: DecisionBackendName =
-    raw.DECISION_BACKEND ?? (typesafeApiKey === null ? "rules" : "jev");
+    raw.DECISION_BACKEND ?? (typesafeApiKey === null ? "rules" : "von");
 
-  if (decisionBackend === "jev" && typesafeApiKey === null) {
-    throw new ConfigError(["DECISION_BACKEND is jev but TYPESAFE_API_KEY is not set"]);
+  if (decisionBackend === "von" && typesafeApiKey === null) {
+    throw new ConfigError(["DECISION_BACKEND is von but TYPESAFE_API_KEY is not set"]);
   }
   if (decisionBackend === "llm" && llmApiKey === null) {
     throw new ConfigError(["DECISION_BACKEND is llm but LLM_API_KEY is not set"]);
@@ -339,15 +339,15 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
         "never sits above the ticket threshold",
     ]);
   }
-  const jevGate: GateThresholdPair = {
-    ticketMinConfidence: raw.JEV_GATE_TICKET_MIN_CONFIDENCE,
-    reviewMinConfidence: raw.JEV_GATE_REVIEW_MIN_CONFIDENCE,
+  const vonGate: GateThresholdPair = {
+    ticketMinConfidence: raw.VON_GATE_TICKET_MIN_CONFIDENCE,
+    reviewMinConfidence: raw.VON_GATE_REVIEW_MIN_CONFIDENCE,
   };
-  if (jevGate.reviewMinConfidence > jevGate.ticketMinConfidence) {
+  if (vonGate.reviewMinConfidence > vonGate.ticketMinConfidence) {
     throw new ConfigError([
-      `Jev's review threshold ${jevGate.reviewMinConfidence} is above its ticket threshold ` +
-        `${jevGate.ticketMinConfidence} (JEV_GATE_REVIEW_MIN_CONFIDENCE, default 0.65, and ` +
-        "JEV_GATE_TICKET_MIN_CONFIDENCE, default 0.85); a review threshold never sits above " +
+      `Von's review threshold ${vonGate.reviewMinConfidence} is above its ticket threshold ` +
+        `${vonGate.ticketMinConfidence} (VON_GATE_REVIEW_MIN_CONFIDENCE, default 0.65, and ` +
+        "VON_GATE_TICKET_MIN_CONFIDENCE, default 0.85); a review threshold never sits above " +
         "the ticket threshold",
     ]);
   }
@@ -369,14 +369,14 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     decisionBackend,
     typesafeApiKey,
     typesafeBaseUrl: raw.TYPESAFE_BASE_URL,
-    jevModel: raw.JEV_MODEL,
+    vonModel: raw.VON_MODEL,
     llmProvider: raw.LLM_PROVIDER,
     llmApiKey,
     llmModel: raw.LLM_MODEL,
     llmBaseUrl: raw.LLM_BASE_URL ?? null,
 
     prices: {
-      jevInputPerMtok: raw.JEV_PRICE_INPUT_PER_MTOK,
+      vonInputPerMtok: raw.VON_PRICE_INPUT_PER_MTOK,
       llmInputPerMtok: raw.LLM_PRICE_INPUT_PER_MTOK,
       llmOutputPerMtok: raw.LLM_PRICE_OUTPUT_PER_MTOK,
       asOf: raw.PRICES_AS_OF,
@@ -386,7 +386,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
       ticketMinConfidence: raw.GATE_TICKET_MIN_CONFIDENCE,
       reviewMinConfidence: raw.GATE_REVIEW_MIN_CONFIDENCE,
       persistSimMin: raw.GATE_PERSIST_SIM_MIN,
-      jev: jevGate,
+      von: vonGate,
     },
 
     decisionIntervalSimMin: raw.DECISION_INTERVAL_SIM_MIN,
@@ -407,13 +407,13 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 /**
  * The two thresholds the gate applies to a backend's decisions.
  *
- * Jev reports its own probability, a different quantity from the rules backend's calibrated
- * gating confidence, so it has its own pair, `JEV_GATE_*`, whose defaults are the
+ * Von reports its own probability, a different quantity from the rules backend's calibrated
+ * gating confidence, so it has its own pair, `VON_GATE_*`, whose defaults are the
  * pre-registered choice (review 0.65, ticket 0.85) and do not follow `GATE_*`. The rules backend
  * keeps `GATE_*`; so does the llm backend until it has been measured.
  */
 export function gateThresholds(gate: Env["gate"], backend: DecisionBackendName): GateThresholdPair {
-  if (backend === "jev") return gate.jev;
+  if (backend === "von") return gate.von;
   return {
     ticketMinConfidence: gate.ticketMinConfidence,
     reviewMinConfidence: gate.reviewMinConfidence,
@@ -429,8 +429,8 @@ export function gateThresholds(gate: Env["gate"], backend: DecisionBackendName):
  */
 export function decisionModel(env: Env): string {
   switch (env.decisionBackend) {
-    case "jev":
-      return env.jevModel;
+    case "von":
+      return env.vonModel;
     case "llm":
       return env.llmModel;
     case "rules":

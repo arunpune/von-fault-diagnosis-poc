@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The explicit tuning list, and the guard that keeps test data out of it.
@@ -22,7 +22,7 @@
 // figures (`src/metrics/design.ts`); the failure table still keeps the
 // unlabelled episodes excluded, and the pre-registered threshold selection
 // leaves may19 out. The pre-registration's amendment of 2026-09-24, made
-// before any Jev decision on the list existed, leaves `august_oil_level_aug10`
+// before any Von decision on the list existed, leaves `august_oil_level_aug10`
 // out of the selection the same way: it binds no labelled window, so counting
 // its time as negative time would score a correct oil-level ticket as a false
 // alarm. Both stay on the list, and both are reported apart.
@@ -68,8 +68,8 @@ export const TUNING_SCENARIOS: readonly string[] = [
 
 /**
  * The tuning scenarios whose figures are reported apart and never counted when a choice is made
- * from the list (the Jev thresholds pre-registration,
- * tools/eval/records/jev-thresholds-preregistration.md, "Data"), each with the reason the
+ * from the list (the Von thresholds pre-registration,
+ * tools/eval/records/von-thresholds-preregistration.md, "Data"), each with the reason the
  * report gives.
  */
 export const TUNING_REPORTED_APART: readonly {

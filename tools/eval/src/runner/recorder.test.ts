@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `summarise` over hand-made event logs.
@@ -47,7 +47,7 @@ interface DecisionFields {
   readonly confidence: number;
   readonly outcome: "ticket" | "review" | "log";
   readonly abstained?: boolean;
-  readonly backend?: "rules" | "jev";
+  readonly backend?: "rules" | "von";
   readonly inputTokens?: number;
 }
 
@@ -63,7 +63,7 @@ function decisionMessage(fields: DecisionFields): Decision {
     event_id: uuid(1000 + fields.id),
     sim_ts: minutes(fields.at),
     backend,
-    model: backend === "rules" ? "rules-v1" : "jev-1.13.0",
+    model: backend === "rules" ? "rules-v1" : "von-1.13.0",
     status: "ok",
     choice: fields.choice,
     probabilities: named
@@ -92,8 +92,8 @@ function decisionMessage(fields: DecisionFields): Decision {
 function failedDecision(id: number, episode: number, at: number): Decision {
   return checked("decision", {
     ...decisionMessage({ id, episode, at, choice: "none_of_these", confidence: 0, outcome: "log" }),
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     status: "failed",
     probabilities: { none_of_these: 1 },
     severity: { level: "low", score: 0, probabilities: { "0": 1 }, confidence: 0 },
@@ -621,7 +621,7 @@ describe("decisions and counters", () => {
           choice: "high_demand",
           confidence: 0.7,
           outcome: "review",
-          backend: "jev",
+          backend: "von",
           inputTokens: 1480,
         }),
       ),
@@ -635,7 +635,7 @@ describe("decisions and counters", () => {
           confidence: 0.8,
           outcome: "log",
           abstained: true,
-          backend: "jev",
+          backend: "von",
           inputTokens: 1500,
         }),
       ),
@@ -658,7 +658,7 @@ describe("decisions and counters", () => {
         gate: "review",
         abstained: false,
         usage: { input_tokens: 1480, output_tokens: 0 },
-        backend: "jev",
+        backend: "von",
         benignChoice: true,
       },
       {
@@ -670,7 +670,7 @@ describe("decisions and counters", () => {
         gate: "log",
         abstained: true,
         usage: { input_tokens: 1500, output_tokens: 0 },
-        backend: "jev",
+        backend: "von",
         benignChoice: false,
       },
     ]);
@@ -684,7 +684,7 @@ describe("decisions and counters", () => {
       choice: "high_demand",
       confidence: 0.9,
       outcome: "ticket",
-      backend: "jev",
+      backend: "von",
       inputTokens: 1480,
     });
     const withFigure: PipelineOutput = {

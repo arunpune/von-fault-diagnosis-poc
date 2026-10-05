@@ -16,7 +16,7 @@
  * The layout is stable so every question can point into it by path — that is
  * what {@link resolveStatePath} and {@link inspectPathsFor} are for, and what
  * makes an `inspect` list testable without a model. The rules backend reads the
- * same object through `retrieval/match.ts`, so the twin and Jev are fed by one
+ * same object through `retrieval/match.ts`, so the twin and Von are fed by one
  * builder and never drift apart.
  *
  * Nothing that did not come out of the catalog or out of detection enters the
@@ -575,9 +575,9 @@ export function definingMovePath(index: number): string {
 }
 
 /**
- * Every path the Jev question set reads from this state.
+ * Every path the Von question set reads from this state.
  *
- * The Jev backend builds the questions; this list is what makes "every
+ * The Von backend builds the questions; this list is what makes "every
  * `inspect` path resolves" a test the state builder can run on its own.
  */
 export function inspectPathsFor(state: DecisionState): readonly string[] {

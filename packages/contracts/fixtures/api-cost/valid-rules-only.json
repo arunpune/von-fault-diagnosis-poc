@@ -21,7 +21,7 @@
     }
   ],
   "prices": {
-    "jev_input_per_mtok": 0.042,
+    "von_input_per_mtok": 0.042,
     "llm_input_per_mtok": null,
     "llm_output_per_mtok": null,
     "as_of": "2026-09-19"

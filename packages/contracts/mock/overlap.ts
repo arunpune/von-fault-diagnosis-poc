@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The matcher behind the `best-overlap` answer policy. The CI Compose stack runs the mock instead
-// of Jev, and a stack whose decision depends on which candidate happens to sit first in the catalog
+// of Von, and a stack whose decision depends on which candidate happens to sit first in the catalog
 // is not a test. This module makes the answer a pure function of the request: the winning candidate
 // is the one whose expected movements overlap the observed movements most, and equal scores are
 // broken by candidate id.

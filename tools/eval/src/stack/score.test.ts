@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Stack mode's scoring on hand-made rows.
@@ -359,8 +359,8 @@ describe("stackThresholds and stackPrices", () => {
   it("bills at the ledger's prices, falling back per backend", () => {
     const ledger: LedgerRow[] = [
       {
-        backend: "jev",
-        model: "jev-1.13.0",
+        backend: "von",
+        model: "von-1.13.0",
         calls: 2,
         input_tokens: 2960,
         output_tokens: 0,
@@ -372,7 +372,7 @@ describe("stackThresholds and stackPrices", () => {
     ];
     expect(stackPrices(ledger, TEST_PRICES)).toEqual({
       ...TEST_PRICES,
-      jevInputPerMtok: 0.042,
+      vonInputPerMtok: 0.042,
       asOf: "2026-09-20",
     });
     expect(stackPrices([], TEST_PRICES)).toEqual(TEST_PRICES);
@@ -474,12 +474,12 @@ describe("scoreStack", () => {
         ],
         decisions: [
           decision({ decision_id: "d-1" }),
-          decision({ decision_id: "d-j", backend: "jev", model: "jev-1.13.0" }),
+          decision({ decision_id: "d-j", backend: "von", model: "von-1.13.0" }),
         ],
       }),
       options,
     );
-    expect(score.backends.map((entry) => entry.backend)).toEqual(["rules", "jev"]);
+    expect(score.backends.map((entry) => entry.backend)).toEqual(["rules", "von"]);
     for (const entry of score.backends) {
       const { metrics, summary } = entry.result;
       expect(summary.suspectEvents?.map((event) => event.eventId)).toEqual(["ev-oil", "ev-purge"]);

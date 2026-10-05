@@ -1,7 +1,7 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The name of one Jev request.
+// The name of one Von request.
 //
 // A cassette is found again by the digest of what was asked: the sha256 of
 // the canonical JSON of `{ model, state, questions }`. Two sides compute it —
@@ -20,7 +20,7 @@
 
 import { createHash } from "node:crypto";
 
-/** What a Jev request is named by: the three members of `POST /v1/systemone`'s body. */
+/** What a Von request is named by: the three members of `POST /v1/systemone`'s body. */
 export interface DigestedRequest {
   readonly model: string;
   readonly state: unknown;

@@ -73,7 +73,7 @@ CREATE TABLE app.decisions (
   unit_id text NOT NULL,
   sim_ts timestamptz NOT NULL,
   wall_ts timestamptz NOT NULL,
-  backend text NOT NULL CHECK (backend IN ('jev', 'llm', 'rules')),
+  backend text NOT NULL CHECK (backend IN ('von', 'llm', 'rules')),
   model text NOT NULL,
   status text NOT NULL DEFAULT 'ok' CHECK (status IN ('ok', 'failed')),
   choice text NOT NULL,

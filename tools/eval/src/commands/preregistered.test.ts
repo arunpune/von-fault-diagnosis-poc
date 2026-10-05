@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The pre-registered choice of Jev's thresholds, proved on synthetic decision sets only (the
-// procedure is tools/eval/records/jev-thresholds-preregistration.md, as amended on 2026-09-24):
-// hand-written Jev decisions on the ten tuning scenario ids, re-gated and scored by the same code
+// The pre-registered choice of Von's thresholds, proved on synthetic decision sets only (the
+// procedure is tools/eval/records/von-thresholds-preregistration.md, as amended on 2026-09-24):
+// hand-written Von decisions on the ten tuning scenario ids, re-gated and scored by the same code
 // a real sweep runs. Each clause of the selection rule has a decision set whose outcome is worked
 // out by hand in its comment. No test here replays a scenario, reads a cassette or calls anything;
-// no figure here is Jev's.
+// no figure here is Von's.
 //
 // The amendment makes the choice a triple (N, review, ticket): N = GATE_PERSIST_SIM_MIN in
 // {0, 1}, each N read from its own recording of the tuning list. A synthetic sweep is therefore
@@ -88,7 +88,7 @@ function at(hours: number): string {
   return new Date(DAY_START + hours * 3_600_000).toISOString();
 }
 
-/** One Jev decision of a synthetic scenario. */
+/** One Von decision of a synthetic scenario. */
 interface Decided {
   readonly episode: string;
   readonly hour: number;
@@ -139,7 +139,7 @@ function scenarioOf(
       abstained: verdict.abstained,
       benign_choice: false,
       usage: { input_tokens: 0, output_tokens: 0 },
-      backend: "jev",
+      backend: "von",
       state_digest: null,
       persisted_sim_min: entry.persisted ?? 5,
     };
@@ -150,8 +150,8 @@ function scenarioOf(
     group: positive ? "injected" : "negative",
     split: "dev",
     positive,
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     mode: "cassette",
     seed: 0,
     scored: true,
@@ -172,7 +172,7 @@ function scenarioOf(
       negative_machine_days: negativeDays,
     },
     warmup_min: 0,
-    events_file: `scenarios/${id}.jev.jsonl`,
+    events_file: `scenarios/${id}.von.jsonl`,
     windows: positive
       ? [
           {
@@ -294,7 +294,7 @@ function runOf(
       },
       rules_disabled: [],
       prices: {
-        jev_input_per_mtok: 0.042,
+        von_input_per_mtok: 0.042,
         llm_input_per_mtok: 5,
         llm_output_per_mtok: 25,
         as_of: "2026-09-19",
@@ -303,8 +303,8 @@ function runOf(
     },
     backends: [
       {
-        name: "jev",
-        model: "jev-1.13.0",
+        name: "von",
+        model: "von-1.13.0",
         mode: "cassette",
         informative: true,
         calls: 10,
@@ -711,7 +711,7 @@ describe("the selection rule on synthetic decision sets", () => {
 
   it("does not count a correct oil-level ticket on 10 August against the constraint", () => {
     // Before the amendment this ticket was a false one (0.111 a day at every ticket ≤ 0.90) and
-    // moved Jev to ticket 0.95; reported apart, it leaves the incumbent meeting the constraint.
+    // moved Von to ticket 0.95; reported apart, it leaves the incumbent meeting the constraint.
     const { selection, triples } = preregisteredSweep(
       sameAtBoth([{ ...positives([]), august_oil_level_aug10: [wrong(0.92)] }]),
     );
@@ -939,7 +939,7 @@ describe("the runs the pre-registered sweep reads", () => {
       /exactly the tuning list/,
     ],
     [
-      "Jev not replayed from cassettes",
+      "Von not replayed from cassettes",
       (report: RunReport): RunReport => ({
         ...report,
         backends: report.backends.map((backend) => ({ ...backend, mode: "mock" as const })),
@@ -1034,7 +1034,7 @@ describe("the pre-registered sweep as a command", () => {
     const document = JSON.parse(readFileSync(json, "utf8")) as Record<string, unknown>;
     expect(document).toMatchObject({
       schema: "urn:fdp:eval:preregistered-sweep:v2",
-      backend: "jev",
+      backend: "von",
       persist_axis: [0, 1],
       incumbent: { persist_sim_min: 1, ticket_min: 0.85, review_min: 0.6 },
       reported_apart: [
@@ -1052,7 +1052,7 @@ describe("the pre-registered sweep as a command", () => {
     expect(recordings.map((entry) => entry.runs.length)).toEqual([2, 3]);
     const page = readFileSync(md, "utf8");
     expect(page).toContain(
-      "Chosen: GATE_PERSIST_SIM_MIN=1, JEV_GATE_REVIEW_MIN_CONFIDENCE=0.55, JEV_GATE_TICKET_MIN_CONFIDENCE=0.85",
+      "Chosen: GATE_PERSIST_SIM_MIN=1, VON_GATE_REVIEW_MIN_CONFIDENCE=0.55, VON_GATE_TICKET_MIN_CONFIDENCE=0.85",
     );
     expect(page).toContain("## Reported apart, never counted");
     expect(page).toContain("`august_oil_level_aug10`");
@@ -1061,7 +1061,7 @@ describe("the pre-registered sweep as a command", () => {
     for (const reading of READINGS) expect(page).toContain(reading);
     expect(json.endsWith(PREREGISTERED_JSON_NAME)).toBe(true);
     expect(md.endsWith(PREREGISTERED_MD_NAME)).toBe(true);
-    expect(written.join("")).toContain("JEV_GATE_REVIEW_MIN_CONFIDENCE=0.55");
+    expect(written.join("")).toContain("VON_GATE_REVIEW_MIN_CONFIDENCE=0.55");
     expect(written.join("")).toContain("GATE_PERSIST_SIM_MIN=1");
   });
 
@@ -1080,7 +1080,7 @@ describe("the pre-registered sweep as a command", () => {
     expect(JSON.parse(readFileSync(json, "utf8"))).toMatchObject({
       selection: { status: "withheld", chosen: null, reason: null },
     });
-    // The rule alone would move Jev to (1, 0.55 / 0.85); withheld, the page marks no triple chosen.
+    // The rule alone would move Von to (1, 0.55 / 0.85); withheld, the page marks no triple chosen.
     const page = readFileSync(md, "utf8");
     expect(page).toContain("No triple chosen");
     expect(page).not.toMatch(/chosen\)/);
@@ -1111,7 +1111,7 @@ describe("the pre-registered sweep as a command", () => {
   it("names both recordings as missing when the cassette store holds none", async () => {
     const empty = () =>
       Promise.reject(
-        new ConfigError("EVAL_JEV_MODE", "cassette mode replays recorded answers and holds none"),
+        new ConfigError("EVAL_VON_MODE", "cassette mode replays recorded answers and holds none"),
       );
     const refused = await executePreregistered(
       { outDir: temporaryDirectory(), fromRuns: false, env: {} },
@@ -1126,11 +1126,11 @@ describe("the pre-registered sweep as a command", () => {
     );
   });
 
-  it("replays the tuning list for Jev alone, from cassettes, at 0.60 / 0.85 and the N it is given, whatever the environment says", () => {
+  it("replays the tuning list for Von alone, from cassettes, at 0.60 / 0.85 and the N it is given, whatever the environment says", () => {
     const cfg = resampleConfig(
       {
-        EVAL_JEV_MODE: "live",
-        JEV_GATE_TICKET_MIN_CONFIDENCE: "0.95",
+        EVAL_VON_MODE: "live",
+        VON_GATE_TICKET_MIN_CONFIDENCE: "0.95",
         GATE_PERSIST_SIM_MIN: "2",
       },
       "/tmp/sweep",
@@ -1139,12 +1139,12 @@ describe("the pre-registered sweep as a command", () => {
     );
     expect(cfg).toMatchObject({
       profile: "tuning",
-      backends: ["jev"],
-      jevMode: "cassette",
+      backends: ["von"],
+      vonMode: "cassette",
       record: false,
       confirmLive: false,
       resample: 2,
-      jevGate: { ticketMin: 0.85, reviewMin: 0.6 },
+      vonGate: { ticketMin: 0.85, reviewMin: 0.6 },
       persistSimMin: 0,
       // Each N on the recording made at N "and on no other": a cassette that does not say its
       // value is a miss, never served.
@@ -1152,9 +1152,9 @@ describe("the pre-registered sweep as a command", () => {
       outDir: resampleDirectory("/tmp/sweep", 0, 2),
     });
     expect(resampleDirectory("/tmp/sweep", 0, 2)).toBe("/tmp/sweep/persist-0/resample-2");
-    // Jev's default pair is now the choice (0.65 / 0.85); the sweep still replays at the pair
+    // Von's default pair is now the choice (0.65 / 0.85); the sweep still replays at the pair
     // the recordings were made at.
-    expect(resampleConfig({}, "/tmp/sweep", 1, 0).jevGate).toEqual({
+    expect(resampleConfig({}, "/tmp/sweep", 1, 0).vonGate).toEqual({
       ticketMin: 0.85,
       reviewMin: 0.6,
     });
@@ -1170,7 +1170,7 @@ describe("the pre-registered sweep as a command", () => {
 
   it("records the choice once, with the triple the held-out run reads, and never a withheld one", async () => {
     const out = temporaryDirectory();
-    const choicePath = join(temporaryDirectory(), "jev-thresholds-choice.md");
+    const choicePath = join(temporaryDirectory(), "von-thresholds-choice.md");
     const quiet = { write: () => true };
     const request = { outDir: out, fromRuns: false, env: {}, recordChoice: true, choicePath };
     const recordedAt = () => new Date("2026-09-26T08:00:00.000Z");
@@ -1197,7 +1197,7 @@ describe("the pre-registered sweep as a command", () => {
     ).rejects.toThrow(/already records the choice/);
 
     // A withheld choice is never recorded.
-    const elsewhere = join(temporaryDirectory(), "jev-thresholds-choice.md");
+    const elsewhere = join(temporaryDirectory(), "von-thresholds-choice.md");
     await expect(
       executePreregistered(
         { ...request, outDir: temporaryDirectory(), choicePath: elsewhere },

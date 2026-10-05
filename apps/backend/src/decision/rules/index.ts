@@ -85,7 +85,7 @@ function clamp(value: number, low: number, high: number): number {
 /**
  * The gating quantity: the calibrated rules confidence above.
  *
- * Exported because the evaluation harness reports it beside Jev's peakedness
+ * Exported because the evaluation harness reports it beside Von's peakedness
  * and has to compute it the same way.
  */
 export function gatingConfidence(supports: readonly number[]): number {

@@ -1,23 +1,23 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The rules-versus-Jev table the README promises, and the aggregation
+// The rules-versus-Von table the README promises, and the aggregation
 // behind it.
 //
-// Every figure is reported for the rules baseline and for Jev, at both levels,
+// Every figure is reported for the rules baseline and for Von, at both levels,
 // so the comparison is one table rather than two runs somebody has to line up
 // by hand. `aggregateScenarios` is what turns one backend's per-scenario
 // results into that column, and `summary.ts` uses the same function for the
 // per-backend block of `run.json`, so a number in the comparison and the same
 // number in the backend section cannot drift apart.
 //
-// `delta` is always Jev minus rules, so a positive delta means Jev did better
+// `delta` is always Von minus rules, so a positive delta means Von did better
 // on a metric where more is better and worse where less is (the false-ticket
 // rate and the cost). The row's `lowerIsBetter` flag says which, because a
 // reader of the Markdown table should not have to know.
 //
 // The confidences themselves are not a row: the rules backend's confidence is a
-// calibrated gating quantity and Jev's is a different one, and putting them in
+// calibrated gating quantity and Von's is a different one, and putting them in
 // the same column unnamed would compare two things that only share a word.
 
 import type {
@@ -202,28 +202,28 @@ function valueOf(scenarios: readonly ScenarioMetrics[] | undefined, row: RowSpec
  * The comparison table: one row per metric, one column per backend.
  *
  * @param rulesMetrics the rules baseline's scenarios.
- * @param jevMetrics Jev's scenarios.
+ * @param vonMetrics Von's scenarios.
  * @param llmMetrics the optional LLM column; the `llm` field is absent when it is not given.
  * @returns one row per metric, in a fixed order so two reports diff cleanly.
  */
 export function compare(
   rulesMetrics: readonly ScenarioMetrics[],
-  jevMetrics: readonly ScenarioMetrics[],
+  vonMetrics: readonly ScenarioMetrics[],
   llmMetrics?: readonly ScenarioMetrics[],
 ): ComparisonRow[] {
   const rulesAggregate = rulesMetrics.length === 0 ? undefined : aggregateScenarios(rulesMetrics);
-  const jevAggregate = jevMetrics.length === 0 ? undefined : aggregateScenarios(jevMetrics);
+  const vonAggregate = vonMetrics.length === 0 ? undefined : aggregateScenarios(vonMetrics);
 
   return ROWS.map((row) => {
     const rules = rulesAggregate === undefined ? null : row.of(rulesAggregate);
-    const jev = jevAggregate === undefined ? null : row.of(jevAggregate);
+    const von = vonAggregate === undefined ? null : row.of(vonAggregate);
     const llm = valueOf(llmMetrics, row);
     return {
       metric: row.metric,
       rules,
-      jev,
+      von,
       ...(llmMetrics === undefined ? {} : { llm }),
-      delta: rules === null || jev === null ? null : jev - rules,
+      delta: rules === null || von === null ? null : von - rules,
       lowerIsBetter: row.lowerIsBetter === true,
     };
   });

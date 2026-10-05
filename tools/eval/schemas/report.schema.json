@@ -115,7 +115,7 @@
       "description": "One pair's tickets and decisions inside its scenario's unlabelled episodes, read against the scenario's design target. A report, never gated: no gate, exit eval, pass rule or threshold selection reads it.",
       "properties": {
         "scenario": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
-        "backend": { "enum": ["rules", "jev", "llm"] },
+        "backend": { "enum": ["rules", "von", "llm"] },
         "gated": { "const": false },
         "accepted": { "$ref": "#/$defs/ids" },
         "provenance": { "type": "string", "minLength": 1 },
@@ -205,13 +205,13 @@
           "type": "object",
           "properties": {
             "ticket_min": {
-              "description": "GATE_TICKET_MIN_CONFIDENCE, the global ticket threshold; a backend with its own pair (jev) states it in backends[].thresholds.",
+              "description": "GATE_TICKET_MIN_CONFIDENCE, the global ticket threshold; a backend with its own pair (von) states it in backends[].thresholds.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
             },
             "review_min": {
-              "description": "GATE_REVIEW_MIN_CONFIDENCE, the global review threshold; a backend with its own pair (jev) states it in backends[].thresholds.",
+              "description": "GATE_REVIEW_MIN_CONFIDENCE, the global review threshold; a backend with its own pair (von) states it in backends[].thresholds.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
@@ -236,12 +236,12 @@
         "prices": {
           "type": "object",
           "properties": {
-            "jev_input_per_mtok": { "type": "number", "minimum": 0 },
+            "von_input_per_mtok": { "type": "number", "minimum": 0 },
             "llm_input_per_mtok": { "type": "number", "minimum": 0 },
             "llm_output_per_mtok": { "type": "number", "minimum": 0 },
             "as_of": { "type": "string", "format": "date" }
           },
-          "required": ["jev_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
+          "required": ["von_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
           "additionalProperties": false
         },
         "seed": { "type": ["integer", "null"], "minimum": 0 }
@@ -269,7 +269,7 @@
     "backend": {
       "type": "object",
       "properties": {
-        "name": { "enum": ["rules", "jev", "llm"] },
+        "name": { "enum": ["rules", "von", "llm"] },
         "model": { "type": "string", "minLength": 1 },
         "mode": { "$ref": "#/$defs/backend_mode" },
         "informative": {
@@ -307,7 +307,7 @@
           "$ref": "#/$defs/count"
         },
         "thresholds": {
-          "description": "The pair the gate applied to this backend's decisions: JEV_GATE_* for jev (0.85 / 0.65 by default, the pre-registered choice; a run made before Jev had its own default pair defaulted each to its GATE_* twin), GATE_* for rules and llm. Optional so that a report written before it existed still validates; run.thresholds then holds the pair every backend used.",
+          "description": "The pair the gate applied to this backend's decisions: VON_GATE_* for von (0.85 / 0.65 by default, the pre-registered choice; a run made before Von had its own default pair defaulted each to its GATE_* twin), GATE_* for rules and llm. Optional so that a report written before it existed still validates; run.thresholds then holds the pair every backend used.",
           "type": "object",
           "properties": {
             "ticket_min": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -704,7 +704,7 @@
         },
         "split": { "enum": ["dev", "test", "heldout"] },
         "positive": { "type": "boolean" },
-        "backend": { "enum": ["rules", "jev", "llm"] },
+        "backend": { "enum": ["rules", "von", "llm"] },
         "model": { "type": "string", "minLength": 1 },
         "mode": { "$ref": "#/$defs/backend_mode" },
         "seed": { "type": "integer", "minimum": 0 },
@@ -746,7 +746,7 @@
         "warmup_min": { "type": "number", "minimum": 0 },
         "events_file": {
           "type": "string",
-          "pattern": "^scenarios/[a-z][a-z0-9_]{2,63}\\.(rules|jev|llm)\\.jsonl$"
+          "pattern": "^scenarios/[a-z][a-z0-9_]{2,63}\\.(rules|von|llm)\\.jsonl$"
         },
         "windows": { "type": "array", "items": { "$ref": "#/$defs/window" } },
         "excluded": { "type": "array", "items": { "$ref": "#/$defs/excluded" } },
@@ -917,12 +917,12 @@
       "properties": {
         "metric": { "type": "string", "minLength": 1 },
         "rules": { "$ref": "#/$defs/ratio" },
-        "jev": { "$ref": "#/$defs/ratio" },
+        "von": { "$ref": "#/$defs/ratio" },
         "llm": { "$ref": "#/$defs/ratio" },
         "delta": { "$ref": "#/$defs/ratio" },
         "lower_is_better": { "type": "boolean" }
       },
-      "required": ["metric", "rules", "jev", "llm", "delta", "lower_is_better"],
+      "required": ["metric", "rules", "von", "llm", "delta", "lower_is_better"],
       "additionalProperties": false
     },
     "summary": {
@@ -963,9 +963,9 @@
           "type": "object",
           "properties": {
             "rules_detection": { "type": ["string", "null"], "pattern": "^\\d+/\\d+$" },
-            "jev_diagnosis": { "type": ["string", "null"], "pattern": "^\\d+/\\d+$" }
+            "von_diagnosis": { "type": ["string", "null"], "pattern": "^\\d+/\\d+$" }
           },
-          "required": ["rules_detection", "jev_diagnosis"],
+          "required": ["rules_detection", "von_diagnosis"],
           "additionalProperties": false
         }
       },

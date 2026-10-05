@@ -6,7 +6,7 @@
   "review_min": 0.6,
   "native_alarm_codes": ["W102", "W103"],
   "prices": {
-    "jev_input_per_mtok": 0.042,
+    "von_input_per_mtok": 0.042,
     "llm_input_per_mtok": 5,
     "llm_output_per_mtok": 25,
     "as_of": "2026-09-19"

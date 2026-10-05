@@ -9,7 +9,7 @@
 //   * `OIL_COOLER`, after `inject oil_cooler_fouling`: 60 simulated minutes later an
 //     oil-temperature suspect event, a decision for the fouled oil cooler and a ticket.
 //
-// Each script answers per decision backend. The Jev backend clears the ticket gate (0.91 and
+// Each script answers per decision backend. The Von backend clears the ticket gate (0.91 and
 // 0.88) and is billed at the input-token price; the rules backend answers with the medium
 // confidence of its scoring formula, so its ticket opens in `review`, and bills nothing.
 
@@ -32,11 +32,11 @@ import type {
 } from "@/api/types";
 
 /** The two decision backends the fake can play. */
-export type BackendMode = Extract<DecisionBackend, "jev" | "rules">;
+export type BackendMode = Extract<DecisionBackend, "von" | "rules">;
 
 /** The model each backend reports in `hello`, `status.backend` and its decisions. */
 export const MODELS: Readonly<Record<BackendMode, string>> = {
-  jev: "jev-1.13.0",
+  von: "von-1.13.0",
   rules: "rules-v1",
 };
 
@@ -44,11 +44,11 @@ export const MODELS: Readonly<Record<BackendMode, string>> = {
 export const GATE = { ticket_min_confidence: 0.85, review_min_confidence: 0.6 } as const;
 
 /**
- * Jev's list price of a million input tokens and the day it was checked, the defaults of
- * `JEV_PRICE_INPUT_PER_MTOK` and `PRICES_AS_OF` (docs/decision-backends.md); output tokens are
+ * Von's list price of a million input tokens and the day it was checked, the defaults of
+ * `VON_PRICE_INPUT_PER_MTOK` and `PRICES_AS_OF` (docs/decision-backends.md); output tokens are
  * free.
  */
-export const PRICES = { jevInputPerMtok: 0.042, asOf: "2026-09-19" } as const;
+export const PRICES = { vonInputPerMtok: 0.042, asOf: "2026-09-19" } as const;
 
 const MINUTE_MS = 60_000;
 
@@ -128,7 +128,7 @@ export const F3_AIR_LEAK: Script = {
     confidence: 0.56,
   },
   verdicts: {
-    jev: {
+    von: {
       probabilities: {
         dryer_purge_leak: 0.78,
         downstream_air_leak: 0.11,
@@ -265,7 +265,7 @@ export const OIL_COOLER: Script = {
     confidence: 0.6,
   },
   verdicts: {
-    jev: {
+    von: {
       probabilities: {
         oil_cooler_fouled: 0.84,
         high_ambient_temperature: 0.09,
@@ -399,9 +399,9 @@ function candidateList(candidates: readonly Candidate[]): Decision["candidates"]
   return [...candidates] as Decision["candidates"];
 }
 
-/** The billed cost of `inputTokens` at Jev's price, to the tenth of a micro-dollar. */
-function jevCostUsd(inputTokens: number): number {
-  return round((inputTokens * PRICES.jevInputPerMtok) / 1e6, 10);
+/** The billed cost of `inputTokens` at Von's price, to the tenth of a micro-dollar. */
+function vonCostUsd(inputTokens: number): number {
+  return round((inputTokens * PRICES.vonInputPerMtok) / 1e6, 10);
 }
 
 /** The state the decision backend saw, as `GET /api/decisions/:id` returns it. */
@@ -467,7 +467,7 @@ export function runScript(script: Script, context: RunContext): PipelineRun {
 
   const candidates = script.candidates.map((faultId) => candidateOf(script, faultId, verdict));
   const state = decisionState(script, context, observations, candidates);
-  const billed = context.backend === "jev";
+  const billed = context.backend === "von";
   const gate = gateOf(verdict.confidence);
   const decision: Decision = {
     schema: "urn:fdp:schema:decision:v1",
@@ -489,8 +489,8 @@ export function runScript(script: Script, context: RunContext): PipelineRun {
     gate,
     usage: { input_tokens: verdict.inputTokens, output_tokens: 0 },
     cost: {
-      usd: billed ? jevCostUsd(verdict.inputTokens) : 0,
-      price_input_per_mtok: billed ? PRICES.jevInputPerMtok : 0,
+      usd: billed ? vonCostUsd(verdict.inputTokens) : 0,
+      price_input_per_mtok: billed ? PRICES.vonInputPerMtok : 0,
       price_output_per_mtok: 0,
       prices_as_of: PRICES.asOf,
     },

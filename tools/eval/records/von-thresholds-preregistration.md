@@ -1,17 +1,17 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
-# Pre-registration: the Jev confidence thresholds
+# Pre-registration: the Von confidence thresholds
 
-_Edited for publication: its paths were updated, one cost estimate of Jev's was removed because no figure of Jev's is published, internal decision identifiers and process narration were replaced by what they refer to, and the rules backend's confidence is no longer called "calibrated", because it is a margin over candidate supports, not a calibrated probability. The rule is unchanged. The planning documents it once cited are not part of this repository._
+_Edited for publication: its paths were updated, one cost estimate of Von's was removed because no figure of Von's is published, internal decision identifiers and process narration were replaced by what they refer to, and the rules backend's confidence is no longer called "calibrated", because it is a margin over candidate supports, not a calibrated probability. The rule is unchanged. The planning documents it once cited are not part of this repository._
 
-Decided on 2026-09-23, **before any Jev decision on the tuning list existed**. This file fixes how the gate
-thresholds for Jev will be chosen, so that the choice cannot follow the data it is judged on. It changes nothing by
+Decided on 2026-09-23, **before any Von decision on the tuning list existed**. This file fixes how the gate
+thresholds for Von will be chosen, so that the choice cannot follow the data it is judged on. It changes nothing by
 itself; the choice is made once, by the procedure below, after the prerequisites have landed.
 
-Amended on 2026-09-24, **still before any Jev decision on the tuning list existed**: the persistence
+Amended on 2026-09-24, **still before any Von decision on the tuning list existed**: the persistence
 `GATE_PERSIST_SIM_MIN` (N) enters the selection, and `august_oil_level_aug10` is reported apart. The
-[amendment](#amendment-2026-09-24-before-any-jev-tuning-data) says what it changes and why. The sections below read as
+[amendment](#amendment-2026-09-24-before-any-von-tuning-data) says what it changes and why. The sections below read as
 amended, and the rest of the rule is unchanged.
 
 ## Scope
@@ -19,13 +19,13 @@ amended, and the rest of the rule is unchanged.
 - The thresholds of `apps/backend/src/gate`: `ticket` at or above the ticket threshold, `review` at or above
   the review threshold, otherwise `log`. When this was written, both backends used `GATE_TICKET_MIN_CONFIDENCE` 0.85
   and `GATE_REVIEW_MIN_CONFIDENCE` 0.60.
-- **Only Jev** (`JEV_MODEL` `jev-1.13.0`) gets its own thresholds; the README already says thresholds are tuned per Jev
+- **Only Von** (`VON_MODEL` `von-1.13.0`) gets its own thresholds; the README already says thresholds are tuned per Von
   version. The rules backend keeps 0.60 / 0.85: its confidence is a gating quantity of its own (a margin over candidate
-  supports, not a calibrated probability), on a different scale from Jev's reported probability. Making the gate read
+  supports, not a calibrated probability), on a different scale from Von's reported probability. Making the gate read
   per-backend thresholds ships with the choice.
 - **Since the amendment, the persistence before the ticket** (the sim minutes a symptom must persist before an
-  episode without a ticket is decided): `GATE_PERSIST_SIM_MIN`, N, then 1, is chosen with Jev's pair, from N ∈ {0, 1}. N is not a per-backend value. The
-  chosen N applies to the pipeline as a whole, every backend included. It is chosen on Jev's recordings, because Jev is
+  episode without a ticket is decided): `GATE_PERSIST_SIM_MIN`, N, then 1, is chosen with Von's pair, from N ∈ {0, 1}. N is not a per-backend value. The
+  chosen N applies to the pipeline as a whole, every backend included. It is chosen on Von's recordings, because Von is
   the backend that diagnoses. The rules backend's diagnosis is a recorded baseline that no gate reads (E3 gates its detection only),
   so its figures at the chosen N are reported and never gated.
 - The LLM backend is out of scope until it has been measured.
@@ -35,14 +35,14 @@ amended, and the rest of the rule is unchanged.
 1. The changes of 2026-09-23 are in place: the diagnosis given the evidence the manual already uses (quiet hours and
    contrastive criteria), the downstream-leak injection made consistent, with a dev twin on the tuning list, the S304 state word and the
    persistence N, together with the two follow-ups to the leak injection decided on 2026-09-24 (the `guard_entry` ramp
-   anchor, and `heavy_air_demand` without its oil offset), because each of them moves Jev's confidences. The follow-ups
+   anchor, and `heavy_air_demand` without its oil offset), because each of them moves Von's confidences. The follow-ups
    make the dev twin raise suspect events and decisions where it raised none, so a recording made before they landed
    would hold no answer for the twin's new requests. Like the rest of those changes, they were decided after the E3 and
    E4 results had been seen; this sentence was added on 2026-09-24 and changes only this prerequisite.
-2. Jev has been recorded on the tuning list **twice**: once with `GATE_PERSIST_SIM_MIN` = 0 and once with
+2. Von has been recorded on the tuning list **twice**: once with `GATE_PERSIST_SIM_MIN` = 0 and once with
    `GATE_PERSIST_SIM_MIN` = 1. Each is a paid run, made with an explicit go-ahead. Both go into one cassette
    store, keyed by request digest, which keeps every repeated answer of each recording. (Amended on 2026-09-24; it read
-   "recorded Jev on the tuning list", once.)
+   "recorded Von on the tuning list", once.)
 
 ## Data
 
@@ -86,7 +86,7 @@ If either recording is missing, the sweep chooses nothing and names the missing 
    0.60 / 0.85.
 4. **Stay unless clearly better:** the incumbent is the triple **(N = 1, 0.60 / 0.85)**. A triple replaces it only if it
    meets the constraint, passes **at least one more positive** than the incumbent on the median resample, and never
-   passes fewer on any resample. Otherwise Jev keeps 0.60 / 0.85 and the pipeline keeps N = 1. If the incumbent itself
+   passes fewer on any resample. Otherwise Von keeps 0.60 / 0.85 and the pipeline keeps N = 1. If the incumbent itself
    breaks the constraint, the qualifying triple with the most positives wins. If no triple qualifies, the thresholds and
    N stay as they are and the finding is recorded.
 
@@ -95,9 +95,9 @@ possible.
 
 ## After the choice
 
-- The chosen pair, the sweep report path and this file's commit are recorded, and Jev-derived figures are not
+- The chosen pair, the sweep report path and this file's commit are recorded, and Von-derived figures are not
   published. Since the amendment, the choice is a triple, and its N is recorded with the pair. The record is written
-  once, from the sweep's own runs, to `tools/eval/records/jev-thresholds-choice.md`
+  once, from the sweep's own runs, to `tools/eval/records/von-thresholds-choice.md`
   (`fdp-eval sweep --preregistered --record-choice`), which is committed and which the held-out set's one run reads:
   that run is refused with any other triple. This sentence was added with the implementation, on 2026-09-24 and before
   any recording, and changes nothing in the rule.
@@ -106,9 +106,9 @@ possible.
   decided on 2026-09-24, and the set was authored and sealed the same day, before any run of it
   (`tools/eval/records/heldout-seal.md`). This sentence was added then and changes nothing else in this file.
 
-## Amendment (2026-09-24, before any Jev tuning data)
+## Amendment (2026-09-24, before any Von tuning data)
 
-Two decisions were made on 2026-09-24, **before any Jev decision on the tuning list existed**: no recording of the
+Two decisions were made on 2026-09-24, **before any Von decision on the tuning list existed**: no recording of the
 tuning list had been made. This amendment was committed on its own, before any recording.
 
 **Decision 1: the persistence N enters the pre-registered selection.** The sweep evaluates triples (N, review, ticket) with N in
@@ -136,7 +136,7 @@ separately.
 - **N.** A rules-backend reading of 2026-09-24 showed that the rules backend reads worse
   at N = 1 than at N = 0 on the merged ten-scenario tuning list. At N = 1, each episode's first decision moves to a
   later frame, and the choices that follow move with it. N changes which requests exist. It must therefore be chosen on
-  the recordings of the backend that diagnoses, Jev, under the same pre-registered rule, and not on the rules backend.
+  the recordings of the backend that diagnoses, Von, under the same pre-registered rule, and not on the rules backend.
   N = 1 was first chosen on the code as it stood before the 2026-09-23 changes to the diagnosis evidence and the leak
   injection.
 - **August.** `august_oil_level_aug10` binds no labelled window. Its expectation is "at least one ticket, any fault", and
@@ -158,5 +158,5 @@ Those readings are written, and repeated in every sweep report, before any recor
 
 **Disclosure.** Like every design decision of 2026-09-23 and 2026-09-24, these two were made after the E3 and E4 results
 had been seen, and every figure they move stays in-sample. The reading that prompted decision 1 is a rules-backend reading
-of the tuning list at N = 0 and N = 1; no Jev decision on the tuning list existed when they were made, and no core-10
+of the tuning list at N = 0 and N = 1; no Von decision on the tuning list existed when they were made, and no core-10
 figure was used.

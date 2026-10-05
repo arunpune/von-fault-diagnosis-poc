@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // One month of the `full` profile, through the real host and the real
@@ -99,7 +99,7 @@ describe.skipIf(!runnable)("the full profile over one month of the real CSV", ()
 
     const cfg = loadConfig(
       ["--profile", "full", "--backends", "rules", "--scenario", "metropt3_full", "--out", out],
-      { METROPT_CSV: csv, EVAL_JEV_MODE: "mock" },
+      { METROPT_CSV: csv, EVAL_VON_MODE: "mock" },
     );
     const { log, lines } = recordingLogger();
     const runs: ScenarioRun[] = [];

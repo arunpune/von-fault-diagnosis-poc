@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Every path of the mock TypeSafe server: authentication, body validation and its messages, the
@@ -193,9 +193,9 @@ describe("request validation", () => {
       expect(status).toBe(200);
       expect((json as SystemOneBody).model).toBe(MOCK_MODEL);
     }
-    const { status, json } = await post({ model: "jev-2", state: "x", questions: { q: NOUL } });
+    const { status, json } = await post({ model: "von-2", state: "x", questions: { q: NOUL } });
     expect(status).toBe(422);
-    expect((json as ErrorBody).error.message).toContain("jev-2");
+    expect((json as ErrorBody).error.message).toContain("von-2");
   });
 });
 
@@ -495,8 +495,8 @@ describe("the other routes", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       models: [
-        { id: "jev-latest", resolves_to: MOCK_MODEL },
-        { id: "jev-preview", resolves_to: MOCK_MODEL },
+        { id: "von-latest", resolves_to: MOCK_MODEL },
+        { id: "von-preview", resolves_to: MOCK_MODEL },
       ],
     });
   });

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The live queue: one call at a time, a token bucket at 600 requests per
@@ -145,14 +145,14 @@ describe("rateLimited", () => {
   it("keeps the backend's name and model and paces every decision", async () => {
     const output = { choice: "none_of_these" } as DecisionOutput;
     const backend: DecisionBackend = {
-      name: "jev",
-      model: "jev-1.13.0",
+      name: "von",
+      model: "von-1.13.0",
       decide: () => Promise.resolve(output),
     };
     const limiter = createRateLimiter({ clock: fakeClock() });
     const paced = rateLimited(backend, limiter);
-    expect(paced.name).toBe("jev");
-    expect(paced.model).toBe("jev-1.13.0");
+    expect(paced.name).toBe("von");
+    expect(paced.model).toBe("von-1.13.0");
     await expect(paced.decide({} as DecisionInput)).resolves.toBe(output);
     expect(limiter.stats.calls).toBe(1);
   });

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // What one `fdp-eval run` produced, before any report is written.
@@ -59,7 +59,7 @@ export interface BackendRecord {
   readonly informative: boolean;
   readonly stats: BackendStats;
   /**
-   * The pair the gate applied to this backend's decisions: Jev's own or `GATE_*`. Absent from a
+   * The pair the gate applied to this backend's decisions: Von's own or `GATE_*`. Absent from a
    * record built without a configuration.
    */
   readonly thresholds?: GateThresholds;

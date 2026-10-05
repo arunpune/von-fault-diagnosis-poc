@@ -110,7 +110,7 @@ describe("the page on its live feed", () => {
 
     // The resync on open brings GET /api/status; the backend status now names the backend.
     await settled(1);
-    expect(bar(tid.status.backend)).toHaveTextContent("Jev · jev-1.13.0");
+    expect(bar(tid.status.backend)).toHaveTextContent("Von · von-1.13.0");
     expect(bar(tid.status.clock)).toHaveTextContent("2020-06-05 09:48:20 UTC");
 
     // snapshot: the statuses of the same instant, the overlay caches seeded.

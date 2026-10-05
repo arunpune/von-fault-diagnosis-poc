@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Reading Jev's answers.
+ * Reading Von's answers.
  *
  * Scripted answers go in as the literals a response body would carry, and
  * what comes out is compared field by field: the Choice read back, the Nouls
@@ -291,7 +291,7 @@ describe("parseAnswers: answers that cannot be read", () => {
 
 describe("readResponse", () => {
   const body = {
-    model: "jev-1.13.0",
+    model: "von-1.13.0",
     answers: answers(),
     usage: { input_tokens: 812, output_tokens: 0 },
   };

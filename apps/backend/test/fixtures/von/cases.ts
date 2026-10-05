@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * The decision inputs the Jev question tests run over.
+ * The decision inputs the Von question tests run over.
  *
  * The labelled events the question set is judged on are F3 onset, F4
  * precursor, F4 acute, the oil-cooler injection, the depot abstention and a
@@ -35,7 +35,7 @@ import {
 } from "../catalog/events.ts";
 
 /** One decision the question set is built for. */
-export interface JevCase {
+export interface VonCase {
   readonly name: string;
   readonly input: DecisionInput;
 }
@@ -240,7 +240,7 @@ export function goldenInput(): DecisionInput {
  * Every labelled event above that has a fixture, the
  * baseline hour, the widest candidate list and the adversarial case.
  */
-export const JEV_CASES: readonly JevCase[] = [
+export const VON_CASES: readonly VonCase[] = [
   ...FIXTURE_CASES.map((testCase) => ({
     name: testCase.name,
     input: inputFor(testCase.event, candidatesFor(testCase.candidateIds)),

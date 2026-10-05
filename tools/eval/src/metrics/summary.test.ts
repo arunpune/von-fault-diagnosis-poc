@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The scenario pass rules and the core-10 gate, with detection level read on
@@ -538,30 +538,30 @@ describe("coreGate", () => {
 });
 
 describe("summarise", () => {
-  it("summarises every backend and puts Jev's gate in the headline", () => {
+  it("summarises every backend and puts Von's gate in the headline", () => {
     const metrics = [
       ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "rules", true)),
-      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "jev", true)),
+      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "von", true)),
     ];
     const summary = summarise(metrics);
 
-    expect(summary.backends.map((entry) => entry.backend)).toEqual(["jev", "rules"]);
-    expect(summary.gate.backend).toBe("jev");
+    expect(summary.backends.map((entry) => entry.backend)).toEqual(["von", "rules"]);
+    expect(summary.gate.backend).toBe("von");
     expect(summary.gate.pass).toBe(true);
     expect(summary.core10).toEqual(CORE_10_SCENARIO_IDS);
   });
 
-  it("asks the rules baseline for detection and Jev for diagnosis by default", () => {
+  it("asks the rules baseline for detection and Von for diagnosis by default", () => {
     const metrics = [
       ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "rules", true)),
-      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "jev", true)),
+      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "von", true)),
     ];
     const summary = summarise(metrics);
 
     expect(summary.backends.find((entry) => entry.backend === "rules")?.gate.level).toBe(
       "detection",
     );
-    expect(summary.backends.find((entry) => entry.backend === "jev")?.gate.level).toBe("diagnosis");
+    expect(summary.backends.find((entry) => entry.backend === "von")?.gate.level).toBe("diagnosis");
   });
 
   it("labels the MetroPT-3 check in-sample", () => {
@@ -591,12 +591,12 @@ describe("summarise", () => {
   it("builds a comparison table with one row per metric", () => {
     const summary = summarise([
       ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "rules", true)),
-      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "jev", false)),
+      ...CORE_10_SCENARIO_IDS.map((id) => scored(id, "von", false)),
     ]);
     const recall = summary.comparison.find((row) => row.metric === "recall (ticket, micro)");
 
     expect(recall?.rules).toBe(1);
-    expect(recall?.jev).toBe(0);
+    expect(recall?.von).toBe(0);
     expect(recall?.delta).toBe(-1);
   });
 

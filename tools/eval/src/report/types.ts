@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `run.json`, as TypeScript.
@@ -27,7 +27,7 @@ export type Ratio = number | null;
 
 /** The dated prices a run was costed at (`PRICES_AS_OF` and the price variables). */
 export interface ReportPrices {
-  readonly jev_input_per_mtok: number;
+  readonly von_input_per_mtok: number;
   readonly llm_input_per_mtok: number;
   readonly llm_output_per_mtok: number;
   readonly as_of: string;
@@ -137,7 +137,7 @@ export interface ReportBackend {
   /** The most recorded answers any cassette the run hit held: the resamples it can give. */
   readonly cassette_answers_max?: number;
   /**
-   * The pair the gate applied to this backend's decisions (Jev has its own pair); absent from a
+   * The pair the gate applied to this backend's decisions (Von has its own pair); absent from a
    * report written before it existed, where `run.thresholds` was every backend's.
    */
   readonly thresholds?: { readonly ticket_min: number; readonly review_min: number };
@@ -471,11 +471,11 @@ export interface ReportBackendSummary {
   readonly gate: ReportGateCounts;
 }
 
-/** One row of the rules-versus-Jev comparison; `delta` is Jev minus rules. */
+/** One row of the rules-versus-Von comparison; `delta` is Von minus rules. */
 export interface ReportComparisonRow {
   readonly metric: string;
   readonly rules: Ratio;
-  readonly jev: Ratio;
+  readonly von: Ratio;
   readonly llm: Ratio;
   readonly delta: Ratio;
   readonly lower_is_better: boolean;
@@ -517,7 +517,7 @@ export interface ReportGate {
    */
   readonly core10: {
     readonly rules_detection: string | null;
-    readonly jev_diagnosis: string | null;
+    readonly von_diagnosis: string | null;
   };
 }
 

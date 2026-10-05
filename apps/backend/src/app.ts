@@ -48,7 +48,7 @@ import { pricesFor, summaryPrices } from "./cost/index.ts";
 import { createCostRepo } from "./cost/repo.ts";
 import { createAppPool } from "./db/app.ts";
 import { assertMigrated, REQUIRED_MIGRATION, type Pool } from "./db/pool.ts";
-import { createJevBackend } from "./decision/jev/index.ts";
+import { createVonBackend } from "./decision/von/index.ts";
 import { createAnthropicProvider, createLlmBackend } from "./decision/llm/index.ts";
 import { selectBackend, type DecisionBackendFactories } from "./decision/select.ts";
 import type { DecisionBackend } from "./decision/types.ts";
@@ -233,11 +233,11 @@ function defaultBackendFactories(clock: WallClock, logger: Logger): DecisionBack
   const decisionLogger = logger.child({ module: "decision" });
   return {
     rules: () => createRulesBackend({ labels: SIGNAL_LABELS, now }),
-    jev: (env) =>
-      createJevBackend({
+    von: (env) =>
+      createVonBackend({
         apiKey: requireKey(env.typesafeApiKey, "TYPESAFE_API_KEY"),
         baseURL: env.typesafeBaseUrl,
-        model: env.jevModel,
+        model: env.vonModel,
         labels: SIGNAL_LABELS,
         wall: now,
         warn: (fields, message) => {
@@ -265,8 +265,8 @@ function loadEmbedder(env: Env): Promise<Embedder> {
 /**
  * The tunables of the pipeline, from the environment.
  *
- * The gate gets the thresholds of the backend the service runs: Jev's own
- * `JEV_GATE_*` pair (default review 0.65, ticket 0.85), or `GATE_*` for the rules
+ * The gate gets the thresholds of the backend the service runs: Von's own
+ * `VON_GATE_*` pair (default review 0.65, ticket 0.85), or `GATE_*` for the rules
  * and llm backends.
  *
  * Exported so a test can hold the running service, the pipeline's own

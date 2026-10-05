@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The cassette server (tools/eval/CASSETTES.md): a recorded request is answered
@@ -17,7 +17,7 @@ import { CassetteError, CassetteStore, cassetteOf, withRecording, withRepeat } f
 import { CASSETTE_API_KEY, answerIndex, startCassetteServer } from "./cassette-server.ts";
 import { requestDigest } from "./digest.ts";
 
-const MODEL = "jev-1.13.0";
+const MODEL = "von-1.13.0";
 
 const temporary: string[] = [];
 

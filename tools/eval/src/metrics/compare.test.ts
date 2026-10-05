@@ -1,7 +1,7 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The rules-versus-Jev table and the per-backend aggregation behind it.
+// The rules-versus-Von table and the per-backend aggregation behind it.
 
 import { describe, expect, it } from "vitest";
 
@@ -67,9 +67,9 @@ function scenario(
 
 describe("aggregateScenarios", () => {
   it("pools one backend's scenarios into one column", () => {
-    const aggregate = aggregateScenarios([scenario("a", "jev", true), scenario("b", "jev", false)]);
+    const aggregate = aggregateScenarios([scenario("a", "von", true), scenario("b", "von", false)]);
 
-    expect(aggregate.backend).toBe("jev");
+    expect(aggregate.backend).toBe("von");
     expect(aggregate.scenarios).toBe(2);
     expect(aggregate.match.ticket.tp).toHaveLength(1);
     expect(aggregate.match.ticket.fn).toHaveLength(1);
@@ -91,14 +91,14 @@ describe("aggregateScenarios", () => {
   });
 
   it("checks the headline failures over the pooled windows", () => {
-    const aggregate = aggregateScenarios([scenario("a", "jev", true)]);
+    const aggregate = aggregateScenarios([scenario("a", "von", true)]);
     expect(aggregate.metropt3Check.review.pass).toBe(true);
     expect(aggregate.metropt3Check.ticket.pass).toBe(true);
   });
 
   it("refuses to mix two backends into one column", () => {
     expect(() =>
-      aggregateScenarios([scenario("a", "jev", true), scenario("b", "rules", true)]),
+      aggregateScenarios([scenario("a", "von", true), scenario("b", "rules", true)]),
     ).toThrow(TypeError);
   });
 
@@ -109,30 +109,30 @@ describe("aggregateScenarios", () => {
 
 describe("compare", () => {
   const rules = [scenario("a", "rules", true), scenario("b", "rules", false)];
-  const jev = [scenario("a", "jev", true), scenario("b", "jev", true)];
+  const von = [scenario("a", "von", true), scenario("b", "von", true)];
 
-  it("puts Jev minus rules in the delta", () => {
-    const rows = compare(rules, jev);
+  it("puts Von minus rules in the delta", () => {
+    const rows = compare(rules, von);
     const recall = rows.find((row) => row.metric === "recall (ticket, micro)");
 
     expect(recall?.rules).toBeCloseTo(0.5, 12);
-    expect(recall?.jev).toBe(1);
+    expect(recall?.von).toBe(1);
     expect(recall?.delta).toBeCloseTo(0.5, 12);
   });
 
   it("marks the metrics a smaller number is better on", () => {
-    const rows = compare(rules, jev);
+    const rows = compare(rules, von);
     expect(rows.find((row) => row.metric === "cost (USD)")?.lowerIsBetter).toBe(true);
     expect(rows.find((row) => row.metric === "recall (ticket, micro)")?.lowerIsBetter).toBe(false);
   });
 
   it("leaves out the llm column when no llm ran", () => {
-    const [row] = compare(rules, jev);
+    const [row] = compare(rules, von);
     expect(row).not.toHaveProperty("llm");
   });
 
   it("adds the llm column when it did", () => {
-    const [row] = compare(rules, jev, [scenario("a", "llm", true)]);
+    const [row] = compare(rules, von, [scenario("a", "llm", true)]);
     expect(row).toHaveProperty("llm");
   });
 
@@ -140,13 +140,13 @@ describe("compare", () => {
     const rows = compare(rules, []);
     const recall = rows.find((row) => row.metric === "recall (ticket, micro)");
 
-    expect(recall?.jev).toBeNull();
+    expect(recall?.von).toBeNull();
     expect(recall?.delta).toBeNull();
   });
 
   it("keeps the row order stable so two reports diff cleanly", () => {
-    expect(compare(rules, jev).map((row) => row.metric)).toEqual(
-      compare(jev, rules).map((row) => row.metric),
+    expect(compare(rules, von).map((row) => row.metric)).toEqual(
+      compare(von, rules).map((row) => row.metric),
     );
   });
 });

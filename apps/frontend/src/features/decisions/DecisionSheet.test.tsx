@@ -54,7 +54,7 @@ describe("DecisionSheet with an answered decision", () => {
     expect(within(header).getByText("dryer_purge_leak")).toBeInTheDocument();
     expect(within(header).getByText("high")).toHaveAttribute("data-severity", "high");
     expect(within(header).getByText("Ticket")).toBeInTheDocument();
-    expect(within(header).getByText("Jev · jev-1.13.0")).toBeInTheDocument();
+    expect(within(header).getByText("Von · von-1.13.0")).toBeInTheDocument();
     expect(within(header).getByText("2020-06-05 09:41:12 UTC")).toBeInTheDocument();
   });
 

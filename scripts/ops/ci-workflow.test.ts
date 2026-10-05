@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The shape of `.github/workflows/ci.yml`.
@@ -542,10 +542,10 @@ describe("ci.yml mosquitto-next job", () => {
 });
 
 describe("ci.yml eval-smoke job", () => {
-  it("runs the smoke profile against the core-10 gate with a mock Jev", () => {
+  it("runs the smoke profile against the core-10 gate with a mock Von", () => {
     const env = jobs["eval-smoke"]?.env ?? {};
     expect(env["EVAL_PROFILE"]).toBe("smoke");
-    expect(env["EVAL_JEV_MODE"]).toBe("mock");
+    expect(env["EVAL_VON_MODE"]).toBe("mock");
     expect(runLines("eval-smoke")).toContain("pnpm --filter @fdp/eval run eval -- --fail-on-gate");
   });
 

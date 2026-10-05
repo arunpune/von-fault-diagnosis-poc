@@ -1,4 +1,5 @@
 {
+  "model": "von-1.13.0",
   "state": {
     "machine": {
       "kind": "oil-injected screw compressor with a twin-tower desiccant dryer, load/unload regulation",
@@ -188,7 +189,6 @@
       }
     ]
   },
-  "model": "jev-1.13.0",
   "questions": {
     "fault": {
       "type": "choice",

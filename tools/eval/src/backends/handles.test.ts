@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The live and cassette handles, offline.
@@ -7,7 +7,7 @@
 // Anthropic server standing in for the two APIs, reached with stand-in keys
 // that exist only inside this test process. The decisions are real: a
 // contracts suspect-event fixture, the mini catalog's candidates from the
-// pipeline's own retriever, the pipeline's own Jev and LLM backends.
+// pipeline's own retriever, the pipeline's own Von and LLM backends.
 
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -28,7 +28,7 @@ import { createFakeWallClock } from "../runner/host.ts";
 import { CassetteStore } from "./cassette.ts";
 import type { Cassette } from "./cassette.ts";
 import { requestDigest } from "./digest.ts";
-import { createCassetteJevHandle, createLiveJevHandle } from "./jev.ts";
+import { createCassetteVonHandle, createLiveVonHandle } from "./von.ts";
 import { createLlmHandle } from "./llm.ts";
 
 /** Stand-in keys; every assertion on output greps for them. */
@@ -82,9 +82,9 @@ function decided(output: DecisionOutput) {
 const CONTINUOUS_LOAD = await decisionInput("valid-continuous-load.json");
 const FREQUENT_CYCLING = await decisionInput("valid-frequent-cycling.json");
 
-describe("the live Jev handle", () => {
+describe("the live Von handle", () => {
   it("needs the key", () => {
-    expect(() => createLiveJevHandle(config({}), { wall: createFakeWallClock() })).toThrow(
+    expect(() => createLiveVonHandle(config({}), { wall: createFakeWallClock() })).toThrow(
       /^TYPESAFE_API_KEY: live mode calls the TypeSafe API/,
     );
   });
@@ -98,11 +98,11 @@ describe("the live Jev handle", () => {
     const root = scratch();
     try {
       const cfg = config({ TYPESAFE_API_KEY: TYPESAFE_KEY, TYPESAFE_BASE_URL: api.url });
-      const handle = createLiveJevHandle(cfg, { wall: createFakeWallClock(), cassettesDir: root });
-      expect([handle.name, handle.model, handle.mode]).toEqual(["jev", MOCK_MODEL, "live"]);
+      const handle = createLiveVonHandle(cfg, { wall: createFakeWallClock(), cassettesDir: root });
+      expect([handle.name, handle.model, handle.mode]).toEqual(["von", MOCK_MODEL, "live"]);
 
       const output = await handle.backend.decide(CONTINUOUS_LOAD);
-      expect(output.backend).toBe("jev");
+      expect(output.backend).toBe("von");
       expect(output.usage.input_tokens).toBeGreaterThan(0);
       expect({ ...handle.stats }).toEqual({
         calls: 1,
@@ -128,7 +128,7 @@ describe("the live Jev handle", () => {
       const cfg = config({ TYPESAFE_API_KEY: TYPESAFE_KEY, TYPESAFE_BASE_URL: api.url }, [
         "--record",
       ]);
-      const handle = createLiveJevHandle(cfg, {
+      const handle = createLiveVonHandle(cfg, {
         wall: createFakeWallClock(),
         cassettesDir: root,
         now: () => RECORDED_AT,
@@ -154,7 +154,7 @@ describe("the live Jev handle", () => {
   });
 });
 
-describe("the cassette Jev handle", () => {
+describe("the cassette Von handle", () => {
   /** Records the two fixtures against a confident mock and returns the live outputs. */
   async function recordTwo(root: string): Promise<DecisionOutput[]> {
     const api = await startMockTypeSafe({
@@ -166,7 +166,7 @@ describe("the cassette Jev handle", () => {
       const cfg = config({ TYPESAFE_API_KEY: TYPESAFE_KEY, TYPESAFE_BASE_URL: api.url }, [
         "--record",
       ]);
-      const handle = createLiveJevHandle(cfg, { wall: createFakeWallClock(), cassettesDir: root });
+      const handle = createLiveVonHandle(cfg, { wall: createFakeWallClock(), cassettesDir: root });
       return [
         await handle.backend.decide(CONTINUOUS_LOAD),
         await handle.backend.decide(FREQUENT_CYCLING),
@@ -179,7 +179,7 @@ describe("the cassette Jev handle", () => {
   it("reproduces the recorded decisions with no key and counts the hits", async () => {
     const root = scratch();
     const live = await recordTwo(root);
-    const handle = await createCassetteJevHandle(config({}), {
+    const handle = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: root,
     });
@@ -246,7 +246,7 @@ describe("the cassette Jev handle", () => {
       const cfg = config({ TYPESAFE_API_KEY: TYPESAFE_KEY, TYPESAFE_BASE_URL: api.url }, [
         "--record",
       ]);
-      const recorder = createLiveJevHandle(cfg, {
+      const recorder = createLiveVonHandle(cfg, {
         wall: createFakeWallClock(),
         cassettesDir: root,
       });
@@ -258,7 +258,7 @@ describe("the cassette Jev handle", () => {
     const severity = recorded?.response.answers["severity"] as { legend: Record<string, unknown> };
     expect(typeof severity.legend["0"]).toBe("object");
 
-    const handle = await createCassetteJevHandle(config({}), {
+    const handle = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: root,
     });
@@ -304,7 +304,7 @@ describe("the cassette Jev handle", () => {
       const cfg = config({ TYPESAFE_API_KEY: TYPESAFE_KEY, TYPESAFE_BASE_URL: api.url }, [
         "--record",
       ]);
-      const recorder = createLiveJevHandle(cfg, {
+      const recorder = createLiveVonHandle(cfg, {
         wall: createFakeWallClock(),
         cassettesDir: root,
       });
@@ -320,7 +320,7 @@ describe("the cassette Jev handle", () => {
     expect(cassette?.response).toEqual(live[0]?.raw.response);
     expect(cassette?.repeat_responses).toEqual([live[1]?.raw.response, live[2]?.raw.response]);
 
-    const handle = await createCassetteJevHandle(config({}), {
+    const handle = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: root,
     });
@@ -352,7 +352,7 @@ describe("the cassette Jev handle", () => {
   });
 
   it("keeps the recordings made at GATE_PERSIST_SIM_MIN 0 and 1 in one store, each replayed at its own value", async () => {
-    // The Jev thresholds pre-registration's amendment of 2026-09-24: the tuning list is recorded
+    // The Von thresholds pre-registration's amendment of 2026-09-24: the tuning list is recorded
     // at N = 0 and at N = 1 into one store keyed by digest, and the two recordings send many of
     // the same requests. Here both send the same one; the stand-in answers each run differently,
     // as the live model would, so only a replay of each run's own answers gives its decisions.
@@ -396,7 +396,7 @@ describe("the cassette Jev handle", () => {
           },
           ["--record"],
         );
-        const recorder = createLiveJevHandle(cfg, {
+        const recorder = createLiveVonHandle(cfg, {
           wall: createFakeWallClock(),
           cassettesDir: root,
         });
@@ -409,7 +409,7 @@ describe("the cassette Jev handle", () => {
       }
     };
     const replayAt = async (persist: string, calls: number) => {
-      const handle = await createCassetteJevHandle(config({ GATE_PERSIST_SIM_MIN: persist }), {
+      const handle = await createCassetteVonHandle(config({ GATE_PERSIST_SIM_MIN: persist }), {
         wall: createFakeWallClock(),
         cassettesDir: root,
       });
@@ -458,7 +458,7 @@ describe("the cassette Jev handle", () => {
       response: { ...recorded.response, usage: { input_tokens: 4242, output_tokens: 0 } },
     });
 
-    const handle = await createCassetteJevHandle(config({}), {
+    const handle = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: root,
     });
@@ -478,13 +478,13 @@ describe("the cassette Jev handle", () => {
     const request = live!.raw.request as { model: string; state: unknown; questions: unknown };
     rmSync(store.pathOf(requestDigest(request)));
 
-    const handle = await createCassetteJevHandle(config({}), {
+    const handle = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: root,
     });
     try {
       const replayed = await handle.backend.decide(CONTINUOUS_LOAD);
-      expect(replayed.backend).toBe("jev");
+      expect(replayed.backend).toBe("von");
       expect(handle.stats.cassetteMisses).toBe(1);
       expect(handle.stats.cassetteHits).toBe(0);
       expect(handle.stats.cassetteMissDigests).toEqual([requestDigest(request)]);
@@ -507,7 +507,7 @@ describe("the cassette Jev handle", () => {
     }
     const request = live!.raw.request as { model: string; state: unknown; questions: unknown };
     const replay = async (ownRecordingOnly: boolean) => {
-      const handle = await createCassetteJevHandle(
+      const handle = await createCassetteVonHandle(
         {
           ...config({ GATE_PERSIST_SIM_MIN: "1" }),
           ...(ownRecordingOnly ? { cassetteOwnRecordingOnly: true } : {}),
@@ -528,19 +528,19 @@ describe("the cassette Jev handle", () => {
   });
 
   it("refuses a model without cassettes and a model the mock does not answer", async () => {
-    const empty = await createCassetteJevHandle(config({}), {
+    const empty = await createCassetteVonHandle(config({}), {
       wall: createFakeWallClock(),
       cassettesDir: scratch(),
     }).catch((caught: unknown) => caught);
     expect(empty).toBeInstanceOf(ConfigError);
-    expect((empty as ConfigError).flag).toBe("EVAL_JEV_MODE");
+    expect((empty as ConfigError).flag).toBe("EVAL_VON_MODE");
 
-    const other = await createCassetteJevHandle(config({ JEV_MODEL: "jev-1.14.0" }), {
+    const other = await createCassetteVonHandle(config({ VON_MODEL: "von-1.14.0" }), {
       wall: createFakeWallClock(),
       cassettesDir: scratch(),
     }).catch((caught: unknown) => caught);
     expect(other).toBeInstanceOf(ConfigError);
-    expect((other as ConfigError).flag).toBe("JEV_MODEL");
+    expect((other as ConfigError).flag).toBe("VON_MODEL");
   });
 });
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The optional language-model column of a report (docs/decision-backends.md).
@@ -6,7 +6,7 @@
 // It is the pipeline's own `createLlmBackend` over the Anthropic provider,
 // with `LLM_MODEL` and the dated `LLM_PRICE_*` prices the report bills it at.
 // It exists for comparison only: its confidence is a self-report, never set
-// beside Jev's without both names on the page, and it has no cassettes,
+// beside Von's without both names on the page, and it has no cassettes,
 // so it runs live or not at all.
 //
 // It runs only when `--backends` names `llm` and `LLM_API_KEY` is set;

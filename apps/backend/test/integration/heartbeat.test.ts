@@ -6,7 +6,7 @@
  *
  * The whole service runs against the test stack with the timeouts cut to one
  * and two seconds (no test waits out the production 15 s and 60 s), and
- * the decision backend is Jev against the contracts' mock with the SDK's
+ * the decision backend is Von against the contracts' mock with the SDK's
  * retries off, so a scripted failure is exactly one failed call.
  *
  *   * `telemetry_silent`: the simulator's retained status says `playing`, the
@@ -36,7 +36,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { Secret } from "../../src/config/secret.ts";
 import { createPool, queryOne, type Pool } from "../../src/db/pool.ts";
-import { createJevBackend } from "../../src/decision/jev/index.ts";
+import { createVonBackend } from "../../src/decision/von/index.ts";
 import { FIXTURE_CATALOG, FIXTURE_LABELS } from "../fixtures/catalog/index.ts";
 import { BASELINE_CYCLE, cycles, longLoadedRuns, runBatches } from "../fixtures/synthetic/index.ts";
 import { startStack, type TestStack } from "../helpers/containers.ts";
@@ -110,18 +110,18 @@ beforeAll(async () => {
   service = await startAppOn(stack, {
     embedder,
     env: {
-      DECISION_BACKEND: "jev",
+      DECISION_BACKEND: "von",
       TYPESAFE_API_KEY: MOCK_KEY,
       TYPESAFE_BASE_URL: mock.url,
       HEARTBEAT_TELEMETRY_TIMEOUT_S: "1",
       HEARTBEAT_DECISION_TIMEOUT_S: "2",
     },
     decision: {
-      jev: (env) =>
-        createJevBackend({
+      von: (env) =>
+        createVonBackend({
           apiKey: env.typesafeApiKey ?? new Secret(""),
           baseURL: env.typesafeBaseUrl,
-          model: env.jevModel,
+          model: env.vonModel,
           maxRetries: 0,
           labels: FIXTURE_LABELS,
         }),

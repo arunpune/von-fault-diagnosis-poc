@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// Jev without a key: the real Jev backend talking to the contracts' mock
+// Von without a key: the real Von backend talking to the contracts' mock
 // TypeSafe server on a free local port.
 //
-// Nothing about the backend is faked. `createJevBackend` builds the same state
+// Nothing about the backend is faked. `createVonBackend` builds the same state
 // and the same three questions it would send to the API, the SDK makes the same
 // `POST /v1/systemone`, and the answers travel back through the same parser, so
-// a mock run exercises the whole decision path. Only the judgment is not Jev's:
+// a mock run exercises the whole decision path. Only the judgment is not Von's:
 // the mock answers with the `best-overlap` policy by default, which is
 // deterministic on the request, and `confident-first` only when a caller asks
 // for it. The report marks every mock column "not informative".
@@ -17,7 +17,7 @@
 
 import { MOCK_MODEL, startMockTypeSafe } from "@fdp/contracts/mock";
 import type { AnswerPolicy, AnswerPolicyName, MockTypeSafe } from "@fdp/contracts/mock";
-import { Secret, createJevBackend } from "@fdp/backend/pipeline";
+import { Secret, createVonBackend } from "@fdp/backend/pipeline";
 
 import { ConfigError } from "../config.ts";
 import type { EvalConfig } from "../config.ts";
@@ -27,8 +27,8 @@ import type { BackendHandle, HandleDeps } from "./types.ts";
 /** The bearer the harness sends its own mock; never a real key. */
 export const MOCK_API_KEY = "eval-mock";
 
-/** The Jev backend's per-attempt timeout, the same as a live run's. */
-export const JEV_TIMEOUT_MS = 10_000;
+/** The Von backend's per-attempt timeout, the same as a live run's. */
+export const VON_TIMEOUT_MS = 10_000;
 
 /** The named policy behind a mock run's answers. */
 export const DEFAULT_MOCK_POLICY: AnswerPolicyName = "best-overlap";
@@ -40,25 +40,25 @@ export interface MockOptions {
 }
 
 /** The mock handle, with its server exposed so a test can read what was asked. */
-export interface MockJevHandle extends BackendHandle {
+export interface MockVonHandle extends BackendHandle {
   readonly server: MockTypeSafe;
 }
 
 /**
- * Starts the mock TypeSafe server and the Jev backend that talks to it.
+ * Starts the mock TypeSafe server and the Von backend that talks to it.
  *
- * @throws ConfigError when `JEV_MODEL` names a version the mock does not answer, since every
+ * @throws ConfigError when `VON_MODEL` names a version the mock does not answer, since every
  * decision of the run would otherwise fail with a 422.
  */
-export async function createMockJevHandle(
-  cfg: Pick<EvalConfig, "jevModel">,
+export async function createMockVonHandle(
+  cfg: Pick<EvalConfig, "vonModel">,
   deps: HandleDeps,
   options: MockOptions = {},
-): Promise<MockJevHandle> {
-  if (cfg.jevModel !== MOCK_MODEL) {
+): Promise<MockVonHandle> {
+  if (cfg.vonModel !== MOCK_MODEL) {
     throw new ConfigError(
-      "JEV_MODEL",
-      `mock mode answers only ${MOCK_MODEL}; unset JEV_MODEL or choose another mode`,
+      "VON_MODEL",
+      `mock mode answers only ${MOCK_MODEL}; unset VON_MODEL or choose another mode`,
     );
   }
 
@@ -71,19 +71,19 @@ export async function createMockJevHandle(
   });
 
   const stats = newStats();
-  const backend = createJevBackend({
+  const backend = createVonBackend({
     apiKey: new Secret(MOCK_API_KEY),
     baseURL: server.url,
-    model: cfg.jevModel,
-    timeoutMs: JEV_TIMEOUT_MS,
+    model: cfg.vonModel,
+    timeoutMs: VON_TIMEOUT_MS,
     labels: SIGNAL_LABELS,
     wall: millisecondsOf(deps.wall),
   });
 
   let closed: Promise<void> | undefined;
   return {
-    name: "jev",
-    model: cfg.jevModel,
+    name: "von",
+    model: cfg.vonModel,
     mode: "mock",
     backend: counted(backend, stats),
     stats,

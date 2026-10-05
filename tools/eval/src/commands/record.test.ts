@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `fdp-eval record` at its edge: its usage, the one line it prints without a
@@ -75,12 +75,12 @@ describe("fdp-eval record", () => {
       expect(result.code).toBe(EXIT_USAGE);
       expect(result.stdout).toBe("");
       expect(result.stderr).toBe(
-        "fdp-eval record: TYPESAFE_API_KEY is not set; recording calls the live Jev API\n",
+        "fdp-eval record: TYPESAFE_API_KEY is not set; recording calls the live Von API\n",
       );
     }
   });
 
-  it("refuses a run that does not name jev", async () => {
+  it("refuses a run that does not name von", async () => {
     const result = await capture(() =>
       run(["--backends", "rules"], { TYPESAFE_API_KEY: KEY, TYPESAFE_BASE_URL: CLOSED_URL }),
     );
@@ -89,8 +89,8 @@ describe("fdp-eval record", () => {
     expect(result.stderr).not.toContain(KEY);
   });
 
-  // The tuning list, whose recording the Jev thresholds pre-registration waits on
-  // (tools/eval/records/jev-thresholds-preregistration.md, "Prerequisites"): its plan path only.
+  // The tuning list, whose recording the Von thresholds pre-registration waits on
+  // (tools/eval/records/von-thresholds-preregistration.md, "Prerequisites"): its plan path only.
   const tuningSlices = [
     ...new Set(
       loadAll()
@@ -100,33 +100,33 @@ describe("fdp-eval record", () => {
   ];
   const tuningCut = tuningSlices.every((name) => sliceIsCut(name));
 
-  it("warns when the tuning list would be recorded at a Jev pair the sweep does not replay", async () => {
+  it("warns when the tuning list would be recorded at a Von pair the sweep does not replay", async () => {
     // --jobs 2 stops the run before anything is loaded or planned, after the warning.
     const result = await capture(() =>
       run(["--tuning", "--jobs", "2"], {
         TYPESAFE_API_KEY: KEY,
         TYPESAFE_BASE_URL: CLOSED_URL,
-        JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9",
+        VON_GATE_TICKET_MIN_CONFIDENCE: "0.9",
       }),
     );
     expect(result.code).toBe(EXIT_USAGE);
     expect(result.stderr).toContain(
-      "the tuning list is recorded at a Jev pair the pre-registered sweep does not replay",
+      "the tuning list is recorded at a Von pair the pre-registered sweep does not replay",
     );
-    expect(result.stderr).toContain('jev_gate="0.65 / 0.9"');
+    expect(result.stderr).toContain('von_gate="0.65 / 0.9"');
     expect(result.stderr).not.toContain(KEY);
-    // Since Jev's default pair is the choice (0.65 / 0.85), nothing set warns too.
+    // Since Von's default pair is the choice (0.65 / 0.85), nothing set warns too.
     const plain = await capture(() =>
       run(["--tuning", "--jobs", "2"], { TYPESAFE_API_KEY: KEY, TYPESAFE_BASE_URL: CLOSED_URL }),
     );
     expect(plain.stderr).toContain("pre-registered sweep does not replay");
-    expect(plain.stderr).toContain('jev_gate="0.65 / 0.85"');
+    expect(plain.stderr).toContain('von_gate="0.65 / 0.85"');
     // The pair the sweep replays, set explicitly, does not.
     const incumbent = await capture(() =>
       run(["--tuning", "--jobs", "2"], {
         TYPESAFE_API_KEY: KEY,
         TYPESAFE_BASE_URL: CLOSED_URL,
-        JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.6",
+        VON_GATE_REVIEW_MIN_CONFIDENCE: "0.6",
       }),
     );
     expect(incumbent.stderr).not.toContain("pre-registered sweep does not replay");
@@ -177,7 +177,7 @@ describe("fdp-eval record", () => {
       expect(result.stdout).toBe("");
       expect(result.stderr).toContain("warn live plan");
       expect(result.stderr).toMatch(
-        /fdp-eval record: --confirm-live: this run calls a live API \(jev \(jev-1\.13\.0\): \d+ planned call\(s\)/,
+        /fdp-eval record: --confirm-live: this run calls a live API \(von \(von-1\.13\.0\): \d+ planned call\(s\)/,
       );
       // The plan is the mock replay of exactly the ten tuning scenarios, never a profile.
       expect(result.stderr).toContain(
@@ -247,7 +247,7 @@ describe("fdp-eval record", () => {
       expect(result.stdout).toBe("");
       expect(result.stderr).toContain("warn live plan");
       expect(result.stderr).toMatch(
-        /fdp-eval record: --confirm-live: this run calls a live API \(jev \(jev-1\.13\.0\): \d+ planned call\(s\)/,
+        /fdp-eval record: --confirm-live: this run calls a live API \(von \(von-1\.13\.0\): \d+ planned call\(s\)/,
       );
       expect(result.stderr).toContain("nothing was called");
       expect(result.stderr).not.toContain(KEY);

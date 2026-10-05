@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The decision backend as a chip: "Jev · jev-1.13.0", "Claude · <model>" or "Rules".
+// The decision backend as a chip: "Von · von-1.13.0", "Claude · <model>" or "Rules".
 // `BackendChip` shows any backend and model — the decision sheet passes the decision's own — and
 // `LiveBackendChip` the one answering now: the backend status's, else the one the `hello` frame
 // announced.

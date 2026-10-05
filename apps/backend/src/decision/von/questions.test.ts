@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * The Jev question set, checked without a model.
+ * The Von question set, checked without a model.
  *
- * Nothing here asks whether Jev answers well — that is for the evaluation on
+ * Nothing here asks whether Von answers well — that is for the evaluation on
  * labelled events. What is asserted is everything a question must be
  * before it is worth asking, over every labelled event
  * rather than one hand-picked case:
@@ -48,7 +48,7 @@ import {
   manEntry,
 } from "../../../test/fixtures/catalog/man/index.ts";
 import { SIGNATURE_A_EVENT } from "../../../test/fixtures/catalog/events.ts";
-import { goldenInput, JEV_CASES } from "../../../test/fixtures/jev/cases.ts";
+import { goldenInput, VON_CASES } from "../../../test/fixtures/von/cases.ts";
 import { moveTarget } from "../../retrieval/match.ts";
 import type { Candidate } from "../../retrieval/types.ts";
 import {
@@ -71,7 +71,7 @@ import {
   REQUEST_TOKEN_BUDGET,
   SEVERITY_QUESTION_ID,
 } from "./questions.ts";
-import type { JevQuestions } from "./questions.ts";
+import type { VonQuestions } from "./questions.ts";
 
 /** The instruction object every question of this set carries. */
 interface Instructions {
@@ -171,15 +171,15 @@ interface NoulSide {
   readonly examples: readonly string[];
 }
 
-function instructionsOf(questions: JevQuestions, id: string): Instructions {
+function instructionsOf(questions: VonQuestions, id: string): Instructions {
   return questions[id]?.instructions as unknown as Instructions;
 }
 
-function choiceCriteria(questions: JevQuestions): Readonly<Record<string, ChoiceCriterion>> {
+function choiceCriteria(questions: VonQuestions): Readonly<Record<string, ChoiceCriterion>> {
   return questions[FAULT_QUESTION_ID]?.criteria as unknown as Record<string, ChoiceCriterion>;
 }
 
-function noulSides(questions: JevQuestions, id: string): { true: NoulSide; false: NoulSide } {
+function noulSides(questions: VonQuestions, id: string): { true: NoulSide; false: NoulSide } {
   return questions[id]?.criteria as unknown as { true: NoulSide; false: NoulSide };
 }
 
@@ -292,7 +292,7 @@ const POLICY_PHRASES = [
 /** Words that only make sense next to a neighbouring level. */
 const RELATIVE_PHRASES = [/\bprevious\b/i, /\bnext level\b/i, /\bworse\b/i, /\bmilder\b/i];
 
-describe.each(JEV_CASES)("buildQuestions: $name", ({ input }) => {
+describe.each(VON_CASES)("buildQuestions: $name", ({ input }) => {
   const state = buildState(input, FIXTURE_LABELS);
   const questions = buildQuestions(state, input);
   const candidateIds = state.candidates.map((candidate) => candidate.id);

@@ -41,8 +41,8 @@
         "none_of_these": 0.05
       },
       "severity": "medium",
-      "backend": "jev",
-      "model": "jev-1.13.0",
+      "backend": "von",
+      "model": "von-1.13.0",
       "latest_decision_id": "a52d6c80-3f19-4e47-b2a8-7c9d0e1f2a30",
       "opened_sim_ts": "2020-07-18T11:52:00.000Z",
       "updated_sim_ts": "2020-07-18T13:22:00.000Z",
@@ -101,8 +101,8 @@
         "none_of_these": 0.03
       },
       "severity": "high",
-      "backend": "jev",
-      "model": "jev-1.13.0",
+      "backend": "von",
+      "model": "von-1.13.0",
       "latest_decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
       "opened_sim_ts": "2020-06-05T09:41:12.000Z",
       "updated_sim_ts": "2020-06-05T09:41:12.000Z",
@@ -153,8 +153,8 @@
         "none_of_these": 0.02
       },
       "severity": "critical",
-      "backend": "jev",
-      "model": "jev-1.13.0",
+      "backend": "von",
+      "model": "von-1.13.0",
       "latest_decision_id": "3b7e1d54-9c28-4a6f-8e03-5d1a2c4b6e97",
       "opened_sim_ts": "2020-05-29T23:41:12.000Z",
       "updated_sim_ts": "2020-05-30T01:11:12.000Z",

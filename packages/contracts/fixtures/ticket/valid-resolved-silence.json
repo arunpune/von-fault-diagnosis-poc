@@ -39,8 +39,8 @@
     "none_of_these": 0.05
   },
   "severity": "medium",
-  "backend": "jev",
-  "model": "jev-1.13.0",
+  "backend": "von",
+  "model": "von-1.13.0",
   "latest_decision_id": "a52d6c80-3f19-4e47-b2a8-7c9d0e1f2a30",
   "opened_sim_ts": "2020-07-18T11:52:00.000Z",
   "updated_sim_ts": "2020-07-18T13:22:00.000Z",

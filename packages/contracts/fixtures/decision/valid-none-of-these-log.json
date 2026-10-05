@@ -6,8 +6,8 @@
   "episode_id": "4f7c9a13-6b08-4d52-a9e4-1c2b3a4d5e60",
   "event_id": "82e4b715-0c93-4a6e-8b17-5d6c7e8f9a01",
   "sim_ts": "2020-07-18T14:03:51.000Z",
-  "backend": "jev",
-  "model": "jev-1.13.0",
+  "backend": "von",
+  "model": "von-1.13.0",
   "status": "ok",
   "choice": "none_of_these",
   "probabilities": {

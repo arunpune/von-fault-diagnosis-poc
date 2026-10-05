@@ -4,8 +4,8 @@
   "wall_ts": "2026-06-05T09:41:12.000Z",
   "version": "1.0.0",
   "backend": {
-    "name": "jev",
-    "model": "jev-1.13.0"
+    "name": "von",
+    "model": "von-1.13.0"
   },
   "mqtt": {
     "diag": "up",

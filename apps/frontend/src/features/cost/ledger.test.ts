@@ -22,19 +22,19 @@ function fixtureAt<T>(items: readonly T[], index: number): T {
   return item;
 }
 
-// decisions.json: a failed call, an answered Jev decision and a rules decision, newest first.
+// decisions.json: a failed call, an answered Von decision and a rules decision, newest first.
 const FAILED = fixtureAt(fixtures.decisions.items, 0);
 const ANSWERED = fixtureAt(fixtures.decisions.items, 1);
 const RULES = fixtureAt(fixtures.decisions.items, 2);
-// cost.json: the Jev ledger row of ANSWERED and a language-model row.
-const JEV_ROW = fixtureAt(fixtures.cost.recent, 0);
+// cost.json: the Von ledger row of ANSWERED and a language-model row.
+const VON_ROW = fixtureAt(fixtures.cost.recent, 0);
 const LLM_ROW = fixtureAt(fixtures.cost.recent, 1);
 
 function row(decisionId: string, wallTs: string, costUsd: number): LedgerRow {
   return {
     decision_id: decisionId,
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     input_tokens: 2_000,
     output_tokens: 0,
     cost_usd: costUsd,
@@ -61,8 +61,8 @@ describe("ledgerRowOf", () => {
   it("bills a decision with its own cost, usage, backend, model and times", () => {
     expect(ledgerRowOf(ANSWERED)).toEqual({
       decision_id: ANSWERED.decision_id,
-      backend: "jev",
-      model: "jev-1.13.0",
+      backend: "von",
+      model: "von-1.13.0",
       input_tokens: 1_834,
       output_tokens: 0,
       cost_usd: 0.000077028,
@@ -81,12 +81,12 @@ describe("mergeLedger", () => {
   it("unions the recent rows and the decisions by decision id, newest first", () => {
     const ledger = mergeLedger(fixtures.cost.recent, fixtures.decisions.items);
 
-    // The answered decision is also the Jev ledger row; the failed call has no row.
-    expect(ids(ledger)).toEqual([JEV_ROW.decision_id, LLM_ROW.decision_id, RULES.decision_id]);
+    // The answered decision is also the Von ledger row; the failed call has no row.
+    expect(ids(ledger)).toEqual([VON_ROW.decision_id, LLM_ROW.decision_id, RULES.decision_id]);
   });
 
   it("keeps the backend's row where a decision is also in the recent rows", () => {
-    const billed = { ...JEV_ROW, cost_usd: 0.00008 };
+    const billed = { ...VON_ROW, cost_usd: 0.00008 };
     const ledger = mergeLedger([billed], [ANSWERED]);
 
     expect(ledger).toEqual([billed]);

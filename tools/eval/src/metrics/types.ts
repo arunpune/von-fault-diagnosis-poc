@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The vocabulary of the metrics library (docs/evaluation.md, "The metrics").
@@ -195,11 +195,11 @@ export interface AlarmActivation {
 /**
  * The dated prices a run was costed with (`PRICES_AS_OF`).
  *
- * Jev bills input tokens only; the LLM comparison bills both. The rules backend is free, so
+ * Von bills input tokens only; the LLM comparison bills both. The rules backend is free, so
  * it has no price of its own.
  */
 export interface Prices {
-  readonly jevInputPerMtok: number;
+  readonly vonInputPerMtok: number;
   readonly llmInputPerMtok: number;
   readonly llmOutputPerMtok: number;
   readonly asOf: string;
@@ -377,9 +377,9 @@ export interface Metropt3Check {
 export interface ComparisonRow {
   readonly metric: string;
   readonly rules: number | null;
-  readonly jev: number | null;
+  readonly von: number | null;
   readonly llm?: number | null;
-  /** Jev minus rules; `null` when either side has no value. */
+  /** Von minus rules; `null` when either side has no value. */
   readonly delta: number | null;
   /** True for the metrics a smaller number is better on (false tickets, cost). */
   readonly lowerIsBetter: boolean;
@@ -439,7 +439,7 @@ export interface DetectionResult {
  *   that expects none, no non-benign ticket. It is what `detection` meant before E3 moved to
  *   detection level, and for the rules backend a recorded baseline that no gate reads.
  * - `diagnosis`: `reviewDiagnosis`, and the first ticket-level ticket inside the window names an
- *   accepted fault. E4 gates Jev on it; for the rules backend it is a baseline too.
+ *   accepted fault. E4 gates Von on it; for the rules backend it is a baseline too.
  */
 export interface ScenarioPass {
   readonly detection: boolean;

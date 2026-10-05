@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `run.json`: the run, turned into the document of `schemas/report.schema.json`
@@ -636,7 +636,7 @@ function summaryJson(summary: RunSummary): ReportSummary {
     comparison: summary.comparison.map((row) => ({
       metric: row.metric,
       rules: row.rules,
-      jev: row.jev,
+      von: row.von,
       llm: row.llm ?? null,
       delta: row.delta,
       lower_is_better: row.lowerIsBetter,
@@ -686,7 +686,7 @@ function gateJson(
     missing: [...counts.missing],
     core10: {
       rules_detection: core10Count(summary, backends, "rules", "detection"),
-      jev_diagnosis: core10Count(summary, backends, "jev", "diagnosis"),
+      von_diagnosis: core10Count(summary, backends, "von", "diagnosis"),
     },
   };
 }
@@ -917,7 +917,7 @@ function runInfo(input: ReportInput): ReportRunInfo {
     },
     rules_disabled: [...cfg.rulesDisabled],
     prices: {
-      jev_input_per_mtok: cfg.prices.jevInputPerMtok,
+      von_input_per_mtok: cfg.prices.vonInputPerMtok,
       llm_input_per_mtok: cfg.prices.llmInputPerMtok,
       llm_output_per_mtok: cfg.prices.llmOutputPerMtok,
       as_of: cfg.prices.asOf,

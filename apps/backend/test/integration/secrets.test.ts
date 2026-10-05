@@ -36,7 +36,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { Secret } from "../../src/config/secret.ts";
 import { createPool, query, type Pool } from "../../src/db/pool.ts";
-import { createJevBackend } from "../../src/decision/jev/index.ts";
+import { createVonBackend } from "../../src/decision/von/index.ts";
 import { FIXTURE_CATALOG, FIXTURE_LABELS } from "../fixtures/catalog/index.ts";
 import { BASELINE_CYCLE, cycles, longLoadedRuns, runBatches } from "../fixtures/synthetic/index.ts";
 import { startStack, type TestStack } from "../helpers/containers.ts";
@@ -109,16 +109,16 @@ describe("the sentinel key through a running service", () => {
     service = await startAppOn(stack, {
       env: {
         LOG_LEVEL: "trace",
-        DECISION_BACKEND: "jev",
+        DECISION_BACKEND: "von",
         TYPESAFE_API_KEY: SENTINEL,
         TYPESAFE_BASE_URL: mock.url,
       },
       decision: {
-        jev: (env) =>
-          createJevBackend({
+        von: (env) =>
+          createVonBackend({
             apiKey: env.typesafeApiKey ?? new Secret(""),
             baseURL: env.typesafeBaseUrl,
-            model: env.jevModel,
+            model: env.vonModel,
             maxRetries: 0,
             labels: FIXTURE_LABELS,
           }),

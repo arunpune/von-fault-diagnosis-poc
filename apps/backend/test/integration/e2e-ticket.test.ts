@@ -15,9 +15,9 @@
  *
  * Three runs:
  *
- *   * **jev**, against the contracts' mock TypeSafe server with its
+ *   * **von**, against the contracts' mock TypeSafe server with its
  *     `best-overlap` policy (confidence 0.9) and the SDK's retries off:
- *     suspect event → decision (`jev-1.13.0`, billed at
+ *     suspect event → decision (`von-1.13.0`, billed at
  *     `input_tokens × 0.042 / 1e6`) → ticket opened → WebSocket frame →
  *     `GET /api/tickets` → `POST /api/tickets/:id/close {verdict}` →
  *     ticket closed, with every row in place;
@@ -46,7 +46,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import { Secret } from "../../src/config/secret.ts";
 import { createPool, query, queryOne, type Pool } from "../../src/db/pool.ts";
-import { createJevBackend } from "../../src/decision/jev/index.ts";
+import { createVonBackend } from "../../src/decision/von/index.ts";
 import type { Embedder } from "../../src/retrieval/embedder.ts";
 import { FIXTURE_CATALOG, FIXTURE_LABELS } from "../fixtures/catalog/index.ts";
 import { startStack, type TestStack } from "../helpers/containers.ts";
@@ -197,7 +197,7 @@ afterEach(async () => {
 });
 
 describe.skipIf(!HAS_FIXTURES)("telemetry to a closed ticket", () => {
-  it("opens, shows, bills and closes a ticket with the Jev backend against the mock", async () => {
+  it("opens, shows, bills and closes a ticket with the Von backend against the mock", async () => {
     const mock = await startMockTypeSafe({
       port: 0,
       apiKey: MOCK_KEY,
@@ -205,13 +205,13 @@ describe.skipIf(!HAS_FIXTURES)("telemetry to a closed ticket", () => {
     });
     open.mock = mock;
     const { service, observer, socket, gateway } = await run(
-      { DECISION_BACKEND: "jev", TYPESAFE_API_KEY: MOCK_KEY, TYPESAFE_BASE_URL: mock.url },
+      { DECISION_BACKEND: "von", TYPESAFE_API_KEY: MOCK_KEY, TYPESAFE_BASE_URL: mock.url },
       {
-        jev: (env) =>
-          createJevBackend({
+        von: (env) =>
+          createVonBackend({
             apiKey: env.typesafeApiKey ?? new Secret(""),
             baseURL: env.typesafeBaseUrl,
-            model: env.jevModel,
+            model: env.vonModel,
             maxRetries: 0,
             labels: FIXTURE_LABELS,
           }),
@@ -234,16 +234,16 @@ describe.skipIf(!HAS_FIXTURES)("telemetry to a closed ticket", () => {
     const decided = observer
       .on<Decision>(TOPICS.decisions)
       .find((decision) => decision.decision_id === ticket.latest_decision_id);
-    expect(decided).toMatchObject({ status: "ok", backend: "jev", model: MOCK_MODEL });
+    expect(decided).toMatchObject({ status: "ok", backend: "von", model: MOCK_MODEL });
     expect(decided?.usage.input_tokens).toBeGreaterThan(0);
     expect(decided?.cost.usd).toBeCloseTo(((decided?.usage.input_tokens ?? 0) * 0.042) / 1e6, 12);
-    expect(ticket).toMatchObject({ status: "open", backend: "jev", model: MOCK_MODEL });
+    expect(ticket).toMatchObject({ status: "open", backend: "von", model: MOCK_MODEL });
     expect(validate("ticket", ticket).ok).toBe(true);
     expect(mock.requests.length).toBeGreaterThan(0);
 
     // The retained backend status names the backend that answered.
     const status = observer.on<StatusBackend>(TOPICS.status).at(-1);
-    expect(status?.backend).toEqual({ name: "jev", model: "jev-1.13.0" });
+    expect(status?.backend).toEqual({ name: "von", model: "von-1.13.0" });
 
     // The browser got the same ticket as a frame.
     await waitUntil(

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The MetroPT-3 check: were the four headline failures found?
@@ -11,7 +11,7 @@
 // injected faults and the negatives, which nobody looked at while writing the
 // rules.
 //
-// The level is the phase's, not the check's. The Jev phase asks for a true
+// The level is the phase's, not the check's. The Von phase asks for a true
 // positive at ticket level (E4), and `metropt3Check` answers it, and the review
 // level beside it. The rules-only phase (detection-level E3) asks for detection
 // instead: a suspect event in each failure's credited span within its budget,

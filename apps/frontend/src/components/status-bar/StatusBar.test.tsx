@@ -137,7 +137,7 @@ describe("StatusBar", () => {
     expect(lamp(tid.status.link)).toHaveTextContent("Linkopen");
     expect(lamp(tid.status.telemetry)).toHaveTextContent("Telemetryok");
     expect(lamp(tid.status.decisions)).toHaveTextContent("Decisionsok");
-    expect(lamp(tid.status.backend)).toHaveTextContent("Jev · jev-1.13.0");
+    expect(lamp(tid.status.backend)).toHaveTextContent("Von · von-1.13.0");
     expect(lamp(tid.status.theme)).toHaveAccessibleName(/^Theme: /);
     expect(screen.queryByText(/^dropped/)).not.toBeInTheDocument();
   });
@@ -306,11 +306,11 @@ describe("StatusBar", () => {
     });
 
     it("shows any backend it is given, for the decision sheet", () => {
-      renderWithProviders(<BackendChip backend={{ name: "jev", model: "jev-1.13.0" }} />);
+      renderWithProviders(<BackendChip backend={{ name: "von", model: "von-1.13.0" }} />);
 
-      expect(screen.getByText("Jev · jev-1.13.0")).toHaveAttribute(
+      expect(screen.getByText("Von · von-1.13.0")).toHaveAttribute(
         "title",
-        "Decision backend: Jev · jev-1.13.0",
+        "Decision backend: Von · von-1.13.0",
       );
     });
   });

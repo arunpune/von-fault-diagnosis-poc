@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Fault Diagnosis PoC
@@ -30,7 +30,7 @@
     <img src="docs/img/ui-light-1440.png" alt="The dashboard during the replay of the 5 June 2020 air leak: four signal lanes on the left, the simulation controls and the alert feed on the right, the tickets table and the running cost below" width="900">
   </picture>
 </p>
-<p align="center"><sub>The dashboard paused during the replay of the 5 June 2020 air leak: signals on the left, simulation controls and alerts on the right, tickets and the running cost below. Captured on the CI stack, whose Jev endpoint is a mock, so the figures show the interface, not a model's accuracy.</sub></p>
+<p align="center"><sub>The dashboard paused during the replay of the 5 June 2020 air leak: signals on the left, simulation controls and alerts on the right, tickets and the running cost below. Captured on the CI stack, whose Von endpoint is a mock, so the figures show the interface, not a model's accuracy.</sub></p>
 
 Fault Diagnosis PoC replays real compressor telemetry through an emulated Modbus device, spots suspicious behaviour with plain code, and asks a decision model which fault from the machine manual explains it. Everything is visible live in the browser: signals, alerts with severity, the model's answer and what each decision cost.
 
@@ -39,9 +39,9 @@ Fault Diagnosis PoC replays real compressor telemetry through an emulated Modbus
 - **Ground truth sealed off.** Which fault is active and when is kept away from the diagnosis code by construction: separate package, broker credentials, database roles and lint rules; see [`docs/architecture.md`](docs/architecture.md#ground-truth-isolation).
 
 > [!TIP]
-> **Zero setup.** The default decision model is [Jev](https://typesafe.ai) by TypeSafe AI. Without an API key the demo falls back to a rules-only baseline that answers the same three questions, so you can try it with nothing but Docker.
+> **Zero setup.** The default decision model is [Von](https://typesafe.ai) by TypeSafe AI. Without an API key the demo falls back to a rules-only baseline that answers the same three questions, so you can try it with nothing but Docker.
 
-**Decision backends:** Jev (the default when a key is set), Anthropic Claude, or the rules-only baseline (the default without a key). [Compare them](#decision-backends).
+**Decision backends:** Von (the default when a key is set), Anthropic Claude, or the rules-only baseline (the default without a key). [Compare them](#decision-backends).
 
 ---
 
@@ -50,9 +50,9 @@ Fault Diagnosis PoC replays real compressor telemetry through an emulated Modbus
 You need Docker with Compose v2 (2.24 or newer) and git; `make` is optional (the [Commands](#commands) table gives the underlying commands).
 
 ```bash
-git clone https://github.com/meddleconnect/jev-fault-diagnosis-poc.git
-cd jev-fault-diagnosis-poc
-cp .env.example .env    # optional: add TYPESAFE_API_KEY to enable Jev
+git clone https://github.com/meddleconnect/von-fault-diagnosis-poc.git
+cd von-fault-diagnosis-poc
+cp .env.example .env    # optional: add TYPESAFE_API_KEY to enable Von
 make up                 # same as: docker compose up --build -d --wait
 ```
 
@@ -74,7 +74,7 @@ After the first `make up` has downloaded the dataset, `make fixtures` cuts small
 1. Press **Play** in the Simulation panel. The replay starts in February 2020 at 600× real time.
 2. Open **Jump to** and pick **Air leak – 5 Jun 2020**. The compressor stays loaded and never reaches its cut-out pressure, and the dryer purge pressure stays high while it runs: the signature of a leak on the dryer's purge side.
 3. Follow the **Alerts** feed: a suspect event appears, then a decision with fault, severity badge and confidence.
-4. Open the alert to see the candidate faults with probabilities, the manual section behind them and the gate outcome. A decision at 0.85 or more opens a ticket and one from 0.60 (0.65 with Jev) a review item, which you close as correct or wrong from the Tickets and Review tabs. With the rules-only backend the leak's decision stays below 0.60, so it is logged and opens neither (see [Status and limitations](#status-and-limitations)).
+4. Open the alert to see the candidate faults with probabilities, the manual section behind them and the gate outcome. A decision at 0.85 or more opens a ticket and one from 0.60 (0.65 with Von) a review item, which you close as correct or wrong from the Tickets and Review tabs. With the rules-only backend the leak's decision stays below 0.60, so it is logged and opens neither (see [Status and limitations](#status-and-limitations)).
 5. Use **Inject fault → Oil cooler fouling** to see a fault the dataset itself never contains.
 6. Check the **Cost** panel for the cost of each decision and the running total.
 
@@ -84,7 +84,7 @@ After the first `make up` has downloaded the dataset, `make fixtures` cuts small
     <img src="docs/img/ui-light-1440-decision.png" alt="The decision sheet: the chosen fault with its severity, ticket status and backend, a confidence bar marked with the review and ticket thresholds, and every candidate fault with its probability, evidence match and manual section" width="900">
   </picture>
 </p>
-<p align="center"><sub>Step 4, the decision sheet: the confidence against the review and ticket thresholds, then every candidate fault with its probability, how well the evidence matches and the manual section it comes from. Same CI stack and mock as above, captured before Jev got its own review threshold of 0.65, so the sheet still marks review at 60 %.</sub></p>
+<p align="center"><sub>Step 4, the decision sheet: the confidence against the review and ticket thresholds, then every candidate fault with its probability, how well the evidence matches and the manual section it comes from. Same CI stack and mock as above, captured before Von got its own review threshold of 0.65, so the sheet still marks review at 60 %.</sub></p>
 
 Prefer a terminal? Watch the raw stream with any MQTT client:
 
@@ -103,7 +103,7 @@ Anonymous clients can read telemetry, status, events, decisions and alerts; grou
 | **Manual in, fault catalog out** | init reads the manual PDF (text and tables), builds the fault catalog (17 conditions and 39 causes in the bundled manual) and indexes its chunks with embeddings in Postgres and pgvector |
 | **Real telemetry, emulated device** | Seven months of MetroPT-3 compressor data (1.5 million samples) replayed as a Modbus TCP device with the 15 MetroPT-3 signals plus a synthetic ambient temperature, at 600× real time by default, with jumps to nine presets |
 | **Detection in plain code** | 16 rules (15 on by default) over windows, trends and machine state, with normal bands taken from the first month of data; no model reads raw time series |
-| **Three decision backends** | Jev, Anthropic Claude or a rules-only baseline that needs no key, all returning the same decision shape: which fault (or none), how severe, how sure |
+| **Three decision backends** | Von, Anthropic Claude or a rules-only baseline that needs no key, all returning the same decision shape: which fault (or none), how severe, how sure |
 | **Confidence gate and episodes** | A ticket at 0.85 confidence or more, a review ticket from 0.60, a log line below; one ticket per episode, updated while the symptom lasts |
 | **Fault injection** | Nine injection types, six faults and three benign look-alikes such as heavy air demand, for faults the dataset itself never contains |
 | **Live dashboard** | Signals, alerts with severity, the candidates behind every decision with their manual section, tickets, a review queue and the cost of each decision |
@@ -127,7 +127,7 @@ flowchart TB
     BE -->|"events, decisions,<br/>alerts, control"| MQ
     MQ -->|"control"| SIM
     BE <--> DB
-    BE -->|"one request<br/>per decision"| DEC["Decision backend<br/>Jev, LLM or rules"]
+    BE -->|"one request<br/>per decision"| DEC["Decision backend<br/>Von, LLM or rules"]
     BE <-->|"REST + WebSocket"| UI["frontend<br/>React + shadcn/ui"]
 ```
 
@@ -210,7 +210,7 @@ flowchart LR
     C -->|"below 0.60"| L
 ```
 
-Severity never changes the outcome, and a failed decision never reaches the gate. An episode opens on the first suspect event, is first decided once its symptom has kept firing for a simulated minute (`GATE_PERSIST_SIM_MIN`), is decided again every 30 simulated minutes while its rule keeps firing and closes after 120 minutes of calm (`DECISION_INTERVAL_SIM_MIN`, `EPISODE_CLEAR_SIM_MIN`). Later decisions update the episode's ticket, and a ticket in review is promoted to open when a decision reaches the ticket threshold. Technicians close tickets as correct or wrong. The thresholds and the persistence are configuration: `GATE_TICKET_MIN_CONFIDENCE`, `GATE_REVIEW_MIN_CONFIDENCE` and `GATE_PERSIST_SIM_MIN`. Jev reports its own probability, a different scale from the rules backend's confidence, so it has its own pair, `JEV_GATE_TICKET_MIN_CONFIDENCE` and `JEV_GATE_REVIEW_MIN_CONFIDENCE`. They default to 0.85 and 0.65, the pre-registered choice ([tools/eval/records/jev-thresholds-choice.md](tools/eval/records/jev-thresholds-choice.md)), whatever the global pair is set to, and the rules and LLM backends keep the global pair.
+Severity never changes the outcome, and a failed decision never reaches the gate. An episode opens on the first suspect event, is first decided once its symptom has kept firing for a simulated minute (`GATE_PERSIST_SIM_MIN`), is decided again every 30 simulated minutes while its rule keeps firing and closes after 120 minutes of calm (`DECISION_INTERVAL_SIM_MIN`, `EPISODE_CLEAR_SIM_MIN`). Later decisions update the episode's ticket, and a ticket in review is promoted to open when a decision reaches the ticket threshold. Technicians close tickets as correct or wrong. The thresholds and the persistence are configuration: `GATE_TICKET_MIN_CONFIDENCE`, `GATE_REVIEW_MIN_CONFIDENCE` and `GATE_PERSIST_SIM_MIN`. Von reports its own probability, a different scale from the rules backend's confidence, so it has its own pair, `VON_GATE_TICKET_MIN_CONFIDENCE` and `VON_GATE_REVIEW_MIN_CONFIDENCE`. They default to 0.85 and 0.65, the pre-registered choice ([tools/eval/records/von-thresholds-choice.md](tools/eval/records/von-thresholds-choice.md)), whatever the global pair is set to, and the rules and LLM backends keep the global pair.
 
 ### Ground truth stays out of the diagnosis
 
@@ -246,7 +246,7 @@ The backend asks one set of questions per decision, and three interchangeable ba
 
 | Backend | Selected when | Needs | How it answers |
 | --- | --- | --- | --- |
-| **Jev** | `TYPESAFE_API_KEY` is set, or `DECISION_BACKEND=jev` | `TYPESAFE_API_KEY` | [Jev](https://typesafe.ai), TypeSafe AI's System One model, pinned to `jev-1.13.0`. One request per decision: a Choice over the candidate faults plus "none of these", one Noul per candidate and a Score for severity. |
+| **Von** | `TYPESAFE_API_KEY` is set, or `DECISION_BACKEND=von` | `TYPESAFE_API_KEY` | [Von](https://typesafe.ai), TypeSafe AI's System One model, pinned to `von-1.13.0`. One request per decision: a Choice over the candidate faults plus "none of these", one Noul per candidate and a Score for severity. |
 | **LLM** | `DECISION_BACKEND=llm` | `LLM_API_KEY` | Anthropic Claude (`claude-opus-5` by default) over the same state, with a structured output schema. The same key enables the optional LLM pass that structures the catalog in init. |
 | **Rules** | No key is set, or `DECISION_BACKEND=rules` | Nothing | The catalog's signal-move descriptions, scored in code. Its confidence is derived from the margin between the two best candidates, not a calibrated probability. |
 
@@ -256,15 +256,15 @@ The Cost panel prices every decision with the `*_PRICE_*` variables of the [Conf
 
 ## Evaluation
 
-`make eval` replays scenarios with known ground truth for both Jev and the rules-only baseline. It reports precision and recall per fault, lead time against the unit's own alarms, tickets per machine-day, and how often the model rightly answers "none of these". Ground truth never reaches the diagnosis code.
+`make eval` replays scenarios with known ground truth for both Von and the rules-only baseline. It reports precision and recall per fault, lead time against the unit's own alarms, tickets per machine-day, and how often the model rightly answers "none of these". Ground truth never reaches the diagnosis code.
 
 | Profile | What it replays | Used by |
 | --- | --- | --- |
-| `smoke` | Five short scenarios | CI, against the mock Jev server; `EVAL_PROFILE=smoke make eval` runs the same profile locally |
+| `smoke` | Five short scenarios | CI, against the mock Von server; `EVAL_PROFILE=smoke make eval` runs the same profile locally |
 | `core` (default) | The core-10: the ten test-split scenarios the gates count | Local runs |
 | `full` | 18 scenarios (the core-10 and eight dev scenarios), the whole MetroPT-3 recording included, from the downloaded CSV | The figures below |
 
-Jev runs live when `TYPESAFE_API_KEY` is set and the run is confirmed with `--confirm-live`, from recorded cassettes without a key, and against a mock server when there are neither, and every report says which. The evaluation reads its variables, `TYPESAFE_API_KEY` included, from the environment of the command and not from `.env`: set them on the command line or export them. More in [docs/evaluation.md](docs/evaluation.md).
+Von runs live when `TYPESAFE_API_KEY` is set and the run is confirmed with `--confirm-live`, from recorded cassettes without a key, and against a mock server when there are neither, and every report says which. The evaluation reads its variables, `TYPESAFE_API_KEY` included, from the environment of the command and not from `.env`: set them on the command line or export them. More in [docs/evaluation.md](docs/evaluation.md).
 
 ### The recording at a glance
 
@@ -308,9 +308,9 @@ xychart-beta horizontal
     bar [2704, 1612, 105, 33]
 ```
 
-Of 2,704 suspect events in 344 episodes, 1,612 led to a decision; 105 of those cleared the review threshold and 33 the ticket threshold. Only one ticket or review item opened inside a failure window, a ticket during F4, and it names a fault other than the air leak. For scale, the full-dataset gate asks for 4 of 4 at ticket level for at least one backend, with a target of at most 0.5 false tickets per negative machine-day for Jev.
+Of 2,704 suspect events in 344 episodes, 1,612 led to a decision; 105 of those cleared the review threshold and 33 the ticket threshold. Only one ticket or review item opened inside a failure window, a ticket during F4, and it names a fault other than the air leak. For scale, the full-dataset gate asks for 4 of 4 at ticket level for at least one backend, with a target of at most 0.5 false tickets per negative machine-day for Von.
 
-These figures are in-sample: the detection rules were designed after looking at the four failures, and later design decisions were made after the in-sample results had been seen, on a recording that includes the evaluated days. They also rest on the failure table as [the dataset guide](docs/dataset.md) resolves it. The one clean measurement is a small held-out set, sealed before its single run ([tools/eval/records/heldout-seal.md](tools/eval/records/heldout-seal.md), [tools/eval/records/heldout-final-run.md](tools/eval/records/heldout-final-run.md)). Jev was evaluated as well; its results are not published pending the vendor's terms. More in [docs/evaluation.md](docs/evaluation.md#the-rules-only-baseline-on-the-whole-recording).
+These figures are in-sample: the detection rules were designed after looking at the four failures, and later design decisions were made after the in-sample results had been seen, on a recording that includes the evaluated days. They also rest on the failure table as [the dataset guide](docs/dataset.md) resolves it. The one clean measurement is a small held-out set, sealed before its single run ([tools/eval/records/heldout-seal.md](tools/eval/records/heldout-seal.md), [tools/eval/records/heldout-final-run.md](tools/eval/records/heldout-final-run.md)). Von was evaluated as well; its results are not published pending the vendor's terms. More in [docs/evaluation.md](docs/evaluation.md#the-rules-only-baseline-on-the-whole-recording).
 
 ---
 
@@ -324,16 +324,16 @@ All settings live in `.env`, copied from `.env.example`. Every variable is optio
 | Variable | Default | What it does |
 | --- | --- | --- |
 | **Decision backend** | | |
-| `TYPESAFE_API_KEY` | — | Enables Jev as the decision backend |
+| `TYPESAFE_API_KEY` | — | Enables Von as the decision backend |
 | `TYPESAFE_BASE_URL` | `https://api.typesafe.ai` | Endpoint of the decision service |
-| `JEV_MODEL` | `jev-1.13.0` | Pinned Jev model id; thresholds are tuned per version |
-| `DECISION_BACKEND` | `jev` if a key is set, else `rules` | `jev`, `llm` or `rules` |
+| `VON_MODEL` | `von-1.13.0` | Pinned Von model id; thresholds are tuned per version |
+| `DECISION_BACKEND` | `von` if a key is set, else `rules` | `von`, `llm` or `rules` |
 | `LLM_PROVIDER` | `anthropic` | Vendor of the optional LLM backend |
 | `LLM_API_KEY` | — | Enables the LLM backend and LLM catalog structuring |
 | `LLM_MODEL` | `claude-opus-5` | Model id for the LLM backend |
 | `LLM_BASE_URL` | vendor default | Endpoint override for the LLM; the tests point it at a mock. The Compose stack does not pass it on |
 | **Prices (Cost panel)** | | |
-| `JEV_PRICE_INPUT_PER_MTOK` | `0.042` | USD per million input tokens, for the Cost panel: Jev's price as published by TypeSafe AI, September 2026, with output tokens free |
+| `VON_PRICE_INPUT_PER_MTOK` | `0.042` | USD per million input tokens, for the Cost panel: Von's price as published by TypeSafe AI, September 2026, with output tokens free |
 | `LLM_PRICE_INPUT_PER_MTOK` | `5` | Same, for the LLM: the price of `claude-opus-5` as published by Anthropic, September 2026 |
 | `LLM_PRICE_OUTPUT_PER_MTOK` | `25` | USD per million output tokens, for the LLM, as published by Anthropic, September 2026 |
 | `PRICES_AS_OF` | `2026-09-19` | When the prices were last checked |
@@ -372,8 +372,8 @@ All settings live in `.env`, copied from `.env.example`. Every variable is optio
 | `GATE_TICKET_MIN_CONFIDENCE` | `0.85` | Confidence a decision needs to open a ticket |
 | `GATE_REVIEW_MIN_CONFIDENCE` | `0.60` | Confidence a decision needs to become a review item |
 | `GATE_PERSIST_SIM_MIN` | `1` | Simulated minutes a symptom must keep firing before it can become a review item or a ticket (`0` = at once) |
-| `JEV_GATE_TICKET_MIN_CONFIDENCE` | `0.85` | Jev's own ticket threshold, the pre-registered choice; the rules and LLM backends keep `GATE_TICKET_MIN_CONFIDENCE` |
-| `JEV_GATE_REVIEW_MIN_CONFIDENCE` | `0.65` | Jev's own review threshold, the pre-registered choice; the rules and LLM backends keep `GATE_REVIEW_MIN_CONFIDENCE` |
+| `VON_GATE_TICKET_MIN_CONFIDENCE` | `0.85` | Von's own ticket threshold, the pre-registered choice; the rules and LLM backends keep `GATE_TICKET_MIN_CONFIDENCE` |
+| `VON_GATE_REVIEW_MIN_CONFIDENCE` | `0.65` | Von's own review threshold, the pre-registered choice; the rules and LLM backends keep `GATE_REVIEW_MIN_CONFIDENCE` |
 | `DECISION_INTERVAL_SIM_MIN` | `30` | Simulated minutes between two decisions on one episode |
 | `EPISODE_CLEAR_SIM_MIN` | `120` | Simulated minutes of calm that close an episode |
 | `TELEMETRY_RETENTION_SIM_DAYS` | `365` | Simulated days of telemetry kept in the database |
@@ -383,7 +383,7 @@ All settings live in `.env`, copied from `.env.example`. Every variable is optio
 | `WS_TELEMETRY_INTERVAL_MS` | `250` | How often the UI receives a telemetry frame |
 | **Evaluation** | | |
 | `EVAL_PROFILE` | `core` | Which scenario set the evaluation runs; read from the environment of `make eval`, not from `.env` |
-| `EVAL_JEV_MODE` | `auto` | How the evaluation runs Jev: `live`, `cassette`, `mock`, or `auto` to pick by key; read from the environment of `make eval`, not from `.env` |
+| `EVAL_VON_MODE` | `auto` | How the evaluation runs Von: `live`, `cassette`, `mock`, or `auto` to pick by key; read from the environment of `make eval`, not from `.env` |
 
 </details>
 
@@ -430,7 +430,7 @@ make down     # stop everything, keep the data
 | `make check-int` | `make check` plus the integration tests: database roles, broker ACL, migrations and images | — |
 | `make smoke` | Compose smoke test in CI mode: its own stack on ephemeral ports, the mock decision service, the tour through the API | — |
 | `make smoke-quickstart` | The quick start with the rules backend on a throw-away stack, asserted the same way | — |
-| `make e2e` | Browser tour against the CI stack that `make smoke SMOKE_ARGS=--keep` leaves running (Jev answered by the mock TypeSafe server, the CI slice); it does not pass on a `make up` stack | — |
+| `make e2e` | Browser tour against the CI stack that `make smoke SMOKE_ARGS=--keep` leaves running (Von answered by the mock TypeSafe server, the CI slice); it does not pass on a `make up` stack | — |
 | `make ci` | The full gate: lint, unit and integration tests, the init end-to-end test, REUSE, licences and the manual checks; CI runs all of it but the init end-to-end test | — |
 
 ### Evaluate
@@ -439,8 +439,8 @@ make down     # stop everything, keep the data
 | --- | --- | --- |
 | `make eval` | Run the evaluation scenarios and write a report to `reports/` | `pnpm --filter @fdp/eval run eval` |
 | `make eval-stack` | Score the running stack from its database, read-only, and write a report to `reports/eval/` | `pnpm --filter @fdp/eval run score-stack -- --db-url postgres://eval:eval@localhost:5432/fdp` |
-| `make eval-sweep` | Choose Jev's thresholds as pre-registered: replay the tuning scenarios from recorded Jev answers, every resample, and re-gate them over the grid | `pnpm --filter @fdp/eval run sweep -- --preregistered` |
-| `make smoke-live` | Opt-in: one Jev and one LLM decision through the stack with the keys in `.env` (paid calls) | — |
+| `make eval-sweep` | Choose Von's thresholds as pre-registered: replay the tuning scenarios from recorded Von answers, every resample, and re-gate them over the grid | `pnpm --filter @fdp/eval run sweep -- --preregistered` |
+| `make smoke-live` | Opt-in: one Von and one LLM decision through the stack with the keys in `.env` (paid calls) | — |
 
 ### Manual and contracts
 
@@ -497,7 +497,7 @@ More in [docs/manual.md](docs/manual.md), [docs/dataset.md](docs/dataset.md) and
 ## Security and privacy
 
 - **Read-only.** The diagnosis reads telemetry and raises alerts; it never writes to the machine and is not a safety function. The only commands on the broker are the simulation controls (play, speed, jump, inject, reset), which travel under their own broker credential.
-- **What leaves the stack.** With the rules backend, decisions are computed inside the stack and nothing is sent to a decision service. With Jev or the LLM backend, each decision sends one request that describes the symptom in words and lists the candidate faults; raw telemetry is never sent. With `LLM_API_KEY` set, init also sends text extracted from the manual to the LLM, one request per ingest.
+- **What leaves the stack.** With the rules backend, decisions are computed inside the stack and nothing is sent to a decision service. With Von or the LLM backend, each decision sends one request that describes the symptom in words and lists the candidate faults; raw telemetry is never sent. With `LLM_API_KEY` set, init also sends text extracted from the manual to the LLM, one request per ingest.
 - **Secrets.** Only `TYPESAFE_API_KEY` and `LLM_API_KEY` are secrets; [Configuration](#configuration) says where they go and where they never appear.
 - **Exposure.** The UI and the API have no authentication, and the database and broker passwords are non-secret PoC defaults: keep the published ports on a machine or network you trust. Anonymous MQTT clients can only read telemetry, status, events, decisions and alerts.
 
@@ -526,7 +526,7 @@ The guides below go deeper than this page.
 | Guide | What it covers |
 | --- | --- |
 | [Architecture](docs/architecture.md) | The seven services, how data flows between them, the contracts they share and how ground truth stays out of the diagnosis |
-| [Decision backends](docs/decision-backends.md) | The questions Jev answers, the LLM and rules backends, the confidence gate, episodes and the cost ledger |
+| [Decision backends](docs/decision-backends.md) | The questions Von answers, the LLM and rules backends, the confidence gate, episodes and the cost ledger |
 | [Detection rules](docs/detection.md) | The 16 rules, their windows and baselines, and how to tune or switch them off |
 | [Simulation and fault injection](docs/simulation.md) | The emulated Modbus device, the replay clock, the jump presets and the injection model |
 | [The manual and the fault catalog](docs/manual.md) | The fictional CAU-7 manual, how it is built, how init extracts the catalog and how to bring your own manual |
@@ -548,7 +548,7 @@ Known limitations:
 
 - **The quick start opens no review item.** With the rules backend, the decision on the 5 June 2020 leak is gated to `log`: its confidence stays below the review threshold of 0.60, so step 4 of the [tour](#try-it-in-five-minutes) shows the decision but no ticket. `make smoke-quickstart` exits 3 at that check. The thresholds were not lowered to pass it.
 - **The rules backend misses the recorded failures.** On the whole MetroPT-3 recording it catches none of the four failures: no ticket or review item inside a failure window names its air leak (in-sample; see [Results](#results-the-rules-only-baseline)).
-- **Jev's results are not published.** Jev was evaluated; its figures stay unpublished pending the vendor's terms. Its configuration is public: model `jev-1.13.0`, gate pair 0.65 / 0.85, persistence of one simulated minute.
+- **Von's results are not published.** Von was evaluated; its figures stay unpublished pending the vendor's terms. Its configuration is public: model `von-1.13.0`, gate pair 0.65 / 0.85, persistence of one simulated minute.
 - **Figures are in-sample.** Design decisions were made after the in-sample results had been seen, so every figure from the recording is in-sample. The held-out set is the one clean measurement.
 - **Not for production.** The UI and the API have no authentication, and the credentials are non-secret defaults (see [Security and privacy](#security-and-privacy)).
 
@@ -571,7 +571,7 @@ Copyright 2026 Meddle S.r.l. Code and configuration are licensed under [Apache-2
 - Fonts: IBM Plex Sans and IBM Plex Mono, Copyright 2017 IBM Corp., SIL OFL 1.1.
 - UI components: shadcn/ui component sources, Copyright 2023 shadcn, MIT.
 - Stop words: the Snowball english stop word list the backend's search drops, Copyright 2001 Dr Martin Porter and 2002 Richard Boulton, BSD-3-Clause.
-- Jev is a third-party service by TypeSafe AI. Its terms apply, and you need your own key.
+- Von is a third-party service by TypeSafe AI. Its terms apply, and you need your own key.
 
 ## Disclaimer
 

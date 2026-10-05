@@ -123,12 +123,12 @@ export function selectDatasetRange(live: LiveState): string | null {
 }
 
 const BACKEND_NAMES: Readonly<Record<DecisionBackend, string>> = {
-  jev: "Jev",
+  von: "Von",
   llm: "Claude",
   rules: "Rules",
 };
 
-/** The chip's words: "Jev · jev-1.13.0", "Claude · <model>", "Rules" (its rule-set id is noise). */
+/** The chip's words: "Von · von-1.13.0", "Claude · <model>", "Rules" (its rule-set id is noise). */
 export function backendLabel(backend: BackendIdentity | null): string {
   if (backend === null) {
     return "No backend yet";

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The live plan: the arithmetic of one row on hand-made decisions,
@@ -25,7 +25,7 @@ function decision(id: string, inputTokens: number): DecisionRecord {
     gate: "ticket",
     abstained: false,
     usage: { input_tokens: inputTokens, output_tokens: 0 },
-    backend: "jev",
+    backend: "von",
     benignChoice: false,
   };
 }
@@ -33,15 +33,15 @@ function decision(id: string, inputTokens: number): DecisionRecord {
 const DECISIONS = [decision("d1", 1234), decision("d2", 1500)];
 
 describe("planRow", () => {
-  it("bills Jev the mock's input tokens at the dated input price, output free", () => {
-    const row = planRow("jev", "jev-1.13.0", DECISIONS, cfg.prices);
+  it("bills Von the mock's input tokens at the dated input price, output free", () => {
+    const row = planRow("von", "von-1.13.0", DECISIONS, cfg.prices);
     expect(row).toEqual({
-      backend: "jev",
-      model: "jev-1.13.0",
+      backend: "von",
+      model: "von-1.13.0",
       calls: 2,
       inputTokens: 2734,
       outputTokens: 0,
-      usd: cost(DECISIONS, cfg.prices, "jev").usd,
+      usd: cost(DECISIONS, cfg.prices, "von").usd,
       pricesAsOf: "2026-09-19",
     });
     expect(row.usd).toBeCloseTo((2734 * 0.042) / 1e6, 12);
@@ -56,7 +56,7 @@ describe("planRow", () => {
   });
 
   it("plans nothing for a run that decides nothing", () => {
-    expect(planRow("jev", "jev-1.13.0", [], cfg.prices)).toMatchObject({ calls: 0, usd: 0 });
+    expect(planRow("von", "von-1.13.0", [], cfg.prices)).toMatchObject({ calls: 0, usd: 0 });
   });
 });
 
@@ -71,13 +71,13 @@ describe("planLiveRun", () => {
 
   it.skipIf(!cut)("counts the decisions of a mock replay of the run's scenarios", async () => {
     const argv = ["--profile", "smoke", "--scenario", "f3_air_leak_jun05"];
-    const plan = await planLiveRun(loadConfig(argv, {}, { cwd: "/tmp" }), ["jev", "llm"]);
+    const plan = await planLiveRun(loadConfig(argv, {}, { cwd: "/tmp" }), ["von", "llm"]);
     expect(plan.scenarios).toBe(1);
-    const [jev, llm] = plan.rows;
-    expect(jev?.backend).toBe("jev");
-    expect(jev?.calls).toBeGreaterThan(0);
-    expect(jev?.inputTokens).toBeGreaterThan(jev?.calls ?? 0);
-    expect(llm?.calls).toBe(jev?.calls);
+    const [von, llm] = plan.rows;
+    expect(von?.backend).toBe("von");
+    expect(von?.calls).toBeGreaterThan(0);
+    expect(von?.inputTokens).toBeGreaterThan(von?.calls ?? 0);
+    expect(llm?.calls).toBe(von?.calls);
     expect(llm?.outputTokens).toBe((llm?.calls ?? 0) * LLM_OUTPUT_TOKENS_PER_CALL);
   });
 });

@@ -38,7 +38,7 @@ interface Recorded {
 }
 
 /** A scenario on a wall clock the test moves by hand, recording everything it emits. */
-function harness(backend: BackendMode = "jev") {
+function harness(backend: BackendMode = "von") {
   let now = Date.parse("2026-09-23T08:00:00.000Z");
   const frames: Recorded[] = [];
   const samples: Sample[] = [];
@@ -293,8 +293,8 @@ test.describe("scenario", () => {
 
     const [decision] = run.payloads<Decision>("decision");
     expect(decision).toMatchObject({
-      backend: "jev",
-      model: "jev-1.13.0",
+      backend: "von",
+      model: "von-1.13.0",
       choice: "dryer_purge_leak",
       confidence: 0.91,
       gate: { outcome: "ticket", ticket_min_confidence: 0.85, review_min_confidence: 0.6 },
@@ -320,7 +320,7 @@ test.describe("scenario", () => {
         cost_usd: 0.0001302,
         total_usd: 0.0001302,
         calls: 1,
-        backend: "jev",
+        backend: "von",
       },
     ]);
     expect(run.scenario.records.decision(decision?.decision_id ?? "")?.state).toBeDefined();

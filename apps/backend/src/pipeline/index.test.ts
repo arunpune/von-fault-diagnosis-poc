@@ -7,7 +7,7 @@
  * Every test pushes telemetry batches through `createPipeline` exactly as a
  * host would and reads nothing but the outputs: the retriever is the
  * database-free catalog retriever over the fictional fixture catalog, and the
- * decision backend is either the rules twin or the real Jev backend talking to
+ * decision backend is either the rules twin or the real Von backend talking to
  * the contracts' mock TypeSafe server on a free port, with `maxRetries: 0` so a
  * scripted failure is exactly one failed call. No test reaches the
  * network and no key is real.
@@ -56,7 +56,7 @@ import {
   NONE_OF_THESE,
   Secret,
   createCatalogRetriever,
-  createJevBackend,
+  createVonBackend,
   createPipeline,
   createRulesBackend,
 } from "./index.ts";
@@ -75,8 +75,8 @@ import type {
 /** A throwaway bearer the mock accepts; nothing like a real key. */
 const API_KEY = "mock-key-pipeline";
 
-/** A price per million input tokens for Jev and no output price. */
-const JEV_PRICES: Prices = {
+/** A price per million input tokens for Von and no output price. */
+const VON_PRICES: Prices = {
   price_input_per_mtok: 0.042,
   price_output_per_mtok: 0,
   prices_as_of: "2026-09-19",
@@ -105,13 +105,13 @@ const NO_PERSISTENCE: Partial<PipelineConfig> = { persistSimMin: 0 };
 // The scripted mock TypeSafe server
 // ---------------------------------------------------------------------------
 
-interface JevScript {
+interface VonScript {
   readonly fault: string;
   readonly confidence: number;
 }
 
 /** A Choice answer over `labels`: the scripted cause when offered, a quiet abstention otherwise. */
-function choiceAnswer(labels: readonly string[], script: JevScript): Answer {
+function choiceAnswer(labels: readonly string[], script: VonScript): Answer {
   const offered = labels.includes(script.fault);
   const choice = offered ? script.fault : NONE_OF_THESE;
   const confidence = offered ? script.confidence : UNOFFERED_CONFIDENCE;
@@ -127,9 +127,9 @@ function choiceAnswer(labels: readonly string[], script: JevScript): Answer {
  *
  * The Nouls and the severity Score keep the mock's documented defaults, which
  * are well-formed answers; a test here is about what the pipeline does with a
- * choice and its confidence, not about how Jev weighs the evidence.
+ * choice and its confidence, not about how Von weighs the evidence.
  */
-function scriptedPolicy(current: () => JevScript): AnswerPolicy {
+function scriptedPolicy(current: () => VonScript): AnswerPolicy {
   return (request) => {
     const answers: Partial<Record<string, Answer>> = {};
     for (const [id, question] of Object.entries(request.questions)) {
@@ -141,7 +141,7 @@ function scriptedPolicy(current: () => JevScript): AnswerPolicy {
   };
 }
 
-interface ScriptedJev {
+interface ScriptedVon {
   readonly mock: MockTypeSafe;
   /** Answer `fault` with `confidence` from the next request on. */
   answer(fault: string, confidence: number): void;
@@ -149,8 +149,8 @@ interface ScriptedJev {
   reset(): void;
 }
 
-async function startScriptedJev(): Promise<ScriptedJev> {
-  let script: JevScript = { fault: NONE_OF_THESE, confidence: UNOFFERED_CONFIDENCE };
+async function startScriptedVon(): Promise<ScriptedVon> {
+  let script: VonScript = { fault: NONE_OF_THESE, confidence: UNOFFERED_CONFIDENCE };
   const policy = scriptedPolicy(() => script);
   const mock = await startMockTypeSafe({ port: 0, apiKey: API_KEY, answer: policy });
   return {
@@ -170,11 +170,11 @@ async function startScriptedJev(): Promise<ScriptedJev> {
 // ---------------------------------------------------------------------------
 
 /**
- * A pipeline over the fixture catalog and the Jev backend pointed at the mock.
+ * A pipeline over the fixture catalog and the Von backend pointed at the mock.
  *
  * `wrap` lets a test put something between the pipeline and that backend.
  */
-function jevPipeline(
+function vonPipeline(
   url: string,
   cfg: Partial<PipelineConfig> = {},
   ports: Partial<PipelinePorts> = {},
@@ -186,7 +186,7 @@ function jevPipeline(
       wall,
       retriever: createCatalogRetriever(FIXTURE_CATALOG),
       decision: wrap(
-        createJevBackend({
+        createVonBackend({
           apiKey: new Secret(API_KEY),
           baseURL: url,
           model: MOCK_MODEL,
@@ -195,7 +195,7 @@ function jevPipeline(
           wall: () => wall.now().getTime(),
         }),
       ),
-      prices: JEV_PRICES,
+      prices: VON_PRICES,
       ...ports,
     },
     cfg,
@@ -444,18 +444,18 @@ const twoSymptoms = (): TelemetrySamples[] => scenarioBatches(frequentCycling(20
 // ---------------------------------------------------------------------------
 
 describe("createPipeline over synthetic telemetry (offline)", () => {
-  let jev: ScriptedJev;
+  let von: ScriptedVon;
 
   beforeAll(async () => {
-    jev = await startScriptedJev();
+    von = await startScriptedVon();
   });
 
   afterAll(async () => {
-    await jev.mock.close();
+    await von.mock.close();
   });
 
   beforeEach(() => {
-    jev.reset();
+    von.reset();
   });
 
   it("emits nothing at all for normal cycling", async () => {
@@ -466,9 +466,9 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   it("opens a ticket with status open: suspect → decision → episode opened → ticket", async () => {
     // The order when nothing waits for persistence (GATE_PERSIST_SIM_MIN=0);
     // the deferred order is the "persistence before the ticket" block's.
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const { outputs } = await replay(
-      jevPipeline(jev.mock.url, NO_PERSISTENCE),
+      vonPipeline(von.mock.url, NO_PERSISTENCE),
       oneSymptom(),
       hasTicket,
     );
@@ -487,7 +487,7 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
     ];
     expect(decided.decision).toMatchObject({
       status: "ok",
-      backend: "jev",
+      backend: "von",
       model: MOCK_MODEL,
       choice: SYNTHETIC_FAULT,
       confidence: 0.9,
@@ -519,8 +519,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("bills the decision at input_tokens × 0.042 / 1e6 in its cost block", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), oneSymptom(), hasTicket);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const { outputs } = await replay(vonPipeline(von.mock.url), oneSymptom(), hasTicket);
 
     const [decided] = decisions(outputs);
     expect(decided?.usage.input_tokens).toBeGreaterThan(0);
@@ -530,12 +530,12 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
       price_output_per_mtok: 0,
       prices_as_of: "2026-09-19",
     });
-    expect(jev.mock.requests).toHaveLength(1);
+    expect(von.mock.requests).toHaveLength(1);
   });
 
   it("re-decides a symptom that keeps firing every 30 sim minutes and updates the ticket", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url, NO_PERSISTENCE);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url, NO_PERSISTENCE);
     const { outputs } = await replay(pipeline, oneSymptom(), (so_far) =>
       tickets(so_far).some((ticket) => ticket.action === "updated"),
     );
@@ -557,14 +557,14 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("opens a review ticket at 0.7 and promotes the same ticket to open at 0.9", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.7);
-    const pipeline = jevPipeline(jev.mock.url);
+    von.answer(SYNTHETIC_FAULT, 0.7);
+    const pipeline = vonPipeline(von.mock.url);
     const opening = await replay(pipeline, oneSymptom(), hasTicket);
     const review = firstTicket(opening.outputs).ticket;
     expect(review).toMatchObject({ action: "opened", status: "review", fault_id: SYNTHETIC_FAULT });
     expect(ofType(opening.outputs, "decision").at(-1)?.gate?.outcome).toBe("review");
 
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const later = await replay(pipeline, opening.rest, (so_far) =>
       tickets(so_far).some((ticket) => ticket.status === "open"),
     );
@@ -579,8 +579,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("logs a confident none_of_these as an abstention and opens no ticket", async () => {
-    jev.answer(NONE_OF_THESE, 0.8);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), oneSymptom());
+    von.answer(NONE_OF_THESE, 0.8);
+    const { outputs } = await replay(vonPipeline(von.mock.url), oneSymptom());
 
     const answered = ofType(outputs, "decision");
     expect(answered.length).toBeGreaterThan(5);
@@ -595,8 +595,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("merges a second symptom key that decides the same fault into the first ticket", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), twoSymptoms());
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const { outputs } = await replay(vonPipeline(von.mock.url), twoSymptoms());
 
     const opened = ofType(outputs, "episode").filter((output) => output.action === "opened");
     expect(opened.map((output) => output.episode.symptom_key)).toEqual([
@@ -629,8 +629,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("closes a ticket on a technician's verdict and keeps later decisions off it", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url);
     const opening = await replay(pipeline, oneSymptom(), hasTicket);
     const open = firstTicket(opening.outputs).ticket;
     const now = pipeline.ingest.latest()?.sim_ts;
@@ -675,8 +675,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("aborts the open episode on a discontinuity and resolves its ticket", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url);
     const opening = await replay(pipeline, oneSymptom(), hasTicket);
     const open = firstTicket(opening.outputs).ticket;
     const [next, ...after] = opening.rest;
@@ -711,9 +711,9 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("closes an episode after 120 silent sim minutes and resolves its ticket", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const batches = runBatches([...longLoadedRuns(12).phases, ...baseline(10).phases]);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), batches);
+    const { outputs } = await replay(vonPipeline(von.mock.url), batches);
 
     const ended = ofType(outputs, "episode").filter((output) => output.action !== "opened");
     expect(ended.map((output) => output.action)).toEqual(["closed"]);
@@ -734,9 +734,9 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("emits a failed call as the error form of the decision and waits for the next interval", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    jev.mock.failNext(529, 1);
-    const pipeline = jevPipeline(jev.mock.url, NO_PERSISTENCE);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    von.mock.failNext(529, 1);
+    const pipeline = vonPipeline(von.mock.url, NO_PERSISTENCE);
     const { outputs } = await replay(pipeline, oneSymptom(), hasTicket);
 
     const [failed, answered] = ofType(outputs, "decision");
@@ -760,13 +760,13 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
       simMinutesBetween(failed?.decision.sim_ts ?? "", answered?.decision.sim_ts ?? ""),
     ).toBeGreaterThanOrEqual(30);
     expect(firstTicket(outputs).ticket.latest_decision_id).toBe(answered?.decision.decision_id);
-    expect(jev.mock.requests).toHaveLength(2);
+    expect(von.mock.requests).toHaveLength(2);
     expect(offContract(outputs)).toEqual([]);
   });
 
   it("turns a failed retrieval into a failed decision and finishes the batch", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url, NO_PERSISTENCE, {
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url, NO_PERSISTENCE, {
       retriever: retrieverFailingOn(1),
     });
     const { outputs } = await replay(pipeline, oneSymptom(), hasTicket);
@@ -811,15 +811,15 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
     ).toBeGreaterThanOrEqual(30);
     expect(firstTicket(outputs).ticket.latest_decision_id).toBe(answered?.decision_id);
     // The backend was never asked about the event retrieval could not serve.
-    expect(jev.mock.requests).toHaveLength(1);
+    expect(von.mock.requests).toHaveLength(1);
     expect(offContract(outputs)).toEqual([]);
   });
 
   it("changes no episode and no ticket in a push it rejects", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     // The episode opens in the push whose decision fails when nothing waits
     // for persistence; with GATE_PERSIST_SIM_MIN it would open a push earlier.
-    const pipeline = jevPipeline(jev.mock.url, NO_PERSISTENCE, {}, (backend) =>
+    const pipeline = vonPipeline(von.mock.url, NO_PERSISTENCE, {}, (backend) =>
       backendFailingOn(1, backend),
     );
     const batches = oneSymptom();
@@ -844,14 +844,14 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("puts an episode's counts and its ticket back when a re-decision's push is rejected", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.7);
-    const pipeline = jevPipeline(jev.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
+    von.answer(SYNTHETIC_FAULT, 0.7);
+    const pipeline = vonPipeline(von.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
     const opening = await replay(pipeline, oneSymptom(), hasTicket);
     const review = firstTicket(opening.outputs).ticket;
     expect(review).toMatchObject({ action: "opened", status: "review" });
 
     // The second call is the re-decision half an hour on, which would promote the ticket.
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const { error, before, at } = await untilRejected(pipeline, opening.rest);
     expect(error).toBeInstanceOf(TypeError);
     expect(diagnosis(pipeline.snapshot())).toEqual(diagnosis(before));
@@ -872,21 +872,21 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("shows detection the rest of a rejected batch, so the next batch is no jump", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     // Where the second decision falls, from a run whose backend never fails.
     const asked: string[] = [];
     await replay(
-      jevPipeline(jev.mock.url, {}, {}, (backend) => backendNoting(asked, backend)),
+      vonPipeline(von.mock.url, {}, {}, (backend) => backendNoting(asked, backend)),
       oneSymptom(),
       (so_far) => decisions(so_far).length >= 2,
     );
     const failingAt = asked[1] ?? "";
-    jev.reset();
+    von.reset();
 
     // That decision opens its batch, so the rejected push leaves 24 samples —
     // four sim minutes — that detection would otherwise never see.
     const batches = startingAt(oneSymptom(), failingAt);
-    const pipeline = jevPipeline(jev.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
+    const pipeline = vonPipeline(von.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
     const { outputs, error, before, at } = await untilRejected(pipeline, batches);
     expect(error).toBeInstanceOf(TypeError);
     expect(batches[at]?.samples[0]?.sim_ts).toBe(failingAt);
@@ -912,15 +912,15 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("aborts the episodes at a jump a rejected batch held, on the next push", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const asked: string[] = [];
     await replay(
-      jevPipeline(jev.mock.url, {}, {}, (backend) => backendNoting(asked, backend)),
+      vonPipeline(von.mock.url, {}, {}, (backend) => backendNoting(asked, backend)),
       oneSymptom(),
       (so_far) => decisions(so_far).length >= 2,
     );
     const failingAt = asked[1] ?? "";
-    jev.reset();
+    von.reset();
 
     // The gateway flags a jump at the end of the batch the push fails in.
     const batches = startingAt(oneSymptom(), failingAt);
@@ -928,7 +928,7 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
     batches[failing] = withJumpAtEnd(batches[failing] as TelemetrySamples);
     const beforeJump = batches[failing]?.samples.at(-2)?.sim_ts;
 
-    const pipeline = jevPipeline(jev.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
+    const pipeline = vonPipeline(von.mock.url, {}, {}, (backend) => backendFailingOn(2, backend));
     const { outputs, error, before, at } = await untilRejected(pipeline, batches);
     expect(error).toBeInstanceOf(TypeError);
     expect(at).toBe(failing);
@@ -994,12 +994,12 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("serialises concurrent pushes and survives a batch that does not validate", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const batches = oneSymptom().slice(0, 12);
-    const sequential = await replay(jevPipeline(jev.mock.url), batches);
+    const sequential = await replay(vonPipeline(von.mock.url), batches);
 
-    jev.reset();
-    const pipeline = jevPipeline(jev.mock.url);
+    von.reset();
+    const pipeline = vonPipeline(von.mock.url);
     const invalid = { schema: "not-a-batch" } as unknown as TelemetrySamples;
     const pushes = [
       ...batches.slice(0, 6).map((batch) => pipeline.push(batch)),
@@ -1019,15 +1019,15 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("continues a hydrated episode's ticket instead of opening a second one", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
+    von.answer(SYNTHETIC_FAULT, 0.9);
     const store = createEpisodeStore();
-    const first = jevPipeline(jev.mock.url, {}, { store });
+    const first = vonPipeline(von.mock.url, {}, { store });
     const opening = await replay(first, oneSymptom(), hasTicket);
     const { record } = firstTicket(opening.outputs);
 
     // A restart: the same store and the ticket as `app.tickets` gave it back.
     const hydrated: readonly TicketRecord[] = [record];
-    const second = jevPipeline(jev.mock.url, {}, { store, tickets: hydrated });
+    const second = vonPipeline(von.mock.url, {}, { store, tickets: hydrated });
     const later = await replay(second, opening.rest, hasTicket);
 
     expect(ofType(later.outputs, "episode")).toEqual([]);
@@ -1039,8 +1039,8 @@ describe("createPipeline over synthetic telemetry (offline)", () => {
   });
 
   it("shows every episode and ticket in its snapshot, as the contract carries them", async () => {
-    jev.answer(SYNTHETIC_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url);
+    von.answer(SYNTHETIC_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url);
     expect(pipeline.snapshot()).toEqual({ episodes: [], tickets: [], frame: undefined });
 
     const { outputs } = await replay(pipeline, twoSymptoms());
@@ -1080,20 +1080,20 @@ function simTsOf(output: PipelineOutput): string | null {
 const HAS_MAY = hasFixture("unlabelled-may19");
 
 describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", () => {
-  let jev: ScriptedJev;
+  let von: ScriptedVon;
   let may: readonly TelemetrySamples[];
 
   beforeAll(async () => {
-    jev = await startScriptedJev();
+    von = await startScriptedVon();
     may = loadFixture("unlabelled-may19").batches;
   });
 
   afterAll(async () => {
-    await jev.mock.close();
+    await von.mock.close();
   });
 
   beforeEach(() => {
-    jev.reset();
+    von.reset();
   });
 
   it("emits suspect → episode opened → decision → a review or open ticket with the rules twin", async () => {
@@ -1124,9 +1124,9 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
     expect(offContract(outputs)).toEqual([]);
   });
 
-  it("opens a ticket with status open and bills it at input_tokens × 0.042 / 1e6 with Jev", async () => {
-    jev.answer(MAY_FAULT, 0.9);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), may, hasTicket);
+  it("opens a ticket with status open and bills it at input_tokens × 0.042 / 1e6 with Von", async () => {
+    von.answer(MAY_FAULT, 0.9);
+    const { outputs } = await replay(vonPipeline(von.mock.url), may, hasTicket);
 
     const first = firstTicket(outputs);
     expect(first.ticket).toMatchObject({ action: "opened", status: "open", fault_id: MAY_FAULT });
@@ -1143,8 +1143,8 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
   });
 
   it("keeps one ticket while the other symptom keys decide the same fault", async () => {
-    jev.answer(MAY_FAULT, 0.9);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), may);
+    von.answer(MAY_FAULT, 0.9);
+    const { outputs } = await replay(vonPipeline(von.mock.url), may);
 
     const owner = firstTicket(outputs).ticket;
     const merged = ofType(outputs, "episode").filter((output) => output.action === "merged");
@@ -1163,8 +1163,8 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
   });
 
   it("re-decides an episode no sooner than 30 sim minutes after its last decision", async () => {
-    jev.answer(MAY_FAULT, 0.9);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), may);
+    von.answer(MAY_FAULT, 0.9);
+    const { outputs } = await replay(vonPipeline(von.mock.url), may);
 
     const byEpisode = new Map<string, Decision[]>();
     for (const decision of decisions(outputs)) {
@@ -1189,14 +1189,14 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
     for (const update of updates) expect(update.update_count).toBeGreaterThanOrEqual(1);
   });
 
-  it("opens a review ticket at 0.7 and promotes it to open when Jev reaches 0.9", async () => {
-    jev.answer(MAY_FAULT, 0.7);
-    const pipeline = jevPipeline(jev.mock.url);
+  it("opens a review ticket at 0.7 and promotes it to open when Von reaches 0.9", async () => {
+    von.answer(MAY_FAULT, 0.7);
+    const pipeline = vonPipeline(von.mock.url);
     const opening = await replay(pipeline, may, hasTicket);
     const review = firstTicket(opening.outputs).ticket;
     expect(review).toMatchObject({ action: "opened", status: "review" });
 
-    jev.answer(MAY_FAULT, 0.9);
+    von.answer(MAY_FAULT, 0.9);
     const later = await replay(pipeline, opening.rest, (so_far) =>
       tickets(so_far).some((ticket) => ticket.status === "open"),
     );
@@ -1206,9 +1206,9 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
     });
   });
 
-  it("opens no ticket when Jev confidently answers none_of_these", async () => {
-    jev.answer(NONE_OF_THESE, 0.8);
-    const { outputs } = await replay(jevPipeline(jev.mock.url), may);
+  it("opens no ticket when Von confidently answers none_of_these", async () => {
+    von.answer(NONE_OF_THESE, 0.8);
+    const { outputs } = await replay(vonPipeline(von.mock.url), may);
 
     expect(decisions(outputs).length).toBeGreaterThan(10);
     for (const decision of decisions(outputs)) {
@@ -1218,8 +1218,8 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
   });
 
   it("closes the ticket on a verdict and emits nothing more for it", async () => {
-    jev.answer(MAY_FAULT, 0.9);
-    const pipeline = jevPipeline(jev.mock.url);
+    von.answer(MAY_FAULT, 0.9);
+    const pipeline = vonPipeline(von.mock.url);
     const opening = await replay(pipeline, may, hasTicket);
     const open = firstTicket(opening.outputs).ticket;
 
@@ -1243,8 +1243,8 @@ describe.skipIf(!HAS_MAY)("createPipeline over the unlabelled 19 May episode", (
   it.skipIf(!hasFixture("gap-jump"))(
     "aborts the open episode at the jump of gap-jump.json and resolves its ticket",
     async () => {
-      jev.answer(MAY_FAULT, 0.9);
-      const pipeline = jevPipeline(jev.mock.url);
+      von.answer(MAY_FAULT, 0.9);
+      const pipeline = vonPipeline(von.mock.url);
       const opening = await replay(pipeline, may, hasTicket);
       const open = firstTicket(opening.outputs).ticket;
       const beforeJump = pipeline.ingest.latest()?.sim_ts;

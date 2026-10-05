@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * The Jev backend over a real socket.
+ * The Von backend over a real socket.
  *
- * Every test here drives `createJevBackend` through `@typesafe-ai/sdk` against
+ * Every test here drives `createVonBackend` through `von-sdk` against
  * the contracts' mock TypeSafe server on a free port: the request the SDK
  * actually serialised, the headers it actually sent, the answers the mock
  * scripted and the failures it was told to serve. Nothing reaches the network
@@ -16,7 +16,7 @@
  *
  * ## The golden request
  *
- * `test/fixtures/jev/f3-request.json` is the request body for the
+ * `test/fixtures/von/f3-request.json` is the request body for the
  * signature-A-like fixture event, pretty-printed with two spaces so a question
  * change reads as a diff. The SDK sends `JSON.stringify(body)`; the file's
  * bytes are compared with `JSON.stringify(body, null, 2)` of what the mock
@@ -28,7 +28,7 @@
  * the diff. A change to any question regenerates both in the same
  * commit:
  *
- *     pnpm --filter @fdp/backend exec vitest run src/decision/jev/index.test.ts --update
+ *     pnpm --filter @fdp/backend exec vitest run src/decision/von/index.test.ts --update
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -43,7 +43,7 @@ import {
   ADVERSARIAL_FAULT_ID,
   adversarialCandidates,
   goldenInput,
-} from "../../../test/fixtures/jev/cases.ts";
+} from "../../../test/fixtures/von/cases.ts";
 import { withSlack } from "../../../test/helpers/timing.ts";
 import { MOCK_MODEL, startTypeSafeHarness } from "../../../test/helpers/typesafe.ts";
 import type { TypeSafeHarness } from "../../../test/helpers/typesafe.ts";
@@ -54,9 +54,9 @@ import { createRulesBackend } from "../rules/index.ts";
 import { estimateTokens, STATE_TOKEN_BUDGET } from "../state.ts";
 import { DecisionError, NONE_OF_THESE } from "../types.ts";
 import type { DecisionBackend, DecisionInput, DecisionOutput, DecisionUsage } from "../types.ts";
-import { createJevBackend } from "./index.ts";
-import type { JevBackendOptions, JevWarn } from "./index.ts";
-import type { JevRequestBody } from "./questions.ts";
+import { createVonBackend } from "./index.ts";
+import type { VonBackendOptions, VonWarn } from "./index.ts";
+import type { VonRequestBody } from "./questions.ts";
 import {
   estimateQuestionTokens,
   FAULT_QUESTION_ID,
@@ -66,10 +66,10 @@ import {
 } from "./questions.ts";
 
 /** A throwaway bearer the mock accepts; nothing like a real key. */
-const API_KEY = "mock-key-jev";
+const API_KEY = "mock-key-von";
 
-const GOLDEN_REQUEST = "../../../test/fixtures/jev/f3-request.json";
-const GOLDEN_USAGE = "../../../test/fixtures/jev/f3-usage.json";
+const GOLDEN_REQUEST = "../../../test/fixtures/von/f3-request.json";
+const GOLDEN_USAGE = "../../../test/fixtures/von/f3-usage.json";
 
 /** A wall clock that moves 125 ms per reading, so a latency is exact. */
 function steppingWall(): () => number {
@@ -80,8 +80,8 @@ function steppingWall(): () => number {
   };
 }
 
-function jevBackend(url: string, overrides: Partial<JevBackendOptions> = {}): DecisionBackend {
-  return createJevBackend({
+function vonBackend(url: string, overrides: Partial<VonBackendOptions> = {}): DecisionBackend {
+  return createVonBackend({
     apiKey: new Secret(API_KEY),
     baseURL: url,
     model: MOCK_MODEL,
@@ -102,9 +102,9 @@ async function failure(backend: DecisionBackend, input: DecisionInput): Promise<
   return error as DecisionError;
 }
 
-/** A `JevWarn` that remembers what it was told. */
+/** A `VonWarn` that remembers what it was told. */
 function recordingWarn(): {
-  warn: JevWarn;
+  warn: VonWarn;
   lines: { fields: Readonly<Record<string, string | number>>; message: string }[];
 } {
   const lines: { fields: Readonly<Record<string, string | number>>; message: string }[] = [];
@@ -123,7 +123,7 @@ function pretty(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-describe("createJevBackend against the mock TypeSafe server", () => {
+describe("createVonBackend against the mock TypeSafe server", () => {
   let harness: TypeSafeHarness;
 
   beforeAll(async () => {
@@ -140,8 +140,8 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
   describe("the golden request", () => {
     it("is byte-identical across two runs and to the committed fixture", async () => {
-      const first = await jevBackend(harness.url).decide(goldenInput());
-      const second = await jevBackend(harness.url).decide(goldenInput());
+      const first = await vonBackend(harness.url).decide(goldenInput());
+      const second = await vonBackend(harness.url).decide(goldenInput());
 
       expect(harness.requests).toHaveLength(2);
       const wire = wireBody(harness, 0);
@@ -155,7 +155,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
     });
 
     it("commits the input tokens the mock reports for it", async () => {
-      const decision = await jevBackend(harness.url).decide(goldenInput());
+      const decision = await vonBackend(harness.url).decide(goldenInput());
       expect(decision.usage.input_tokens).toBeGreaterThan(0);
       await expect(pretty({ input_tokens: decision.usage.input_tokens })).toMatchFileSnapshot(
         GOLDEN_USAGE,
@@ -163,8 +163,8 @@ describe("createJevBackend against the mock TypeSafe server", () => {
     });
 
     it("fits the three token budgets as it went over the wire", async () => {
-      await jevBackend(harness.url).decide(goldenInput());
-      const body = harness.requests[0]?.body as JevRequestBody;
+      await vonBackend(harness.url).decide(goldenInput());
+      const body = harness.requests[0]?.body as VonRequestBody;
       const stateTokens = estimateTokens(body.state);
       expect(stateTokens).toBeLessThanOrEqual(STATE_TOKEN_BUDGET);
       expect(stateTokens + estimateQuestionTokens(body.questions)).toBeLessThanOrEqual(
@@ -177,8 +177,8 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
     it("carries every signal a candidate names, ahead of any it does not", async () => {
       const input = goldenInput();
-      await jevBackend(harness.url).decide(input);
-      const body = harness.requests[0]?.body as JevRequestBody;
+      await vonBackend(harness.url).decide(input);
+      const body = harness.requests[0]?.body as VonRequestBody;
       const named = new Set(
         input.candidates.flatMap((candidate) => candidate.signal_moves.map(moveTarget)),
       );
@@ -192,13 +192,13 @@ describe("createJevBackend against the mock TypeSafe server", () => {
     });
 
     it("names the pinned model and the three question kinds on the wire", async () => {
-      await jevBackend(harness.url).decide(goldenInput());
+      await vonBackend(harness.url).decide(goldenInput());
       const request = harness.requests[0];
       expect(request?.method).toBe("POST");
       expect(request?.path).toBe("/v1/systemone");
-      const body = request?.body as JevRequestBody;
-      expect(Object.keys(body)).toEqual(["state", "model", "questions"]);
-      expect(body.model).toBe("jev-1.13.0");
+      const body = request?.body as VonRequestBody;
+      expect(Object.keys(body)).toEqual(["model", "state", "questions"]);
+      expect(body.model).toBe("von-1.13.0");
       expect(Object.keys(body.questions)).toEqual([
         "fault",
         "match_dryer_purge_leak",
@@ -214,9 +214,9 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
   describe("the bearer", () => {
     it("reaches the mock as Authorization: Bearer <key>, and nothing records its value", async () => {
-      await jevBackend(harness.url).decide(goldenInput());
+      await vonBackend(harness.url).decide(goldenInput());
       const headers = harness.requests[0]?.headers ?? {};
-      // The mock accepts exactly `Bearer mock-key-jev` and answers 401 to
+      // The mock accepts exactly `Bearer mock-key-von` and answers 401 to
       // anything else, so a 200 is the proof the key travelled; the recording
       // itself keeps only the header name.
       expect(headers["authorization"]).toBe(REDACTED);
@@ -225,7 +225,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
     });
 
     it("is refused when it is the wrong one, as an auth failure", async () => {
-      const wrong = createJevBackend({
+      const wrong = createVonBackend({
         apiKey: new Secret("another-mock-key"),
         baseURL: harness.url,
         model: MOCK_MODEL,
@@ -245,9 +245,9 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       harness.answerNouls({ dryer_purge_leak: 0.93, downstream_air_leak: 0.2 });
       harness.answerSeverity("high", 0.8);
 
-      const decision = await jevBackend(harness.url).decide(goldenInput());
+      const decision = await vonBackend(harness.url).decide(goldenInput());
 
-      expect(decision.backend).toBe("jev");
+      expect(decision.backend).toBe("von");
       expect(decision.model).toBe(MOCK_MODEL);
       expect(decision.choice).toBe("dryer_purge_leak");
       expect(decision.confidence).toBe(0.91);
@@ -285,7 +285,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       harness.answerNouls({ dryer_purge_leak: 0.35, purge_silencer_damaged: 0.85 });
       harness.answerSeverity("medium", 0.6);
 
-      const decision = await jevBackend(harness.url).decide(goldenInput());
+      const decision = await vonBackend(harness.url).decide(goldenInput());
       expect(decision.choice).toBe("purge_silencer_damaged");
       expect(decision.confidence).toBe(0.4);
     });
@@ -296,19 +296,19 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       harness.answerSeverity("high", 0.8);
       const { warn, lines } = recordingWarn();
 
-      const decision = await jevBackend(harness.url, { warn }).decide(goldenInput());
+      const decision = await vonBackend(harness.url, { warn }).decide(goldenInput());
       expect(decision.choice).toBe("dryer_purge_leak");
       expect(lines).toEqual([
         {
           fields: { choice: "dryer_purge_leak", support: 0.1 },
-          message: "jev chose a cause whose own movement check stays low",
+          message: "von chose a cause whose own movement check stays low",
         },
       ]);
     });
 
     it("warn about nothing on an ordinary answer", async () => {
       const { warn, lines } = recordingWarn();
-      await jevBackend(harness.url, { warn }).decide(goldenInput());
+      await vonBackend(harness.url, { warn }).decide(goldenInput());
       expect(lines).toEqual([]);
     });
   });
@@ -316,10 +316,10 @@ describe("createJevBackend against the mock TypeSafe server", () => {
   describe("the adversarial cause", () => {
     it("travels as data in the state and alters no question", async () => {
       const input = { ...goldenInput(), candidates: adversarialCandidates() };
-      await jevBackend(harness.url).decide(goldenInput());
-      await jevBackend(harness.url).decide(input);
-      const plain = harness.requests[0]?.body as JevRequestBody;
-      const steered = harness.requests[1]?.body as JevRequestBody;
+      await vonBackend(harness.url).decide(goldenInput());
+      await vonBackend(harness.url).decide(input);
+      const plain = harness.requests[0]?.body as VonRequestBody;
+      const steered = harness.requests[1]?.body as VonRequestBody;
 
       const index = steered.state.candidates.findIndex(
         (candidate) => candidate.id === ADVERSARIAL_FAULT_ID,
@@ -380,7 +380,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       { status: 500 as const, kind: "unknown" },
     ])("map a $status to $kind after exactly one request", async ({ status, kind }) => {
       harness.fail(status);
-      const error = await failure(jevBackend(harness.url), goldenInput());
+      const error = await failure(vonBackend(harness.url), goldenInput());
       expect(error.kind).toBe(kind);
       expect(error.status).toBe(status);
       expect(harness.requests).toHaveLength(1);
@@ -388,7 +388,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
     it("retry a 529 twice with maxRetries 2, then give up after three requests", async () => {
       harness.fail(529, 3);
-      const backend = jevBackend(harness.url, {
+      const backend = vonBackend(harness.url, {
         maxRetries: 2,
         backoffInitialMs: 1,
         backoffMaxMs: 2,
@@ -400,7 +400,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
     it("recover from one 429 with maxRetries 2 in two requests", async () => {
       harness.fail(429, 1);
-      const backend = jevBackend(harness.url, {
+      const backend = vonBackend(harness.url, {
         maxRetries: 2,
         backoffInitialMs: 1,
         backoffMaxMs: 2,
@@ -412,7 +412,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
     it("never carry the provider's body, and never the key", async () => {
       harness.fail(429);
-      const error = await failure(jevBackend(harness.url), goldenInput());
+      const error = await failure(vonBackend(harness.url), goldenInput());
       expect(error).not.toHaveProperty("body");
       expect(error.message).not.toContain("Rate limit exceeded");
       expect(error.message).not.toContain("rate_limit_error");
@@ -428,7 +428,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       const timeoutMs = withSlack(250);
       const slow = await startTypeSafeHarness({ apiKey: API_KEY, latencyMs: 10 * timeoutMs });
       try {
-        const error = await failure(jevBackend(slow.url, { timeoutMs }), goldenInput());
+        const error = await failure(vonBackend(slow.url, { timeoutMs }), goldenInput());
         expect(error.kind).toBe("timeout");
         expect(slow.requests).toHaveLength(1);
       } finally {
@@ -439,7 +439,7 @@ describe("createJevBackend against the mock TypeSafe server", () => {
     it("map an aborted decision to timeout", async () => {
       const controller = new AbortController();
       controller.abort();
-      const error: unknown = await jevBackend(harness.url)
+      const error: unknown = await vonBackend(harness.url)
         .decide(goldenInput(), { signal: controller.signal })
         .then(
           () => undefined,
@@ -453,29 +453,29 @@ describe("createJevBackend against the mock TypeSafe server", () => {
       const gone = await startTypeSafeHarness({ apiKey: API_KEY });
       const url = gone.url;
       await gone.close();
-      const error = await failure(jevBackend(url), goldenInput());
+      const error = await failure(vonBackend(url), goldenInput());
       expect(error.kind).toBe("network");
     });
 
     it("refuse an answer for a cause that was never offered", async () => {
       harness.answerFault("oil_cooler_fouled", 0.9);
-      const error = await failure(jevBackend(harness.url), goldenInput());
+      const error = await failure(vonBackend(harness.url), goldenInput());
       expect(error.kind).toBe("validation");
     });
   });
 
   describe("the model the response reports", () => {
     it("is stored and warned about when it is not the pinned one", async () => {
-      const moved = await startTypeSafeHarness({ apiKey: API_KEY, model: "jev-1.14.0" });
+      const moved = await startTypeSafeHarness({ apiKey: API_KEY, model: "von-1.14.0" });
       try {
         const { warn, lines } = recordingWarn();
-        const decision = await jevBackend(moved.url, { warn }).decide(goldenInput());
-        expect(decision.model).toBe("jev-1.14.0");
-        expect((moved.requests[0]?.body as JevRequestBody).model).toBe(MOCK_MODEL);
+        const decision = await vonBackend(moved.url, { warn }).decide(goldenInput());
+        expect(decision.model).toBe("von-1.14.0");
+        expect((moved.requests[0]?.body as VonRequestBody).model).toBe(MOCK_MODEL);
         expect(lines).toEqual([
           {
-            fields: { model: "jev-1.14.0", pinned: MOCK_MODEL },
-            message: "jev answered with a model other than the pinned one",
+            fields: { model: "von-1.14.0", pinned: MOCK_MODEL },
+            message: "von answered with a model other than the pinned one",
           },
         ]);
       } finally {
@@ -539,24 +539,24 @@ describe("createJevBackend against the mock TypeSafe server", () => {
 
     it("answers the same input with the same shape, the same state and a valid message", async () => {
       const input = goldenInput();
-      const jev = await jevBackend(harness.url).decide(input);
+      const von = await vonBackend(harness.url).decide(input);
       const rules = await createRulesBackend({
         severityHints: FIXTURE_SEVERITY_HINTS,
         labels: FIXTURE_LABELS,
         now: () => 0,
       }).decide(input);
 
-      expect(shapeOf(jev)).toEqual(shapeOf(rules));
-      expect(jev.state).toEqual(rules.state);
-      expect(jev.state_digest).toBe(rules.state_digest);
-      expect(jev.severity.legend?.every((line) => typeof line === "string")).toBe(true);
+      expect(shapeOf(von)).toEqual(shapeOf(rules));
+      expect(von.state).toEqual(rules.state);
+      expect(von.state_digest).toBe(rules.state_digest);
+      expect(von.severity.legend?.every((line) => typeof line === "string")).toBe(true);
 
-      const jevMessage = assertValid("decision", toDecisionMessage(jev, contextFor(jev, input)));
+      const vonMessage = assertValid("decision", toDecisionMessage(von, contextFor(von, input)));
       const rulesMessage = assertValid(
         "decision",
         toDecisionMessage(rules, contextFor(rules, input)),
       );
-      expect(Object.keys(jevMessage).sort()).toEqual(Object.keys(rulesMessage).sort());
+      expect(Object.keys(vonMessage).sort()).toEqual(Object.keys(rulesMessage).sort());
     });
   });
 });

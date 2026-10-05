@@ -70,7 +70,7 @@ The running service is tested whole, `startApp` against the containers, by five 
 
 | Suite | Proves |
 | --- | --- |
-| `e2e-ticket.test.ts` | telemetry → suspect event → decision → ticket → WS frame → REST close with a verdict, with Jev (mock, `best-overlap`, retries off) and with the rules backend; every row in place, the cost exact; no ticket on the February baseline |
+| `e2e-ticket.test.ts` | telemetry → suspect event → decision → ticket → WS frame → REST close with a verdict, with Von (mock, `best-overlap`, retries off) and with the rules backend; every row in place, the cost exact; no ticket on the February baseline |
 | `heartbeat.test.ts` | `telemetry_silent` and `decision_api_silent` raised and cleared on a real broker within seconds (one- and two-second timeouts) |
 | `mqtt-acl.test.ts` | the running diagnosis client receives nothing on the ground-truth root while `eval` does, is refused the command topic (PUBACK 0x87), and `createDiagClient` refuses a missing credential |
 | `secrets.test.ts` | a sentinel `TYPESAFE_API_KEY` appears in no log line, table, REST body, WS frame, MQTT payload or image layer |
@@ -144,12 +144,12 @@ The rest, with the defaults this package applies when Compose does not pass one:
 | `MQTT_BACKEND_DIAG_PASSWORD` | `backend-diag` | the diagnosis broker credential |
 | `PG_HOST`, `PG_PORT`, `POSTGRES_DB`, `PG_APP_PASSWORD` | `localhost`, `5432`, `fdp`, `app_rw` | composed into the `app_rw` pool URL |
 | `DATABASE_URL_APP` | — | a development override for that URL |
-| `DECISION_BACKEND` | `jev` with a TypeSafe key, else `rules` | which answer engine runs |
-| `TYPESAFE_API_KEY`, `TYPESAFE_BASE_URL`, `JEV_MODEL` | —, `https://api.typesafe.ai`, `jev-1.13.0` | the Jev backend; the model must be a pinned version, never an alias |
+| `DECISION_BACKEND` | `von` with a TypeSafe key, else `rules` | which answer engine runs |
+| `TYPESAFE_API_KEY`, `TYPESAFE_BASE_URL`, `VON_MODEL` | —, `https://api.typesafe.ai`, `von-1.13.0` | the Von backend; the model must be a pinned version, never an alias |
 | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL` | `anthropic`, —, `claude-opus-5`, — | the LLM backend |
-| `JEV_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_OUTPUT_PER_MTOK`, `PRICES_AS_OF` | `0.042`, `5`, `25`, `2026-09-19` | the cost ledger; the defaults are USD per million tokens as published by TypeSafe and Anthropic, September 2026 |
+| `VON_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_INPUT_PER_MTOK`, `LLM_PRICE_OUTPUT_PER_MTOK`, `PRICES_AS_OF` | `0.042`, `5`, `25`, `2026-09-19` | the cost ledger; the defaults are USD per million tokens as published by TypeSafe and Anthropic, September 2026 |
 | `GATE_TICKET_MIN_CONFIDENCE`, `GATE_REVIEW_MIN_CONFIDENCE` | `0.85`, `0.60` | the confidence gate, for the rules and llm backends |
-| `JEV_GATE_TICKET_MIN_CONFIDENCE`, `JEV_GATE_REVIEW_MIN_CONFIDENCE` | `0.85`, `0.65` | Jev's own gate thresholds, fixed before the held-out run; independent of `GATE_*` |
+| `VON_GATE_TICKET_MIN_CONFIDENCE`, `VON_GATE_REVIEW_MIN_CONFIDENCE` | `0.85`, `0.65` | Von's own gate thresholds, fixed before the held-out run; independent of `GATE_*` |
 | `GATE_PERSIST_SIM_MIN` | `1` | sim minutes a symptom must keep firing before an episode without a ticket is decided, so before it can open a review or a ticket (`0` decides at once) |
 | `DECISION_INTERVAL_SIM_MIN`, `EPISODE_CLEAR_SIM_MIN` | `30`, `120` | episodes |
 | `HEARTBEAT_TELEMETRY_TIMEOUT_S`, `HEARTBEAT_DECISION_TIMEOUT_S` | `15`, `60` | the watchdogs |

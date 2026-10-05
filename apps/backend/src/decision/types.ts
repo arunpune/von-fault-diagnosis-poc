@@ -12,7 +12,7 @@
  * (`state`), what it answered and what it cost.
  *
  * `confidence` is the one field whose meaning differs per backend, and that is
- * deliberate: Jev reports the peakedness of its own distribution, the LLM
+ * deliberate: Von reports the peakedness of its own distribution, the LLM
  * reports a self-report and the rules twin reports a calibrated margin. The
  * gate applies the same thresholds to all three, and every report that
  * compares them names the quantity it shows.

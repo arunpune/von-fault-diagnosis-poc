@@ -35,16 +35,16 @@ describe("pipelineConfig", () => {
     expect(pipelineConfig(loadEnv({ GATE_PERSIST_SIM_MIN: "0" })).persistSimMin).toBe(0);
   });
 
-  it("gates with the running backend's pair: JEV_GATE_* for jev, GATE_* for rules and llm", () => {
+  it("gates with the running backend's pair: VON_GATE_* for von, GATE_* for rules and llm", () => {
     const variables = {
       GATE_TICKET_MIN_CONFIDENCE: "0.85",
       GATE_REVIEW_MIN_CONFIDENCE: "0.6",
-      JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9",
-      JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.7",
+      VON_GATE_TICKET_MIN_CONFIDENCE: "0.9",
+      VON_GATE_REVIEW_MIN_CONFIDENCE: "0.7",
       TYPESAFE_API_KEY: "tsk-test-not-a-key",
       LLM_API_KEY: "sk-test-not-a-key",
     };
-    expect(pipelineConfig(loadEnv({ ...variables, DECISION_BACKEND: "jev" })).gate).toEqual({
+    expect(pipelineConfig(loadEnv({ ...variables, DECISION_BACKEND: "von" })).gate).toEqual({
       ticketMin: 0.9,
       reviewMin: 0.7,
     });
@@ -56,13 +56,13 @@ describe("pipelineConfig", () => {
     }
   });
 
-  it("gates Jev at the pre-registered choice by default, and rules and llm at the pipeline's pair", () => {
-    // Unset, Jev's pair is the choice in tools/eval/records/jev-thresholds-choice.md
+  it("gates Von at the pre-registered choice by default, and rules and llm at the pipeline's pair", () => {
+    // Unset, Von's pair is the choice in tools/eval/records/von-thresholds-choice.md
     // (review 0.65, ticket 0.85) and N stays 1; tools/eval's host test pins the same numbers.
     const keys = { TYPESAFE_API_KEY: "tsk-test-not-a-key", LLM_API_KEY: "sk-test-not-a-key" };
-    const jev = pipelineConfig(loadEnv({ ...keys, DECISION_BACKEND: "jev" }));
-    expect(jev.gate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
-    expect(jev.persistSimMin).toBe(1);
+    const von = pipelineConfig(loadEnv({ ...keys, DECISION_BACKEND: "von" }));
+    expect(von.gate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    expect(von.persistSimMin).toBe(1);
     for (const backend of ["rules", "llm"]) {
       expect(pipelineConfig(loadEnv({ ...keys, DECISION_BACKEND: backend })).gate).toEqual(
         DEFAULT_PIPELINE_CONFIG.gate,

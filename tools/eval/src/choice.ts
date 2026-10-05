@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The committed record of the pre-registered choice of Jev's thresholds
-// (tools/eval/records/jev-thresholds-preregistration.md).
+// The committed record of the pre-registered choice of Von's thresholds
+// (tools/eval/records/von-thresholds-preregistration.md).
 //
 // `make eval-sweep` makes the choice from the tuning list's recordings: a
-// triple (GATE_PERSIST_SIM_MIN, Jev's review threshold, Jev's ticket
+// triple (GATE_PERSIST_SIM_MIN, Von's review threshold, Von's ticket
 // threshold), since the pre-registration's amendment of 2026-09-24. Its
-// report stays in the gitignored reports/, because it carries Jev-derived
+// report stays in the gitignored reports/, because it carries Von-derived
 // figures. The choice itself is configuration, and it is recorded once, in the
 // one file this module names: `fdp-eval sweep --preregistered --record-choice`
 // writes it from the sweep's own resample runs, and it is committed by hand.
@@ -20,8 +20,8 @@
 //
 // The record holds the triple and where it came from — the outcome, the
 // pre-registration's commit, the sweep report's path and the resample runs —
-// and no figure of Jev's, which stays unpublished. Which clause of the rule
-// decided is left out too: each clause is a statement about Jev's figures on
+// and no figure of Von's, which stays unpublished. Which clause of the rule
+// decided is left out too: each clause is a statement about Von's figures on
 // the tuning list, so it stays in the gitignored sweep report with them.
 
 import { execFileSync } from "node:child_process";
@@ -31,16 +31,16 @@ import { join, relative } from "node:path";
 import { REPO_ROOT } from "./slices.ts";
 
 /** Where the choice is recorded, relative to the repository root. */
-export const CHOICE_RECORD_FILE = "tools/eval/records/jev-thresholds-choice.md";
+export const CHOICE_RECORD_FILE = "tools/eval/records/von-thresholds-choice.md";
 
 /** The pre-registration the choice was made under. */
-const PREREGISTRATION_FILE = "tools/eval/records/jev-thresholds-preregistration.md";
+const PREREGISTRATION_FILE = "tools/eval/records/von-thresholds-preregistration.md";
 
 /** The three variables the triple is set as, in the order the record writes them. */
 export const CHOICE_VARIABLES = [
   "GATE_PERSIST_SIM_MIN",
-  "JEV_GATE_REVIEW_MIN_CONFIDENCE",
-  "JEV_GATE_TICKET_MIN_CONFIDENCE",
+  "VON_GATE_REVIEW_MIN_CONFIDENCE",
+  "VON_GATE_TICKET_MIN_CONFIDENCE",
 ] as const;
 
 /** How long a `git` question may take before the answer is "cannot tell". */
@@ -49,7 +49,7 @@ const GIT_TIMEOUT_MS = 5_000;
 /** A full commit id. */
 const GIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
 
-/** The chosen triple: the pipeline's persistence and Jev's own pair. */
+/** The chosen triple: the pipeline's persistence and Von's own pair. */
 export interface ChosenTriple {
   readonly persistSimMin: number;
   readonly reviewMin: number;
@@ -108,8 +108,8 @@ function persistence(value: number): string {
 export function tripleLines(triple: ChosenTriple): string[] {
   return [
     `GATE_PERSIST_SIM_MIN=${persistence(triple.persistSimMin)}`,
-    `JEV_GATE_REVIEW_MIN_CONFIDENCE=${threshold(triple.reviewMin)}`,
-    `JEV_GATE_TICKET_MIN_CONFIDENCE=${threshold(triple.ticketMin)}`,
+    `VON_GATE_REVIEW_MIN_CONFIDENCE=${threshold(triple.reviewMin)}`,
+    `VON_GATE_TICKET_MIN_CONFIDENCE=${threshold(triple.ticketMin)}`,
   ];
 }
 
@@ -130,8 +130,8 @@ export function renderChoiceRecord(input: ChoiceRecordInput): string {
   const { triple } = input;
   const outcome =
     input.outcome === "change"
-      ? `**change**: the pipeline and Jev move to ${tripleText(triple)}, which replaces the incumbent N = 1, 0.60 / 0.85.`
-      : `**keep**: the pipeline and Jev keep the incumbent, ${tripleText(triple)}.`;
+      ? `**change**: the pipeline and Von move to ${tripleText(triple)}, which replaces the incumbent N = 1, 0.60 / 0.85.`
+      : `**keep**: the pipeline and Von keep the incumbent, ${tripleText(triple)}.`;
   const runs = input.recordings.flatMap((recording) => [
     `- GATE_PERSIST_SIM_MIN = ${persistence(recording.persistSimMin)}: ${recording.runs.map((run) => `\`${run}\``).join(", ")}` +
       ` (commit ${recording.gitSha === null ? "unknown" : `\`${recording.gitSha}\``})`,
@@ -139,7 +139,7 @@ export function renderChoiceRecord(input: ChoiceRecordInput): string {
   return [
     ...LICENCE_HEADER,
     "",
-    "# The Jev thresholds choice",
+    "# The Von thresholds choice",
     "",
     `Recorded on ${input.recordedAt.toISOString().slice(0, 10)} by \`fdp-eval sweep --preregistered --record-choice\`, from the`,
     `pre-registered sweep of the tuning list (\`${PREREGISTRATION_FILE}\`, as amended on 2026-09-24).`,
@@ -157,7 +157,7 @@ export function renderChoiceRecord(input: ChoiceRecordInput): string {
     "**Where it came from.**",
     "",
     `- The pre-registration: \`${PREREGISTRATION_FILE}\`, last changed in commit ${input.preregistrationCommit === null ? "unknown" : `\`${input.preregistrationCommit}\``}.`,
-    `- The sweep report: \`${input.report}\` (gitignored, because it carries Jev-derived figures).`,
+    `- The sweep report: \`${input.report}\` (gitignored, because it carries Von-derived figures).`,
     `- The catalog the tuning list was replayed with: \`${input.catalog.name}\`, sha256 \`${input.catalog.sha256}\`.`,
     "- The resample runs, each recording replayed from its own cassettes:",
     ...runs.map((line) => `  ${line}`),
@@ -197,13 +197,13 @@ export function parseChoiceRecord(text: string, source: string): ChosenTriple {
   }
   const triple: ChosenTriple = {
     persistSimMin: values.get("GATE_PERSIST_SIM_MIN") ?? 0,
-    reviewMin: values.get("JEV_GATE_REVIEW_MIN_CONFIDENCE") ?? 0,
-    ticketMin: values.get("JEV_GATE_TICKET_MIN_CONFIDENCE") ?? 0,
+    reviewMin: values.get("VON_GATE_REVIEW_MIN_CONFIDENCE") ?? 0,
+    ticketMin: values.get("VON_GATE_TICKET_MIN_CONFIDENCE") ?? 0,
   };
   if (triple.reviewMin > triple.ticketMin) {
     throw new ChoiceRecordError(
       source,
-      `JEV_GATE_REVIEW_MIN_CONFIDENCE ${threshold(triple.reviewMin)} is above JEV_GATE_TICKET_MIN_CONFIDENCE ${threshold(triple.ticketMin)}`,
+      `VON_GATE_REVIEW_MIN_CONFIDENCE ${threshold(triple.reviewMin)} is above VON_GATE_TICKET_MIN_CONFIDENCE ${threshold(triple.ticketMin)}`,
     );
   }
   return triple;

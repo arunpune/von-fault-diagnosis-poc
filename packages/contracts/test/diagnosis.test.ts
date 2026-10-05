@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The referential checks JSON Schema cannot express. The fixture harness of `schemas.test.ts`
@@ -109,7 +109,7 @@ describe("decision fixtures", () => {
   it("ships the backends, gate outcomes and statuses the pipeline produces", () => {
     expect(decisions.length).toBeGreaterThanOrEqual(4);
     expect(new Set(decisions.map(({ decision }) => decision.backend))).toEqual(
-      new Set(["jev", "llm", "rules"]),
+      new Set(["von", "llm", "rules"]),
     );
     expect(new Set(decisions.map(({ decision }) => decision.gate.outcome))).toEqual(
       new Set(["ticket", "review", "log"]),

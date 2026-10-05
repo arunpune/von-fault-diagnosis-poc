@@ -4,21 +4,21 @@
 /**
  * The optional language-model backend (docs/decision-backends.md#the-llm-backend).
  *
- * It exists for comparison. Jev answers three typed questions and reports the
+ * It exists for comparison. Von answers three typed questions and reports the
  * peakedness of its own distribution; this backend asks one model the same
  * three questions in prose and reads a JSON object back, so the evaluation
  * report can put a self-report beside a calibrated quantity and say which is
  * which. Nothing in the pipeline prefers one over the other: both produce the
  * same {@link DecisionOutput}, and the gate applies the same thresholds.
  *
- * The state is the very object `decision/state.ts` builds for Jev and for the
+ * The state is the very object `decision/state.ts` builds for Von and for the
  * rules twin, serialised as the user message. One builder for all three
  * backends is what makes the comparison honest — a backend cannot win by
  * having been shown more.
  *
  * ## What code does and what the model does
  *
- * The model answers the three judgments Jev is asked and nothing else. Every number
+ * The model answers the three judgments Von is asked and nothing else. Every number
  * that reaches the gate is computed here: the probabilities are normalised so
  * they sum to one whatever the model wrote, `confidence` is the margin
  * `p1 − p2` over that normalised distribution (it is probability-like
@@ -76,12 +76,12 @@ export type {
 } from "./provider.ts";
 
 /**
- * The fixed system prompt: the three questions Jev is asked.
+ * The fixed system prompt: the three questions Von is asked.
  *
  * It is a constant, not a template. The questions are the same for every
  * decision — only the state changes — and a prompt assembled per call could
  * drift between runs, which would make two evaluation runs incomparable. The
- * wording is the Jev question set's: the Choice's question, focus and note,
+ * wording is the Von question set's: the Choice's question, focus and note,
  * the per-candidate Noul narrowed to the defining movement, and the four
  * situational severity levels, none of which carries a numeral.
  *

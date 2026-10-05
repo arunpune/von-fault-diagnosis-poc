@@ -44,7 +44,7 @@ import { createOutputSink, createWatchdogSink, type OutputSink } from "./sinks.t
 const UNIT = "cau-7";
 const logger = createLogger({ logLevel: "silent", unitId: UNIT, version: "test" });
 
-/** Jev's price list, so the ledger rows carry the configured prices. */
+/** Von's price list, so the ledger rows carry the configured prices. */
 const PRICES = {
   price_input_per_mtok: 0.042,
   price_output_per_mtok: 0,

@@ -48,8 +48,8 @@
     "none_of_these": 0.03
   },
   "severity": "high",
-  "backend": "jev",
-  "model": "jev-1.13.0",
+  "backend": "von",
+  "model": "von-1.13.0",
   "latest_decision_id": "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60",
   "opened_sim_ts": "2020-06-05T09:41:12.000Z",
   "updated_sim_ts": "2020-06-05T09:41:12.000Z",
@@ -66,8 +66,8 @@
       "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
       "event_id": "1a9c8b74-2e60-4d35-af18-9b0c1d2e3f40",
       "sim_ts": "2020-06-05T10:11:12.000Z",
-      "backend": "jev",
-      "model": "jev-1.13.0",
+      "backend": "von",
+      "model": "von-1.13.0",
       "status": "failed",
       "choice": "none_of_these",
       "probabilities": {
@@ -119,8 +119,8 @@
       "episode_id": "b71d4a09-3e52-4c88-9f61-0a2b3c4d5e6f",
       "event_id": "3d4a1f02-5c6b-4e71-9a83-0b1c2d3e4f50",
       "sim_ts": "2020-06-05T09:41:12.000Z",
-      "backend": "jev",
-      "model": "jev-1.13.0",
+      "backend": "von",
+      "model": "von-1.13.0",
       "status": "ok",
       "choice": "dryer_purge_leak",
       "probabilities": {

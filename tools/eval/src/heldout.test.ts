@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The guards of the held-out set (tools/eval/records/heldout-seal.md).
@@ -9,9 +9,9 @@
 // slice of the set and are never replayed either. The committed held-out files
 // are only loaded, never bound to a run.
 //
-// Since the Jev thresholds pre-registration's amendment of 2026-09-24 the one
+// Since the Von thresholds pre-registration's amendment of 2026-09-24 the one
 // run also uses exactly the triple the pre-registered sweep chose, read from
-// its committed record (tools/eval/records/jev-thresholds-choice.md). The
+// its committed record (tools/eval/records/von-thresholds-choice.md). The
 // records here are synthetic, written to temporary directories; no sweep is
 // replayed.
 
@@ -134,7 +134,7 @@ function configError(run: () => unknown): ConfigError {
 
 /** The arguments and environment of an acceptable final run, against an absent record. */
 const FINAL_ARGS = ["--profile", "heldout", "--final-heldout", "--confirm-live"] as const;
-const FINAL_ENV = { EVAL_JEV_MODE: "live" } as const;
+const FINAL_ENV = { EVAL_VON_MODE: "live" } as const;
 
 function absentRecord(): string {
   return join(scratch(), "heldout-final-run.md");
@@ -154,7 +154,7 @@ const CHOSEN: ChosenTriple = { persistSimMin: 1, reviewMin: 0.65, ticketMin: 0.8
 
 /** A synthetic choice record of `triple`, written to a temporary directory. */
 function choiceRecord(triple: ChosenTriple = CHOSEN): string {
-  const path = join(scratch(), "jev-thresholds-choice.md");
+  const path = join(scratch(), "von-thresholds-choice.md");
   writeFileSync(
     path,
     renderChoiceRecord({
@@ -285,7 +285,7 @@ describe("--profile heldout is the one final run and nothing else", () => {
     {
       name: "the heldout profile from EVAL_PROFILE",
       argv: ["--final-heldout", "--confirm-live"],
-      env: { EVAL_PROFILE: "heldout", EVAL_JEV_MODE: "live" },
+      env: { EVAL_PROFILE: "heldout", EVAL_VON_MODE: "live" },
       flag: "EVAL_PROFILE",
     },
     {
@@ -311,20 +311,20 @@ describe("--profile heldout is the one final run and nothing else", () => {
     { name: "a --seed override", argv: [...FINAL_ARGS, "--seed", "3"], flag: "--seed" },
     { name: "the core-10 gate", argv: [...FINAL_ARGS, "--fail-on-gate"], flag: "--fail-on-gate" },
     { name: "the E3 check", argv: [...FINAL_ARGS, "--exit-eval", "e3"], flag: "--exit-eval" },
-    { name: "a run without Jev", argv: [...FINAL_ARGS, "--backends", "rules"], flag: "--backends" },
+    { name: "a run without Von", argv: [...FINAL_ARGS, "--backends", "rules"], flag: "--backends" },
     {
-      name: "Jev in mock mode",
+      name: "Von in mock mode",
       argv: FINAL_ARGS,
-      env: { EVAL_JEV_MODE: "mock" },
-      flag: "EVAL_JEV_MODE",
+      env: { EVAL_VON_MODE: "mock" },
+      flag: "EVAL_VON_MODE",
     },
     {
-      name: "Jev from cassettes",
+      name: "Von from cassettes",
       argv: FINAL_ARGS,
-      env: { EVAL_JEV_MODE: "cassette" },
-      flag: "EVAL_JEV_MODE",
+      env: { EVAL_VON_MODE: "cassette" },
+      flag: "EVAL_VON_MODE",
     },
-    { name: "Jev in auto mode", argv: FINAL_ARGS, env: {}, flag: "EVAL_JEV_MODE" },
+    { name: "Von in auto mode", argv: FINAL_ARGS, env: {}, flag: "EVAL_VON_MODE" },
     {
       name: "a live run not confirmed up front",
       argv: ["--profile", "heldout", "--final-heldout"],
@@ -367,7 +367,7 @@ describe("--profile heldout is the one final run and nothing else", () => {
     const hand = (fields: { profile: EvalConfig["profile"]; finalHeldout: boolean }) => ({
       ...fields,
       persistSimMin: 1,
-      jevGate: { ticketMin: 0.85, reviewMin: 0.65 },
+      vonGate: { ticketMin: 0.85, reviewMin: 0.65 },
     });
     expect(() =>
       assertFinalHeldoutRun(hand({ profile: "core", finalHeldout: false }), present),
@@ -398,7 +398,7 @@ describe("--profile heldout is the one final run and nothing else", () => {
     expect(
       configError(() =>
         assertFinalHeldoutRun(hand({ profile: "heldout", finalHeldout: true }), absent, {
-          path: join(scratch(), "jev-thresholds-choice.md"),
+          path: join(scratch(), "von-thresholds-choice.md"),
           committed: () => true,
         }),
       ).flag,
@@ -428,19 +428,19 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
   const CHANGED_ENV = {
     ...FINAL_ENV,
     GATE_PERSIST_SIM_MIN: "0",
-    JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.55",
-    JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9",
+    VON_GATE_REVIEW_MIN_CONFIDENCE: "0.55",
+    VON_GATE_TICKET_MIN_CONFIDENCE: "0.9",
   };
 
-  it("reads the committed record at tools/eval/records/jev-thresholds-choice.md by default", () => {
-    expect(CHOICE_RECORD_FILE).toBe("tools/eval/records/jev-thresholds-choice.md");
+  it("reads the committed record at tools/eval/records/von-thresholds-choice.md by default", () => {
+    expect(CHOICE_RECORD_FILE).toBe("tools/eval/records/von-thresholds-choice.md");
     expect(choiceRecordPath()).toBe(join(REPO_ROOT, CHOICE_RECORD_FILE));
   });
 
   it("takes the chosen triple, set as the three variables", () => {
     const cfg = loadConfig(FINAL_ARGS, CHANGED_ENV, finalOptions(CHANGED));
     expect(cfg.persistSimMin).toBe(0);
-    expect(cfg.jevGate).toEqual({ ticketMin: 0.9, reviewMin: 0.55 });
+    expect(cfg.vonGate).toEqual({ ticketMin: 0.9, reviewMin: 0.55 });
     // The rules and llm backends keep their own pair; the chosen N is the pipeline's.
     expect(cfg.gate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
   });
@@ -448,33 +448,33 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
   it("takes the committed choice with nothing set: each variable's default is the chosen triple", () => {
     const cfg = loadConfig(FINAL_ARGS, FINAL_ENV, finalOptions(CHOSEN));
     expect(cfg.persistSimMin).toBe(1);
-    expect(cfg.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    expect(cfg.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
   });
 
   it("refuses a kept incumbent with nothing set, and takes it with its review threshold set", () => {
-    // Jev's default review threshold is the choice's 0.65, so a record that kept 0.60 is refused.
+    // Von's default review threshold is the choice's 0.65, so a record that kept 0.60 is refused.
     const error = configError(() => loadConfig(FINAL_ARGS, FINAL_ENV, finalOptions(KEPT)));
-    expect(error.flag).toBe("JEV_GATE_REVIEW_MIN_CONFIDENCE");
-    expect(error.message).toContain("JEV_GATE_REVIEW_MIN_CONFIDENCE=0.60, not 0.65");
+    expect(error.flag).toBe("VON_GATE_REVIEW_MIN_CONFIDENCE");
+    expect(error.message).toContain("VON_GATE_REVIEW_MIN_CONFIDENCE=0.60, not 0.65");
     const cfg = loadConfig(
       FINAL_ARGS,
-      { ...FINAL_ENV, JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.6" },
+      { ...FINAL_ENV, VON_GATE_REVIEW_MIN_CONFIDENCE: "0.6" },
       finalOptions(KEPT),
     );
-    expect(cfg.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
+    expect(cfg.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
   });
 
   it.each([
     ["GATE_PERSIST_SIM_MIN", { GATE_PERSIST_SIM_MIN: "1" }, "GATE_PERSIST_SIM_MIN=0, not 1"],
     [
-      "JEV_GATE_REVIEW_MIN_CONFIDENCE",
-      { JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.6" },
-      "JEV_GATE_REVIEW_MIN_CONFIDENCE=0.55, not 0.60",
+      "VON_GATE_REVIEW_MIN_CONFIDENCE",
+      { VON_GATE_REVIEW_MIN_CONFIDENCE: "0.6" },
+      "VON_GATE_REVIEW_MIN_CONFIDENCE=0.55, not 0.60",
     ],
     [
-      "JEV_GATE_TICKET_MIN_CONFIDENCE",
-      { JEV_GATE_TICKET_MIN_CONFIDENCE: "0.95" },
-      "JEV_GATE_TICKET_MIN_CONFIDENCE=0.90, not 0.95",
+      "VON_GATE_TICKET_MIN_CONFIDENCE",
+      { VON_GATE_TICKET_MIN_CONFIDENCE: "0.95" },
+      "VON_GATE_TICKET_MIN_CONFIDENCE=0.90, not 0.95",
     ],
   ])("refuses any other %s, naming it", (flag, change, text) => {
     const error = configError(() =>
@@ -490,11 +490,11 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
     const error = configError(() =>
       loadConfig(FINAL_ARGS, FINAL_ENV, {
         ...finalOptions(),
-        choiceRecord: join(scratch(), "jev-thresholds-choice.md"),
+        choiceRecord: join(scratch(), "von-thresholds-choice.md"),
       }),
     );
     expect(error.flag).toBe("--final-heldout");
-    expect(error.message).toContain("the Jev thresholds are not fixed");
+    expect(error.message).toContain("the Von thresholds are not fixed");
     expect(error.message).toContain("--record-choice");
   });
 
@@ -514,7 +514,7 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
   });
 
   it("refuses a record it cannot read as a triple, naming the file", () => {
-    const path = join(scratch(), "jev-thresholds-choice.md");
+    const path = join(scratch(), "von-thresholds-choice.md");
     writeFileSync(path, "GATE_PERSIST_SIM_MIN=1\n", "utf8");
     const error = configError(() =>
       loadConfig(FINAL_ARGS, FINAL_ENV, { ...finalOptions(), choiceRecord: path }),
@@ -524,7 +524,7 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
   });
 
   it("never reads the record for any other run", () => {
-    const unread = join(scratch(), "jev-thresholds-choice.md");
+    const unread = join(scratch(), "von-thresholds-choice.md");
     writeFileSync(unread, "not a record\n", "utf8");
     const options = { cwd: CWD, choiceRecord: unread, choiceCommitted: () => false };
     expect(() => loadConfig(["--tuning"], { GATE_PERSIST_SIM_MIN: "0" }, options)).not.toThrow();
@@ -545,7 +545,7 @@ describe("the one run uses exactly the triple the pre-registered sweep chose", (
 describe("a held-out run is stopped before its first row", () => {
   /** A dev configuration turned into a held-out one by hand, which `loadConfig` would refuse. */
   function handMade(fields: Partial<EvalConfig>, env: Record<string, string> = {}): EvalConfig {
-    const base = loadConfig(["--profile", "dev", "--backends", "jev"], env, { cwd: CWD });
+    const base = loadConfig(["--profile", "dev", "--backends", "von"], env, { cwd: CWD });
     return { ...base, profile: HELDOUT_PROFILE, ...fields };
   }
 
@@ -575,7 +575,7 @@ describe("a held-out run is stopped before its first row", () => {
     };
     const cfg = handMade(
       { finalHeldout: true, confirmLive: false },
-      { TYPESAFE_API_KEY: FAKE_KEY, EVAL_JEV_MODE: "live" },
+      { TYPESAFE_API_KEY: FAKE_KEY, EVAL_VON_MODE: "live" },
     );
     const selection = selectBackends(cfg, {
       wall: createFakeWallClock(),

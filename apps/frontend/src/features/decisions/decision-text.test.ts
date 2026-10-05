@@ -112,7 +112,7 @@ describe("priceLine", () => {
 
 describe("backendLabel", () => {
   it("names the backend and its model as the status bar does", () => {
-    expect(backendLabel("jev", "jev-1.13.0")).toBe("Jev · jev-1.13.0");
+    expect(backendLabel("von", "von-1.13.0")).toBe("Von · von-1.13.0");
     expect(backendLabel("llm", "claude-model")).toBe("Claude · claude-model");
     expect(backendLabel("rules", "rules-v1")).toBe("Rules");
   });

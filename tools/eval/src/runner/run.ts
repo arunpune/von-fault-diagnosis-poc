@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The scenario loop: every scenario of a profile, replayed against every
@@ -29,11 +29,11 @@
 // ticket they produce would count as a false positive against the backend.
 //
 // **The headline backend is the one whose answer is informative.** The gate is
-// counted per backend at its own level — rules at detection, Jev at
-// diagnosis — and the headline is Jev only when Jev ran live or from
-// cassettes. A mock Jev column is "not informative", so a run with the mock
+// counted per backend at its own level — rules at detection, Von at
+// diagnosis — and the headline is Von only when Von ran live or from
+// cassettes. A mock Von column is "not informative", so a run with the mock
 // is judged on the rules baseline, which is exactly E3's reading of
-// `--backends rules,jev --fail-on-gate` (docs/evaluation.md).
+// `--backends rules,von --fail-on-gate` (docs/evaluation.md).
 //
 // **A backend whose every decision failed answered nothing, and says so.** Its
 // column is not informative either, and when it is the headline backend the
@@ -339,14 +339,14 @@ export function defaultNativeAlarmCodes(registry: AlarmRegistry | undefined): st
 }
 
 /**
- * The backend whose gate is the run's: Jev when it ran live or from cassettes, else the rules
+ * The backend whose gate is the run's: Von when it ran live or from cassettes, else the rules
  * baseline, else whatever ran first.
  */
 export function headlineBackend(
   backends: readonly Pick<BackendRecord, "name" | "mode">[],
 ): BackendName | undefined {
-  const jev = backends.find((backend) => backend.name === "jev");
-  if (jev !== undefined && (jev.mode === "live" || jev.mode === "cassette")) return "jev";
+  const von = backends.find((backend) => backend.name === "von");
+  if (von !== undefined && (von.mode === "live" || von.mode === "cassette")) return "von";
   if (backends.some((backend) => backend.name === "rules")) return "rules";
   return backends[0]?.name;
 }

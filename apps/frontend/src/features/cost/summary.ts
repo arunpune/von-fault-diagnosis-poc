@@ -10,13 +10,13 @@ import { fmtUsd, humanize } from "@/lib/format";
 
 /** How each decision backend reads on screen; an unknown one reads as its humanised name. */
 const BACKEND_LABELS: Readonly<Record<string, string>> = {
-  jev: "Jev",
+  von: "Von",
   llm: "Language model",
   rules: "Rules",
 };
 
 /** The order the per-backend rows are listed in; a backend this build does not know comes last. */
-const BACKEND_ORDER: readonly string[] = ["jev", "llm", "rules"];
+const BACKEND_ORDER: readonly string[] = ["von", "llm", "rules"];
 
 export const RULES_NOTICE = "Rules backend: no model calls, no cost.";
 
@@ -33,7 +33,7 @@ function backendRank(backend: string): number {
   return rank === -1 ? BACKEND_ORDER.length : rank;
 }
 
-/** `by_backend` as rows: Jev, the language model, rules, then any other backend by name. */
+/** `by_backend` as rows: Von, the language model, rules, then any other backend by name. */
 export function backendRows(byBackend: ApiCost["by_backend"]): BackendRow[] {
   return Object.entries(byBackend)
     .map(([backend, totals]) => ({ ...totals, backend }))
@@ -61,13 +61,13 @@ function llmPrices(prices: ApiCost["prices"]): string | null {
 
 /**
  * The prices the totals were computed with and the day they were checked: "$0.042 per MTok
- * input, output free · prices as of 2026-09-19". When the language model has prices, the Jev
+ * input, output free · prices as of 2026-09-19". When the language model has prices, the Von
  * price is named and the language model's follow it.
  */
 export function priceSentence(prices: ApiCost["prices"]): string {
-  const jev = `${perMtok(prices.jev_input_per_mtok)} input, output free`;
+  const von = `${perMtok(prices.von_input_per_mtok)} input, output free`;
   const llm = llmPrices(prices);
-  const rates = llm === null ? jev : `Jev ${jev}; ${llm}`;
+  const rates = llm === null ? von : `Von ${von}; ${llm}`;
   return `${rates} · prices as of ${prices.as_of}`;
 }
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `fdp-eval run`: replay the scenarios of a profile against every backend,
@@ -40,7 +40,7 @@ export function usage(): string {
     CONFIG_USAGE,
     "  --help                            print this text",
     "",
-    "environment: EVAL_PROFILE, EVAL_JEV_MODE, METROPT_CSV and the backend variables",
+    "environment: EVAL_PROFILE, EVAL_VON_MODE, METROPT_CSV and the backend variables",
     '(docs/evaluation.md, "Running a profile")',
     "",
     "exit codes: 0 completed (and the gate held under --fail-on-gate), 1 usage or",

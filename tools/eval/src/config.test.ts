@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `loadConfig` and `loadCatalog`.
@@ -66,7 +66,7 @@ describe("defaults", () => {
 
   it("are the harness's and the backend's documented values", () => {
     expect(config.profile).toBe("core");
-    expect(config.backends).toEqual(["rules", "jev"]);
+    expect(config.backends).toEqual(["rules", "von"]);
     expect(config.scenarios).toEqual([]);
     expect(config.catalog).toEqual({ kind: "reference" });
     expect(config.record).toBe(false);
@@ -74,21 +74,21 @@ describe("defaults", () => {
     expect(config.jobs).toBe(1);
     expect(config.seed).toBeUndefined();
     expect(config.failOnGate).toBe(false);
-    expect(config.jevMode).toBe("auto");
+    expect(config.vonMode).toBe("auto");
     expect(config.typesafeBaseUrl).toBe("https://api.typesafe.ai");
-    expect(config.jevModel).toBe("jev-1.13.0");
+    expect(config.vonModel).toBe("von-1.13.0");
     expect(config.llmProvider).toBe("anthropic");
     expect(config.llmModel).toBe("claude-opus-5");
     expect(config.prices).toEqual({
-      jevInputPerMtok: 0.042,
+      vonInputPerMtok: 0.042,
       llmInputPerMtok: 5,
       llmOutputPerMtok: 25,
       asOf: "2026-09-19",
     });
     expect(config.gate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
-    // Jev's own pair defaults to the pre-registered choice.
-    expect(config.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
-    expect(DEFAULTS.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    // Von's own pair defaults to the pre-registered choice.
+    expect(config.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    expect(DEFAULTS.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
     expect(config.decisionIntervalSimMin).toBe(30);
     expect(config.episodeClearSimMin).toBe(120);
     expect(config.persistSimMin).toBe(1);
@@ -126,7 +126,7 @@ describe("flags and the environment", () => {
     const config = loadConfig(
       [
         "--backends",
-        "jev, rules",
+        "von, rules",
         "--scenario",
         "f3_air_leak_jun05",
         "--scenario",
@@ -147,7 +147,7 @@ describe("flags and the environment", () => {
       {},
       { cwd: CWD },
     );
-    expect(config.backends).toEqual(["jev", "rules"]);
+    expect(config.backends).toEqual(["von", "rules"]);
     expect(config.scenarios).toEqual(["f3_air_leak_jun05", "baseline_feb03_normal"]);
     expect(config.record).toBe(true);
     expect(config.confirmLive).toBe(true);
@@ -162,12 +162,12 @@ describe("flags and the environment", () => {
     const config = loadConfig(
       [],
       {
-        EVAL_JEV_MODE: "mock",
+        EVAL_VON_MODE: "mock",
         METROPT_CSV: "/data/full.csv",
         TYPESAFE_BASE_URL: "http://127.0.0.1:8089",
-        JEV_MODEL: "jev-1.14.2",
+        VON_MODEL: "von-1.14.2",
         LLM_MODEL: "claude-test",
-        JEV_PRICE_INPUT_PER_MTOK: "0.05",
+        VON_PRICE_INPUT_PER_MTOK: "0.05",
         LLM_PRICE_INPUT_PER_MTOK: "3",
         LLM_PRICE_OUTPUT_PER_MTOK: "15",
         PRICES_AS_OF: "2026-10-01",
@@ -180,20 +180,20 @@ describe("flags and the environment", () => {
       },
       { cwd: CWD },
     );
-    expect(config.jevMode).toBe("mock");
+    expect(config.vonMode).toBe("mock");
     expect(config.csvPath).toBe("/data/full.csv");
     expect(config.typesafeBaseUrl).toBe("http://127.0.0.1:8089");
-    expect(config.jevModel).toBe("jev-1.14.2");
+    expect(config.vonModel).toBe("von-1.14.2");
     expect(config.llmModel).toBe("claude-test");
     expect(config.prices).toEqual({
-      jevInputPerMtok: 0.05,
+      vonInputPerMtok: 0.05,
       llmInputPerMtok: 3,
       llmOutputPerMtok: 15,
       asOf: "2026-10-01",
     });
     expect(config.gate).toEqual({ ticketMin: 0.9, reviewMin: 0.5 });
-    // Unset, Jev's pair is the pre-registered choice, wherever the global pair is set.
-    expect(config.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    // Unset, Von's pair is the pre-registered choice, wherever the global pair is set.
+    expect(config.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
     expect(config.decisionIntervalSimMin).toBe(15);
     expect(config.episodeClearSimMin).toBe(60);
     expect(config.persistSimMin).toBe(0);
@@ -203,11 +203,11 @@ describe("flags and the environment", () => {
   it("reads an empty variable as unset", () => {
     const config = loadConfig(
       [],
-      { EVAL_PROFILE: "", JEV_MODEL: "", RULES_DISABLED: "", TYPESAFE_API_KEY: "" },
+      { EVAL_PROFILE: "", VON_MODEL: "", RULES_DISABLED: "", TYPESAFE_API_KEY: "" },
       { cwd: CWD },
     );
     expect(config.profile).toBe("core");
-    expect(config.jevModel).toBe("jev-1.13.0");
+    expect(config.vonModel).toBe("von-1.13.0");
     expect(config.rulesDisabled).toEqual(["flow_pulses_missing"]);
     expect(config.secrets.typesafeApiKey).toBeUndefined();
   });
@@ -224,46 +224,46 @@ describe("flags and the environment", () => {
     );
   });
 
-  it("reads Jev's own pair, defaulting to the pre-registered choice, and gates each backend with its own", () => {
+  it("reads Von's own pair, defaulting to the pre-registered choice, and gates each backend with its own", () => {
     const config = loadConfig(
       [],
-      { JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9", JEV_GATE_REVIEW_MIN_CONFIDENCE: "" },
+      { VON_GATE_TICKET_MIN_CONFIDENCE: "0.9", VON_GATE_REVIEW_MIN_CONFIDENCE: "" },
       { cwd: CWD },
     );
-    expect(config.jevGate).toEqual({ ticketMin: 0.9, reviewMin: 0.65 });
+    expect(config.vonGate).toEqual({ ticketMin: 0.9, reviewMin: 0.65 });
     expect(config.gate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
-    expect(gateFor(config, "jev")).toEqual({ ticketMin: 0.9, reviewMin: 0.65 });
+    expect(gateFor(config, "von")).toEqual({ ticketMin: 0.9, reviewMin: 0.65 });
     expect(gateFor(config, "rules")).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
     expect(gateFor(config, "llm")).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
   });
 
-  it("never moves Jev's default pair with GATE_*, so a rules-only pair still loads", () => {
+  it("never moves Von's default pair with GATE_*, so a rules-only pair still loads", () => {
     const config = loadConfig(
       [],
       { GATE_TICKET_MIN_CONFIDENCE: "0.6", GATE_REVIEW_MIN_CONFIDENCE: "0.5" },
       { cwd: CWD },
     );
     expect(config.gate).toEqual({ ticketMin: 0.6, reviewMin: 0.5 });
-    expect(config.jevGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
+    expect(config.vonGate).toEqual({ ticketMin: 0.85, reviewMin: 0.65 });
     // The pair the tuning recordings were made at can still be set explicitly.
-    expect(loadConfig([], { JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.6" }, { cwd: CWD }).jevGate).toEqual(
+    expect(loadConfig([], { VON_GATE_REVIEW_MIN_CONFIDENCE: "0.6" }, { cwd: CWD }).vonGate).toEqual(
       { ticketMin: 0.85, reviewMin: 0.6 },
     );
   });
 
   it("defaults to exactly the triple of the committed pre-registered choice", () => {
-    // tools/eval/records/jev-thresholds-choice.md is the source; the code defaults carry it.
+    // tools/eval/records/von-thresholds-choice.md is the source; the code defaults carry it.
     const chosen = readChoiceRecord();
     expect(chosen).toEqual({
       persistSimMin: DEFAULTS.persistSimMin,
-      reviewMin: DEFAULTS.jevGate.reviewMin,
-      ticketMin: DEFAULTS.jevGate.ticketMin,
+      reviewMin: DEFAULTS.vonGate.reviewMin,
+      ticketMin: DEFAULTS.vonGate.ticketMin,
     });
     const config = loadConfig([], {}, { cwd: CWD });
     expect({
       persistSimMin: config.persistSimMin,
-      reviewMin: config.jevGate.reviewMin,
-      ticketMin: config.jevGate.ticketMin,
+      reviewMin: config.vonGate.reviewMin,
+      ticketMin: config.vonGate.ticketMin,
     }).toEqual(chosen);
   });
 
@@ -323,7 +323,7 @@ describe("validation", () => {
     { name: "an unknown profile variable", env: { EVAL_PROFILE: "nightly" }, flag: "EVAL_PROFILE" },
     { name: "an unknown backend", argv: ["--backends", "rules,gpt"], flag: "--backends" },
     { name: "an empty backend list", argv: ["--backends", " , "], flag: "--backends" },
-    { name: "a repeated backend", argv: ["--backends", "jev,jev"], flag: "--backends" },
+    { name: "a repeated backend", argv: ["--backends", "von,von"], flag: "--backends" },
     { name: "a malformed scenario id", argv: ["--scenario", "F3"], flag: "--scenario" },
     { name: "an unknown catalog source", argv: ["--catalog", "pdf"], flag: "--catalog" },
     { name: "a file: catalog with no path", argv: ["--catalog", "file:"], flag: "--catalog" },
@@ -344,8 +344,8 @@ describe("validation", () => {
     { name: "an unknown flag", argv: ["--verbose"], flag: "--verbose" },
     { name: "a flag without its value", argv: ["--profile"], flag: "--profile" },
     { name: "a positional argument", argv: ["smoke"], flag: "arguments" },
-    { name: "an unknown Jev mode", env: { EVAL_JEV_MODE: "replay" }, flag: "EVAL_JEV_MODE" },
-    { name: "a Jev alias", env: { JEV_MODEL: "jev-latest" }, flag: "JEV_MODEL" },
+    { name: "an unknown Von mode", env: { EVAL_VON_MODE: "replay" }, flag: "EVAL_VON_MODE" },
+    { name: "a Von alias", env: { VON_MODEL: "von-latest" }, flag: "VON_MODEL" },
     {
       name: "a base URL that is not one",
       env: { TYPESAFE_BASE_URL: "api" },
@@ -359,8 +359,8 @@ describe("validation", () => {
     { name: "another LLM provider", env: { LLM_PROVIDER: "other" }, flag: "LLM_PROVIDER" },
     {
       name: "a negative price",
-      env: { JEV_PRICE_INPUT_PER_MTOK: "-1" },
-      flag: "JEV_PRICE_INPUT_PER_MTOK",
+      env: { VON_PRICE_INPUT_PER_MTOK: "-1" },
+      flag: "VON_PRICE_INPUT_PER_MTOK",
     },
     {
       name: "a price day that is not one",
@@ -378,19 +378,19 @@ describe("validation", () => {
       flag: "GATE_REVIEW_MIN_CONFIDENCE",
     },
     {
-      name: "a Jev threshold above one",
-      env: { JEV_GATE_TICKET_MIN_CONFIDENCE: "1.2" },
-      flag: "JEV_GATE_TICKET_MIN_CONFIDENCE",
+      name: "a Von threshold above one",
+      env: { VON_GATE_TICKET_MIN_CONFIDENCE: "1.2" },
+      flag: "VON_GATE_TICKET_MIN_CONFIDENCE",
     },
     {
-      name: "a Jev review threshold above the ticket threshold Jev resolves to",
-      env: { JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.9" },
-      flag: "JEV_GATE_REVIEW_MIN_CONFIDENCE",
+      name: "a Von review threshold above the ticket threshold Von resolves to",
+      env: { VON_GATE_REVIEW_MIN_CONFIDENCE: "0.9" },
+      flag: "VON_GATE_REVIEW_MIN_CONFIDENCE",
     },
     {
-      name: "a Jev ticket threshold set alone below Jev's default review threshold",
-      env: { JEV_GATE_TICKET_MIN_CONFIDENCE: "0.6" },
-      flag: "JEV_GATE_REVIEW_MIN_CONFIDENCE",
+      name: "a Von ticket threshold set alone below Von's default review threshold",
+      env: { VON_GATE_TICKET_MIN_CONFIDENCE: "0.6" },
+      flag: "VON_GATE_REVIEW_MIN_CONFIDENCE",
     },
     { name: "a negative resample", argv: ["--resample", "-1"], flag: "--resample" },
     { name: "a resample that is not a number", argv: ["--resample", "two"], flag: "--resample" },
@@ -419,7 +419,7 @@ describe("validation", () => {
     { name: "an exit eval other than e3", argv: ["--exit-eval", "x"], flag: "--exit-eval" },
     {
       name: "an exit eval without the rules backend it judges",
-      argv: ["--exit-eval", "e3", "--backends", "jev"],
+      argv: ["--exit-eval", "e3", "--backends", "von"],
       flag: "--exit-eval",
     },
   ];

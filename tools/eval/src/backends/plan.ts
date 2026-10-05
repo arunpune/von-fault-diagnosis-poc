@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // What a live run will ask and cost, known before it asks anything.
@@ -8,13 +8,13 @@
 // contact an API without `--confirm-live`. The count cannot be read off the
 // scenario files — a decision is taken wherever detection raises a suspect
 // event and every `DECISION_INTERVAL_SIM_MIN` while the symptom persists — so
-// the plan replays the run's scenarios once with Jev against the contracts'
+// the plan replays the run's scenarios once with Von against the contracts'
 // mock, which is the same pipeline, the same detection and the same request
 // builders the live run will use, and counts.
 //
 // The estimate is exactly that. The count is the mock run's: a live answer
 // can merge an episode the mock's did not, so the real run may take a few
-// decisions fewer or more. The Jev tokens are the mock's usage, the
+// decisions fewer or more. The Von tokens are the mock's usage, the
 // documented estimate `ceil((bytes(state) + bytes(questions)) / 4)`. The LLM
 // is asked the same three questions about the same state in one message, so
 // its input is estimated the same way, and its output — one JSON object and
@@ -41,10 +41,10 @@ import { summarise } from "../runner/recorder.ts";
 import { bindScenario, inProfile, loadAll } from "../scenario/index.ts";
 import type { BoundScenario, Profile } from "../scenario/index.ts";
 import { selectTuning, TUNING_BIND_PROFILE } from "../tuning.ts";
-import { createMockJevHandle } from "./mock.ts";
+import { createMockVonHandle } from "./mock.ts";
 
 /** The backends that reach a live API. */
-export type LiveBackendName = "jev" | "llm";
+export type LiveBackendName = "von" | "llm";
 
 /** The output an LLM decision is estimated at: a JSON answer and a one-sentence rationale. */
 export const LLM_OUTPUT_TOKENS_PER_CALL = 300;
@@ -108,7 +108,7 @@ async function mockDecisions(
   const bound = plannedScenarios(cfg, deps);
   const catalog = await loadCatalog(cfg.catalog, cfg.secrets);
   const wall = createFakeWallClock();
-  const handle = await createMockJevHandle({ jevModel: MOCK_MODEL }, { wall });
+  const handle = await createMockVonHandle({ vonModel: MOCK_MODEL }, { wall });
   try {
     const decisions: DecisionRecord[] = [];
     for (const scenario of bound) {
@@ -166,7 +166,7 @@ export async function planLiveRun(
   return {
     scenarios,
     rows: live.map((backend) =>
-      planRow(backend, backend === "jev" ? cfg.jevModel : cfg.llmModel, decisions, cfg.prices),
+      planRow(backend, backend === "von" ? cfg.vonModel : cfg.llmModel, decisions, cfg.prices),
     ),
   };
 }

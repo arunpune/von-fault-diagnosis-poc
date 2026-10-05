@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+﻿<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Security policy
@@ -11,7 +11,7 @@ fictional. Run it on a machine or network you trust. The threat model and its li
 ## Reporting a vulnerability
 
 Report a suspected vulnerability privately through GitHub's private vulnerability reporting:
-[open a draft security advisory](https://github.com/meddleconnect/jev-fault-diagnosis-poc/security/advisories/new).
+[open a draft security advisory](https://github.com/meddleconnect/von-fault-diagnosis-poc/security/advisories/new).
 
 **Never report a vulnerability in a public issue, pull request or discussion**, and never paste a real API key, token or
 password anywhere, including in the report. If a key of yours was exposed, revoke it with its vendor first.
@@ -49,7 +49,7 @@ In scope: the code, configuration and container definitions in this repository.
 
 Out of scope:
 
-- third-party services the stack can call, such as TypeSafe AI's Jev API and Anthropic's API; report their issues to
+- third-party services the stack can call, such as TypeSafe AI's Von API and Anthropic's API; report their issues to
   their vendors;
 - third-party dependencies, unless this repository uses them in a vulnerable way; report the dependency itself
   upstream;

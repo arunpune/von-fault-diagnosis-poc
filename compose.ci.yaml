@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 # SPDX-License-Identifier: Apache-2.0
 #
 # CI, smoke test and stack-mode browser tests, applied as
@@ -16,7 +16,7 @@
 # The manual stays the default realistic PDF, so CI ingests what the demo
 # ingests.
 #
-# The decision backend here is jev against the mock, never rules: the
+# The decision backend here is von against the mock, never rules: the
 # best-overlap policy answers with confidence 0.9, which clears the 0.85 ticket
 # gate, so this stack always opens tickets in status `open`. `make smoke`
 # (scripts/smoke.sh --mode ci) and the frontend's stack tour assert exactly
@@ -72,7 +72,7 @@ services:
 
   backend:
     environment:
-      DECISION_BACKEND: jev
+      DECISION_BACKEND: von
       # Not a secret: the mock accepts any non-empty bearer token.
       TYPESAFE_API_KEY: fdp-ci-mock-key
       TYPESAFE_BASE_URL: http://typesafe-mock:8089

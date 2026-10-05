@@ -49,7 +49,7 @@ const HOST_FACTORIES = [
   "createPipeline",
   "createCatalogRetriever",
   "createRulesBackend",
-  "createJevBackend",
+  "createVonBackend",
   "createLlmBackend",
   "createAnthropicProvider",
   "selectBackend",

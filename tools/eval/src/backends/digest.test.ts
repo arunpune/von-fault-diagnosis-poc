@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The request digest a cassette is filed under: stable under key order and
@@ -9,9 +9,9 @@ import { describe, expect, it } from "vitest";
 
 import { canonicalJson, requestDigest, sha256Hex } from "./digest.ts";
 
-/** A request shaped like the Jev backend's, small enough to read. */
+/** A request shaped like the Von backend's, small enough to read. */
 const REQUEST = {
-  model: "jev-1.13.0",
+  model: "von-1.13.0",
   state: {
     machine: "CAU-7 compressed-air unit",
     symptom: { key: "purge_pressure_high", detail: "dryer purge pressure stays high" },
@@ -103,7 +103,7 @@ describe("requestDigest", () => {
   });
 
   it("changes with the model and with a question", () => {
-    expect(requestDigest({ ...REQUEST, model: "jev-1.14.0" })).not.toBe(digest);
+    expect(requestDigest({ ...REQUEST, model: "von-1.14.0" })).not.toBe(digest);
     const questions = { ...REQUEST.questions, extra: { type: "noul", instructions: "Is it?" } };
     expect(requestDigest({ ...REQUEST, questions })).not.toBe(digest);
   });

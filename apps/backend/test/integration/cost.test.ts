@@ -75,12 +75,12 @@ interface Billed {
   readonly wallTs: string;
 }
 
-/** The three hand-worked figures: Jev input only, both LLM prices, rules free. */
+/** The three hand-worked figures: Von input only, both LLM prices, rules free. */
 const BILLED: readonly Billed[] = [
   {
     decisionId: "55555555-5555-4555-8555-555555555501",
-    backend: "jev",
-    model: "jev-1.13.0",
+    backend: "von",
+    model: "von-1.13.0",
     usage: { input_tokens: 1_234, output_tokens: 0 },
     wallTs: "2026-09-22T08:00:01.000Z",
   },
@@ -285,7 +285,7 @@ describe("the generated cost_usd", () => {
         `INSERT INTO app.cost_ledger
                 (decision_id, backend, model, input_tokens, price_input_per_mtok, prices_as_of,
                  cost_usd)
-         VALUES ($1, 'jev', 'jev-1.13.0', 1, 0.042, '2026-09-19', 1)`,
+         VALUES ($1, 'von', 'von-1.13.0', 1, 0.042, '2026-09-19', 1)`,
         [BILLED[0]?.decisionId],
       ),
     ).rejects.toMatchObject({ code: "428C9" });
@@ -350,9 +350,9 @@ describe("summary()", () => {
   it("breaks the totals down per backend from app.v_cost_totals", async () => {
     const { by_backend: byBackend } = await repo.summary();
 
-    expect(Object.keys(byBackend).sort()).toEqual(["jev", "llm", "rules"]);
-    expect(byBackend["jev"]).toEqual({
-      model: "jev-1.13.0",
+    expect(Object.keys(byBackend).sort()).toEqual(["von", "llm", "rules"]);
+    expect(byBackend["von"]).toEqual({
+      model: "von-1.13.0",
       usd: 0.000051828,
       calls: 1,
       input_tokens: 1_234,
@@ -373,17 +373,17 @@ describe("summary()", () => {
 
     expect(summary.by_day).toEqual([{ day_wall: "2026-09-22", usd: summary.totals.usd }]);
     expect(summary.prices).toEqual({
-      jev_input_per_mtok: 0.042,
+      von_input_per_mtok: 0.042,
       llm_input_per_mtok: 5,
       llm_output_per_mtok: 25,
       as_of: "2026-09-19",
     });
-    expect(summary.recent.map((row) => row.backend)).toEqual(["rules", "llm", "jev"]);
+    expect(summary.recent.map((row) => row.backend)).toEqual(["rules", "llm", "von"]);
     expect(summary.recent.length).toBeLessThanOrEqual(MAX_RECENT_ROWS);
     expect(summary.recent[2]).toEqual({
       decision_id: BILLED[0]?.decisionId,
-      backend: "jev",
-      model: "jev-1.13.0",
+      backend: "von",
+      model: "von-1.13.0",
       input_tokens: 1_234,
       output_tokens: 0,
       cost_usd: 0.000051828,

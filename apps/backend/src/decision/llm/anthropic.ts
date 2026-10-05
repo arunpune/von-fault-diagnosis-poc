@@ -75,7 +75,7 @@ export const MAX_TOKENS = 4096;
 /**
  * How long one call may take.
  *
- * Longer than Jev's ten seconds: this backend asks one model for three
+ * Longer than Von's ten seconds: this backend asks one model for three
  * judgments and a sentence in a single reply, and a timeout that fires while
  * the answer is still being written would be counted as an outage by the
  * heartbeat rather than as the slow call it is.

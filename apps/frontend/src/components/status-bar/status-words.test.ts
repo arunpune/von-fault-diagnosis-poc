@@ -32,11 +32,11 @@ function simStatus(): StatusSim {
 
 function backend(
   heartbeat: StatusBackend["heartbeat"],
-  name: DecisionBackend = "jev",
+  name: DecisionBackend = "von",
 ): StatusBackend {
   return {
     ...fixtures.status.backend,
-    backend: { name, model: name === "rules" ? "rules-v1" : "jev-1.13.0" },
+    backend: { name, model: name === "rules" ? "rules-v1" : "von-1.13.0" },
     heartbeat,
   };
 }
@@ -78,7 +78,7 @@ describe("the lamp words", () => {
     expect(selectDecisionsWord(live({ hello: { name: "rules", model: "rules-v1" } }))).toBe(
       "no model",
     );
-    expect(selectDecisionsWord(live({ hello: { name: "jev", model: "jev-1.13.0" } }))).toBe(
+    expect(selectDecisionsWord(live({ hello: { name: "von", model: "von-1.13.0" } }))).toBe(
       "unknown",
     );
     expect(selectDecisionsWord(live({ backend: backend(QUIET), link: "closed" }))).toBe("unknown");
@@ -151,7 +151,7 @@ describe("the dataset position", () => {
 
 describe("backendLabel", () => {
   it("names each backend with its model, the rules backend alone", () => {
-    expect(backendLabel({ name: "jev", model: "jev-1.13.0" })).toBe("Jev · jev-1.13.0");
+    expect(backendLabel({ name: "von", model: "von-1.13.0" })).toBe("Von · von-1.13.0");
     expect(backendLabel({ name: "llm", model: "claude-opus-5" })).toBe("Claude · claude-opus-5");
     expect(backendLabel({ name: "rules", model: "rules-v1" })).toBe("Rules");
     expect(backendLabel(null)).toBe("No backend yet");

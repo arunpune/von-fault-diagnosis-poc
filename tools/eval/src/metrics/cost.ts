@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // What a run cost.
@@ -12,7 +12,7 @@
 // agree to 1e-12 — which `cost.test.ts` asserts on the two reference cases
 // rather than trusting.
 //
-// Prices are per backend and dated. Jev bills input tokens only; the LLM
+// Prices are per backend and dated. Von bills input tokens only; the LLM
 // comparison bills both; the rules backend is free and gets zero prices rather
 // than an exception, so the same arithmetic runs for all three and a rules
 // column of 0.00 is a measured number, not a special case.
@@ -40,12 +40,12 @@ export interface CostResult extends CostSummary {
 /**
  * The prices one backend is billed at (`pricesFor`).
  *
- * Any backend that is not `jev` or `llm` is free: the rules baseline costs nothing, and a
+ * Any backend that is not `von` or `llm` is free: the rules baseline costs nothing, and a
  * future deterministic backend should not need a new branch to be costed correctly.
  */
 export function pricesFor(prices: Prices, backend: string): BackendPrices {
-  if (backend === "jev") {
-    return { inputPerMtok: prices.jevInputPerMtok, outputPerMtok: 0, asOf: prices.asOf };
+  if (backend === "von") {
+    return { inputPerMtok: prices.vonInputPerMtok, outputPerMtok: 0, asOf: prices.asOf };
   }
   if (backend === "llm") {
     return {

@@ -3,7 +3,7 @@
 
 # Decision backends
 
-This guide follows a suspect event from the moment the backend asks "which fault is this?" to the ticket a technician closes. It covers the interface every decision backend implements, the state they all read, how Jev, the LLM backend and the rules-only baseline answer, and what the confidence gate, the episodes, the tickets and the cost ledger do with the answer. Read it before you change a threshold, compare backends or add one, and whenever you want to know why a suspect event did or did not open a ticket. The [README](../README.md#decision-backends) has the one-table summary. How suspect events are raised is in [detection.md](detection.md), how the candidate faults are retrieved from the manual in [manual.md](manual.md), and the routes, frames and topics in [api.md](api.md).
+This guide follows a suspect event from the moment the backend asks "which fault is this?" to the ticket a technician closes. It covers the interface every decision backend implements, the state they all read, how Von, the LLM backend and the rules-only baseline answer, and what the confidence gate, the episodes, the tickets and the cost ledger do with the answer. Read it before you change a threshold, compare backends or add one, and whenever you want to know why a suspect event did or did not open a ticket. The [README](../README.md#decision-backends) has the one-table summary. How suspect events are raised is in [detection.md](detection.md), how the candidate faults are retrieved from the manual in [manual.md](manual.md), and the routes, frames and topics in [api.md](api.md).
 
 The code lives in `apps/backend/src/`:
 
@@ -12,7 +12,7 @@ The code lives in `apps/backend/src/`:
 | `decision/types.ts`   | The `DecisionBackend` interface, the `DecisionOutput` shape and `DecisionError`  |
 | `decision/state.ts`   | Builds the state every backend reads                                             |
 | `decision/select.ts`  | Builds the backend that `DECISION_BACKEND` names                                 |
-| `decision/jev/`       | The Jev questions, the request and the answer parser                             |
+| `decision/von/`       | The Von questions, the request and the answer parser                             |
 | `decision/llm/`       | The provider port, the Anthropic provider and the answer schema                  |
 | `decision/rules/`     | The rules-only baseline                                                          |
 | `decision/message.ts` | Turns an answer or a failure into the `decision` contract message, gate included |
@@ -27,7 +27,7 @@ Every backend implements one interface. Condensed from `apps/backend/src/decisio
 
 ```ts
 interface DecisionBackend {
-  readonly name: "jev" | "llm" | "rules";
+  readonly name: "von" | "llm" | "rules";
   readonly model: string; // the model id its answers carry; rules-v1 for the rules backend
   decide(input: DecisionInput, options?: { signal?: AbortSignal }): Promise<DecisionOutput>;
 }
@@ -48,7 +48,7 @@ A backend is a function of its input. It returns what it saw, what it answered a
 | `probabilities`            | Mass over the candidate ids plus `none_of_these`, summing to 1                                                                                                                         |
 | `confidence`               | The number the gate reads; what it measures depends on the backend (next table)                                                                                                        |
 | `support`                  | Per candidate, a figure from 0 to 1 for how well its expected movements show in the observations; `null` for a candidate the backend did not judge                                     |
-| `severity`                 | `level` (`low`, `medium`, `high` or `critical`), `score` (the level's index, 0 to 3), `probabilities` keyed by that index, `confidence`, and the Score's `legend` when Jev returns one |
+| `severity`                 | `level` (`low`, `medium`, `high` or `critical`), `score` (the level's index, 0 to 3), `probabilities` keyed by that index, `confidence`, and the Score's `legend` when Von returns one |
 | `usage`                    | `input_tokens` and `output_tokens` as the provider reported them; zeros for the rules backend                                                                                          |
 | `latency_ms`, `request_id` | How long the call took, and the provider's request id when there is one                                                                                                                |
 | `state`, `state_digest`    | The state the backend saw, and the sha256 of its canonical JSON                                                                                                                        |
@@ -58,11 +58,11 @@ A backend is a function of its input. It returns what it saw, what it answered a
 
 | Backend | `confidence` is                                                                                                                                   |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jev     | The `fault` Choice's own confidence: how peaked its distribution over the options is                                                              |
+| Von     | The `fault` Choice's own confidence: how peaked its distribution over the options is                                                              |
 | LLM     | `p(choice) − p(best other option)` over the renormalised probabilities, and 0 when the model chose an option it did not rank first; a self-report |
 | Rules   | `s1 · clamp((s1 − s2) / 0.3, 0, 1)` over the candidates' supports: a margin, not a probability ([why](#why-the-confidence-is-a-margin))           |
 
-The gate compares each quantity with its own backend's pair of thresholds: Jev's pair, `JEV_GATE_*`, at review 0.65 and ticket 0.85 by default, and `GATE_*`, at 0.60 and 0.85, for the rules and LLM backends ([Thresholds for Jev](#thresholds-for-jev)). Because the three quantities are not on one scale, every report that compares backends names the quantity it shows.
+The gate compares each quantity with its own backend's pair of thresholds: Von's pair, `VON_GATE_*`, at review 0.65 and ticket 0.85 by default, and `GATE_*`, at 0.60 and 0.85, for the rules and LLM backends ([Thresholds for Von](#thresholds-for-von)). Because the three quantities are not on one scale, every report that compares backends names the quantity it shows.
 
 ### One decision, step by step
 
@@ -84,7 +84,7 @@ sequenceDiagram
     RT-->>PL: at most six catalog causes
     PL->>BK: decide with the event, the candidates and the unit
     BK->>BK: build the state, the same words for every backend
-    alt jev or llm
+    alt von or llm
         BK->>PV: one request carrying the state
         PV-->>BK: answers and token usage
     else rules
@@ -107,12 +107,12 @@ The pipeline (`apps/backend/src/pipeline/index.ts`) awaits each decision before 
 
 `decision/message.ts` turns a `DecisionOutput` into the `decision` contract message ([`decision.schema.json`](../packages/contracts/schemas/v1/decision.schema.json)) and applies the gate there, once, so the message, the database row and the broker payload cannot disagree about the outcome. The message adds the ids (`decision_id`, `episode_id`, `event_id`), `sim_ts`, `status`, up to six `candidates` with their probability, benign flag and manual section, the `gate` block with the outcome, the thresholds it used and a one-sentence `reason`, and the `cost` block. The state itself stays out: it goes to `app.decisions.state`, and only `state_digest` travels. The message is published on `plant/cau-7/decisions`, sent to the browser as a `decision` WebSocket frame and stored in `app.decisions`, with one `app.decision_candidates` row per candidate. `GET /api/decisions/:id` returns it together with the state.
 
-Trimmed from the contract fixture [`valid-jev-ticket.json`](../packages/contracts/fixtures/decision/valid-jev-ticket.json). Its numbers were written for the fixture; they are not a Jev answer, its gate block carries a configured review threshold of 0.6 rather than Jev's default 0.65, and its cost block uses the default Jev price of the [price variables](#the-cost-ledger-and-the-price-variables):
+Trimmed from the contract fixture [`valid-von-ticket.json`](../packages/contracts/fixtures/decision/valid-von-ticket.json). Its numbers were written for the fixture; they are not a Von answer, its gate block carries a configured review threshold of 0.6 rather than Von's default 0.65, and its cost block uses the default Von price of the [price variables](#the-cost-ledger-and-the-price-variables):
 
 ```jsonc
 {
-  "backend": "jev",
-  "model": "jev-1.13.0",
+  "backend": "von",
+  "model": "von-1.13.0",
   "status": "ok",
   "choice": "dryer_purge_leak",
   "probabilities": {
@@ -185,9 +185,9 @@ A failed decision never reaches the gate and changes no ticket. It still counts 
 
 | `DECISION_BACKEND` | Keys                                             | Result                                                                    |
 | ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------- |
-| Unset              | `TYPESAFE_API_KEY` set                           | Jev                                                                       |
+| Unset              | `TYPESAFE_API_KEY` set                           | Von                                                                       |
 | Unset              | `TYPESAFE_API_KEY` not set                       | Rules                                                                     |
-| `jev`              | `TYPESAFE_API_KEY` not set                       | Start-up fails: "DECISION_BACKEND is jev but TYPESAFE_API_KEY is not set" |
+| `von`              | `TYPESAFE_API_KEY` not set                       | Start-up fails: "DECISION_BACKEND is von but TYPESAFE_API_KEY is not set" |
 | `llm`              | `LLM_API_KEY` set, `LLM_PROVIDER=anthropic`      | LLM                                                                       |
 | `llm`              | `LLM_API_KEY` not set, or another `LLM_PROVIDER` | Start-up fails, naming the variable                                       |
 | `rules`            | Any                                              | Rules                                                                     |
@@ -196,7 +196,7 @@ The backend and its model are logged at start-up and reported by the health and 
 
 ## The state: words, not numbers
 
-Every backend reads the same object, built by `buildState` in `apps/backend/src/decision/state.ts` from the suspect event and the candidates. Jev receives it as the request's `state`, the LLM backend as its user message, and the rules backend scores it. One builder for all three means that no backend can win by having been shown more.
+Every backend reads the same object, built by `buildState` in `apps/backend/src/decision/state.ts` from the suspect event and the candidates. Von receives it as the request's `state`, the LLM backend as its user message, and the rules backend scores it. One builder for all three means that no backend can win by having been shown more.
 
 | Path                               | Content                                                                                                |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -219,7 +219,7 @@ The words come from closed vocabularies:
 
 ### Why words
 
-Detection has already turned every number into a level against the first-month band, a trend and a duration ([detection.md](detection.md)). The suspect event still carries each observation's value and unit, for the UI and the evaluation, but the state builder drops them. There are two reasons: Jev is a System One model, built for quick judgments rather than arithmetic, and buckets computed in code are both more accurate and auditable. The split follows the backend's first principle, "code computes, the model judges": windows, thresholds, trends and arithmetic stay in code, and the model answers only the three questions a technician answers at a glance (which fault, if any; how well each candidate fits; how serious). A test holds the rule: once register tags, controller codes and path indexes are taken out, no digit remains in any state, instruction or criteria string. A side effect is that raw telemetry never leaves the stack ([security.md](security.md)).
+Detection has already turned every number into a level against the first-month band, a trend and a duration ([detection.md](detection.md)). The suspect event still carries each observation's value and unit, for the UI and the evaluation, but the state builder drops them. There are two reasons: Von is a System One model, built for quick judgments rather than arithmetic, and buckets computed in code are both more accurate and auditable. The split follows the backend's first principle, "code computes, the model judges": windows, thresholds, trends and arithmetic stay in code, and the model answers only the three questions a technician answers at a glance (which fault, if any; how well each candidate fits; how serious). A test holds the rule: once register tags, controller codes and path indexes are taken out, no digit remains in any state, instruction or criteria string. A side effect is that raw telemetry never leaves the stack ([security.md](security.md)).
 
 ### What the state includes
 
@@ -230,7 +230,7 @@ Detection has already turned every number into a level against the first-month b
 - **The idle decay by kind of hour.** When detection read the last day of `unloaded_pressure_decay` by kind of hour, its row gains `by_hours`, one sentence saying whether the decay is faster than usual in the busy hours and in the unit's quiet hours, "when the plant draws least air". This is the evidence the manual uses to tell a network leak from heavy air demand ([detection.md](detection.md#quiet-hours)).
 - **Nothing from outside.** No text enters the state that did not come out of the catalog or out of detection. The only free text is the manual's own wording, which limits the prompt-injection surface to text this project wrote.
 
-Trimmed from the golden request [`f3-request.json`](../apps/backend/test/fixtures/jev/f3-request.json), a test fixture of the Jev backend:
+Trimmed from the golden request [`f3-request.json`](../apps/backend/test/fixtures/von/f3-request.json), a test fixture of the Von backend:
 
 ```jsonc
 {
@@ -298,25 +298,25 @@ Every token of a request is billed (`cost_usd = input_tokens × price / 1e6`), a
 | The state plus every question              | 8,000  |
 | The state plus the longest single question | 6,000  |
 
-`decision/jev/questions.test.ts` asserts all three over every condition of the manual's catalog, with and without every co-symptom. The golden request and the input tokens the mock reports for it (`f3-usage.json`) are committed, so growth shows up in a diff. The cap of 12 observations and the budgets are not raised to make a request fit.
+`decision/von/questions.test.ts` asserts all three over every condition of the manual's catalog, with and without every co-symptom. The golden request and the input tokens the mock reports for it (`f3-usage.json`) are committed, so growth shows up in a diff. The cap of 12 observations and the budgets are not raised to make a request fit.
 
-## Jev
+## Von
 
-Jev is TypeSafe AI's System One model. `apps/backend/src/decision/jev/` sends it one request per decision that asks three kinds of question over the state, and reads the answers in code.
+Von is TypeSafe AI's System One model. `apps/backend/src/decision/von/` sends it one request per decision that asks three kinds of question over the state, and reads the answers in code.
 
 | Setting       | Value                                                                                  |
 | ------------- | -------------------------------------------------------------------------------------- |
-| Selected when | `TYPESAFE_API_KEY` is set and `DECISION_BACKEND` is unset or `jev`                     |
-| SDK           | `@typesafe-ai/sdk` 0.6.0                                                               |
+| Selected when | `TYPESAFE_API_KEY` is set and `DECISION_BACKEND` is unset or `von`                     |
+| SDK           | `von-sdk` 0.6.0                                                                        |
 | Endpoint      | `TYPESAFE_BASE_URL` (default `https://api.typesafe.ai`), `POST /v1/systemone`          |
-| Model         | `JEV_MODEL` (default `jev-1.13.0`), sent explicitly on every request                   |
+| Model         | `VON_MODEL` (default `von-1.13.0`), sent explicitly on every request                   |
 | Timeout       | 10 s per attempt                                                                       |
 | Retries       | The SDK's own, two by default, on rate limits and server errors; the backend adds none |
 | SDK logging   | Off: at debug level the SDK would print headers and bodies                             |
 
-**The pinned model.** The SDK's default model resolves to the alias `jev-latest`, and a run that cannot say which version answered it is not an evaluation. The backend therefore passes `JEV_MODEL` on every call, and `config/env.ts` refuses at start-up any value that is not `jev-<major>.<minor>.<patch>`. The decision records the `model` the response names; when it differs from the pinned id, the backend logs a warning rather than failing. Thresholds are tuned per Jev version, so a new `JEV_MODEL` means checking them again.
+**The pinned model.** The SDK's default model resolves to the alias `von-latest`, and a run that cannot say which version answered it is not an evaluation. The backend therefore passes `VON_MODEL` on every call, and `config/env.ts` refuses at start-up any value that is not `von-<major>.<minor>.<patch>`. The decision records the `model` the response names; when it differs from the pinned id, the backend logs a warning rather than failing. Thresholds are tuned per Von version, so a new `VON_MODEL` means checking them again.
 
-**One request.** Questions that share a state travel together, keyed by question id. The ids never reach the model; each question's full wording is in its `instructions`. Every backticked path in a question is listed in its `inspect`, and every `inspect` path resolves in the state: `decision/jev/questions.test.ts` checks both directions.
+**One request.** Questions that share a state travel together, keyed by question id. The ids never reach the model; each question's full wording is in its `instructions`. Every backticked path in a question is listed in its `inspect`, and every `inspect` path resolves in the state: `decision/von/questions.test.ts` checks both directions.
 
 | Question id        | Primitive                                          | What it asks                                                       | Becomes                                 |
 | ------------------ | -------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------- |
@@ -388,7 +388,7 @@ The levels describe situations, stand alone and carry no numerals, and the rare 
 
 ### Reading the answers
 
-`decision/jev/parse.ts` reads the answers. Every answer stays inside the options that were sent, so no prose is parsed.
+`decision/von/parse.ts` reads the answers. Every answer stays inside the options that were sent, so no prose is parsed.
 
 | Output field     | Read from                                                                                                                                                                |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -401,7 +401,7 @@ The levels describe situations, stand alone and carry no numerals, and the rare 
 
 Two policies live in code rather than in the questions:
 
-- **Tie-break.** When the two options with the most mass are both candidates and lie within 0.05 of each other, the one with the higher Noul becomes the `choice`; `probabilities` and `confidence` stay as Jev answered. The abstention has no Noul and is never tie-broken.
+- **Tie-break.** When the two options with the most mass are both candidates and lie within 0.05 of each other, the one with the higher Noul becomes the `choice`; `probabilities` and `confidence` stay as Von answered. The abstention has no Noul and is never tie-broken.
 - **Inconsistency.** A chosen candidate whose own Noul is below 0.4 answered two questions two ways. The backend logs a warning and nothing more: the gate reads only `confidence`, and the case can be found later from the stored `choice` and `support`.
 
 An answer that cannot be read is a `validation` failure, never a guess: a response without a model, answers or usage, a label that was not offered, a missing Noul or a non-numeric probability. Provider failures map to `DecisionError` kinds as follows, and no error carries the provider's body:
@@ -416,21 +416,21 @@ An answer that cannot be read is a `validation` failure, never a guess: a respon
 | Timeout, or the call aborted                                    | `timeout`            |
 | No connection                                                   | `network`            |
 
-### Thresholds for Jev
+### Thresholds for Von
 
-Jev is gated at review 0.65 and ticket 0.85 by default; the rules and LLM backends are gated at 0.60 and 0.85. The gate reads a pair per backend: Jev's is `JEV_GATE_TICKET_MIN_CONFIDENCE` and `JEV_GATE_REVIEW_MIN_CONFIDENCE`, with those defaults whatever `GATE_*` says, while the rules and LLM backends keep `GATE_*`, because their confidences are a margin and a self-report on other scales. Jev's pair, with the persistence before a ticket at N = 1, is the pre-registered choice recorded in [`tools/eval/records/jev-thresholds-choice.md`](../tools/eval/records/jev-thresholds-choice.md). The rule behind it was fixed in [`tools/eval/records/jev-thresholds-preregistration.md`](../tools/eval/records/jev-thresholds-preregistration.md) before any Jev decision on the tuning list existed: `make eval-sweep` replays the tuning list from the recorded Jev answers, every resample, re-gates it over a grid of threshold pairs, applies a hard limit on false tickets and false reviews per negative machine-day first, then the selection clauses the record states, starting from the incumbent N = 1, 0.60 / 0.85 ([evaluation.md](evaluation.md#choosing-jevs-thresholds)). Which clause decided is not published, because each clause states an outcome of Jev's figures. Jev was evaluated, and its results are unpublished pending TypeSafe's terms: Jev-derived figures stay in the gitignored `reports/` ([evaluation.md](evaluation.md#current-results)).
+Von is gated at review 0.65 and ticket 0.85 by default; the rules and LLM backends are gated at 0.60 and 0.85. The gate reads a pair per backend: Von's is `VON_GATE_TICKET_MIN_CONFIDENCE` and `VON_GATE_REVIEW_MIN_CONFIDENCE`, with those defaults whatever `GATE_*` says, while the rules and LLM backends keep `GATE_*`, because their confidences are a margin and a self-report on other scales. Von's pair, with the persistence before a ticket at N = 1, is the pre-registered choice recorded in [`tools/eval/records/von-thresholds-choice.md`](../tools/eval/records/von-thresholds-choice.md). The rule behind it was fixed in [`tools/eval/records/von-thresholds-preregistration.md`](../tools/eval/records/von-thresholds-preregistration.md) before any Von decision on the tuning list existed: `make eval-sweep` replays the tuning list from the recorded Von answers, every resample, re-gates it over a grid of threshold pairs, applies a hard limit on false tickets and false reviews per negative machine-day first, then the selection clauses the record states, starting from the incumbent N = 1, 0.60 / 0.85 ([evaluation.md](evaluation.md#choosing-vons-thresholds)). Which clause decided is not published, because each clause states an outcome of Von's figures. Von was evaluated, and its results are unpublished pending TypeSafe's terms: Von-derived figures stay in the gitignored `reports/` ([evaluation.md](evaluation.md#current-results)).
 
 ### Without a key: the mock server
 
-`@fdp/contracts/mock` serves a local stand-in for the TypeSafe API: `startMockTypeSafe` in tests, or `pnpm --filter @fdp/contracts run mock` on its own (port 8089, any non-empty key). It answers with one of three policies, `default`, `confident-first` or `best-overlap`, set by `--answer-policy` or `MOCK_ANSWER_POLICY`. The CI stack (`compose.ci.yaml`, used by `make smoke`) runs the Jev backend against it with `best-overlap`, which puts 0.9 on the candidate whose expected movements best match the observations. That clears the ticket threshold, so the CI stack always opens tickets with status `open` and never `review`. The dashboard screenshots in `docs/img/` come from that stack: they show the interface, not a model's accuracy. Mock answers are never results.
+`@fdp/contracts/mock` serves a local stand-in for the TypeSafe API: `startMockTypeSafe` in tests, or `pnpm --filter @fdp/contracts run mock` on its own (port 8089, any non-empty key). It answers with one of three policies, `default`, `confident-first` or `best-overlap`, set by `--answer-policy` or `MOCK_ANSWER_POLICY`. The CI stack (`compose.ci.yaml`, used by `make smoke`) runs the Von backend against it with `best-overlap`, which puts 0.9 on the candidate whose expected movements best match the observations. That clears the ticket threshold, so the CI stack always opens tickets with status `open` and never `review`. The dashboard screenshots in `docs/img/` come from that stack: they show the interface, not a model's accuracy. Mock answers are never results.
 
-The golden request [`f3-request.json`](../apps/backend/test/fixtures/jev/f3-request.json) freezes the body the backend sends for one fixed test event, and `f3-usage.json` beside it holds the input tokens the mock reports for that body. A change to any question regenerates both in the same commit:
+The golden request [`f3-request.json`](../apps/backend/test/fixtures/von/f3-request.json) freezes the body the backend sends for one fixed test event, and `f3-usage.json` beside it holds the input tokens the mock reports for that body. A change to any question regenerates both in the same commit:
 
 ```bash
-pnpm --filter @fdp/backend exec vitest run src/decision/jev/index.test.ts --update
+pnpm --filter @fdp/backend exec vitest run src/decision/von/index.test.ts --update
 ```
 
-Changing the questions also invalidates recorded evaluation cassettes, because their request digest covers the questions ([evaluation.md](evaluation.md)). To try the real services, `make smoke-live` sends one Jev and one LLM decision through a stack with the keys in `.env`; those are paid calls, so the target is opt-in.
+Changing the questions also invalidates recorded evaluation cassettes, because their request digest covers the questions ([evaluation.md](evaluation.md)). To try the real services, `make smoke-live` sends one Von and one LLM decision through a stack with the keys in `.env`; those are paid calls, so the target is opt-in.
 
 ## The LLM backend
 
@@ -491,7 +491,7 @@ The same key has a second, independent use. When `LLM_API_KEY` is set and `LLM_P
 
 ## The rules backend
 
-`apps/backend/src/decision/rules/index.ts` (model `rules-v1`) answers the same three questions with no model and no network. It is the default without a key, and it is the evaluation's baseline: it reads the identical state, so Jev is measured against a twin that had exactly the same inputs.
+`apps/backend/src/decision/rules/index.ts` (model `rules-v1`) answers the same three questions with no model and no network. It is the default without a key, and it is the evaluation's baseline: it reads the identical state, so Von is measured against a twin that had exactly the same inputs.
 
 ### How it scores a candidate
 
@@ -528,7 +528,7 @@ For example, a leader at 0.9 with a runner-up at 0.6 gets 0.9 × 1 = 0.9, a tick
 
 ### Why the confidence is a margin
 
-The obvious margin, `p1 − p2` over the normalised probabilities, is wrong here. Retrieval decides how many candidates there are, and normalising makes every probability shrink as that number grows, so one more weakly matching cause could drop the same evidence from `review` to `log`, and the gate would measure the length of retrieval's list instead of the evidence. The formula above is built from the supports before any normalisation: `s1` says how much of the best cause's signature is on the machine, the clamped gap says how clearly it beats the runner-up, and a third, weaker candidate changes neither term. The result is a gating quantity on the same 0-to-1 scale as the thresholds, not a calibrated probability: a rules decision at 0.9 does not mean that nine in ten such decisions are right, and it cannot be compared with Jev's confidence number for number.
+The obvious margin, `p1 − p2` over the normalised probabilities, is wrong here. Retrieval decides how many candidates there are, and normalising makes every probability shrink as that number grows, so one more weakly matching cause could drop the same evidence from `review` to `log`, and the gate would measure the length of retrieval's list instead of the evidence. The formula above is built from the supports before any normalisation: `s1` says how much of the best cause's signature is on the machine, the clamped gap says how clearly it beats the runner-up, and a third, weaker candidate changes neither term. The result is a gating quantity on the same 0-to-1 scale as the thresholds, not a calibrated probability: a rules decision at 0.9 does not mean that nine in ten such decisions are right, and it cannot be compared with Von's confidence number for number.
 
 ### What the baseline does today
 
@@ -554,7 +554,7 @@ On the whole MetroPT-3 recording (`EVAL_PROFILE=full make eval`) the rules backe
 - **Abstention.** A confident `none_of_these` says that no catalog cause fits. It only logs, since there is nothing to put on a ticket, but `abstained: true` lets the evaluation count how often the backend is right to abstain.
 - **Severity is never read.** How serious a situation is and how sure the backend is are two judgments; a severity-weighted gate would leave the evaluation unable to say which one was wrong.
 - **Failed decisions never reach it.** Their `gate` block says `log` and names the failure.
-- **Configuration.** Both thresholds are environment variables between 0 and 1, and start-up fails when the review threshold is above the ticket threshold. Jev has its own pair, `JEV_GATE_TICKET_MIN_CONFIDENCE` and `JEV_GATE_REVIEW_MIN_CONFIDENCE`, which default to 0.85 and 0.65, the pre-registered choice ([Thresholds for Jev](#thresholds-for-jev)); the rules and LLM backends use the global pair. Every decision message repeats the pair it was gated with in its `gate` block with a one-sentence `reason`, together with `persist_sim_min` (below), and `GET /api/status` reports the running backend's pair and the persistence. They are tuned by the evaluation, never by rewording the questions; `fdp-eval sweep` re-gates a tuning run's decisions over a grid of pairs, and `make eval-sweep` makes the pre-registered choice of Jev's pair ([evaluation.md](evaluation.md)).
+- **Configuration.** Both thresholds are environment variables between 0 and 1, and start-up fails when the review threshold is above the ticket threshold. Von has its own pair, `VON_GATE_TICKET_MIN_CONFIDENCE` and `VON_GATE_REVIEW_MIN_CONFIDENCE`, which default to 0.85 and 0.65, the pre-registered choice ([Thresholds for Von](#thresholds-for-von)); the rules and LLM backends use the global pair. Every decision message repeats the pair it was gated with in its `gate` block with a one-sentence `reason`, together with `persist_sim_min` (below), and `GET /api/status` reports the running backend's pair and the persistence. They are tuned by the evaluation, never by rewording the questions; `fdp-eval sweep` re-gates a tuning run's decisions over a grid of pairs, and `make eval-sweep` makes the pre-registered choice of Von's pair ([evaluation.md](evaluation.md)).
 
 ### Episodes
 
@@ -653,11 +653,11 @@ usd = (input_tokens × price_input_per_mtok + output_tokens × price_output_per_
 
 | Backend | Input price per million tokens         | Output price per million tokens        |
 | ------- | -------------------------------------- | -------------------------------------- |
-| Jev     | `JEV_PRICE_INPUT_PER_MTOK` (0.042 USD) | 0: Jev's price list charges input only |
+| Von     | `VON_PRICE_INPUT_PER_MTOK` (0.042 USD) | 0: Von's price list charges input only |
 | LLM     | `LLM_PRICE_INPUT_PER_MTOK` (5 USD)     | `LLM_PRICE_OUTPUT_PER_MTOK` (25 USD)   |
 | Rules   | 0                                      | 0                                      |
 
-The defaults are the vendors' list prices: Jev's as published by TypeSafe, September 2026, and those of `claude-opus-5` as published by Anthropic, September 2026. `PRICES_AS_OF` (default 2026-09-19) records when they were last checked. The prices are configuration: they are what a run bills at, not a live price list, so check the vendors' current prices before you rely on a cost figure.
+The defaults are the vendors' list prices: Von's as published by TypeSafe, September 2026, and those of `claude-opus-5` as published by Anthropic, September 2026. `PRICES_AS_OF` (default 2026-09-19) records when they were last checked. The prices are configuration: they are what a run bills at, not a live price list, so check the vendors' current prices before you rely on a cost figure.
 
 - **The message.** `pricesFor` in `apps/backend/src/cost/index.ts` picks the prices of the selected backend at start-up, and every decision message's `cost` block carries `usd`, both prices and `prices_as_of`; the example [above](#the-decision-message) shows one.
 - **The ledger.** The runtime writes one `app.cost_ledger` row per answered decision; `decision_id` is unique, so a replayed message bills once. `cost_usd` is a generated `numeric(16,10)` column that Postgres derives from the row's tokens and prices (`numeric(12,6)`), and the backend computes the message's figure in integer arithmetic so the two agree to the last digit. Rules decisions get rows at zero cost; failed calls carry no tokens and get none, and are counted in the backend status instead.
@@ -672,7 +672,7 @@ Because every request token is billed, the request's size budget ([above](#the-s
 Adding a backend means implementing one interface and a cost price. In practice:
 
 1. **Implement the interface.** Add a module under `apps/backend/src/decision/<name>/` that implements `DecisionBackend`. Build the state with `buildState(input, labels)` so the new backend sees exactly what the others see, ask the same three questions (which candidate or `none_of_these`, how well each candidate's defining movement shows, how serious), and return a `DecisionOutput` with `state`, `state_digest` (`stateDigest(state)`), `usage`, `latency_ms` and `raw` bodies stripped of headers and keys.
-2. **Define its confidence.** Keep it between 0 and 1 and write down what it measures: the gate compares it with the `GATE_*` pair, which every backend but Jev uses (`gateThresholds` in `config/env.ts`), and reports must say which quantity they compare.
+2. **Define its confidence.** Keep it between 0 and 1 and write down what it measures: the gate compares it with the `GATE_*` pair, which every backend but Von uses (`gateThresholds` in `config/env.ts`), and reports must say which quantity they compare.
 3. **Fail loudly.** Map every provider failure to a `DecisionError` kind. Never fall back to another backend, and never throw anything else for a provider problem, since that rejects the whole telemetry batch.
 4. **Register the name.** The name is a closed enum in several places: `decision_backend` in `packages/contracts/schemas/v1/common.schema.json` (then `make generate`; [`packages/contracts/VERSIONING.md`](../packages/contracts/VERSIONING.md) says what counts as additive), the `app.decisions.backend` check constraint of `db/migrations/0006_diagnosis.sql` (through a new forward-only migration, as [`db/README.md`](../db/README.md) describes, with `REQUIRED_MIGRATION` in `apps/backend/src/db/pool.ts` raised to match), `DECISION_BACKENDS` and `decisionModel()` in `apps/backend/src/config/env.ts`, `selectBackend` and `DecisionBackendFactories` in `apps/backend/src/decision/select.ts`, and the factory in `defaultBackendFactories` of `apps/backend/src/app.ts`.
 5. **Price it.** Add a case to `pricesFor` in `apps/backend/src/cost/index.ts`. New variables go into `config/env.ts` and into `.env.example`, `compose.yaml` and the README's Configuration table; `make env-check`, part of `make lint`, fails when those three disagree. The Cost panel's `prices` block belongs to the `api-cost` contract, so showing a new price there is a contract change too.
@@ -685,7 +685,7 @@ Keep the answer space as it is: candidate ids plus `none_of_these`, and four sev
 
 ## Further reading
 
-- [`tools/eval/records/jev-thresholds-preregistration.md`](../tools/eval/records/jev-thresholds-preregistration.md) and [`tools/eval/records/jev-thresholds-choice.md`](../tools/eval/records/jev-thresholds-choice.md): how Jev's own thresholds were chosen, and the choice.
+- [`tools/eval/records/von-thresholds-preregistration.md`](../tools/eval/records/von-thresholds-preregistration.md) and [`tools/eval/records/von-thresholds-choice.md`](../tools/eval/records/von-thresholds-choice.md): how Von's own thresholds were chosen, and the choice.
 - [manual.md](manual.md#the-signal-move-vocabulary): the signal-move vocabulary the rules backend scores, and [manual.md](manual.md#the-optional-llm-pass) for the optional LLM pass over the catalog.
 - [detection.md](detection.md): the levels and trends the state carries, and the reading by kind of hour.
 - [evaluation.md](evaluation.md#the-rules-only-baseline-on-the-whole-recording): the rules baseline on the whole recording.

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
-// The Cost tab over the msw fixtures (cost.json: 41 billed calls, a Jev and a language-model
-// row in `recent`; decisions.json: the same Jev decision, a rules decision and a failed call),
+// The Cost tab over the msw fixtures (cost.json: 41 billed calls, a Von and a language-model
+// row in `recent`; decisions.json: the same Von decision, a rules decision and a failed call),
 // plus the live path: two `decision` frames and a `cost.update` frame go through the page's own
 // cache reducers (`installWsCache`) and the tab follows.
 
@@ -22,7 +22,7 @@ import { apiError } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
 import { renderWithProviders } from "@/test/render";
 
-const JEV_DECISION = "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60";
+const VON_DECISION = "6a0c8e37-2b41-4f9d-8c05-1d2e3f4a5b60";
 const LLM_DECISION = "1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9";
 const RULES_DECISION = "0e5f7a21-9c34-4b6d-81a7-2f3e4d5c6b70";
 const FAILED_DECISION = "7e2a9c05-4d18-4b73-9e60-3a4b5c6d7e80";
@@ -32,7 +32,7 @@ const NOTHING_BILLED: ApiCost = {
   by_backend: {},
   by_day: [],
   prices: {
-    jev_input_per_mtok: 0.042,
+    von_input_per_mtok: 0.042,
     llm_input_per_mtok: null,
     llm_output_per_mtok: null,
     as_of: "2026-09-19",
@@ -51,7 +51,7 @@ function answerDecisions(body: ApiDecisions): void {
 }
 
 /** The fixture status with `name` as the active decision backend. */
-function statusWithBackend(name: "jev" | "llm" | "rules", model: string): ApiStatus {
+function statusWithBackend(name: "von" | "llm" | "rules", model: string): ApiStatus {
   const status: ApiStatus = structuredClone(fixtures.status);
   if (status.backend === null) {
     throw new Error("status.json carries a backend status");
@@ -110,7 +110,7 @@ describe("CostTab summary", () => {
     renderWithProviders(<CostTab />);
 
     expect(await screen.findByTestId("cost-prices")).toHaveTextContent(
-      "Jev $0.042 per MTok input, output free; " +
+      "Von $0.042 per MTok input, output free; " +
         "language model $3.00 per MTok input, $15.00 per MTok output · prices as of 2026-09-19",
     );
   });
@@ -119,9 +119,9 @@ describe("CostTab summary", () => {
     renderWithProviders(<CostTab />);
 
     const table = await screen.findByRole("table", { name: "Cost by backend" });
-    const [, jev, llm] = within(table).getAllByRole("row");
+    const [, von, llm] = within(table).getAllByRole("row");
     // The backend's name with its model under it.
-    expect(jev && cellTexts(jev)).toEqual(["Jevjev-1.13.0", "38", "70,512", "0", "$0.003145"]);
+    expect(von && cellTexts(von)).toEqual(["Vonvon-1.13.0", "38", "70,512", "0", "$0.003145"]);
     expect(llm && cellTexts(llm)).toEqual([
       "Language modelsmall-language-model-v2",
       "3",
@@ -149,7 +149,7 @@ describe("CostTab summary", () => {
   it("does not explain a zero total under a model backend", async () => {
     // Held by the live store before the first render, so the absence below is not a race with
     // the status poll.
-    applyStatusSnapshot(statusWithBackend("jev", "jev-1.13.0"));
+    applyStatusSnapshot(statusWithBackend("von", "von-1.13.0"));
     answerCost(NOTHING_BILLED);
     answerDecisions(NO_DECISIONS);
     renderWithProviders(<CostTab />);
@@ -170,22 +170,22 @@ describe("CostTab ledger", () => {
       .getAllByRole("row")
       .filter((row) => row.dataset.testid !== undefined);
     expect(rows.map((row) => row.dataset.testid)).toEqual([
-      `cost-row-${JEV_DECISION}`,
+      `cost-row-${VON_DECISION}`,
       `cost-row-${LLM_DECISION}`,
       `cost-row-${RULES_DECISION}`,
     ]);
     expect(screen.queryByTestId(`cost-row-${FAILED_DECISION}`)).not.toBeInTheDocument();
 
     // Decision, wall time (the viewer's zone), backend with its model, tokens in and out, cost.
-    const [jev, llm, rules] = rows.map(cellTexts);
-    expect(jev?.filter((_, index) => index !== 1)).toEqual([
+    const [von, llm, rules] = rows.map(cellTexts);
+    expect(von?.filter((_, index) => index !== 1)).toEqual([
       "4a5b60",
-      "Jevjev-1.13.0",
+      "Vonvon-1.13.0",
       "1,834",
       "0",
       "$0.000077",
     ]);
-    expect(jev?.[1]).toMatch(/^2026-06-0[45] \d\d:\d\d:13 /);
+    expect(von?.[1]).toMatch(/^2026-06-0[45] \d\d:\d\d:13 /);
     expect(llm?.slice(2)).toEqual([
       "Language modelsmall-language-model-v2",
       "1,460",
@@ -200,12 +200,12 @@ describe("CostTab ledger", () => {
     renderWithProviders(<CostTab />);
 
     const link = await screen.findByRole("link", { name: "Open decision 4a5b60" });
-    expect(link).toHaveAttribute("href", `#/decisions/${JEV_DECISION}`);
-    expect(within(link).getByText("4a5b60")).toHaveAttribute("title", JEV_DECISION);
+    expect(link).toHaveAttribute("href", `#/decisions/${VON_DECISION}`);
+    expect(within(link).getByText("4a5b60")).toHaveAttribute("title", VON_DECISION);
 
     await user.click(link);
 
-    expect(window.location.hash).toBe(`#/decisions/${JEV_DECISION}`);
+    expect(window.location.hash).toBe(`#/decisions/${VON_DECISION}`);
   });
 
   it("draws the running total as a step chart that does not animate", async () => {
@@ -231,7 +231,7 @@ describe("CostTab ledger", () => {
     answerCost({ ...fixtures.cost, recent: fixtures.cost.recent.slice(0, 1) });
     renderWithProviders(<CostTab />);
 
-    expect(await screen.findByTestId(`cost-row-${JEV_DECISION}`)).toBeInTheDocument();
+    expect(await screen.findByTestId(`cost-row-${VON_DECISION}`)).toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "Running total over wall time" })).toBeNull();
   });
 
@@ -253,7 +253,7 @@ describe("CostTab ledger", () => {
     renderWithProviders(<CostTab />);
 
     expect(await screen.findByTestId(`cost-row-${LLM_DECISION}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`cost-row-${JEV_DECISION}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`cost-row-${VON_DECISION}`)).toBeInTheDocument();
   });
 });
 
@@ -304,7 +304,7 @@ function costUpdate(decisionId: string, costUsd: number, totalUsd: number, calls
     cost_usd: costUsd,
     total_usd: totalUsd,
     calls,
-    backend: "jev",
+    backend: "von",
   };
   return frame;
 }
@@ -352,7 +352,7 @@ describe("CostTab live updates", () => {
     expect(rows.map((row) => row.dataset.testid)).toEqual([
       `cost-row-${PUSHED_SECOND}`,
       `cost-row-${PUSHED_FIRST}`,
-      `cost-row-${JEV_DECISION}`,
+      `cost-row-${VON_DECISION}`,
       `cost-row-${LLM_DECISION}`,
       `cost-row-${RULES_DECISION}`,
     ]);

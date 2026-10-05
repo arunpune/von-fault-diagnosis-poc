@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // A stored run, back in the metrics' vocabulary, and one scenario of it
@@ -61,7 +61,7 @@ export function suspectsOf(scenario: ReportScenario): SuspectRecord[] {
 }
 
 /**
- * The pair the run's gate applied to one backend: its own when the run recorded it (Jev's),
+ * The pair the run's gate applied to one backend: its own when the run recorded it (Von's),
  * else the run's global pair, which every backend used before backends had their own.
  */
 export function backendThresholds(
@@ -208,7 +208,7 @@ export function rescoreScenario(
     regatedDecisions(scenario, pair),
     [],
     {
-      jevInputPerMtok: prices.jev_input_per_mtok,
+      vonInputPerMtok: prices.von_input_per_mtok,
       llmInputPerMtok: prices.llm_input_per_mtok,
       llmOutputPerMtok: prices.llm_output_per_mtok,
       asOf: prices.as_of,

@@ -62,22 +62,22 @@ describe("GET /api/status", () => {
     expect(isValid("api-status", body)).toBe(true);
     expect(body).toMatchObject({
       gate: { ticket_min_confidence: 0.85, review_min_confidence: 0.6, persist_sim_min: 1 },
-      backend: { backend: { name: "jev" } },
+      backend: { backend: { name: "von" } },
       alerts_active: [{ state: "raised" }],
     });
     expect(body).not.toHaveProperty("features");
   });
 
-  it("reports the thresholds of the running backend: Jev's own pair, GATE_* for the others", async () => {
-    // The gate applies JEV_GATE_* to Jev and GATE_* to the rules and llm backends,
+  it("reports the thresholds of the running backend: Von's own pair, GATE_* for the others", async () => {
+    // The gate applies VON_GATE_* to Von and GATE_* to the rules and llm backends,
     // and the status says what the running gate applies.
     const gate = {
       ticketMinConfidence: 0.85,
       reviewMinConfidence: 0.6,
       persistSimMin: 1,
-      jev: { ticketMinConfidence: 0.9, reviewMinConfidence: 0.7 },
+      von: { ticketMinConfidence: 0.9, reviewMinConfidence: 0.7 },
     };
-    await serve({ ...fake.deps, env: { gate, decisionBackend: "jev" } });
+    await serve({ ...fake.deps, env: { gate, decisionBackend: "von" } });
     expect((await get("/api/status")).json()).toMatchObject({
       gate: { ticket_min_confidence: 0.9, review_min_confidence: 0.7, persist_sim_min: 1 },
     });

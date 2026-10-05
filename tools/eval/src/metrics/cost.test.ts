@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Cost arithmetic, and the proof that it agrees with the database.
@@ -26,8 +26,8 @@ function generatedColumn(
 }
 
 describe("pricesFor", () => {
-  it("bills Jev on input tokens only", () => {
-    expect(pricesFor(TEST_PRICES, "jev")).toEqual({
+  it("bills Von on input tokens only", () => {
+    expect(pricesFor(TEST_PRICES, "von")).toEqual({
       inputPerMtok: 0.042,
       outputPerMtok: 0,
       asOf: "2026-09-19",
@@ -50,11 +50,11 @@ describe("pricesFor", () => {
 });
 
 describe("cost", () => {
-  it("matches the generated column on the Jev reference case", () => {
+  it("matches the generated column on the Von reference case", () => {
     const result = cost(
       [decision({ decisionId: "d1", usage: { input_tokens: 1234, output_tokens: 0 } })],
       TEST_PRICES,
-      "jev",
+      "von",
     );
 
     expect(result.usd).toBeCloseTo(0.000051828, 12);
@@ -89,7 +89,7 @@ describe("cost", () => {
         decision({ decisionId: "d2", usage: { input_tokens: 1234, output_tokens: 0 } }),
       ],
       TEST_PRICES,
-      "jev",
+      "von",
       [ticket({ ticketId: "t1" })],
     );
 
@@ -102,7 +102,7 @@ describe("cost", () => {
   });
 
   it("reports null rather than zero when nothing was spent on nothing", () => {
-    const result = cost([], TEST_PRICES, "jev");
+    const result = cost([], TEST_PRICES, "von");
     expect(result.usd).toBe(0);
     expect(result.perDecision).toBeNull();
     expect(result.perTicket).toBeNull();
@@ -112,7 +112,7 @@ describe("cost", () => {
     const result = cost(
       [decision({ decisionId: "d1", usage: { input_tokens: 1234, output_tokens: 0 } })],
       TEST_PRICES,
-      "jev",
+      "von",
       [],
     );
     expect(result.perTicket).toBeNull();
@@ -121,19 +121,19 @@ describe("cost", () => {
 
 describe("mergeCost", () => {
   it("pools scenario costs into one backend total", () => {
-    const prices = pricesFor(TEST_PRICES, "jev");
+    const prices = pricesFor(TEST_PRICES, "von");
     const first = cost(
       [decision({ decisionId: "d1", usage: { input_tokens: 1234, output_tokens: 0 } })],
       TEST_PRICES,
-      "jev",
+      "von",
     );
     const second = cost(
       [decision({ decisionId: "d2", usage: { input_tokens: 1234, output_tokens: 0 } })],
       TEST_PRICES,
-      "jev",
+      "von",
     );
 
-    const merged = mergeCost([first, second], "jev", prices, 2);
+    const merged = mergeCost([first, second], "von", prices, 2);
     expect(merged.calls).toBe(2);
     expect(merged.usd).toBeCloseTo(0.000103656, 12);
     expect(merged.perTicket).toBeCloseTo(0.000051828, 12);
@@ -141,6 +141,6 @@ describe("mergeCost", () => {
 
   it("refuses to pool two backends into one column", () => {
     const rules = cost([], TEST_PRICES, "rules");
-    expect(() => mergeCost([rules], "jev", pricesFor(TEST_PRICES, "jev"), 0)).toThrow(TypeError);
+    expect(() => mergeCost([rules], "von", pricesFor(TEST_PRICES, "von"), 0)).toThrow(TypeError);
   });
 });

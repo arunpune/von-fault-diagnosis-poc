@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `report.md`: `run.json` for a person.
@@ -11,7 +11,7 @@
 // its backend's mode beside it:
 //
 // - a mock column is headed "mock — not informative", and a notice
-//   above every table carrying Jev figures says they stay in the gitignored
+//   above every table carrying Von figures says they stay in the gitignored
 //   `reports/` until the vendor's publication terms allow otherwise;
 // - a backend with failed decisions opens the headline with a bold warning
 //   that counts them and gives their reasons; when every decision failed its
@@ -110,9 +110,9 @@ export function failureWarning(backend: ReportBackend): string | undefined {
     : `${who}: ${backend.failures} of its ${backend.calls} decision(s) failed${why}. A failed decision has no choice, so its figures count those as missing.`;
 }
 
-/** The line printed above any table that carries Jev figures. */
-export const JEV_NOTICE =
-  "> Jev-derived figures stay in the gitignored `reports/` until the vendor's publication terms allow otherwise.";
+/** The line printed above any table that carries Von figures. */
+export const VON_NOTICE =
+  "> Von-derived figures stay in the gitignored `reports/` until the vendor's publication terms allow otherwise.";
 
 /**
  * The licence the rendered page carries: evaluation figures are documentation, not code.
@@ -148,7 +148,7 @@ const IN_PROCESS_LIMITATIONS =
 
 /** What a stack run's report states instead. */
 const STACK_LIMITATIONS =
-  "Stack run: scored from the database of a running Compose stack as role `eval`, read-only. Retrieval used the backend's Postgres path (vector and full-text search) and every backend answered as the stack was configured, so a Jev column from a stack pointed at the mock TypeSafe server is not informative. Covered time is the telemetry minutes the stack aggregated, minus the jumps, the gaps and the excluded windows.";
+  "Stack run: scored from the database of a running Compose stack as role `eval`, read-only. Retrieval used the backend's Postgres path (vector and full-text search) and every backend answered as the stack was configured, so a Von column from a stack pointed at the mock TypeSafe server is not informative. Covered time is the telemetry minutes the stack aggregated, minus the jumps, the gaps and the excluded windows.";
 
 // --- Formatting ----------------------------------------------------------------
 
@@ -201,13 +201,13 @@ function columnHeading(backend: ReportBackend): string {
   return `${backend.name} · ${backend.mode}${failed ? ` — ${FAILED_LABEL}` : ""}`;
 }
 
-function hasJev(report: RunReport): boolean {
-  return report.backends.some((backend) => backend.name === "jev");
+function hasVon(report: RunReport): boolean {
+  return report.backends.some((backend) => backend.name === "von");
 }
 
-/** The Jev notice and a blank line, when the table below it carries Jev figures. */
-function jevNotice(report: RunReport): string[] {
-  return hasJev(report) ? [JEV_NOTICE, ""] : [];
+/** The Von notice and a blank line, when the table below it carries Von figures. */
+function vonNotice(report: RunReport): string[] {
+  return hasVon(report) ? [VON_NOTICE, ""] : [];
 }
 
 function backendOf(report: RunReport, name: string): ReportBackend | undefined {
@@ -215,8 +215,8 @@ function backendOf(report: RunReport, name: string): ReportBackend | undefined {
 }
 
 /**
- * The backends the gate ran with a pair other than the global one (Jev's own pair), as
- * `" (jev: ticket ≥ …, review ≥ …)"`; empty when every backend ran with the global pair.
+ * The backends the gate ran with a pair other than the global one (Von's own pair), as
+ * `" (von: ticket ≥ …, review ≥ …)"`; empty when every backend ran with the global pair.
  */
 function ownPairs(report: RunReport): string {
   const { ticket_min: ticketMin, review_min: reviewMin } = report.run.thresholds;
@@ -279,7 +279,7 @@ function header(report: RunReport): string[] {
         ["Rules left out", run.rules_disabled.length === 0 ? DASH : run.rules_disabled.join(", ")],
         [
           "Prices",
-          `Jev $${run.prices.jev_input_per_mtok}/Mtok input; LLM $${run.prices.llm_input_per_mtok}/$${run.prices.llm_output_per_mtok} per Mtok in/out; as of ${run.prices.as_of}`,
+          `Von $${run.prices.von_input_per_mtok}/Mtok input; LLM $${run.prices.llm_input_per_mtok}/$${run.prices.llm_output_per_mtok} per Mtok in/out; as of ${run.prices.as_of}`,
         ],
         ["Commit", run.git_sha === null ? DASH : code(run.git_sha)],
         ["Runtime", `Node ${run.node}; @fdp/backend ${run.backend_version}`],
@@ -308,7 +308,7 @@ function core10Text(report: RunReport, name: string, count: string | null): stri
 function gateLines(gate: ReportGate, report: RunReport): string[] {
   const perBackend = [
     `- Per backend: rules at detection level ${core10Text(report, "rules", gate.core10.rules_detection)}; ` +
-      `jev at diagnosis level ${core10Text(report, "jev", gate.core10.jev_diagnosis)}`,
+      `von at diagnosis level ${core10Text(report, "von", gate.core10.von_diagnosis)}`,
     `- Enforced with \`--fail-on-gate\`: ${yesNo(gate.enforced)}`,
     "",
   ];
@@ -599,7 +599,7 @@ function headline(report: RunReport): string[] {
 
 function comparisonValue(rowValue: ReportComparisonRow, backend: string): number | null {
   if (backend === "rules") return rowValue.rules;
-  if (backend === "jev") return rowValue.jev;
+  if (backend === "von") return rowValue.von;
   return rowValue.llm;
 }
 
@@ -611,7 +611,7 @@ function comparison(report: RunReport): string[] {
   }
   const byMetric = new Map(report.summary.comparison.map((entry) => [entry.metric, entry]));
   lines.push(
-    ...jevNotice(report),
+    ...vonNotice(report),
     ...table(
       ["Metric", ...report.backends.map(columnHeading)],
       COMPARISON_ROWS.map(({ label, metric }) => {
@@ -627,7 +627,7 @@ function comparison(report: RunReport): string[] {
       }),
     ),
     "",
-    "The rules confidence is a calibrated gating quantity and Jev's a probability; neither is compared here.",
+    "The rules confidence is a calibrated gating quantity and Von's a probability; neither is compared here.",
     "",
   );
   return lines;
@@ -659,7 +659,7 @@ function perFault(report: RunReport): string[] {
     return lines;
   }
   lines.push(
-    ...jevNotice(report),
+    ...vonNotice(report),
     ...table(
       [
         "Backend",
@@ -699,7 +699,7 @@ function leadTimes(report: RunReport): string[] {
     return lines;
   }
   lines.push(
-    ...jevNotice(report),
+    ...vonNotice(report),
     "Lead time is the native alarm minus the first correct ticket (positive: earlier than the controller); latency is the ticket minus the data onset, `≥` when the onset is a lower bound.",
     "",
     ...table(
@@ -737,7 +737,7 @@ function abstention(report: RunReport): string[] {
     return lines;
   }
   lines.push(
-    ...jevNotice(report),
+    ...vonNotice(report),
     ...table(
       ["Backend", "Accuracy", "Correct / cases", "Explicit abstention rate"],
       backends.map((backend) => [
@@ -762,7 +762,7 @@ function cost(report: RunReport): string[] {
     return lines;
   }
   lines.push(
-    ...jevNotice(report),
+    ...vonNotice(report),
     ...table(
       [
         "Backend",

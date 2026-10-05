@@ -97,11 +97,11 @@
           "minLength": 1
         },
         "ticket_min_confidence": {
-          "description": "The ticket threshold the gate applied to this decision's backend: JEV_GATE_TICKET_MIN_CONFIDENCE for jev, GATE_TICKET_MIN_CONFIDENCE for rules and llm.",
+          "description": "The ticket threshold the gate applied to this decision's backend: VON_GATE_TICKET_MIN_CONFIDENCE for von, GATE_TICKET_MIN_CONFIDENCE for rules and llm.",
           "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
         },
         "review_min_confidence": {
-          "description": "The review threshold the gate applied to this decision's backend: JEV_GATE_REVIEW_MIN_CONFIDENCE for jev, GATE_REVIEW_MIN_CONFIDENCE for rules and llm.",
+          "description": "The review threshold the gate applied to this decision's backend: VON_GATE_REVIEW_MIN_CONFIDENCE for von, GATE_REVIEW_MIN_CONFIDENCE for rules and llm.",
           "$ref": "urn:fdp:schema:common:v1#/$defs/confidence"
         },
         "persist_sim_min": {

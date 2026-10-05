@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // `fdp-eval sweep`: the grid, the guard, the merges it recovers and — the
@@ -6,7 +6,7 @@
 // giving back exactly what the run reported.
 //
 // The real run is the smoke profile, replayed in process over the cut slices
-// as the smoke E2E replays it (rules and a mock Jev, whose episodes merge),
+// as the smoke E2E replays it (rules and a mock Von, whose episodes merge),
 // and swept with `--allow-test-split`, because the smoke replays core-10
 // scenarios and is never a tuning signal: here it only proves the re-gating.
 // It skips when the slices are not cut and fails instead under
@@ -278,7 +278,7 @@ function decision(fields: Partial<ReportDecision> & { decision_id: string }): Re
     abstained: false,
     benign_choice: false,
     usage: { input_tokens: 0, output_tokens: 0 },
-    backend: "jev",
+    backend: "von",
     state_digest: null,
     ...fields,
   };
@@ -372,8 +372,8 @@ describe("the smoke profile, swept at its own thresholds", () => {
     "gives back the run's own figures for both backends and writes sweep.json and sweep.md",
     async () => {
       const out = temporaryDirectory();
-      const cfg = loadConfig(["--profile", "smoke", "--backends", "rules,jev", "--out", out], {
-        EVAL_JEV_MODE: "mock",
+      const cfg = loadConfig(["--profile", "smoke", "--backends", "rules,von", "--out", out], {
+        EVAL_VON_MODE: "mock",
       });
       expect(await executeRun(cfg, { log: QUIET, stdout: SINK })).toBe(0);
       const latest = join(out, "latest.json");
@@ -386,18 +386,18 @@ describe("the smoke profile, swept at its own thresholds", () => {
         { write: (chunk: string) => printed.push(chunk) },
       );
 
-      expect(result.backends.map((entry) => entry.backend)).toEqual(["rules", "jev"]);
+      expect(result.backends.map((entry) => entry.backend)).toEqual(["rules", "von"]);
       const merged = result.backends.reduce((total, entry) => total + entry.mergedEpisodes, 0);
-      expect(merged, "the mock Jev merges episodes, which the sweep must recover").toBeGreaterThan(
+      expect(merged, "the mock Von merges episodes, which the sweep must recover").toBeGreaterThan(
         0,
       );
       for (const entry of result.backends) {
-        // Each backend is swept around the pair it ran at: rules at GATE_* (0.60 / 0.85), Jev at
+        // Each backend is swept around the pair it ran at: rules at GATE_* (0.60 / 0.85), Von at
         // its own default, the pre-registered choice (0.65 / 0.85).
-        const pair = entry.backend === "jev" ? cfg.jevGate : cfg.gate;
+        const pair = entry.backend === "von" ? cfg.vonGate : cfg.gate;
         expect(entry.own, `${entry.backend}: ${entry.own.differences.join("; ")}`).toMatchObject({
           ticketMin: 0.85,
-          reviewMin: entry.backend === "jev" ? 0.65 : 0.6,
+          reviewMin: entry.backend === "von" ? 0.65 : 0.6,
           reproduces: true,
         });
         const own = entry.rows.find(

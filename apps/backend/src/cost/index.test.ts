@@ -4,7 +4,7 @@
 /**
  * The cost arithmetic and the ledger row.
  *
- * The figures are worked by hand: 1,234 Jev input tokens at 0.042 per million
+ * The figures are worked by hand: 1,234 Von input tokens at 0.042 per million
  * cost exactly 0.0000518280 dollars, a language-model call of 1,000 input and
  * 200 output tokens at 5 and 25 costs exactly one cent, and the rules twin
  * costs nothing. "Exactly" is the point: the assertions compare ledger units
@@ -43,7 +43,7 @@ import type { Prices } from "./index.ts";
 
 const AS_OF = "2026-09-19";
 
-const JEV: Prices = { price_input_per_mtok: 0.042, price_output_per_mtok: 0, prices_as_of: AS_OF };
+const VON: Prices = { price_input_per_mtok: 0.042, price_output_per_mtok: 0, prices_as_of: AS_OF };
 const LLM: Prices = { price_input_per_mtok: 5, price_output_per_mtok: 25, prices_as_of: AS_OF };
 const RULES: Prices = { price_input_per_mtok: 0, price_output_per_mtok: 0, prices_as_of: AS_OF };
 
@@ -53,11 +53,11 @@ function ledgerText(units: bigint): string {
 }
 
 describe("computeCost", () => {
-  it("prices 1,234 Jev input tokens at 0.042 per million as 0.0000518280 exactly", () => {
+  it("prices 1,234 Von input tokens at 0.042 per million as 0.0000518280 exactly", () => {
     const usage = { input_tokens: 1_234, output_tokens: 0 };
-    expect(costUnits(usage, JEV)).toBe(518_280n);
-    expect(ledgerText(costUnits(usage, JEV))).toBe("0.0000518280");
-    expect(computeCost(usage, JEV)).toBe(0.000051828);
+    expect(costUnits(usage, VON)).toBe(518_280n);
+    expect(ledgerText(costUnits(usage, VON))).toBe("0.0000518280");
+    expect(computeCost(usage, VON)).toBe(0.000051828);
   });
 
   it("prices a language-model call on both token counts: (1000 x 5 + 200 x 25) / 1e6", () => {
@@ -73,7 +73,7 @@ describe("computeCost", () => {
 
   it("does not drift the way tokens x price / 1e6 in floating point does", () => {
     const usage = { input_tokens: 3, output_tokens: 0 };
-    const prices: Prices = { ...JEV, price_input_per_mtok: 0.1 };
+    const prices: Prices = { ...VON, price_input_per_mtok: 0.1 };
     expect((3 * 0.1) / 1e6).not.toBe(0.0000003);
     expect(computeCost(usage, prices)).toBe(0.0000003);
   });
@@ -81,28 +81,28 @@ describe("computeCost", () => {
   it("rounds the eleventh decimal half away from zero, as numeric(16,10) does", () => {
     const one = { input_tokens: 1, output_tokens: 0 };
     // 1 token at 0.000050 per million is 5e-11 dollars: half a ledger unit.
-    expect(costUnits(one, { ...JEV, price_input_per_mtok: 0.00005 })).toBe(1n);
-    expect(costUnits(one, { ...JEV, price_input_per_mtok: 0.000049 })).toBe(0n);
-    expect(costUnits(one, { ...JEV, price_input_per_mtok: 0.000149 })).toBe(1n);
-    expect(costUnits(one, { ...JEV, price_input_per_mtok: 0.00015 })).toBe(2n);
+    expect(costUnits(one, { ...VON, price_input_per_mtok: 0.00005 })).toBe(1n);
+    expect(costUnits(one, { ...VON, price_input_per_mtok: 0.000049 })).toBe(0n);
+    expect(costUnits(one, { ...VON, price_input_per_mtok: 0.000149 })).toBe(1n);
+    expect(costUnits(one, { ...VON, price_input_per_mtok: 0.00015 })).toBe(2n);
   });
 
   it("keeps a price to the six decimals numeric(12,6) stores", () => {
     const usage = { input_tokens: 1_000_000, output_tokens: 0 };
-    expect(computeCost(usage, { ...JEV, price_input_per_mtok: 0.0420004 })).toBe(0.042);
+    expect(computeCost(usage, { ...VON, price_input_per_mtok: 0.0420004 })).toBe(0.042);
   });
 });
 
 describe("pricesFor", () => {
   const env = loadEnv({
-    JEV_PRICE_INPUT_PER_MTOK: "0.042",
+    VON_PRICE_INPUT_PER_MTOK: "0.042",
     LLM_PRICE_INPUT_PER_MTOK: "5",
     LLM_PRICE_OUTPUT_PER_MTOK: "25",
     PRICES_AS_OF: AS_OF,
   });
 
-  it("bills Jev on input tokens only", () => {
-    expect(pricesFor(env, "jev")).toEqual(JEV);
+  it("bills Von on input tokens only", () => {
+    expect(pricesFor(env, "von")).toEqual(VON);
   });
 
   it("bills the language model on both token counts", () => {
@@ -117,7 +117,7 @@ describe("pricesFor", () => {
 describe("summaryPrices", () => {
   it("leaves the language-model prices null while no key configures it", () => {
     expect(summaryPrices(loadEnv({}))).toEqual({
-      jev_input_per_mtok: 0.042,
+      von_input_per_mtok: 0.042,
       llm_input_per_mtok: null,
       llm_output_per_mtok: null,
       as_of: AS_OF,
@@ -133,7 +133,7 @@ describe("summaryPrices", () => {
 
 describe("costBlock", () => {
   it("repeats the prices beside the cost, for the decision message", () => {
-    expect(costBlock({ input_tokens: 1_234, output_tokens: 0 }, JEV)).toEqual({
+    expect(costBlock({ input_tokens: 1_234, output_tokens: 0 }, VON)).toEqual({
       usd: 0.000051828,
       price_input_per_mtok: 0.042,
       price_output_per_mtok: 0,

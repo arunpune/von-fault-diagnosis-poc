@@ -77,7 +77,7 @@ export interface DecisionCandidateRow {
   readonly name: string;
   readonly probability: number;
   /**
-   * The per-candidate support the backend computed — Jev's Noul, the rules
+   * The per-candidate support the backend computed — Von's Noul, the rules
    * twin's match score — or `null` for a backend without one. The `decision`
    * message carries only the Noul, so this column is where the rules twin's
    * scores are kept.

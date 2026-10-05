@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // What the two live smoke tests share: the decision they ask about, the
@@ -71,7 +71,7 @@ export function expectLiveShape(output: DecisionOutput, input: DecisionInput): v
 
 /** Prints what the call cost at the run's dated prices: the one line a live test writes. */
 export function printCost(
-  backend: "jev" | "llm",
+  backend: "von" | "llm",
   output: DecisionOutput,
   cfg: EvalConfig,
   input: DecisionInput,

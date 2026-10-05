@@ -4,19 +4,19 @@
 /**
  * Which answer engine a run uses (docs/decision-backends.md#choosing-the-backend).
  *
- * The rule is in `config/env.ts`, which resolves `DECISION_BACKEND` — `jev`
+ * The rule is in `config/env.ts`, which resolves `DECISION_BACKEND` — `von`
  * when `TYPESAFE_API_KEY` is set, `rules` otherwise — and refuses a backend
  * whose key is missing. This module is the other half: it turns that word into
  * an object, using factories its caller injects.
  *
- * The injection is the point. The Jev backend and the LLM backend live in
+ * The injection is the point. The Von backend and the LLM backend live in
  * their own modules, the pipeline wires its own doubles in tests, and the
  * evaluation harness swaps all three. If this module imported them directly,
  * every one of those would have to edit it, and a test that wanted a stub
  * would have to reach around it.
  *
  * A missing factory is a startup failure, not a fall-back: a run configured for
- * Jev that quietly answered with the rules twin would put a whole evaluation
+ * Von that quietly answered with the rules twin would put a whole evaluation
  * under the wrong label.
  */
 
@@ -36,7 +36,7 @@ export type DecisionBackendFactory = (env: Env) => DecisionBackend;
  */
 export interface DecisionBackendFactories {
   readonly rules: DecisionBackendFactory;
-  readonly jev?: DecisionBackendFactory;
+  readonly von?: DecisionBackendFactory;
   readonly llm?: DecisionBackendFactory;
 }
 
@@ -57,12 +57,12 @@ function missingFactory(name: string): ConfigError {
  */
 export function selectBackend(env: Env, factories: DecisionBackendFactories): DecisionBackend {
   switch (env.decisionBackend) {
-    case "jev": {
+    case "von": {
       if (env.typesafeApiKey === null) {
-        throw new ConfigError(["DECISION_BACKEND is jev but TYPESAFE_API_KEY is not set"]);
+        throw new ConfigError(["DECISION_BACKEND is von but TYPESAFE_API_KEY is not set"]);
       }
-      if (factories.jev === undefined) throw missingFactory("jev");
-      return factories.jev(env);
+      if (factories.von === undefined) throw missingFactory("von");
+      return factories.von(env);
     }
     case "llm": {
       if (env.llmApiKey === null) {

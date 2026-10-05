@@ -12,8 +12,8 @@ import {
 } from "@/features/cost/summary";
 import { fixtures } from "@/test/msw/fixtures";
 
-const JEV_ONLY: ApiCost["prices"] = {
-  jev_input_per_mtok: 0.042,
+const VON_ONLY: ApiCost["prices"] = {
+  von_input_per_mtok: 0.042,
   llm_input_per_mtok: null,
   llm_output_per_mtok: null,
   as_of: "2026-09-19",
@@ -28,38 +28,38 @@ function costWith(calls: number, byBackend: ApiCost["by_backend"]): ApiCost {
 }
 
 describe("priceSentence", () => {
-  it("states the Jev input price, free output and the as-of date", () => {
-    expect(priceSentence(JEV_ONLY)).toBe(
+  it("states the Von input price, free output and the as-of date", () => {
+    expect(priceSentence(VON_ONLY)).toBe(
       "$0.042 per MTok input, output free · prices as of 2026-09-19",
     );
   });
 
-  it("names the Jev price and adds the language model's prices when configured", () => {
+  it("names the Von price and adds the language model's prices when configured", () => {
     expect(priceSentence(fixtures.cost.prices)).toBe(
-      "Jev $0.042 per MTok input, output free; " +
+      "Von $0.042 per MTok input, output free; " +
         "language model $3.00 per MTok input, $15.00 per MTok output · prices as of 2026-09-19",
     );
   });
 
   it("adds the one language-model price that is configured", () => {
-    expect(priceSentence({ ...JEV_ONLY, llm_input_per_mtok: 0.8 })).toBe(
-      "Jev $0.042 per MTok input, output free; language model $0.80 per MTok input" +
+    expect(priceSentence({ ...VON_ONLY, llm_input_per_mtok: 0.8 })).toBe(
+      "Von $0.042 per MTok input, output free; language model $0.80 per MTok input" +
         " · prices as of 2026-09-19",
     );
   });
 });
 
 describe("backendRows", () => {
-  it("lists Jev, the language model and rules in that order, then others by name", () => {
+  it("lists Von, the language model and rules in that order, then others by name", () => {
     const row = { ...totals(1), model: "m" };
-    const rows = backendRows({ rules: row, zeta: row, llm: row, alpha: row, jev: row });
+    const rows = backendRows({ rules: row, zeta: row, llm: row, alpha: row, von: row });
 
-    expect(rows.map((entry) => entry.backend)).toEqual(["jev", "llm", "rules", "alpha", "zeta"]);
+    expect(rows.map((entry) => entry.backend)).toEqual(["von", "llm", "rules", "alpha", "zeta"]);
   });
 
   it("keeps each backend's totals and model", () => {
     expect(backendRows(fixtures.cost.by_backend)).toEqual([
-      { backend: "jev", ...fixtures.cost.by_backend.jev },
+      { backend: "von", ...fixtures.cost.by_backend.von },
       { backend: "llm", ...fixtures.cost.by_backend.llm },
     ]);
   });
@@ -67,8 +67,8 @@ describe("backendRows", () => {
 
 describe("backendLabel", () => {
   it("names the three decision backends and humanises any other", () => {
-    expect(["jev", "llm", "rules", "edge_model"].map(backendLabel)).toEqual([
-      "Jev",
+    expect(["von", "llm", "rules", "edge_model"].map(backendLabel)).toEqual([
+      "Von",
       "Language model",
       "Rules",
       "Edge model",
@@ -78,7 +78,7 @@ describe("backendLabel", () => {
 
 describe("showsRulesNotice", () => {
   const rulesRow = { ...totals(3), model: "rules-v1" };
-  const jevRow = { ...totals(2, 0.00015), model: "jev-1.13.0" };
+  const vonRow = { ...totals(2, 0.00015), model: "von-1.13.0" };
 
   it("applies under the rules backend before any call was billed", () => {
     expect(showsRulesNotice("rules", costWith(0, {}))).toBe(true);
@@ -89,11 +89,11 @@ describe("showsRulesNotice", () => {
   });
 
   it("does not apply once a model has billed a call", () => {
-    expect(showsRulesNotice("rules", costWith(5, { rules: rulesRow, jev: jevRow }))).toBe(false);
+    expect(showsRulesNotice("rules", costWith(5, { rules: rulesRow, von: vonRow }))).toBe(false);
   });
 
   it("does not apply under a model backend or while the backend is unknown", () => {
-    expect(showsRulesNotice("jev", costWith(0, {}))).toBe(false);
+    expect(showsRulesNotice("von", costWith(0, {}))).toBe(false);
     expect(showsRulesNotice(null, costWith(0, {}))).toBe(false);
   });
 });

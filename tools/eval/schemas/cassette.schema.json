@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:fdp:eval:cassette:v1",
-  "title": "Recorded Jev answer",
-  "description": "One cassette: a POST /v1/systemone request the harness sent in live mode and every answer the model gave it during one recording run, in order, filed as fixtures/cassettes/<model>/<request_digest>.json and replayed by the cassette server in cassette mode (tools/eval/CASSETTES.md). request_digest is the sha256 of the canonical JSON of the request's {model, state, questions}: keys sorted, no whitespace, values as JSON.stringify prints them. Since 2026-09-24 a cassette keeps one recording per GATE_PERSIST_SIM_MIN (persist_sim_min, other_recordings), because the Jev thresholds pre-registration records the tuning list at N = 0 and N = 1 into one store and the two recordings send many of the same requests; a replay at N is served the recording made at N. A cassette holds the state (fictional machine words), the questions and the answers; it never holds a key, a header or a scenario label.",
+  "title": "Recorded Von answer",
+  "description": "One cassette: a POST /v1/systemone request the harness sent in live mode and every answer the model gave it during one recording run, in order, filed as fixtures/cassettes/<model>/<request_digest>.json and replayed by the cassette server in cassette mode (tools/eval/CASSETTES.md). request_digest is the sha256 of the canonical JSON of the request's {model, state, questions}: keys sorted, no whitespace, values as JSON.stringify prints them. Since 2026-09-24 a cassette keeps one recording per GATE_PERSIST_SIM_MIN (persist_sim_min, other_recordings), because the Von thresholds pre-registration records the tuning list at N = 0 and N = 1 into one store and the two recordings send many of the same requests; a replay at N is served the recording made at N. A cassette holds the state (fictional machine words), the questions and the answers; it never holds a key, a header or a scenario label.",
   "type": "object",
   "properties": {
     "schema": { "const": "urn:fdp:eval:cassette:v1" },
@@ -65,7 +65,7 @@
   ],
   "additionalProperties": false,
   "$defs": {
-    "model": { "type": "string", "pattern": "^jev-\\d+\\.\\d+\\.\\d+$" },
+    "model": { "type": "string", "pattern": "^von-\\d+\\.\\d+\\.\\d+$" },
     "persist_sim_min": { "type": "number", "minimum": 0 },
     "recording": {
       "description": "One recording run's answers to the request: at which GATE_PERSIST_SIM_MIN, when, by which @fdp/backend, and every answer in the order the run received them.",

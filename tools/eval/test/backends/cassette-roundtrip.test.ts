@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Record, replay, miss (tools/eval/CASSETTES.md), end to end through the real
-// run: the F3 scenario of the smoke profile, the pipeline host, the Jev
+// run: the F3 scenario of the smoke profile, the pipeline host, the Von
 // backend, the reports.
 //
 // 1. Live and --record against a stand-in "live" API: the contracts' mock
@@ -49,7 +49,7 @@ import { datasetRequired, sliceIsCut } from "../../src/slices.ts";
 /** The stand-in key; nothing any run writes or logs may contain it. */
 const KEY = "tsk-roundtrip-stand-in-4c9e";
 
-const SCENARIO = ["--profile", "smoke", "--scenario", "f3_air_leak_jun05", "--backends", "jev"];
+const SCENARIO = ["--profile", "smoke", "--scenario", "f3_air_leak_jun05", "--backends", "von"];
 
 const cut = sliceIsCut("f3-jun05");
 const directories: string[] = [];
@@ -173,7 +173,7 @@ describe.skipIf(!cut)("the cassette round trip over f3_air_leak_jun05", () => {
     api = await startMockTypeSafe({ port: 0, apiKey: KEY, answer: scripted });
     try {
       recorded = await evaluate(
-        { TYPESAFE_API_KEY: KEY, TYPESAFE_BASE_URL: api.url, EVAL_JEV_MODE: "live" },
+        { TYPESAFE_API_KEY: KEY, TYPESAFE_BASE_URL: api.url, EVAL_VON_MODE: "live" },
         [...SCENARIO, "--record", "--confirm-live"],
         cassettes,
       );
@@ -185,7 +185,7 @@ describe.skipIf(!cut)("the cassette round trip over f3_air_leak_jun05", () => {
   it("records a cassette for every distinct request of the live run", () => {
     expect(recorded.code).toBe(EXIT_OK);
     expect(recorded.report.backends).toMatchObject([
-      { name: "jev", mode: "live", informative: true, cassette_misses: 0 },
+      { name: "von", mode: "live", informative: true, cassette_misses: 0 },
     ]);
     const outputs = outputsOf(recorded);
     expect(outputs.length).toBeGreaterThan(0);
@@ -216,7 +216,7 @@ describe.skipIf(!cut)("the cassette round trip over f3_air_leak_jun05", () => {
     expect(outputsOf(replayed).map(decided)).toEqual(live.map(decided));
     expect(replayed.report.backends).toEqual([
       expect.objectContaining({
-        name: "jev",
+        name: "von",
         mode: "cassette",
         cassette_hits: live.length,
         cassette_misses: 0,
@@ -225,10 +225,10 @@ describe.skipIf(!cut)("the cassette round trip over f3_air_leak_jun05", () => {
       }),
     ]);
     expect(replayed.markdown).toContain(
-      `- jev ran from cassettes: ${live.length} hit(s), 0 miss(es).`,
+      `- von ran from cassettes: ${live.length} hit(s), 0 miss(es).`,
     );
     expect(replayed.written).toContain('mode="cassette"');
-    expect(replayed.written).toContain("EVAL_JEV_MODE=auto");
+    expect(replayed.written).toContain("EVAL_VON_MODE=auto");
   });
 
   it("counts and reports one miss when one cassette's state changed", async () => {
@@ -250,7 +250,7 @@ describe.skipIf(!cut)("the cassette round trip over f3_air_leak_jun05", () => {
     rmSync(store.pathOf(last));
     store.put({ ...cassette, request, request_digest: requestDigest(request) });
 
-    const replayed = await evaluate({ EVAL_JEV_MODE: "cassette" }, SCENARIO, cassettes);
+    const replayed = await evaluate({ EVAL_VON_MODE: "cassette" }, SCENARIO, cassettes);
     expect(replayed.code).toBe(EXIT_OK);
     expect(replayed.report.backends[0]).toMatchObject({
       mode: "cassette",

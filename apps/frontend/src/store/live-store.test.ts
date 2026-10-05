@@ -172,7 +172,7 @@ describe("hello", () => {
     const { result } = renderHook(() => useDecisionBackend());
 
     push(frames.hello);
-    expect(result.current).toEqual({ name: "jev", model: "jev-1.13.0" });
+    expect(result.current).toEqual({ name: "von", model: "von-1.13.0" });
 
     const rules: StatusBackend = {
       ...backendStatus,
@@ -214,7 +214,7 @@ describe("hello", () => {
 
     push(frames.hello);
     expect(getLiveState().linkNote).toBeNull();
-    expect(result.current).toEqual({ name: "jev", model: "jev-1.13.0" });
+    expect(result.current).toEqual({ name: "von", model: "von-1.13.0" });
   });
 });
 

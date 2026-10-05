@@ -21,7 +21,7 @@ import {
   type StatusInfo,
 } from "./status.ts";
 
-const INFO: StatusInfo = { unitId: "cau-7", backend: "jev", model: "jev-1.13.0", version: "1.0.0" };
+const INFO: StatusInfo = { unitId: "cau-7", backend: "von", model: "von-1.13.0", version: "1.0.0" };
 
 function harness() {
   const wall = fixedClock("2026-09-22T10:00:00.000Z");
@@ -156,7 +156,7 @@ describe("createStatusPublisher", () => {
       schema: "urn:fdp:schema:status-backend:v1",
       unit_id: "cau-7",
       wall_ts: "2026-09-22T10:00:00.000Z",
-      backend: { name: "jev", model: "jev-1.13.0" },
+      backend: { name: "von", model: "von-1.13.0" },
       decision: {
         total: 0,
         ok: 0,

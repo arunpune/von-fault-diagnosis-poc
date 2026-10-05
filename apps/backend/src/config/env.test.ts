@@ -30,8 +30,8 @@ describe("loadEnv", () => {
       ticketMinConfidence: 0.85,
       reviewMinConfidence: 0.6,
       persistSimMin: 1,
-      // Jev's own pair: the pre-registered choice (tools/eval/records/jev-thresholds-choice.md).
-      jev: { ticketMinConfidence: 0.85, reviewMinConfidence: 0.65 },
+      // Von's own pair: the pre-registered choice (tools/eval/records/von-thresholds-choice.md).
+      von: { ticketMinConfidence: 0.85, reviewMinConfidence: 0.65 },
     });
     expect(env.decisionIntervalSimMin).toBe(30);
     expect(env.episodeClearSimMin).toBe(120);
@@ -70,13 +70,13 @@ describe("loadEnv", () => {
     expect(env.databaseUrlApp).toBe("postgres://app_rw:app_rw@postgres:5432/fdp");
   });
 
-  it("picks jev when a TypeSafe key is set and rules when it is not", () => {
+  it("picks von when a TypeSafe key is set and rules when it is not", () => {
     expect(loadEnv({ ...COMPOSE }).decisionBackend).toBe("rules");
-    expect(loadEnv({ ...COMPOSE, TYPESAFE_API_KEY: "tk-test" }).decisionBackend).toBe("jev");
+    expect(loadEnv({ ...COMPOSE, TYPESAFE_API_KEY: "tk-test" }).decisionBackend).toBe("von");
   });
 
   it("refuses a decision backend whose key is missing, naming the variable", () => {
-    expect(() => loadEnv({ ...COMPOSE, DECISION_BACKEND: "jev" })).toThrow(
+    expect(() => loadEnv({ ...COMPOSE, DECISION_BACKEND: "von" })).toThrow(
       /TYPESAFE_API_KEY is not set/,
     );
     expect(() => loadEnv({ ...COMPOSE, DECISION_BACKEND: "llm" })).toThrow(
@@ -95,10 +95,10 @@ describe("loadEnv", () => {
     ).toThrow(/only anthropic is implemented/);
   });
 
-  it("refuses a Jev model alias and accepts a pinned version", () => {
-    expect(() => loadEnv({ ...COMPOSE, JEV_MODEL: "jev-latest" })).toThrow(ConfigError);
-    expect(() => loadEnv({ ...COMPOSE, JEV_MODEL: "jev-1.13" })).toThrow(ConfigError);
-    expect(loadEnv({ ...COMPOSE, JEV_MODEL: "jev-2.0.1" }).jevModel).toBe("jev-2.0.1");
+  it("refuses a Von model alias and accepts a pinned version", () => {
+    expect(() => loadEnv({ ...COMPOSE, VON_MODEL: "von-latest" })).toThrow(ConfigError);
+    expect(() => loadEnv({ ...COMPOSE, VON_MODEL: "von-1.13" })).toThrow(ConfigError);
+    expect(loadEnv({ ...COMPOSE, VON_MODEL: "von-2.0.1" }).vonModel).toBe("von-2.0.1");
   });
 
   it("refuses a review threshold above the ticket threshold", () => {
@@ -107,10 +107,10 @@ describe("loadEnv", () => {
     ).toThrow(/never sits above the ticket threshold/);
   });
 
-  it("gives Jev its own default pair, the pre-registered choice, independent of GATE_*", () => {
-    // Nothing set: Jev is gated at the choice recorded in
-    // tools/eval/records/jev-thresholds-choice.md.
-    expect(loadEnv({ ...COMPOSE }).gate.jev).toEqual({
+  it("gives Von its own default pair, the pre-registered choice, independent of GATE_*", () => {
+    // Nothing set: Von is gated at the choice recorded in
+    // tools/eval/records/von-thresholds-choice.md.
+    expect(loadEnv({ ...COMPOSE }).gate.von).toEqual({
       ticketMinConfidence: 0.85,
       reviewMinConfidence: 0.65,
     });
@@ -119,72 +119,72 @@ describe("loadEnv", () => {
       ...COMPOSE,
       GATE_TICKET_MIN_CONFIDENCE: "0.9",
       GATE_REVIEW_MIN_CONFIDENCE: "0.7",
-      JEV_GATE_TICKET_MIN_CONFIDENCE: "",
-      JEV_GATE_REVIEW_MIN_CONFIDENCE: "",
+      VON_GATE_TICKET_MIN_CONFIDENCE: "",
+      VON_GATE_REVIEW_MIN_CONFIDENCE: "",
     }).gate;
-    expect(moved.jev).toEqual({ ticketMinConfidence: 0.85, reviewMinConfidence: 0.65 });
+    expect(moved.von).toEqual({ ticketMinConfidence: 0.85, reviewMinConfidence: 0.65 });
     expect(moved).toMatchObject({ ticketMinConfidence: 0.9, reviewMinConfidence: 0.7 });
     // Each variable overrides its own threshold only, and never the global pair.
-    const env = loadEnv({ ...COMPOSE, JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.7" });
-    expect(env.gate.jev).toEqual({ ticketMinConfidence: 0.85, reviewMinConfidence: 0.7 });
+    const env = loadEnv({ ...COMPOSE, VON_GATE_REVIEW_MIN_CONFIDENCE: "0.7" });
+    expect(env.gate.von).toEqual({ ticketMinConfidence: 0.85, reviewMinConfidence: 0.7 });
     expect(env.gate.reviewMinConfidence).toBe(0.6);
     expect(
       loadEnv({
         ...COMPOSE,
-        JEV_GATE_TICKET_MIN_CONFIDENCE: "0.95",
-        JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.5",
-      }).gate.jev,
+        VON_GATE_TICKET_MIN_CONFIDENCE: "0.95",
+        VON_GATE_REVIEW_MIN_CONFIDENCE: "0.5",
+      }).gate.von,
     ).toEqual({ ticketMinConfidence: 0.95, reviewMinConfidence: 0.5 });
     // The pair the tuning recordings were made at can still be set explicitly.
-    expect(loadEnv({ ...COMPOSE, JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.6" }).gate.jev).toEqual({
+    expect(loadEnv({ ...COMPOSE, VON_GATE_REVIEW_MIN_CONFIDENCE: "0.6" }).gate.von).toEqual({
       ticketMinConfidence: 0.85,
       reviewMinConfidence: 0.6,
     });
   });
 
-  it("refuses a Jev pair whose review threshold sits above its ticket threshold", () => {
-    // The Jev review threshold is checked against the Jev ticket threshold it resolves to.
-    expect(() => loadEnv({ ...COMPOSE, JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.9" })).toThrow(
-      /Jev's review threshold 0\.9 is above its ticket threshold 0\.85/,
+  it("refuses a Von pair whose review threshold sits above its ticket threshold", () => {
+    // The Von review threshold is checked against the Von ticket threshold it resolves to.
+    expect(() => loadEnv({ ...COMPOSE, VON_GATE_REVIEW_MIN_CONFIDENCE: "0.9" })).toThrow(
+      /Von's review threshold 0\.9 is above its ticket threshold 0\.85/,
     );
     expect(() =>
       loadEnv({
         ...COMPOSE,
-        JEV_GATE_TICKET_MIN_CONFIDENCE: "0.7",
-        JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.75",
+        VON_GATE_TICKET_MIN_CONFIDENCE: "0.7",
+        VON_GATE_REVIEW_MIN_CONFIDENCE: "0.75",
       }),
     ).toThrow(ConfigError);
-    expect(() => loadEnv({ ...COMPOSE, JEV_GATE_TICKET_MIN_CONFIDENCE: "1.5" })).toThrow(
-      /JEV_GATE_TICKET_MIN_CONFIDENCE/,
+    expect(() => loadEnv({ ...COMPOSE, VON_GATE_TICKET_MIN_CONFIDENCE: "1.5" })).toThrow(
+      /VON_GATE_TICKET_MIN_CONFIDENCE/,
     );
-    expect(() => loadEnv({ ...COMPOSE, JEV_GATE_REVIEW_MIN_CONFIDENCE: "most" })).toThrow(
-      /JEV_GATE_REVIEW_MIN_CONFIDENCE/,
+    expect(() => loadEnv({ ...COMPOSE, VON_GATE_REVIEW_MIN_CONFIDENCE: "most" })).toThrow(
+      /VON_GATE_REVIEW_MIN_CONFIDENCE/,
     );
-    // A Jev ticket threshold set alone below the default review threshold is refused, naming both.
-    expect(() => loadEnv({ ...COMPOSE, JEV_GATE_TICKET_MIN_CONFIDENCE: "0.6" })).toThrow(
-      /Jev's review threshold 0\.65 is above its ticket threshold 0\.6 \(JEV_GATE_REVIEW_MIN_CONFIDENCE, default 0\.65, and JEV_GATE_TICKET_MIN_CONFIDENCE, default 0\.85\)/,
+    // A Von ticket threshold set alone below the default review threshold is refused, naming both.
+    expect(() => loadEnv({ ...COMPOSE, VON_GATE_TICKET_MIN_CONFIDENCE: "0.6" })).toThrow(
+      /Von's review threshold 0\.65 is above its ticket threshold 0\.6 \(VON_GATE_REVIEW_MIN_CONFIDENCE, default 0\.65, and VON_GATE_TICKET_MIN_CONFIDENCE, default 0\.85\)/,
     );
     // Equal thresholds are allowed.
     expect(
       loadEnv({
         ...COMPOSE,
-        JEV_GATE_TICKET_MIN_CONFIDENCE: "0.65",
-        JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.65",
-      }).gate.jev,
+        VON_GATE_TICKET_MIN_CONFIDENCE: "0.65",
+        VON_GATE_REVIEW_MIN_CONFIDENCE: "0.65",
+      }).gate.von,
     ).toEqual({ ticketMinConfidence: 0.65, reviewMinConfidence: 0.65 });
-    // A GATE_* pair set for the rules backend never moves Jev's, so it never stops start-up.
+    // A GATE_* pair set for the rules backend never moves Von's, so it never stops start-up.
     expect(
       loadEnv({
         ...COMPOSE,
         GATE_TICKET_MIN_CONFIDENCE: "0.6",
         GATE_REVIEW_MIN_CONFIDENCE: "0.5",
-      }).gate.jev,
+      }).gate.von,
     ).toEqual({ ticketMinConfidence: 0.85, reviewMinConfidence: 0.65 });
   });
 
-  it("gates Jev at the pre-registered choice and rules and llm at GATE_* by default", () => {
+  it("gates Von at the pre-registered choice and rules and llm at GATE_* by default", () => {
     const { gate } = loadEnv({ ...COMPOSE });
-    expect(gateThresholds(gate, "jev")).toEqual({
+    expect(gateThresholds(gate, "von")).toEqual({
       ticketMinConfidence: 0.85,
       reviewMinConfidence: 0.65,
     });
@@ -196,13 +196,13 @@ describe("loadEnv", () => {
     }
   });
 
-  it("gates each backend with its own pair: Jev with JEV_GATE_*, rules and llm with GATE_*", () => {
+  it("gates each backend with its own pair: Von with VON_GATE_*, rules and llm with GATE_*", () => {
     const { gate } = loadEnv({
       ...COMPOSE,
-      JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9",
-      JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.65",
+      VON_GATE_TICKET_MIN_CONFIDENCE: "0.9",
+      VON_GATE_REVIEW_MIN_CONFIDENCE: "0.65",
     });
-    expect(gateThresholds(gate, "jev")).toEqual({
+    expect(gateThresholds(gate, "von")).toEqual({
       ticketMinConfidence: 0.9,
       reviewMinConfidence: 0.65,
     });
@@ -299,7 +299,7 @@ describe("loadEnv", () => {
 describe("decisionModel", () => {
   it("reports the model the selected backend will call", () => {
     expect(decisionModel(loadEnv({ ...COMPOSE }))).toBe(RULES_MODEL);
-    expect(decisionModel(loadEnv({ ...COMPOSE, TYPESAFE_API_KEY: "tk" }))).toBe("jev-1.13.0");
+    expect(decisionModel(loadEnv({ ...COMPOSE, TYPESAFE_API_KEY: "tk" }))).toBe("von-1.13.0");
     expect(decisionModel(loadEnv({ ...COMPOSE, DECISION_BACKEND: "llm", LLM_API_KEY: "lk" }))).toBe(
       "claude-opus-5",
     );

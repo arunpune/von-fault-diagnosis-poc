@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // Scoring one scenario, and the run summary the gate is read from
@@ -24,7 +24,7 @@
 //                     window at ticket level names an accepted fault. A
 //                     backend that opens a wrong ticket first and corrects it
 //                     later does not diagnose; the correction is reported as
-//                     "recovered". E4 gates Jev here.
+//                     "recovered". E4 gates Von here.
 //
 // The budget runs from `max(onset, replay.from + warmup)`: a scenario that
 // starts inside a failure must not be credited for a detection the warmup
@@ -455,7 +455,7 @@ function backendSummary(
  *
  * @param scenarioMetrics every (scenario, backend) pair the run scored, in any order.
  * @param options the gate level and which backend's gate is the headline one; by default the
- * headline is `jev` when it ran and `rules` otherwise, and the level is each backend's own.
+ * headline is `von` when it ran and `rules` otherwise, and the level is each backend's own.
  * @throws TypeError when the list is empty — a run summary over nothing would report a gate
  * result nobody measured.
  */
@@ -474,7 +474,7 @@ export function summarise(
   const backends = names.map((name) => backendSummary(byBackend.get(name) ?? [], options));
 
   const headlineName =
-    options.headlineBackend ?? (byBackend.has("jev") ? "jev" : (names[0] as string));
+    options.headlineBackend ?? (byBackend.has("von") ? "von" : (names[0] as string));
   const headline = backends.find((summary) => summary.backend === headlineName) ?? backends[0];
   if (headline === undefined) throw new TypeError("cannot summarise a run with no backends");
 
@@ -482,7 +482,7 @@ export function summarise(
     backends,
     comparison: compare(
       byBackend.get("rules") ?? [],
-      byBackend.get("jev") ?? [],
+      byBackend.get("von") ?? [],
       byBackend.get("llm"),
     ),
     gate: headline.gate,

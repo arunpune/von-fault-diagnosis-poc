@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The full profile's month progress and its whole-recording summary (E6).
@@ -154,11 +154,11 @@ function boundScenario(id: string, profile: "full" | "core"): BoundScenario {
   return bindScenario(scenario, { profile });
 }
 
-function run(bound: BoundScenario, backend: "rules" | "jev"): ScenarioRun {
+function run(bound: BoundScenario, backend: "rules" | "von"): ScenarioRun {
   return {
     scenarioId: bound.scenario.id,
     backend,
-    model: backend === "rules" ? "rules-v1" : "jev-1.13.0",
+    model: backend === "rules" ? "rules-v1" : "von-1.13.0",
     mode: backend === "rules" ? "-" : "mock",
     seed: bound.scenario.seed,
     events: [],
@@ -321,7 +321,7 @@ describe("the full profile in the loop", () => {
         seen.push(options);
         options.onBatch?.({ simTs: "2020-02-01T00:04:00.000Z", samples: 25 });
         options.onBatch?.({ simTs: "2020-03-01T00:04:00.000Z", samples: 25 });
-        return Promise.resolve(run(bound, backend.name === "rules" ? "rules" : "jev"));
+        return Promise.resolve(run(bound, backend.name === "rules" ? "rules" : "von"));
       },
     });
 

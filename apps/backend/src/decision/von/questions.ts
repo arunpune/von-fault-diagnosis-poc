@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * The one request Jev answers (docs/decision-backends.md#jev).
+ * The one request Von answers (docs/decision-backends.md#von).
  *
  * Three kinds of question travel together over one state, because questions
  * that share a state belong in one request: a Choice that names the cause, one
@@ -44,7 +44,22 @@
  * lets the shape test check both directions without a model.
  */
 
-import type { ChoiceQuestion, NoulQuestion, Question, ScoreQuestion } from "@typesafe-ai/sdk";
+// The von-sdk TypeScript types restrict criteria to string | null or string[].
+// The wire protocol supports structured JSON objects as criteria values.
+// We define permissive local question types that allow unknown criteria values
+// while keeping the same shape the SDK will accept on the wire.
+
+/** A question with permissive criteria that can be any JSON-serialisable value. */
+interface WireQuestion {
+  readonly type: "choice" | "noul" | "score";
+  readonly instructions: unknown;
+  readonly criteria?: unknown;
+}
+
+type ChoiceQuestion = WireQuestion & { type: "choice" };
+type NoulQuestion = WireQuestion & { type: "noul" };
+type ScoreQuestion = WireQuestion & { type: "score" };
+type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
 
 import type { SignalMove } from "@fdp/contracts";
 
@@ -61,13 +76,13 @@ import { NONE_OF_THESE } from "../types.ts";
 import type { DecisionInput } from "../types.ts";
 
 /** The question set of one decision, keyed the way the answers come back. */
-export type JevQuestions = Record<string, Question>;
+export type VonQuestions = Record<string, Question>;
 
 /** The whole request as the SDK sends it; the golden fixture is this object. */
-export interface JevRequestBody {
-  readonly state: DecisionState;
+export interface VonRequestBody {
   readonly model: string;
-  readonly questions: JevQuestions;
+  readonly state: DecisionState;
+  readonly questions: VonQuestions;
 }
 
 /** The id of the question that judges one candidate's defining movement. */
@@ -102,12 +117,12 @@ export const LONGEST_QUESTION_TOKEN_BUDGET = 6000;
  * reason: the budget is there to catch growth, and a real tokenizer would tie
  * the assertion to one provider's vocabulary.
  */
-export function estimateQuestionTokens(value: Question | JevQuestions): number {
+export function estimateQuestionTokens(value: Question | VonQuestions): number {
   return Math.ceil(JSON.stringify(value).length / 3);
 }
 
 /** The largest single question of a set, in the same heuristic. */
-export function longestQuestionTokens(questions: JevQuestions): number {
+export function longestQuestionTokens(questions: VonQuestions): number {
   return Math.max(
     0,
     ...Object.values(questions).map((question) => estimateQuestionTokens(question)),
@@ -504,8 +519,8 @@ function severityQuestion(): ScoreQuestion {
  * carries, which is what makes the golden fixture a byte comparison rather than
  * a deep one.
  */
-export function buildQuestions(state: DecisionState, input: DecisionInput): JevQuestions {
-  const questions: JevQuestions = { [FAULT_QUESTION_ID]: faultQuestion(state, input) };
+export function buildQuestions(state: DecisionState, input: DecisionInput): VonQuestions {
+  const questions: VonQuestions = { [FAULT_QUESTION_ID]: faultQuestion(state, input) };
   state.candidates.forEach((candidate, index) => {
     questions[matchQuestionId(candidate.id)] = matchQuestion(index);
   });

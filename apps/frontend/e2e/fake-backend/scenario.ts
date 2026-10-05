@@ -81,7 +81,7 @@ export interface ScenarioSink {
 }
 
 export interface ScenarioOptions {
-  /** The decision backend to play: `jev` (the default) or `rules`. */
+  /** The decision backend to play: `von` (the default) or `rules`. */
   readonly backend?: BackendMode;
   readonly unitId?: string;
   readonly seed?: number;
@@ -194,7 +194,7 @@ interface Stream {
 
 export function createScenario(options: ScenarioOptions): Scenario {
   const { wall, sink } = options;
-  const backend: BackendMode = options.backend ?? "jev";
+  const backend: BackendMode = options.backend ?? "von";
   const unitId = options.unitId ?? UNIT_ID;
   const seed = options.seed ?? DEFAULT_SEED;
   const ids = createIdSource(seed);
@@ -394,7 +394,7 @@ export function createScenario(options: ScenarioOptions): Scenario {
       store.putTicket(run.ticket);
       emit("ticket", run.ticket);
     }
-    if (run.decision.backend === "jev") {
+    if (run.decision.backend === "von") {
       const totals = store.bill({
         decision_id: run.decision.decision_id,
         backend: run.decision.backend,

@@ -63,9 +63,6 @@ catalogs:
     '@types/ws':
       specifier: 8.18.1
       version: 8.18.1
-    '@typesafe-ai/sdk':
-      specifier: 0.6.0
-      version: 0.6.0
     '@vitejs/plugin-react':
       specifier: 6.1.1
       version: 6.1.1
@@ -260,9 +257,6 @@ importers:
       '@huggingface/tokenizers':
         specifier: 'catalog:'
         version: 0.2.0
-      '@typesafe-ai/sdk':
-        specifier: 'catalog:'
-        version: 0.6.0
       fastify:
         specifier: 'catalog:'
         version: 5.12.5
@@ -278,6 +272,9 @@ importers:
       pino:
         specifier: 'catalog:'
         version: 10.3.1
+      von-sdk:
+        specifier: ^1.3.7
+        version: 1.3.7
       zod:
         specifier: 'catalog:'
         version: 4.6.5
@@ -451,6 +448,12 @@ importers:
       ajv-formats:
         specifier: 'catalog:'
         version: 3.0.1(ajv@8.20.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      von-sdk:
+        specifier: ^1.3.7
+        version: 1.3.7
     devDependencies:
       '@anthropic-ai/sdk':
         specifier: 'catalog:'
@@ -458,15 +461,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.6
-      '@typesafe-ai/sdk':
-        specifier: 'catalog:'
-        version: 0.6.0
       json-schema-to-typescript:
         specifier: 'catalog:'
         version: 16.0.0
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.1(@types/node@24.13.6)(@vitest/coverage-v8@5.0.1)(jsdom@30.1.0)(msw@2.15.0(@types/node@24.13.6)(typescript@5.9.3))(vite@8.3.0(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.1))
@@ -2289,10 +2286,6 @@ packages:
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
-
-  '@typesafe-ai/sdk@0.6.0':
-    resolution: {integrity: sha512-IddX+Q0XM+VagOUZFeP7wZjaO4SHMdvnh2zEBdrZZnXedWI3BNK1lKhMx3ayrkFWvVLbVcUHJy6AVZlY+e6Jaw==}
-    engines: {node: '>=20'}
 
   '@typescript-eslint/eslint-plugin@8.70.0':
     resolution: {integrity: sha512-/v8HZt6RlyIZxB3ntehELOcUcfxKPVGWXnQdJuHRmzrqgF8nQypcC/oxGW+Ot4VGKDq81XugPKxx0n5PBtf9PA==}
@@ -5136,6 +5129,9 @@ packages:
       jsdom:
         optional: true
 
+  von-sdk@1.3.7:
+    resolution: {integrity: sha512-RSmn6CUtAhUT/0MMDg8vrd4ve2F2SVTM5I7K1EKDqxsnjt06Seje1+iufYwLFX4hPSYc5bPMHhzjgvJ2qv5SzA==}
+
   w3c-xmlserializer@5.0.0:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
@@ -6987,8 +6983,6 @@ snapshots:
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 24.13.6
-
-  '@typesafe-ai/sdk@0.6.0': {}
 
   '@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.11.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint@10.11.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)':
     dependencies:
@@ -9912,6 +9906,8 @@ snapshots:
       jsdom: 30.1.0
     transitivePeerDependencies:
       - msw
+
+  von-sdk@1.3.7: {}
 
   w3c-xmlserializer@5.0.0:
     dependencies:

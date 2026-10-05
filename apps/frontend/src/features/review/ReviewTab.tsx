@@ -39,8 +39,8 @@ type GateThresholds = ApiStatus["gate"];
 
 /**
  * The rules and LLM backends' default pair (`GATE_*`), review 0.60 and ticket 0.85, shown until
- * the backend reports the pair it runs. Jev's own pair (`JEV_GATE_*`) defaults to review 0.65 and
- * ticket 0.85 (docs/decision-backends.md), which `/api/status` reports when Jev is the running
+ * the backend reports the pair it runs. Von's own pair (`VON_GATE_*`) defaults to review 0.65 and
+ * ticket 0.85 (docs/decision-backends.md), which `/api/status` reports when Von is the running
  * backend.
  */
 const DEFAULT_GATE: GateThresholds = { review_min_confidence: 0.6, ticket_min_confidence: 0.85 };

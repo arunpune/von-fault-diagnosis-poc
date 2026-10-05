@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The in-process host.
@@ -34,7 +34,7 @@ import type {
 } from "@fdp/backend/pipeline";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { createMockJevHandle, MOCK_API_KEY } from "../backends/mock.ts";
+import { createMockVonHandle, MOCK_API_KEY } from "../backends/mock.ts";
 import { createRulesHandle } from "../backends/rules.ts";
 import { counted, newStats } from "../backends/types.ts";
 import type { BackendHandle } from "../backends/types.ts";
@@ -362,12 +362,12 @@ describe("the pipeline's configuration and ports", () => {
 
   it("runs the pipeline exactly as the backend configures it by default", () => {
     // The runtime's own parity is apps/backend's `pipelineConfig` test; both meet at the
-    // pipeline's defaults for rules and llm, and at the pre-registered choice for Jev
+    // pipeline's defaults for rules and llm, and at the pre-registered choice for Von
     // (review 0.65, ticket 0.85), so a run and the service apply one rule.
     for (const backend of ["rules", "llm"] as const) {
       expect(buildPipelineConfig(cfg, backend)).toEqual(DEFAULT_PIPELINE_CONFIG);
     }
-    expect(buildPipelineConfig(cfg, "jev")).toEqual({
+    expect(buildPipelineConfig(cfg, "von")).toEqual({
       ...DEFAULT_PIPELINE_CONFIG,
       gate: { ticketMin: 0.85, reviewMin: 0.65 },
     });
@@ -377,23 +377,23 @@ describe("the pipeline's configuration and ports", () => {
     const tuned = loadConfig([], { METROPT_CSV: "/unused.csv", GATE_PERSIST_SIM_MIN: "5" });
     expect(buildPipelineConfig(tuned, "rules").persistSimMin).toBe(5);
     const off = loadConfig([], { METROPT_CSV: "/unused.csv", GATE_PERSIST_SIM_MIN: "0" });
-    expect(buildPipelineConfig(off, "jev").persistSimMin).toBe(0);
+    expect(buildPipelineConfig(off, "von").persistSimMin).toBe(0);
   });
 
-  it("gates Jev with JEV_GATE_* and the other backends with GATE_*", () => {
+  it("gates Von with VON_GATE_* and the other backends with GATE_*", () => {
     // The runtime's own side is apps/backend's pipelineConfig test: one rule for both hosts.
     const own = loadConfig([], {
       METROPT_CSV: "/unused.csv",
-      JEV_GATE_TICKET_MIN_CONFIDENCE: "0.9",
-      JEV_GATE_REVIEW_MIN_CONFIDENCE: "0.7",
+      VON_GATE_TICKET_MIN_CONFIDENCE: "0.9",
+      VON_GATE_REVIEW_MIN_CONFIDENCE: "0.7",
     });
-    expect(buildPipelineConfig(own, "jev").gate).toEqual({ ticketMin: 0.9, reviewMin: 0.7 });
+    expect(buildPipelineConfig(own, "von").gate).toEqual({ ticketMin: 0.9, reviewMin: 0.7 });
     expect(buildPipelineConfig(own, "rules").gate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
     expect(buildPipelineConfig(own, "llm").gate).toEqual({ ticketMin: 0.85, reviewMin: 0.6 });
   });
 
   it("bills each backend at its own prices", () => {
-    expect(messagePrices("jev", cfg.prices)).toEqual({
+    expect(messagePrices("von", cfg.prices)).toEqual({
       price_input_per_mtok: 0.042,
       price_output_per_mtok: 0,
       prices_as_of: "2026-09-19",
@@ -799,9 +799,9 @@ describe("runScenario with the real backends", () => {
     }
   });
 
-  it("decides with Jev through the mock server, sending no key and no ground truth", async () => {
+  it("decides with Von through the mock server, sending no key and no ground truth", async () => {
     const wall = createFakeWallClock();
-    const handle = await createMockJevHandle({ jevModel: MOCK_MODEL }, { wall });
+    const handle = await createMockVonHandle({ vonModel: MOCK_MODEL }, { wall });
     try {
       const run = await runScenario(boundScenario(phases), handle, hostConfig(csvPath), CATALOG, {
         wall,
@@ -812,7 +812,7 @@ describe("runScenario with the real backends", () => {
       expect(decisions.length).toBeGreaterThan(0);
       expect(decisions.every((decision) => decision.status === "ok")).toBe(true);
       expect(
-        decisions.every((decision) => decision.backend === "jev" && decision.model === MOCK_MODEL),
+        decisions.every((decision) => decision.backend === "von" && decision.model === MOCK_MODEL),
       ).toBe(true);
       expect(decisions.every((decision) => decision.cost.price_input_per_mtok === 0.042)).toBe(
         true,

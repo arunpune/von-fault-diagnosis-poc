@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿# SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 # SPDX-License-Identifier: Apache-2.0
 """The canonical environment-variable list of the PoC.
 
@@ -19,14 +19,14 @@ REQUIRED_VARS: frozenset[str] = frozenset(
         # Decision backend
         "TYPESAFE_API_KEY",
         "TYPESAFE_BASE_URL",
-        "JEV_MODEL",
+        "VON_MODEL",
         "DECISION_BACKEND",
         "LLM_PROVIDER",
         "LLM_API_KEY",
         "LLM_MODEL",
         "LLM_BASE_URL",
         # Prices (Cost panel)
-        "JEV_PRICE_INPUT_PER_MTOK",
+        "VON_PRICE_INPUT_PER_MTOK",
         "LLM_PRICE_INPUT_PER_MTOK",
         "LLM_PRICE_OUTPUT_PER_MTOK",
         "PRICES_AS_OF",
@@ -65,8 +65,8 @@ REQUIRED_VARS: frozenset[str] = frozenset(
         "GATE_TICKET_MIN_CONFIDENCE",
         "GATE_REVIEW_MIN_CONFIDENCE",
         "GATE_PERSIST_SIM_MIN",
-        "JEV_GATE_TICKET_MIN_CONFIDENCE",
-        "JEV_GATE_REVIEW_MIN_CONFIDENCE",
+        "VON_GATE_TICKET_MIN_CONFIDENCE",
+        "VON_GATE_REVIEW_MIN_CONFIDENCE",
         "DECISION_INTERVAL_SIM_MIN",
         "EPISODE_CLEAR_SIM_MIN",
         "TELEMETRY_RETENTION_SIM_DAYS",
@@ -76,7 +76,7 @@ REQUIRED_VARS: frozenset[str] = frozenset(
         "WS_TELEMETRY_INTERVAL_MS",
         # Evaluation
         "EVAL_PROFILE",
-        "EVAL_JEV_MODE",
+        "EVAL_VON_MODE",
     }
 )
 """Every variable the PoC documents. Secrets come from the environment: no values in Git."""

@@ -144,7 +144,7 @@
       "description": "The prices the numbers above were computed with. A backend that bills nothing has null prices.",
       "type": "object",
       "properties": {
-        "jev_input_per_mtok": {
+        "von_input_per_mtok": {
           "description": "Price of a million input tokens of the decision model, in US dollars.",
           "type": "number",
           "minimum": 0
@@ -165,7 +165,7 @@
           "format": "date"
         }
       },
-      "required": ["jev_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
+      "required": ["von_input_per_mtok", "llm_input_per_mtok", "llm_output_per_mtok", "as_of"],
       "additionalProperties": false
     },
     "recent": {

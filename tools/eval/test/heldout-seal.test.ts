@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
+﻿// SPDX-FileCopyrightText: 2026 Meddle S.r.l.
 // SPDX-License-Identifier: Apache-2.0
 
 // The held-out set against its seal (tools/eval/records/heldout-seal.md).
@@ -61,7 +61,7 @@ const heldoutEntries = definitions.slices.filter((entry) => isHeldoutSlice(entry
 describe("the held-out set against tools/eval/records/heldout-seal.md", () => {
   it("states the one-run rule", () => {
     expect(seal.replace(/\s+/g, " ").toLowerCase()).toContain(
-      "the held-out set runs once, after the jev thresholds are fixed under the pre-registration",
+      "the held-out set runs once, after the von thresholds are fixed under the pre-registration",
     );
   });
 

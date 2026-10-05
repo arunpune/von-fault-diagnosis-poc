@@ -188,7 +188,7 @@ flowchart LR
 ```
 
 - **Mock mode.** `e2e/launch.ts` builds the app, serves it with `vite preview` and starts the scripted fake backend of `e2e/fake-backend/`, both on ports the system picks, so several worktrees can run the suite at once. The `mock` project runs the tour and the accessibility checks, and the `perf` project the streaming budget (`make e2e-perf` runs it alone). `E2E_SKIP_BUILD=1` reuses `dist/`.
-- **Stack mode.** The `stack` project runs the tour against `E2E_BASE_URL`, else the URL a kept smoke stack wrote to `reports/smoke/ui-url`, else `http://localhost:8080`. The tour expects the CI stack, with Jev answered by the mock TypeSafe server and the CI slice; it does not pass on a `make up` stack. Its setup waits for `GET /api/health`, rewinds the replay and sets 600×, so `make e2e` can run again on the same stack.
+- **Stack mode.** The `stack` project runs the tour against `E2E_BASE_URL`, else the URL a kept smoke stack wrote to `reports/smoke/ui-url`, else `http://localhost:8080`. The tour expects the CI stack, with Von answered by the mock TypeSafe server and the CI slice; it does not pass on a `make up` stack. Its setup waits for `GET /api/health`, rewinds the replay and sets 600×, so `make e2e` can run again on the same stack.
 
 Reports land in `apps/frontend/playwright-report/`. The fake backend and its control routes are described in [`apps/frontend/README.md`](../apps/frontend/README.md).
 
@@ -196,15 +196,15 @@ Reports land in `apps/frontend/playwright-report/`. The fake backend and its con
 
 `scripts/smoke.sh` builds its own stack under a unique project name on ephemeral ports, walks the README tour through the API and tears the stack down again:
 
-- `make smoke` runs `compose.yaml` with `compose.ci.yaml`: the CI fixture slice and the mock decision service answering as Jev. This is what CI runs.
+- `make smoke` runs `compose.yaml` with `compose.ci.yaml`: the CI fixture slice and the mock decision service answering as Von. This is what CI runs.
 - `make smoke-quickstart` runs the README quick start with the rules backend, on a copy of `.env.example` that selects the CI slice; it never touches your `.env` or a running demo.
-- `make smoke-live` asserts one Jev and one LLM decision with the keys of `.env`: opt-in, and the calls are paid.
+- `make smoke-live` asserts one Von and one LLM decision with the keys of `.env`: opt-in, and the calls are paid.
 
 `make smoke SMOKE_ARGS=--keep` leaves the stack up for `make e2e` and `make eval-stack`; remove it afterwards with `docker compose -p "$(cat reports/smoke/project)" down -v --remove-orphans`. The exit code says what failed: 1 an assertion, 2 the stack did not come up, 3 a decision opened no ticket where one is required, 4 a usage error, 5 live mode without its keys. `make smoke-quickstart` currently stops at its ticket assertion with exit 3 and a `known failure` line: on the real stack the rules backend's decision on the 5 June leak lands at gate `log`, so neither a ticket nor a review item opens. It is a recorded known failure ([evaluation.md](evaluation.md#current-results)), and no threshold is lowered to pass it.
 
 ### The evaluation
 
-`make eval` replays the evaluation scenarios in process, through the backend's own pipeline, and writes a report to `reports/eval/`; it needs no Docker and no running stack. `EVAL_PROFILE` picks `smoke` (five short scenarios, what CI runs), `core` (the default), `dev` (the dev split, outside the core-10 and the held-out set) or `full` (the core-10 and the dev split less its diagnostic scenarios and the leak's dev twin, the whole recording included, from the downloaded CSV), and `EVAL_JEV_MODE` picks how Jev is reached: `auto`, `live`, `cassette` or `mock`. With `TYPESAFE_API_KEY` exported, `auto` resolves to `live`, and a live run is planned and refused without `--confirm-live`, which `make eval` never passes; flags go through `pnpm --filter @fdp/eval run eval -- <flags>`. `make eval-stack` scores a running stack from its database as the `eval` role, and `make eval-sweep` chooses Jev's gate thresholds as pre-registered, re-gating the tuning scenarios' recorded Jev answers over a grid of pairs with no API call. Scenarios, metrics and reports are in [evaluation.md](evaluation.md).
+`make eval` replays the evaluation scenarios in process, through the backend's own pipeline, and writes a report to `reports/eval/`; it needs no Docker and no running stack. `EVAL_PROFILE` picks `smoke` (five short scenarios, what CI runs), `core` (the default), `dev` (the dev split, outside the core-10 and the held-out set) or `full` (the core-10 and the dev split less its diagnostic scenarios and the leak's dev twin, the whole recording included, from the downloaded CSV), and `EVAL_VON_MODE` picks how Von is reached: `auto`, `live`, `cassette` or `mock`. With `TYPESAFE_API_KEY` exported, `auto` resolves to `live`, and a live run is planned and refused without `--confirm-live`, which `make eval` never passes; flags go through `pnpm --filter @fdp/eval run eval -- <flags>`. `make eval-stack` scores a running stack from its database as the `eval` role, and `make eval-sweep` chooses Von's gate thresholds as pre-registered, re-gating the tuning scenarios' recorded Von answers over a grid of pairs with no API call. Scenarios, metrics and reports are in [evaluation.md](evaluation.md).
 
 ### What every test follows
 

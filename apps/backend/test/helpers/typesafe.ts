@@ -34,13 +34,13 @@ import type {
   SystemOneRequest,
 } from "@fdp/contracts/mock";
 
-import { SEVERITY_ORDER } from "../../src/decision/jev/parse.ts";
-import { matchQuestionId } from "../../src/decision/jev/questions.ts";
+import { SEVERITY_ORDER } from "../../src/decision/von/parse.ts";
+import { matchQuestionId } from "../../src/decision/von/questions.ts";
 
 /** The pinned model the mock answers with; the backend's requests must name it. */
 export { MOCK_MODEL } from "@fdp/contracts/mock";
 
-/** What a test may script, in the vocabulary of the Jev question set. */
+/** What a test may script, in the vocabulary of the Von question set. */
 export interface TypeSafeHarness {
   /** The base URL the backend is pointed at. */
   readonly url: string;
