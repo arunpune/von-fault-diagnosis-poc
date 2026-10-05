@@ -13,7 +13,7 @@
 # one: it admits the workspace manifests, @fdp/contracts and this package, and
 # never a `.env`: secrets reach the stack through the environment only.
 
-FROM node:24.21.0-trixie-slim AS build
+FROM node:26.10.0-trixie-slim AS build
 RUN corepack enable && corepack prepare pnpm@11.27.0 --activate
 WORKDIR /repo
 # Manifests before sources, so the install layer is reused until a dependency
@@ -31,7 +31,7 @@ COPY apps/frontend apps/frontend
 RUN pnpm --filter "@fdp/contracts..." build \
  && pnpm --filter @fdp/frontend build
 
-FROM nginx:1.30.5-alpine-slim
+FROM nginx:1.31.0-alpine-slim
 # The entrypoint renders /etc/nginx/templates/*.template with envsubst; the
 # filter keeps it to BACKEND_* so nginx's own $uri and $http_upgrade survive.
 ENV NGINX_ENVSUBST_FILTER=^BACKEND_
