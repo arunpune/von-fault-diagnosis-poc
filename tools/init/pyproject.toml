@@ -23,7 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 # Optional catalog structuring. Installed in the image so the path works as
 # soon as LLM_API_KEY is set; never required to run init.
-llm = ["anthropic==1.7.0"]
+llm = ["anthropic==1.11.0"]
 
 [project.scripts]
 fdp-init = "fdp_init.cli:main"
