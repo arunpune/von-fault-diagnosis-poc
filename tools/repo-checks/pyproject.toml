@@ -12,5 +12,5 @@ dependencies = [] # stdlib only: the checks must run before anything is installe
 fdp-checks = "fdp_repo_checks.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.12,<0.13"]
+requires = ["uv_build>=0.12,<0.14"]
 build-backend = "uv_build"
