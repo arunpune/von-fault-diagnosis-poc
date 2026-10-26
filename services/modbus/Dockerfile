@@ -17,7 +17,7 @@
 # (section 8.3). Both stages are pinned by digest, because `nonroot` is a
 # floating tag and a digest is the only stable pin distroless offers.
 
-FROM golang:1.27.1-trixie AS build
+FROM golang:1.27.3-trixie AS build
 WORKDIR /src/services/modbus
 # The manifest first, so a source-only change reuses the download layer.
 COPY services/modbus/go.mod services/modbus/go.sum ./
@@ -32,7 +32,7 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/modbus-sim ./cmd/m
 # The machine. It also carries the ground truth the control plane forwards on
 # `gt/#`; the COPY fails the build when packages/ground-truth/data is missing,
 # which is intended — an image without presets.json cannot serve a jump target.
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3 AS sim
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:18f4cc26c9ffa7f20a359298be7deadac5c607c8e03a02b8119f1a5fc2f82c99 AS sim
 COPY --from=build /out/modbus-sim /modbus-sim
 COPY packages/ground-truth/data/ /gt/
 USER nonroot
@@ -42,7 +42,7 @@ ENTRYPOINT ["/modbus-sim"]
 # The edge connector. No ground truth reaches this image (ground-truth
 # isolation, docs/architecture.md#ground-truth-isolation): it carries one
 # binary and nothing else.
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3 AS gateway
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:18f4cc26c9ffa7f20a359298be7deadac5c607c8e03a02b8119f1a5fc2f82c99 AS gateway
 COPY --from=build /out/gateway /gateway
 USER nonroot
 EXPOSE 8082

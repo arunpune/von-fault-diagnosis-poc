@@ -13,7 +13,7 @@
 # one: it admits the workspace manifests, @fdp/contracts and this package, and
 # never a `.env`: secrets reach the stack through the environment only.
 
-FROM node:26.11.1-trixie-slim AS build
+FROM node:26.12.1-trixie-slim AS build
 RUN corepack enable && corepack prepare pnpm@11.27.0 --activate
 WORKDIR /repo
 # Manifests before sources, so the install layer is reused until a dependency
