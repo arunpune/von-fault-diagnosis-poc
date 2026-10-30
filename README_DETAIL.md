@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Meddle S.r.l. -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Fault Diagnosis PoC — Comprehensive Project Documentation
 
 > **This document is a detailed technical guide to the Fault Diagnosis Proof of Concept (PoC) project.** It explains every layer — from what the project does and why it matters, to the exact data flow inside each service, to where this technology can be applied in the real world. It is written to be read by engineers, product managers, domain experts, and decision-makers alike.
@@ -18,14 +21,15 @@
 10. [The Confidence Gate, Episodes, and Tickets](#10-the-confidence-gate-episodes-and-tickets)
 11. [Ground Truth Isolation — Why It Matters](#11-ground-truth-isolation--why-it-matters)
 12. [Fault Injection System](#12-fault-injection-system)
-13. [The Evaluation Harness](#13-the-evaluation-harness)
-14. [Technology Stack](#14-technology-stack)
-15. [Configuration Reference](#15-configuration-reference)
-16. [Security Model](#16-security-model)
-17. [Repository Layout](#17-repository-layout)
-18. [Real-World Use Cases and Industry Applications](#18-real-world-use-cases-and-industry-applications)
-19. [Status and Known Limitations](#19-status-and-known-limitations)
-20. [Licensing and Credits](#20-licensing-and-credits)
+13. [How Von Diagnoses an Injected Fault: Step-by-Step](#13-how-von-diagnoses-an-injected-fault-step-by-step)
+14. [The Evaluation Harness](#14-the-evaluation-harness)
+15. [Technology Stack](#15-technology-stack)
+16. [Configuration Reference](#16-configuration-reference)
+17. [Security Model](#17-security-model)
+18. [Repository Layout](#18-repository-layout)
+19. [Real-World Use Cases and Industry Applications](#19-real-world-use-cases-and-industry-applications)
+20. [Status and Known Limitations](#20-status-and-known-limitations)
+21. [Licensing and Credits](#21-licensing-and-credits)
 
 ---
 
@@ -145,13 +149,13 @@ Machine manual (PDF)
 
 ### Key Architectural Invariants
 
-| Invariant | How it is enforced |
-|---|---|
+| Invariant                            | How it is enforced                                                                              |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | No raw time series reaches the model | Detection computes words from windows; the state builder puts only words into the model's input |
-| No model writes to the machine | The diagnosis credential is read-only on the broker; no service issues Modbus writes |
-| Ground truth never reaches diagnosis | Three-layer isolation: import boundary, broker ACL, database role |
-| Every decision shape is the same | All three backends implement `DecisionBackend`; the gate never branches on which one answered |
-| Every file has a licence header | REUSE/SPDX compliance, enforced by `make lint` |
+| No model writes to the machine       | The diagnosis credential is read-only on the broker; no service issues Modbus writes            |
+| Ground truth never reaches diagnosis | Three-layer isolation: import boundary, broker ACL, database role                               |
+| Every decision shape is the same     | All three backends implement `DecisionBackend`; the gate never branches on which one answered   |
+| Every file has a licence header      | REUSE/SPDX compliance, enforced by `make lint`                                                  |
 
 ---
 
@@ -162,6 +166,7 @@ Machine manual (PDF)
 **Built from:** `tools/init/` (Python 3.13, package `fdp-init`)
 
 `init` runs exactly once, on the first start. It performs every preparation step the rest of the stack needs, then exits with code 0. If any step fails, it exits with a numbered code that names the failing step:
+
 - Exit 2 = configuration error
 - Exit 3 = dependency wait timeout (Postgres or broker not ready)
 - Exit 4 = database migration failure
@@ -221,14 +226,14 @@ The batch envelope carries a `wall_ts` (the actual wall-clock time); each sample
 
 The MQTT broker is the **central message bus**. It enforces access control via a topic ACL file rendered from the `MQTT_*_PASSWORD` environment variables at every start.
 
-| Credential | Publishes to | Subscribes to |
-|---|---|---|
-| `gateway` | `plant/cau-7/telemetry/#`, gateway status | — |
-| `sim` | `plant/cau-7/status/sim`, `gt/cau-7/#` | `plant/cau-7/control/#` |
-| `backend-diag` | `plant/cau-7/events/#`, `decisions`, `alerts/#` | `plant/cau-7/telemetry/#`, `status/#` |
-| `backend-ops` | `plant/cau-7/control/#` | `gt/cau-7/#`, `status/#` |
-| `eval` | — | `plant/cau-7/#` (read-only) |
-| Anonymous | — | `plant/cau-7/telemetry/#`, `status/#`, `events/#`, `decisions`, `alerts/#` |
+| Credential     | Publishes to                                    | Subscribes to                                                              |
+| -------------- | ----------------------------------------------- | -------------------------------------------------------------------------- |
+| `gateway`      | `plant/cau-7/telemetry/#`, gateway status       | —                                                                          |
+| `sim`          | `plant/cau-7/status/sim`, `gt/cau-7/#`          | `plant/cau-7/control/#`                                                    |
+| `backend-diag` | `plant/cau-7/events/#`, `decisions`, `alerts/#` | `plant/cau-7/telemetry/#`, `status/#`                                      |
+| `backend-ops`  | `plant/cau-7/control/#`                         | `gt/cau-7/#`, `status/#`                                                   |
+| `eval`         | —                                               | `plant/cau-7/#` (read-only)                                                |
+| Anonymous      | —                                               | `plant/cau-7/telemetry/#`, `status/#`, `events/#`, `decisions`, `alerts/#` |
 
 The `backend-diag` credential is **prohibited from reading `gt/#`** — one of the three layers of ground-truth isolation.
 
@@ -240,21 +245,21 @@ The `backend-diag` credential is **prohibited from reading `gt/#`** — one of t
 
 The backend owns the entire diagnostic pipeline. Its sub-modules are:
 
-| Module | What it does |
-|---|---|
-| `ingest/` | Validates telemetry, deduplicates, feeds the ring buffer, aggregates to `telemetry_agg_1m` |
-| `detection/` | Windows, trends, machine state, 16 rules, suspect events |
-| `retrieval/` | Signal-move match + pgvector semantic search → top 6 candidates |
-| `decision/types.ts` | The `DecisionBackend` interface and `DecisionOutput` shape |
-| `decision/state.ts` | Builds the human-readable state every backend reads |
-| `decision/von/` | Von questions, request, answer parser |
-| `decision/llm/` | Anthropic provider, structured output schema |
-| `decision/rules/` | Rules-only baseline (signal-move scorer) |
-| `gate/` | Two-threshold confidence gate |
-| `episodes/` | Episode state machine and in-memory store |
-| `tickets/` | Ticket lifecycle |
-| `cost/` | Price arithmetic and cost ledger |
-| `overlay/` | The only module allowed to read ground truth (`gt_rw`) |
+| Module              | What it does                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `ingest/`           | Validates telemetry, deduplicates, feeds the ring buffer, aggregates to `telemetry_agg_1m` |
+| `detection/`        | Windows, trends, machine state, 16 rules, suspect events                                   |
+| `retrieval/`        | Signal-move match + pgvector semantic search → top 6 candidates                            |
+| `decision/types.ts` | The `DecisionBackend` interface and `DecisionOutput` shape                                 |
+| `decision/state.ts` | Builds the human-readable state every backend reads                                        |
+| `decision/von/`     | Von questions, request, answer parser                                                      |
+| `decision/llm/`     | Anthropic provider, structured output schema                                               |
+| `decision/rules/`   | Rules-only baseline (signal-move scorer)                                                   |
+| `gate/`             | Two-threshold confidence gate                                                              |
+| `episodes/`         | Episode state machine and in-memory store                                                  |
+| `tickets/`          | Ticket lifecycle                                                                           |
+| `cost/`             | Price arithmetic and cost ledger                                                           |
+| `overlay/`          | The only module allowed to read ground truth (`gt_rw`)                                     |
 
 **REST API:** Routes under `/api/` serve health, telemetry aggregates, decisions, tickets, feature frame, and evaluation commands.
 
@@ -268,11 +273,11 @@ The backend owns the entire diagnostic pipeline. Its sub-modules are:
 
 Three login roles are created on the first start:
 
-| Role | Access |
-|---|---|
-| `app_rw` | Read/write on `app` schema; no access to `gt` schema |
-| `gt_rw` | Read/write on `gt` schema; used only by the overlay module |
-| `eval` | SELECT on `app` and `gt` schemas, read-only transaction |
+| Role     | Access                                                     |
+| -------- | ---------------------------------------------------------- |
+| `app_rw` | Read/write on `app` schema; no access to `gt` schema       |
+| `gt_rw`  | Read/write on `gt` schema; used only by the overlay module |
+| `eval`   | SELECT on `app` and `gt` schemas, read-only transaction    |
 
 The `app` schema holds: `fault_conditions`, `fault_causes`, `manual_chunks` (with 384-dimensional pgvector embeddings), `telemetry_agg_1m`, `native_alarms`, `episodes`, `decisions`, `tickets`, and `cost_ledger`.
 
@@ -285,6 +290,7 @@ The `app` schema holds: `fault_conditions`, `fault_causes`, `manual_chunks` (wit
 nginx serves the static build and proxies `/api/` and `/ws` to the backend, so the browser talks to one origin.
 
 **Dashboard components:**
+
 - **Status bar**: simulated clock, active backend, heartbeat indicators
 - **Signal recorder**: four live lanes with normal-band overlays, machine-state strip, reference windows
 - **Simulation panel**: play/pause, speed, jump-to presets, inject fault, reset
@@ -310,12 +316,14 @@ This section traces one sample from its CSV row to the maintenance ticket in the
 **Step 3 — Ingest:** The backend's `backend-diag` client receives the batch. It validates the JSON Schema, checks `seq = 941372 > 941371` (not a re-delivery), adds the sample to the in-memory ring buffer, and adds a data point to the 1-minute aggregate.
 
 **Step 4 — Detection:** The feature frame is recomputed on this new simulated minute. The frame shows:
+
 - Machine state: `loaded`, in loaded state for **18 minutes** (`loaded_run_s = 1080`).
 - 5-minute line pressure slope: `+0.03 bar/min` (rising slowly).
 
 The rule **`stuck_loaded`** fires: loaded run > 600 s AND pressure slope < 0.1 bar/min. The compressor is loading continuously but not reaching cut-out — the signature of an air leak. Detection builds a suspect event describing the symptom in words: `"The compressor has been continuously loaded for about 18 minutes. Line pressure is rising slowly."` The raw numbers never leave this step.
 
 **Step 5 — Retrieval:** The backend retrieves the top 6 candidate faults from the catalog matching this symptom. The top 3:
+
 1. `dryer_purge_leak` — "Dryer purge valve not seating" (manual section 8.3)
 2. `downstream_air_leak` — "Leak in distribution network" (manual section 8.4)
 3. `high_air_demand` — "Air demand exceeds delivery" (benign, manual section 8.5)
@@ -331,37 +339,38 @@ The rule **`stuck_loaded`** fires: loaded run > 600 s AND pressure slope < 0.1 b
 ## 7. The Machine Manual and Fault Catalog
 
 The CAU-7 unit manual is a **fictional document** generated from YAML source files in `manual/spec/`, rendered into two PDF variants:
+
 - `data/manual/cau-7-clean.pdf` — clean, machine-readable PDF
 - `data/manual/cau-7-realistic.pdf` — slightly skewed version simulating a scanned real manual (the default for ingestion)
 
 ### Manual Structure
 
-| Chapter | Contents |
-|---|---|
-| 1 | Safety and compliance |
-| 2 | System description and schematic (SVG diagram of all 27 components across 10 subsystems) |
-| 3 | CTRL-7 controller panel and alarm codes (35 messages: 17 warnings, 4 shutdown warnings, 8 shutdowns, 6 info) |
-| 4 | Installation |
-| 5 | Operation |
-| 6 | Maintenance schedule (11 consumables, service intervals, part codes) |
-| 7 | Troubleshooting tables |
-| 8 | Fault diagnosis — 17 fault conditions and 39 causes |
-| 9 | Specifications — sensor ranges, operating limits, rated values |
+| Chapter | Contents                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------ |
+| 1       | Safety and compliance                                                                                        |
+| 2       | System description and schematic (SVG diagram of all 27 components across 10 subsystems)                     |
+| 3       | CTRL-7 controller panel and alarm codes (35 messages: 17 warnings, 4 shutdown warnings, 8 shutdowns, 6 info) |
+| 4       | Installation                                                                                                 |
+| 5       | Operation                                                                                                    |
+| 6       | Maintenance schedule (11 consumables, service intervals, part codes)                                         |
+| 7       | Troubleshooting tables                                                                                       |
+| 8       | Fault diagnosis — 17 fault conditions and 39 causes                                                          |
+| 9       | Specifications — sensor ranges, operating limits, rated values                                               |
 
 ### The 10 Subsystems and 27 Components
 
-| Subsystem | Components |
-|---|---|
-| `compressor` | Screw compression element, motor coupling, minimum-pressure valve, safety valve |
-| `intake_unloading` | Air intake filter, intake and unloading valve, blow-down valve |
-| `oil` | Oil separator vessel, thermostatic valve, oil filter, oil level switch |
-| `cooling` | Oil cooler, aftercooler, cooling fan |
-| `separator_drain` | Cyclonic separator, automatic condensate drain |
-| `dryer` | Desiccant towers 1 and 2, dryer changeover valves, dryer purge valve, purge silencer |
-| `reservoirs` | Air reservoirs, reservoir isolation valve, reservoir inlet flow sensor |
-| `distribution` | Pneumatic panel |
-| `electrical` | Drive motor |
-| `control` | CTRL-7 controller |
+| Subsystem          | Components                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `compressor`       | Screw compression element, motor coupling, minimum-pressure valve, safety valve      |
+| `intake_unloading` | Air intake filter, intake and unloading valve, blow-down valve                       |
+| `oil`              | Oil separator vessel, thermostatic valve, oil filter, oil level switch               |
+| `cooling`          | Oil cooler, aftercooler, cooling fan                                                 |
+| `separator_drain`  | Cyclonic separator, automatic condensate drain                                       |
+| `dryer`            | Desiccant towers 1 and 2, dryer changeover valves, dryer purge valve, purge silencer |
+| `reservoirs`       | Air reservoirs, reservoir isolation valve, reservoir inlet flow sensor               |
+| `distribution`     | Pneumatic panel                                                                      |
+| `electrical`       | Drive motor                                                                          |
+| `control`          | CTRL-7 controller                                                                    |
 
 ### How Retrieval Works at Decision Time
 
@@ -393,16 +402,16 @@ The valves take priority. This definition agrees with a current-only reading on 
 
 Recomputed on every new simulated minute, every machine-state change, and after every reset. Key fields:
 
-| Field | What it measures | Window |
-|---|---|---|
-| `loaded_run_s` | Duration of the current loaded run | Current run |
-| `tp3_slope_bar_per_min` | Least-squares slope of line pressure | 5 min, 3+ samples |
-| `cycles_per_hour` | Cut-ins per hour | 2 h, 2+ cut-ins |
-| `dv_pressure_loaded_consecutive_gt` | Consecutive loaded samples with purge pressure > 0.5 bar | Samples |
-| `oil_trend_c_per_h` | Oil temperature slope | 2 h, 60+ samples |
-| `motor_current_loaded_a` | 60-s median of loaded motor current | 60 s |
-| `h1_return_s` | Seconds for separator to return to line pressure after cut-out | Current/last cycle |
-| `lps_active_s` | Duration the low-pressure switch has been closed | Run length |
+| Field                               | What it measures                                               | Window             |
+| ----------------------------------- | -------------------------------------------------------------- | ------------------ |
+| `loaded_run_s`                      | Duration of the current loaded run                             | Current run        |
+| `tp3_slope_bar_per_min`             | Least-squares slope of line pressure                           | 5 min, 3+ samples  |
+| `cycles_per_hour`                   | Cut-ins per hour                                               | 2 h, 2+ cut-ins    |
+| `dv_pressure_loaded_consecutive_gt` | Consecutive loaded samples with purge pressure > 0.5 bar       | Samples            |
+| `oil_trend_c_per_h`                 | Oil temperature slope                                          | 2 h, 60+ samples   |
+| `motor_current_loaded_a`            | 60-s median of loaded motor current                            | 60 s               |
+| `h1_return_s`                       | Seconds for separator to return to line pressure after cut-out | Current/last cycle |
+| `lps_active_s`                      | Duration the low-pressure switch has been closed               | Run length         |
 
 Every value is then converted into three words:
 
@@ -413,6 +422,7 @@ Every value is then converted into three words:
 ### 8.3 Normal Bands from the First Month
 
 "Normal" is defined from **February 2020** (28 days, 214,850 rows, no frozen block). Stored as constants in `apps/backend/src/detection/baseline.ts`:
+
 - p1, p5, p50, p95, p99 for every analog signal per machine state
 - Same percentiles for cycle-level metrics and derived behaviours
 - Digital signal shares per state
@@ -420,32 +430,32 @@ Every value is then converted into three words:
 
 Every sensor band is widened outward by the sensor's measurement accuracy before level classification:
 
-| Signal group | Accuracy |
-|---|---|
+| Signal group              | Accuracy   |
+| ------------------------- | ---------- |
 | All five pressure sensors | ±0.085 bar |
-| Oil temperature | ±1 °C |
-| Motor current | ±0.4 A |
+| Oil temperature           | ±1 °C      |
+| Motor current             | ±0.4 A     |
 
 ### 8.4 The 16 Detection Rules
 
-| Rule | Fires when | Severity | Default |
-|---|---|---|---|
-| `stuck_loaded` | Loaded run > 600 s AND line pressure slope < 0.1 bar/min over 5 min | High | On |
-| `purge_pressure_high` | Dryer purge pressure > 0.5 bar on 6+ consecutive loaded samples | High | On |
-| `fast_decay` | Last 3 idle decays each exceed max(0.25, 2.0× rolling median) bar/min | Medium | On |
-| `frequent_cycling` | Cut-ins > max(5, 1.8× rolling median)/hr, or median off phase < 250 s | Medium | On |
-| `long_loaded_runs` | 3+ of last 5 cycles were loaded > max(200, 1.5× rolling median) s | Medium | On |
-| `low_pressure_switch` | Low-pressure switch closed (while motor running) | **Critical** | On |
-| `oil_temperature_high` | 30-min minimum oil temperature > 75 °C | Medium | On |
-| `oil_temperature_rising` | Oil temperature rising > 4 °C/hr over 2 hours | Low | On |
-| `motor_current_high` | 60-s median loaded motor current > 6.5 A | Medium | On |
-| `motor_current_low` | 60-s median loaded motor current < 5.2 A | Medium | On |
-| `discharge_differential_low` | 60-s median of discharge minus line pressure < 0.1 bar while loaded | Medium | On |
-| `dryer_tower_not_switching` | None of last 3 cycles shows tower changeover pulse | Low | On |
-| `separator_not_venting` | Separator took > 120 s after cut-out to return within 0.3 bar of line pressure | Medium | On |
-| `reservoir_pressure_mismatch` | 5-min median of reservoir minus line pressure beyond ±0.3 bar | Low | On |
-| `low_oil_level` | Oil level switch reads low (while motor running) | Medium | On |
-| `flow_pulses_missing` | Flow pulse has not changed | Low | **Off** by default |
+| Rule                          | Fires when                                                                     | Severity     | Default            |
+| ----------------------------- | ------------------------------------------------------------------------------ | ------------ | ------------------ |
+| `stuck_loaded`                | Loaded run > 600 s AND line pressure slope < 0.1 bar/min over 5 min            | High         | On                 |
+| `purge_pressure_high`         | Dryer purge pressure > 0.5 bar on 6+ consecutive loaded samples                | High         | On                 |
+| `fast_decay`                  | Last 3 idle decays each exceed max(0.25, 2.0× rolling median) bar/min          | Medium       | On                 |
+| `frequent_cycling`            | Cut-ins > max(5, 1.8× rolling median)/hr, or median off phase < 250 s          | Medium       | On                 |
+| `long_loaded_runs`            | 3+ of last 5 cycles were loaded > max(200, 1.5× rolling median) s              | Medium       | On                 |
+| `low_pressure_switch`         | Low-pressure switch closed (while motor running)                               | **Critical** | On                 |
+| `oil_temperature_high`        | 30-min minimum oil temperature > 75 °C                                         | Medium       | On                 |
+| `oil_temperature_rising`      | Oil temperature rising > 4 °C/hr over 2 hours                                  | Low          | On                 |
+| `motor_current_high`          | 60-s median loaded motor current > 6.5 A                                       | Medium       | On                 |
+| `motor_current_low`           | 60-s median loaded motor current < 5.2 A                                       | Medium       | On                 |
+| `discharge_differential_low`  | 60-s median of discharge minus line pressure < 0.1 bar while loaded            | Medium       | On                 |
+| `dryer_tower_not_switching`   | None of last 3 cycles shows tower changeover pulse                             | Low          | On                 |
+| `separator_not_venting`       | Separator took > 120 s after cut-out to return within 0.3 bar of line pressure | Medium       | On                 |
+| `reservoir_pressure_mismatch` | 5-min median of reservoir minus line pressure beyond ±0.3 bar                  | Low          | On                 |
+| `low_oil_level`               | Oil level switch reads low (while motor running)                               | Medium       | On                 |
+| `flow_pulses_missing`         | Flow pulse has not changed                                                     | Low          | **Off** by default |
 
 Each rule has a **hold time** (how long it must keep firing before raising a suspect event) and a **clear time** (how long silence must last before the event is dismissed). Some rules share a **symptom key** — if two rules fire with the same key, they open one episode rather than two.
 
@@ -453,11 +463,11 @@ Each rule has a **hold time** (how long it must keep firing before raising a sus
 
 Three cycle metrics use rolling baselines because healthy summer operation looks different from February:
 
-| Metric | Floor | Factor | Cap on median |
-|---|---|---|---|
-| Idle pressure decay | 0.25 bar/min | 2.0× | 0.138 bar/min |
-| Cycles per hour | 5/hr | 1.8× | 3.936/hr |
-| Loaded run duration | 200 s | 1.5× | 218 s |
+| Metric              | Floor        | Factor | Cap on median |
+| ------------------- | ------------ | ------ | ------------- |
+| Idle pressure decay | 0.25 bar/min | 2.0×   | 0.138 bar/min |
+| Cycles per hour     | 5/hr         | 1.8×   | 3.936/hr      |
+| Loaded run duration | 200 s        | 1.5×   | 218 s         |
 
 The median is taken over the last 48 simulated hours of closed cycles, requiring at least 20. **Cycles that close while an episode is open are excluded**, preventing a fault from raising its own threshold. The median is capped at twice the first-month value, limiting how far a slow leak can drag the threshold up.
 
@@ -542,43 +552,239 @@ A **parity test** (`tools/eval/test/integration/parity.test.ts`) proves that the
 
 Because real fault datasets are rare, the system includes a **fault injection engine** that overlays synthetic signal deviations onto the real replay. This lets you test faults the MetroPT-3 recording never contains.
 
-| Injection ID | What it simulates |
-|---|---|
-| `dryer_purge_leak` | Dryer purge valve leaking: purge pressure elevated while loaded |
-| `downstream_air_leak` | Distribution network leak: rapid idle pressure decay, frequent cycling |
-| `high_air_demand` | Heavy legitimate air demand: long loaded runs, frequent cut-ins, no leak |
-| `oil_cooler_fouling` | Fouled oil cooler: oil temperature rising steadily over hours |
-| `oil_filter_blocked` | Blocked oil filter: rising discharge pressure differential |
-| `intake_filter_blocked` | Clogged intake filter: low motor current while loaded |
-| `separator_drain_blocked` | Blocked condensate drain: separator takes long to vent after cut-out |
-| `dryer_tower_fault` | Dryer tower not switching: no changeover pulse for several cycles |
-| `reservoir_valve_partially_closed` | Partially closed reservoir isolation valve: reservoir pressure mismatch |
+| Injection ID                       | What it simulates                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `dryer_purge_leak`                 | Dryer purge valve leaking: purge pressure elevated while loaded          |
+| `downstream_air_leak`              | Distribution network leak: rapid idle pressure decay, frequent cycling   |
+| `high_air_demand`                  | Heavy legitimate air demand: long loaded runs, frequent cut-ins, no leak |
+| `oil_cooler_fouling`               | Fouled oil cooler: oil temperature rising steadily over hours            |
+| `oil_filter_blocked`               | Blocked oil filter: rising discharge pressure differential               |
+| `intake_filter_blocked`            | Clogged intake filter: low motor current while loaded                    |
+| `separator_drain_blocked`          | Blocked condensate drain: separator takes long to vent after cut-out     |
+| `dryer_tower_fault`                | Dryer tower not switching: no changeover pulse for several cycles        |
+| `reservoir_valve_partially_closed` | Partially closed reservoir isolation valve: reservoir pressure mismatch  |
 
 To try an injection: open the dashboard → **Inject fault** → choose a type → click Start.
 
 ---
 
-## 13. The Evaluation Harness
+## 13. How Von Diagnoses an Injected Fault: Step-by-Step
+
+This section walks through the complete pipeline from the moment you inject a fault to the moment a ticket appears on the dashboard, using **`downstream_air_leak`** (a distribution network air leak) as the worked example. Von is responsible for only one step — but it is the most important one: naming the fault.
+
+> **Important distinction:** Von _diagnoses_ the fault — it tells you what is wrong and how confident it is. It does not fix it. The physical repair (finding and sealing the leak) is the technician's job after reading the ticket.
+
+### Step 1 — Inject the Fault
+
+You open the dashboard, click **Inject fault → downstream_air_leak → Start**. The overlay service begins warping the replayed sensor stream, adding synthetic signal deviations on top of the real MetroPT-3 data:
+
+| Signal                         | Effect                                                |
+| ------------------------------ | ----------------------------------------------------- |
+| Idle line pressure             | Decays faster than normal while the unit is unloaded  |
+| Compressor cycle rate          | Increases — the unit cuts in more often to compensate |
+| Oil temperature, motor current | Unchanged — the machine itself is healthy             |
+
+Nothing changes in the real data. The overlay is a mathematical mask applied to the telemetry stream inside the gateway.
+
+### Step 2 — Detection Fires a Rule (No AI)
+
+Every 50 ms the backend receives a new telemetry batch and recomputes sliding windows over the last few minutes. Within one or two simulated minutes the idle pressure decay rule fires:
+
+```
+rule: idle_pressure_decay
+symptom_key: rapid_pressure_decay
+evidence: "Idle line pressure decay: 2.4 bar/min (reference: 0.25 bar/min, threshold: 2.0×)"
+```
+
+This creates a **SuspectEvent** — a snapshot of the current machine state, all sensor observations (as statistical levels and trends, never raw numbers), and the firing rule's evidence sentence. Detection has noticed _something is wrong_ but has no idea what.
+
+### Step 3 — Retrieval Finds Candidate Faults (No AI)
+
+The backend embeds the suspect event's evidence text and runs a vector similarity search in pgvector against the machine manual's fault catalog. It returns the faults whose expected signal moves best match the observed pattern — typically 2–4 candidates:
+
+| Rank | Fault ID              | Why it was retrieved                                           |
+| ---- | --------------------- | -------------------------------------------------------------- |
+| 1    | `downstream_air_leak` | Expects: idle pressure decays faster, cycle rate rises         |
+| 2    | `high_air_demand`     | Expects: same idle decay, but driven by legitimate consumption |
+| 3    | `dryer_purge_leak`    | Expects: purge pressure elevated, some pressure loss           |
+
+Retrieval ranks by semantic overlap with the evidence, not by the answer. It deliberately returns plausible _alternatives_ — that is what forces Von to discriminate between them.
+
+### Step 4 — The State Is Built in Words (No AI)
+
+The backend translates every sensor reading into **words only** — no raw numbers ever reach Von. This is a deliberate design choice: a model that must compare two digits stops being a fast judgment call.
+
+```json
+{
+  "machine": {
+    "kind": "oil-injected screw compressor with a twin-tower desiccant dryer, load/unload regulation",
+    "mode": "unloaded",
+    "mode_for": "3 minutes"
+  },
+  "symptom": {
+    "condition": "Rapid idle pressure decay",
+    "for": "4 minutes"
+  },
+  "observations": [
+    {
+      "label": "Idle line pressure",
+      "level": "far below normal",
+      "trend": "falling",
+      "seen": "Idle line pressure decay: 2.4 bar/min (reference: 0.25 bar/min)"
+    },
+    { "label": "Cycle rate", "level": "far above normal", "trend": "rising" },
+    { "label": "Oil temperature", "level": "normal", "trend": "flat" },
+    { "label": "Motor current", "level": "normal", "trend": "flat" }
+  ],
+  "candidates": [
+    {
+      "id": "downstream_air_leak",
+      "cause": "Downstream air leak",
+      "expected_signal_moves": ["Idle line pressure falls faster than normal while unloaded", "Cycle rate rises"]
+    },
+    {
+      "id": "high_air_demand",
+      "cause": "High air demand",
+      "expected_signal_moves": [
+        "Idle line pressure falls faster than normal while unloaded",
+        "Loaded run duration longer"
+      ]
+    },
+    {
+      "id": "dryer_purge_leak",
+      "cause": "Dryer purge leak",
+      "expected_signal_moves": ["Dryer purge pressure (P4) is persistently high while loaded"]
+    }
+  ]
+}
+```
+
+The state is capped at 12 observations and a ~4,000-token budget. Only signals that are misbehaving, or that a candidate expects, are included.
+
+### Step 5 — Von Answers Three Questions (AI)
+
+This is where Von works. One HTTP POST to the local Von server (`http://von:8000/v1/systemone`) carries the state above and three structured questions in a single request. Von runs a **single non-autoregressive forward pass** through a 395M ModernBERT encoder — no token generation, no chain-of-thought — and returns calibrated probabilities in under 15 ms.
+
+#### Question 1 — Choice: Which fault is this?
+
+> _"Which candidate in `candidates` has `expected_signal_moves` that match the movements listed in `observations`?"_
+
+Each candidate is described with:
+
+- `what` — the manual's own paragraph on that fault and what distinguishes it from the others
+- `signals` — its expected signal moves, verbatim from the manual
+- `not_for` — what the observation looks like when it is _not_ this fault (e.g. _"Cases where idle pressure stays normal"_)
+
+Von returns a **probability distribution** over all candidates plus an abstention option (`none_of_these`):
+
+| Option                | Probability             |
+| --------------------- | ----------------------- |
+| `downstream_air_leak` | **0.91** ← Von's choice |
+| `high_air_demand`     | 0.07                    |
+| `dryer_purge_leak`    | 0.02                    |
+| `none_of_these`       | 0.00                    |
+
+**Confidence** is how peaked this distribution is — not a threshold Von sets, but a measure the backend computes from the distribution. At 0.91 the distribution is very peaked: Von is sure.
+
+The key discrimination Von makes here: both `downstream_air_leak` and `high_air_demand` expect idle pressure to fall faster. Von's `not_for` criteria for `downstream_air_leak` note that high demand _"disappears when the plant stops, at night and at the weekend"_ — and the by-hour idle decay pattern in the state shows the decay persists in the quiet hours too. That single sentence separates the two candidates.
+
+#### Question 2 — Noul (per candidate): Does the defining signal move match?
+
+For each candidate, Von gets one targeted binary question about that candidate's _most defining_ signal move:
+
+> _"Does `observations` show the movement in `candidates[0].expected_signal_moves[0]`?"_
+> (i.e. "Is idle pressure falling faster than normal while unloaded?")
+
+| Candidate             | Noul score | Meaning                                                               |
+| --------------------- | ---------- | --------------------------------------------------------------------- |
+| `downstream_air_leak` | 0.88       | Yes — idle pressure is indeed falling fast                            |
+| `high_air_demand`     | 0.85       | Yes — same signal, same direction (the ambiguity the Choice resolves) |
+| `dryer_purge_leak`    | 0.11       | No — purge pressure is normal                                         |
+
+This `support` score is stored alongside the ticket as per-candidate evidence strength. It also feeds a consistency check: if Von chose a fault whose own Noul score is low (it named a cause but judged its defining move as absent), a warning is logged.
+
+#### Question 3 — Score: How serious is this?
+
+> _"How serious is the situation described by `observations` and `controller_alarms` for the air supply of the plant right now?"_
+
+Von scores on four situational levels:
+
+| Level      | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| `low`      | One reading drifts outside normal; unit cycles and holds pressure as usual |
+| `medium`   | Unit holds pressure but works harder — more frequent cut-ins, faster decay |
+| `high`     | Unit cannot reach cut-out pressure, or a controller warning is active      |
+| `critical` | Air supply lost, or a shutdown condition is active                         |
+
+For an early-stage air leak → **`medium`**: the unit is cycling harder but still delivering air.
+
+### Step 6 — The Gate Decides: Ticket or Log Line?
+
+Von's answer passes through the confidence gate:
+
+```
+confidence = 0.91  ≥  VON_GATE_TICKET_MIN_CONFIDENCE (0.85)
+→ TICKET opened   status: open   severity: medium
+```
+
+If confidence had been between 0.65 and 0.85, the ticket would open as `review` — flagged for a human to confirm before acting on it. Below 0.65, only a log line is written and no ticket is created.
+
+Von uses its own gate thresholds (`VON_GATE_TICKET_MIN_CONFIDENCE = 0.85`, `VON_GATE_REVIEW_MIN_CONFIDENCE = 0.65`) separate from the rules backend's thresholds, because Von's probability is on a different scale from a rules confidence margin.
+
+### Step 7 — The Ticket Appears on the Dashboard
+
+Within seconds of the gate decision the ticket is visible in the dashboard's **Tickets** tab:
+
+```
+🔴 Downstream air leak
+Confidence: 91%   Severity: medium   Backend: von (von-1.13.0)
+Opened: sim-time 14:32   Decision: open
+
+Candidate probabilities:
+  downstream_air_leak  91%  support 0.88
+  high_air_demand       7%  support 0.85
+  dryer_purge_leak      2%  support 0.11
+```
+
+The technician reads the ticket, inspects the distribution network for leaks, carries out the repair, and closes the ticket as **Correct**. That closure is written to the ground-truth database and can be used in future evaluation runs.
+
+### Summary: What Von Does and Does Not Do
+
+| Stage                                                    | Who does it                             | Uses AI?            |
+| -------------------------------------------------------- | --------------------------------------- | ------------------- |
+| Sensor polling and MQTT publish                          | Gateway (Go)                            | No                  |
+| Anomaly detection, rule firing                           | Backend — detection module (TypeScript) | No                  |
+| Candidate retrieval from manual                          | Backend — pgvector semantic search      | No (embedding only) |
+| State building (numbers → words)                         | Backend — `decision/state.ts`           | No                  |
+| **Naming the fault, scoring severity, judging evidence** | **Von (local ModernBERT model)**        | **Yes**             |
+| Gate decision (ticket / review / log line)               | Backend — gate module (TypeScript)      | No                  |
+| Ticket storage and display                               | Backend + Frontend                      | No                  |
+
+Von's role is precisely bounded: it receives a structured description of the machine state and candidate faults, answers three questions in one forward pass, and returns calibrated probabilities. Everything before and after it is deterministic code.
+
+---
+
+## 14. The Evaluation Harness
 
 `tools/eval` replays scenarios with known ground truth through the backend's own production pipeline in-process, without a running stack, and writes reports to `reports/eval/`.
 
 ### Metrics
 
-| Metric | What it measures |
-|---|---|
-| **Precision** | Of tickets inside a failure window, what fraction named the correct fault? |
-| **Recall** | Of labelled failures, what fraction had at least one correct ticket? |
-| **Lead time** | How far ahead of the unit's own CTRL-7 alarm did the system open a ticket? |
-| **False tickets per negative machine-day** | Tickets outside failure windows, normalised to machine-days |
-| **"None of these" rate** | How often did the model correctly abstain on a negative scenario? |
+| Metric                                     | What it measures                                                           |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| **Precision**                              | Of tickets inside a failure window, what fraction named the correct fault? |
+| **Recall**                                 | Of labelled failures, what fraction had at least one correct ticket?       |
+| **Lead time**                              | How far ahead of the unit's own CTRL-7 alarm did the system open a ticket? |
+| **False tickets per negative machine-day** | Tickets outside failure windows, normalised to machine-days                |
+| **"None of these" rate**                   | How often did the model correctly abstain on a negative scenario?          |
 
 ### Profiles
 
-| Profile | Scenarios | Used by |
-|---|---|---|
-| `smoke` | 5 short scenarios | CI (mock Von server) |
-| `core` (default) | Core-10: 10 test-split scenarios the gates count | Local runs |
-| `full` | 18 scenarios + whole MetroPT-3 recording | Full baseline figures |
+| Profile          | Scenarios                                        | Used by               |
+| ---------------- | ------------------------------------------------ | --------------------- |
+| `smoke`          | 5 short scenarios                                | CI (mock Von server)  |
+| `core` (default) | Core-10: 10 test-split scenarios the gates count | Local runs            |
+| `full`           | 18 scenarios + whole MetroPT-3 recording         | Full baseline figures |
 
 ### How Von Runs in Evaluation
 
@@ -594,94 +800,94 @@ A sealed held-out set of six scenarios was drawn before their data was ever insp
 
 On the full MetroPT-3 recording (1,516,418 samples, 1 Feb – 31 Aug 2020, 158.1 negative machine-days):
 
-| Measure | Value |
-|---|---|
-| Air leaks caught at ticket level | **0 of 4** |
-| False tickets per negative machine-day (ticket level) | **0.063** |
-| False tickets per negative machine-day (review level) | **0.209** |
-| Suspect events → decisions → review/ticket → tickets | 2,704 → 1,612 → 105 → 33 |
+| Measure                                               | Value                    |
+| ----------------------------------------------------- | ------------------------ |
+| Air leaks caught at ticket level                      | **0 of 4**               |
+| False tickets per negative machine-day (ticket level) | **0.063**                |
+| False tickets per negative machine-day (review level) | **0.209**                |
+| Suspect events → decisions → review/ticket → tickets  | 2,704 → 1,612 → 105 → 33 |
 
 These figures are in-sample: detection thresholds were designed after looking at the four labelled failures.
 
 ---
 
-## 14. Technology Stack
+## 15. Technology Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| Container orchestration | Docker Compose | 2.24+ |
-| Message broker | Eclipse Mosquitto | 2.0.22 |
-| Database | PostgreSQL | 18 |
-| Vector search | pgvector | 0.8.6 |
-| Backend language | Node.js + Fastify | 24 / 5 |
-| Backend types | TypeScript | 5 |
-| Frontend framework | React | 19 |
-| Frontend UI | shadcn/ui + Tailwind CSS | latest |
-| Frontend fonts | IBM Plex Sans, IBM Plex Mono | SIL OFL 1.1 |
-| Machine emulator | Go | 1.27 |
-| Init / ingestion | Python | 3.13 |
-| PDF extraction | pdfminer.six + pdfplumber | latest |
-| Embedding model | sentence-transformers/all-MiniLM-L6-v2 | pinned revision |
-| Package manager | pnpm (JS) + uv (Python) | workspace |
-| Test framework | Vitest (TypeScript), pytest (Python), Go test | latest |
-| CI | GitHub Actions | — |
-| Decision backend 1 | Von (TypeSafe AI) | von-1.13.0 |
-| Decision backend 2 | Anthropic Claude | claude-opus-5 |
+| Layer                   | Technology                                    | Version         |
+| ----------------------- | --------------------------------------------- | --------------- |
+| Container orchestration | Docker Compose                                | 2.24+           |
+| Message broker          | Eclipse Mosquitto                             | 2.0.22          |
+| Database                | PostgreSQL                                    | 18              |
+| Vector search           | pgvector                                      | 0.8.6           |
+| Backend language        | Node.js + Fastify                             | 24 / 5          |
+| Backend types           | TypeScript                                    | 5               |
+| Frontend framework      | React                                         | 19              |
+| Frontend UI             | shadcn/ui + Tailwind CSS                      | latest          |
+| Frontend fonts          | IBM Plex Sans, IBM Plex Mono                  | SIL OFL 1.1     |
+| Machine emulator        | Go                                            | 1.27            |
+| Init / ingestion        | Python                                        | 3.13            |
+| PDF extraction          | pdfminer.six + pdfplumber                     | latest          |
+| Embedding model         | sentence-transformers/all-MiniLM-L6-v2        | pinned revision |
+| Package manager         | pnpm (JS) + uv (Python)                       | workspace       |
+| Test framework          | Vitest (TypeScript), pytest (Python), Go test | latest          |
+| CI                      | GitHub Actions                                | —               |
+| Decision backend 1      | Von (TypeSafe AI)                             | von-1.13.0      |
+| Decision backend 2      | Anthropic Claude                              | claude-opus-5   |
 
 ---
 
-## 15. Configuration Reference
+## 16. Configuration Reference
 
 All settings are in `.env`, copied from `.env.example`. Every variable has a default; the stack runs without any changes.
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `TYPESAFE_API_KEY` | — | Enables Von as the decision backend |
-| `DECISION_BACKEND` | `von` if key set, else `rules` | `von`, `llm`, or `rules` |
-| `LLM_API_KEY` | — | Enables the Anthropic LLM backend |
-| `LLM_MODEL` | `claude-opus-5` | Model ID for the LLM backend |
-| `VON_MODEL` | `von-1.13.0` | Pinned Von model ID |
-| `REPLAY_SPEED` | `600` | Initial replay speed (× real time) |
-| `METROPT_CSV` | `/data/metropt3/MetroPT3(AirCompressor).csv` | CSV path inside the container |
-| `MANUAL_PATH` | `data/manual/cau-7-realistic.pdf` | PDF to ingest |
-| `UI_PORT` | `8080` | Host port for the dashboard |
-| `MQTT_PORT` | `1883` | Host port for the MQTT broker |
-| `MODBUS_PORT` | `5020` | Host port for the Modbus device |
-| `GATE_TICKET_MIN_CONFIDENCE` | `0.85` | Ticket threshold (rules/LLM) |
-| `GATE_REVIEW_MIN_CONFIDENCE` | `0.60` | Review threshold (rules/LLM) |
-| `VON_GATE_TICKET_MIN_CONFIDENCE` | `0.85` | Ticket threshold (Von only) |
-| `VON_GATE_REVIEW_MIN_CONFIDENCE` | `0.65` | Review threshold (Von only) |
-| `GATE_PERSIST_SIM_MIN` | `1` | Symptom must persist this many sim-minutes before first decision |
-| `DECISION_INTERVAL_SIM_MIN` | `30` | Sim-minutes between re-decisions on one episode |
-| `EPISODE_CLEAR_SIM_MIN` | `120` | Sim-minutes of calm that close an episode |
-| `INIT_FORCE_INGEST` | `0` | Set to `1` to re-ingest the manual on next start |
-| `LOG_LEVEL` | `info` | Log verbosity for all services |
-| `RULES_DISABLED` | `flow_pulses_missing` | Comma-separated rules to disable |
-| `VON_PRICE_INPUT_PER_MTOK` | `0.042` | USD per million Von input tokens (for Cost panel) |
-| `LLM_PRICE_INPUT_PER_MTOK` | `5` | USD per million LLM input tokens |
-| `LLM_PRICE_OUTPUT_PER_MTOK` | `25` | USD per million LLM output tokens |
+| Variable                         | Default                                      | Purpose                                                          |
+| -------------------------------- | -------------------------------------------- | ---------------------------------------------------------------- |
+| `TYPESAFE_API_KEY`               | —                                            | Enables Von as the decision backend                              |
+| `DECISION_BACKEND`               | `von` if key set, else `rules`               | `von`, `llm`, or `rules`                                         |
+| `LLM_API_KEY`                    | —                                            | Enables the Anthropic LLM backend                                |
+| `LLM_MODEL`                      | `claude-opus-5`                              | Model ID for the LLM backend                                     |
+| `VON_MODEL`                      | `von-1.13.0`                                 | Pinned Von model ID                                              |
+| `REPLAY_SPEED`                   | `600`                                        | Initial replay speed (× real time)                               |
+| `METROPT_CSV`                    | `/data/metropt3/MetroPT3(AirCompressor).csv` | CSV path inside the container                                    |
+| `MANUAL_PATH`                    | `data/manual/cau-7-realistic.pdf`            | PDF to ingest                                                    |
+| `UI_PORT`                        | `8080`                                       | Host port for the dashboard                                      |
+| `MQTT_PORT`                      | `1883`                                       | Host port for the MQTT broker                                    |
+| `MODBUS_PORT`                    | `5020`                                       | Host port for the Modbus device                                  |
+| `GATE_TICKET_MIN_CONFIDENCE`     | `0.85`                                       | Ticket threshold (rules/LLM)                                     |
+| `GATE_REVIEW_MIN_CONFIDENCE`     | `0.60`                                       | Review threshold (rules/LLM)                                     |
+| `VON_GATE_TICKET_MIN_CONFIDENCE` | `0.85`                                       | Ticket threshold (Von only)                                      |
+| `VON_GATE_REVIEW_MIN_CONFIDENCE` | `0.65`                                       | Review threshold (Von only)                                      |
+| `GATE_PERSIST_SIM_MIN`           | `1`                                          | Symptom must persist this many sim-minutes before first decision |
+| `DECISION_INTERVAL_SIM_MIN`      | `30`                                         | Sim-minutes between re-decisions on one episode                  |
+| `EPISODE_CLEAR_SIM_MIN`          | `120`                                        | Sim-minutes of calm that close an episode                        |
+| `INIT_FORCE_INGEST`              | `0`                                          | Set to `1` to re-ingest the manual on next start                 |
+| `LOG_LEVEL`                      | `info`                                       | Log verbosity for all services                                   |
+| `RULES_DISABLED`                 | `flow_pulses_missing`                        | Comma-separated rules to disable                                 |
+| `VON_PRICE_INPUT_PER_MTOK`       | `0.042`                                      | USD per million Von input tokens (for Cost panel)                |
+| `LLM_PRICE_INPUT_PER_MTOK`       | `5`                                          | USD per million LLM input tokens                                 |
+| `LLM_PRICE_OUTPUT_PER_MTOK`      | `25`                                         | USD per million LLM output tokens                                |
 
 Only `TYPESAFE_API_KEY` and `LLM_API_KEY` are secrets. All other values are PoC defaults.
 
 ---
 
-## 16. Security Model
+## 17. Security Model
 
 The system is a **proof of concept** and is explicitly not production-ready from an authentication standpoint.
 
-| Aspect | What the stack does |
-|---|---|
-| Machine write access | Zero. The diagnosis only reads telemetry. |
-| What leaves the stack (rules backend) | Nothing. Decisions are computed in-process. |
-| What leaves the stack (Von/LLM) | One HTTPS request per decision: symptom description in words + candidate fault names. Raw telemetry is never sent. |
-| What leaves the stack (LLM with `LLM_API_KEY` during init) | One LLM call per ingest: text extracted from the manual PDF. |
-| API authentication | None. Keep published ports on a trusted network. |
-| Secret handling | `TYPESAFE_API_KEY` and `LLM_API_KEY` are read from `.env` (gitignored), passed only to `backend` and `init`, and never appear in images, logs, the UI, or `docker compose config` output. |
-| Anonymous MQTT access | Anonymous clients can read telemetry, status, events, decisions, and alerts. They cannot publish or read ground-truth topics. |
+| Aspect                                                     | What the stack does                                                                                                                                                                       |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Machine write access                                       | Zero. The diagnosis only reads telemetry.                                                                                                                                                 |
+| What leaves the stack (rules backend)                      | Nothing. Decisions are computed in-process.                                                                                                                                               |
+| What leaves the stack (Von/LLM)                            | One HTTPS request per decision: symptom description in words + candidate fault names. Raw telemetry is never sent.                                                                        |
+| What leaves the stack (LLM with `LLM_API_KEY` during init) | One LLM call per ingest: text extracted from the manual PDF.                                                                                                                              |
+| API authentication                                         | None. Keep published ports on a trusted network.                                                                                                                                          |
+| Secret handling                                            | `TYPESAFE_API_KEY` and `LLM_API_KEY` are read from `.env` (gitignored), passed only to `backend` and `init`, and never appear in images, logs, the UI, or `docker compose config` output. |
+| Anonymous MQTT access                                      | Anonymous clients can read telemetry, status, events, decisions, and alerts. They cannot publish or read ground-truth topics.                                                             |
 
 ---
 
-## 17. Repository Layout
+## 18. Repository Layout
 
 ```
 jev-fault-diagnosis-poc/
@@ -723,19 +929,20 @@ jev-fault-diagnosis-poc/
 
 ---
 
-## 18. Real-World Use Cases and Industry Applications
+## 19. Real-World Use Cases and Industry Applications
 
 The Fault Diagnosis PoC demonstrates a pattern that is broadly applicable: **automated anomaly detection grounded in domain documentation, with AI-assisted root-cause identification, a confidence gate, and a human-in-the-loop review queue**. Here is where this pattern can be applied, domain by domain.
 
 ---
 
-### 18.1 Manufacturing Industry
+### 19.1 Manufacturing Industry
 
 **Domain:** Discrete and process manufacturing — automotive assembly, chemical plants, paper mills, plastics, metals.
 
 Manufacturing facilities run hundreds of rotating and pneumatic machines: compressors, pumps, fans, conveyor drives, and hydraulic presses. Every machine has an O&M manual that describes fault conditions. Today, that manual sits on a shelf and is consulted reactively — after a breakdown.
 
 Using this pattern:
+
 - The machine's sensors are already wired to a PLC or SCADA system via Modbus, OPC-UA, or Profibus. A gateway (analogous to this project's Go gateway) polls the registers and publishes structured telemetry.
 - Detection rules watch the signals that the manual says are diagnostic: motor current rising, pressure differentials shrinking, cycle times lengthening.
 - When a rule fires, the AI asks: "Which fault in this machine's manual explains what we are seeing, and how sure are we?" The answer names a chapter, a cause, and a corrective action.
@@ -747,13 +954,14 @@ Using this pattern:
 
 ---
 
-### 18.2 Oil and Gas Industry
+### 19.2 Oil and Gas Industry
 
 **Domain:** Upstream (production wells, compressor stations), midstream (pipelines, gas processing), downstream (refineries).
 
 Compressor stations in gas pipelines are almost exactly the machine this PoC models: large reciprocating or centrifugal compressors with complex lubrication, sealing, and cooling systems. Their O&M manuals run to thousands of pages and describe vibration patterns, pressure drops, seal leaks, and bearing wear.
 
 Using this pattern:
+
 - SCADA systems already collect pressure, temperature, flow, vibration, and motor current at high frequency.
 - Detection rules watch for patterns the manual describes: discharge pressure falling (reverse flow), lube oil pressure dropping while running (bearing failure precursor), discharge temperature spiking (valve leakage).
 - The AI identifies which specific stage, valve, or seal is implicated, citing the manual section.
@@ -765,7 +973,7 @@ Using this pattern:
 
 ---
 
-### 18.3 Railway and Metro Systems
+### 19.3 Railway and Metro Systems
 
 **Domain:** Metro trains, heavy rail, traction units, rolling stock maintenance depots.
 
@@ -774,6 +982,7 @@ The MetroPT-3 dataset that this project replays **is already a railway compresso
 Railway air systems power brakes, door systems, pantographs, and suspension. Their reliability is safety-critical. A failure in the brake air system causes an emergency stop; a failure in the door system delays the service.
 
 Using this pattern:
+
 - Every train reports telemetry from its air system (compressor pressure, motor current, dryer status) over a 4G/5G link to a condition-monitoring centre.
 - The detection engine identifies anomalies in the compressor cycle: cut-in-to-cut-out ratios changing, purge pressure elevated, motor current trending upward.
 - The AI identifies the root cause from the unit's service manual, including lead time against the unit's own alarms (exactly the metric this project measures in the evaluation harness).
@@ -785,13 +994,14 @@ Using this pattern:
 
 ---
 
-### 18.4 Water and Wastewater Utilities
+### 19.4 Water and Wastewater Utilities
 
 **Domain:** Water treatment plants, pumping stations, sewage treatment, desalination.
 
 Municipal water utilities operate pumping stations that run 24/7, often unstaffed. Their pumps, compressors, and blowers are maintained on fixed schedules — the manual says "replace impeller every 5 years". But the actual condition depends on water quality, load profile, and number of starts. Condition-based maintenance, triggered by actual anomalies rather than the calendar, saves money and prevents failures.
 
 Using this pattern:
+
 - Pumping stations report flow rate, suction and discharge pressure, motor power, vibration, and efficiency index to a SCADA system.
 - Detection rules watch for efficiency degradation (pump is working harder to deliver the same flow), cavitation signatures, and seal leaks.
 - When a rule fires, the AI asks: "Which fault in this pump's manual is consistent with reduced efficiency and elevated power draw?" The answer might be "impeller wear" (section 6.4) or "partially closed discharge valve" (section 7.2, benign).
@@ -801,13 +1011,14 @@ Using this pattern:
 
 ---
 
-### 18.5 Pharmaceutical Industry
+### 19.5 Pharmaceutical Industry
 
 **Domain:** Cleanroom compressed air systems, HVAC, freeze-dryers, fermenters, sterile fill lines.
 
 Pharmaceutical manufacturing requires compressed air systems that meet GMP (Good Manufacturing Practice) standards: air purity class, dew point, particulate count, microbial load. These systems have detailed maintenance manuals and require documented evidence of correct operation.
 
 Using this pattern:
+
 - The compressed air system's quality sensors (dew point meter, particle counter, oil detector) are added to the signal channels alongside the compressor's own sensors.
 - Detection rules watch for dew point creeping upward (dryer malfunction), particle count spiking (filter bypass), or pressure fluctuations.
 - The AI identifies the root cause, citing the validation documentation reference.
@@ -817,13 +1028,14 @@ Using this pattern:
 
 ---
 
-### 18.6 Data Centers
+### 19.6 Data Centers
 
 **Domain:** Hyperscale data centers, colocation facilities, edge computing nodes.
 
 Data centers use large centrifugal chillers, cooling towers, and precision air conditioning units (PACs) to manage heat. These machines run continuously and their failure causes expensive downtime. Their O&M manuals describe dozens of fault causes for common symptoms like "chiller low suction pressure" or "high condenser approach temperature".
 
 Using this pattern:
+
 - BAS (Building Automation System) data — chilled water temperatures, compressor pressures, fan speeds, refrigerant superheat, pump flows — is polled and published as telemetry.
 - Detection rules watch for performance degradation: chiller COP declining, condenser approach temperature rising (fouling), evaporator approach temperature rising (refrigerant charge loss).
 - The AI identifies the cause, with the confidence gate preventing false alarms that would wake on-call engineers at 3 AM.
@@ -831,13 +1043,14 @@ Using this pattern:
 
 ---
 
-### 18.7 Mining Industry
+### 19.7 Mining Industry
 
 **Domain:** Open-pit and underground mining — crushing, grinding, hoisting, ventilation, compressed air for drilling.
 
 Mining operations run large compressors that power drill rigs, rock breakers, and pneumatic hoisting systems. Compressors in remote open-pit mines are serviced by teams that travel hours to reach them.
 
 Using this pattern:
+
 - The compressor telemetry is transmitted over LTE or satellite to a central condition monitoring centre.
 - Detection rules identify anomalies that a remote technician, arriving after a long drive, would otherwise face as a surprise breakdown.
 - The AI pre-diagnoses the fault — "oil separator bypass valve leaking", citing section 7 of the manual — so the technician arrives with the right spare parts and tools.
@@ -847,13 +1060,14 @@ Using this pattern:
 
 ---
 
-### 18.8 Aerospace and Defense
+### 19.8 Aerospace and Defense
 
 **Domain:** Aircraft ground support equipment (GSE), military base utilities, test cell compressors.
 
 Aircraft ground support uses high-pressure air compressors to start jet engines, service pneumatic systems, and supply nitrogen for tire inflation. These compressors operate on strict maintenance schedules, and unscheduled maintenance between flights is extremely disruptive.
 
 Using this pattern:
+
 - Each GSE unit is fitted with a telemetry module that publishes to a maintenance server over the base network.
 - The detection and diagnosis system identifies developing faults before the unit fails during aircraft servicing.
 - The AI's answer includes the manual section reference, which is required for technical order (TO) compliance documentation in military settings.
@@ -863,13 +1077,14 @@ Using this pattern:
 
 ---
 
-### 18.9 Building and Facility Management (HVAC)
+### 19.9 Building and Facility Management (HVAC)
 
 **Domain:** Commercial office buildings, hospitals, hotels, shopping centres.
 
 Large HVAC systems — chillers, air handling units, cooling towers, heat pumps — are the largest energy consumers in commercial buildings and among the most failure-prone. Building managers typically receive a reactive call when a tenant reports it is too hot or cold, by which point the fault has already manifested.
 
 Using this pattern:
+
 - BACnet or Modbus data from the building automation system is ingested as telemetry.
 - Detection rules watch for thermal performance degradation: supply air temperature drifting from setpoint, refrigerant superheat increasing, chiller efficiency index declining.
 - The AI identifies the root cause from the equipment's service manual — fouled condenser coil, low refrigerant charge, stuck expansion valve.
@@ -879,13 +1094,14 @@ Using this pattern:
 
 ---
 
-### 18.10 Food and Beverage Industry
+### 19.10 Food and Beverage Industry
 
 **Domain:** Food processing plants, breweries, cold chain logistics, bottling lines.
 
 Food and beverage facilities rely heavily on compressed air for pneumatic actuators, product conveying, blow moulding, and cleanroom applications. Compressed air quality (oil-free, low dew point) is a food safety requirement. An oil-contaminated compressed air supply can cause product contamination and a recall.
 
 Using this pattern:
+
 - The compressed air supply system's sensors (dew point, oil content, pressure, flow) are monitored continuously.
 - Detection rules fire when dew point rises above the food-safety threshold, when oil content increases, or when pressure drops during peak production.
 - The AI identifies the cause — dryer tower switching failure, oil separator bypass, compressor piston ring wear — from the equipment manual, with the regulatory implication stated in the ticket.
@@ -895,22 +1111,22 @@ Using this pattern:
 
 ---
 
-## 19. Status and Known Limitations
+## 20. Status and Known Limitations
 
 The Fault Diagnosis PoC is released at version **0.4.0** as a **proof of concept**. It is a functioning, fully tested system that demonstrates the complete pattern from telemetry to ticket, but it has deliberate limitations:
 
-| Limitation | Detail |
-|---|---|
-| **Quick start opens no review item** | With the rules backend, the decision on the 5 June 2020 leak scores below the 0.60 review threshold. Steps 1–3 of the tour work; step 4 (a review ticket) requires the Von backend. |
+| Limitation                                     | Detail                                                                                                                                                                                                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Quick start opens no review item**           | With the rules backend, the decision on the 5 June 2020 leak scores below the 0.60 review threshold. Steps 1–3 of the tour work; step 4 (a review ticket) requires the Von backend.                                                             |
 | **Rules backend misses the recorded failures** | On the full MetroPT-3 recording, the rules baseline catches 0 of 4 air leaks at ticket level. The rules backend's confidence margin is too low to clear the thresholds on these failures. Von's results are not published pending vendor terms. |
-| **Figures are in-sample** | Detection thresholds were designed after seeing the four labelled failures. The held-out set is the only uncontaminated measurement. |
-| **No authentication** | The REST API, WebSocket, and MQTT anonymous channel have no authentication. The stack is safe on a private machine or network, not exposed to the internet. |
-| **Fictional machine** | The CAU-7 unit and its manual do not exist. Do not use the manual to operate or service real equipment. |
-| **Von results not published** | Von was evaluated; its figures are withheld pending TypeSafe AI's terms review. |
+| **Figures are in-sample**                      | Detection thresholds were designed after seeing the four labelled failures. The held-out set is the only uncontaminated measurement.                                                                                                            |
+| **No authentication**                          | The REST API, WebSocket, and MQTT anonymous channel have no authentication. The stack is safe on a private machine or network, not exposed to the internet.                                                                                     |
+| **Fictional machine**                          | The CAU-7 unit and its manual do not exist. Do not use the manual to operate or service real equipment.                                                                                                                                         |
+| **Von results not published**                  | Von was evaluated; its figures are withheld pending TypeSafe AI's terms review.                                                                                                                                                                 |
 
 ---
 
-## 20. Licensing and Credits
+## 21. Licensing and Credits
 
 **Code and configuration:** Apache-2.0
 **Manual, fault catalog, data documentation:** CC BY 4.0
@@ -920,7 +1136,7 @@ Every file carries an SPDX header (`SPDX-FileCopyrightText` and `SPDX-License-Id
 
 **Third-party material:**
 
-- **MetroPT-3:** Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021). *MetroPT-3 Dataset*. UCI Machine Learning Repository. https://doi.org/10.24432/C5VW3R. Licensed CC BY 4.0. The repository contains no rows of this dataset — only derived statistics (normal bands, failure table). The dataset is downloaded at first start.
+- **MetroPT-3:** Davari, N., Veloso, B., Ribeiro, R., & Gama, J. (2021). _MetroPT-3 Dataset_. UCI Machine Learning Repository. https://doi.org/10.24432/C5VW3R. Licensed CC BY 4.0. The repository contains no rows of this dataset — only derived statistics (normal bands, failure table). The dataset is downloaded at first start.
 - **Dashboard screenshots** (`docs/img/`): CC BY 4.0. Captured on a CI stack with a mock Von endpoint. Charts draw replayed MetroPT-3 rows and carry the dataset credit above.
 - **Fonts:** IBM Plex Sans and IBM Plex Mono, Copyright 2017 IBM Corp., SIL OFL 1.1.
 - **UI components:** shadcn/ui component sources, Copyright 2023 shadcn, MIT.
@@ -931,4 +1147,4 @@ Every file carries an SPDX header (`SPDX-FileCopyrightText` and `SPDX-License-Id
 
 ---
 
-*This document was written from the project's source code, documentation, and configuration files. Every fact stated here — every threshold, every rule, every signal name, every port number — is grounded in the actual implementation. No information was invented or inferred beyond what the codebase explicitly states.*
+_This document was written from the project's source code, documentation, and configuration files. Every fact stated here — every threshold, every rule, every signal name, every port number — is grounded in the actual implementation. No information was invented or inferred beyond what the codebase explicitly states._
