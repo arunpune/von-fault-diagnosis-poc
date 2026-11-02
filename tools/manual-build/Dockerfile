@@ -13,7 +13,7 @@
 #   docker build -f tools/manual-build/Dockerfile -t fdp-manual-build:local .
 # BuildKit reads the ignore list from `Dockerfile.dockerignore` next to this
 # file, which is a symlink to `.dockerignore` in the same directory.
-FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.17 /uv /uvx /bin/
 

@@ -21,7 +21,7 @@
 # developer's machine). It is a one-shot that exits; every long-running
 # service is non-root.
 
-FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d AS builder
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.17 /uv /uvx /bin/
 
@@ -56,7 +56,7 @@ RUN mkdir -p /notices/pypdfium2 \
     && licences="$(find /opt/venv -type d -name BUILD_LICENSES -path '*pypdfium2*' | head -n 1)" \
     && if [ -n "$licences" ]; then cp -R "$licences"/. /notices/pypdfium2/; fi
 
-FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d AS runtime
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS runtime
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /notices/pypdfium2 /usr/share/doc/third-party/pypdfium2
