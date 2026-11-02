@@ -22,10 +22,10 @@ members = ["tools/init", "tools/manual-build", "tools/repo-checks", "tools/block
 # environment, so `uv sync --all-packages` type-checks and tests
 # `catalog/anthropic_structurer.py`; the image installs the extra itself.
 dev = [
-  "pytest==9.1.1",
+  "pytest==9.2.0",
   "pytest-cov==7.1.0",
-  "ruff==0.17.1",
-  "mypy==2.4.0",
+  "ruff==0.17.3",
+  "mypy==2.4.1",
   "import-linter==2.15",
   "fdp-init[llm]",
 ]
