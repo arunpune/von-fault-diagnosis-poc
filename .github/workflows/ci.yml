@@ -139,7 +139,7 @@ jobs:
         run: uv run fdp-checks commits --range "origin/$BASE_REF..HEAD"
       - name: Upload the reports of a failed run
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lint-reports
           path: reports/**
@@ -171,7 +171,7 @@ jobs:
         run: make test
       - name: Upload the coverage summaries
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage
           path: |
@@ -233,7 +233,7 @@ jobs:
           exit "$status"
       - name: Upload the reports of a failed run
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-integration-${{ matrix.lang }}-reports
           path: reports/**
@@ -273,7 +273,7 @@ jobs:
         run: make licenses
       - name: Upload the licence report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: licenses
           path: reports/**
@@ -329,7 +329,7 @@ jobs:
           pytest manual/tools/tests -q
       - name: Upload the validation report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: manual-validate
           path: reports/**
@@ -367,7 +367,7 @@ jobs:
         run: uv run --package fdp-manual-build fdp-manual-check --rebuilt-dir .rebuild --report-dir reports
       - name: Upload the acceptance report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: manual-check
           path: reports/**
@@ -421,7 +421,7 @@ jobs:
         run: go -C services/modbus run ./cmd/modbus-sim index --csv "$GITHUB_WORKSPACE/data/fixtures/metropt3/sim-day-2020-02-01.csv"
       - name: Upload the reports of a failed run
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: go-reports
           path: reports/**
@@ -507,7 +507,7 @@ jobs:
           '
       - name: Upload the performance metrics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: frontend-perf
           path: reports/frontend-perf.json
@@ -515,7 +515,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload the Playwright report of a failed run
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: frontend-playwright-report
           path: |
@@ -616,7 +616,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload the smoke report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: stack-smoke
           path: reports/smoke/**
@@ -624,7 +624,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload the stack score
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: stack-eval
           path: reports/eval/**
@@ -632,7 +632,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload the Playwright report of a failed run
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: stack-playwright-report
           path: apps/frontend/playwright-report
@@ -696,7 +696,7 @@ jobs:
         run: make reset
       - name: Upload the smoke report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: quickstart-smoke
           path: reports/smoke-quickstart/**
@@ -750,7 +750,7 @@ jobs:
         run: scripts/smoke.sh --mode ci --project "$SMOKE_PROJECT" --no-build --report reports/smoke-mosquitto-next
       - name: Upload the smoke report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mosquitto-next-smoke
           path: reports/smoke-mosquitto-next/**
@@ -823,7 +823,7 @@ jobs:
         run: make reset
       - name: Upload the smoke report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: quickstart-download-smoke
           path: reports/quickstart-download/**
@@ -831,7 +831,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload init's report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: quickstart-download-init
           path: ${{ runner.temp }}/clone/reports/**
@@ -876,7 +876,7 @@ jobs:
         run: pnpm --filter @fdp/eval run eval -- --fail-on-gate
       - name: Upload the evaluation report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: eval-smoke
           path: reports/eval/**
